@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.BLL", "Catal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.DAL", "CatalogService.DAL\CatalogService.DAL.csproj", "{CEF5A13C-BB09-4AD1-847C-97A223723C26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.Domain", "CatalogService.Domain\CatalogService.Domain.csproj", "{A5918B8D-ABD4-45A4-B680-DB2C33C50CD0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{CEF5A13C-BB09-4AD1-847C-97A223723C26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEF5A13C-BB09-4AD1-847C-97A223723C26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEF5A13C-BB09-4AD1-847C-97A223723C26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5918B8D-ABD4-45A4-B680-DB2C33C50CD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5918B8D-ABD4-45A4-B680-DB2C33C50CD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5918B8D-ABD4-45A4-B680-DB2C33C50CD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5918B8D-ABD4-45A4-B680-DB2C33C50CD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -37,5 +43,9 @@ Global
 		{1819C25D-62B5-4F48-9C71-F172634AA695} = {7FD13CC5-E093-4689-9493-1F2CBD72D288}
 		{9C064226-5C6D-442B-ABE1-EFC3F8BB594A} = {7FD13CC5-E093-4689-9493-1F2CBD72D288}
 		{CEF5A13C-BB09-4AD1-847C-97A223723C26} = {7FD13CC5-E093-4689-9493-1F2CBD72D288}
+		{A5918B8D-ABD4-45A4-B680-DB2C33C50CD0} = {7FD13CC5-E093-4689-9493-1F2CBD72D288}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DDA80D23-98FE-43BE-BA3E-10BFFA13CB46}
 	EndGlobalSection
 EndGlobal

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CatalogService.DAL\CatalogService.DAL.csproj" />
+    <Folder Include="QueryParametrs\" />
   </ItemGroup>
 
 </Project>
