@@ -3,12 +3,39 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "catalogService", "catalogService", "{7FD13CC5-E093-4689-9493-1F2CBD72D288}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.API", "CatalogService.API\CatalogService.API.csproj", "{1819C25D-62B5-4F48-9C71-F172634AA695}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.BLL", "CatalogService.BLL\CatalogService.BLL.csproj", "{9C064226-5C6D-442B-ABE1-EFC3F8BB594A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.DAL", "CatalogService.DAL\CatalogService.DAL.csproj", "{CEF5A13C-BB09-4AD1-847C-97A223723C26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1819C25D-62B5-4F48-9C71-F172634AA695}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1819C25D-62B5-4F48-9C71-F172634AA695}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1819C25D-62B5-4F48-9C71-F172634AA695}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1819C25D-62B5-4F48-9C71-F172634AA695}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C064226-5C6D-442B-ABE1-EFC3F8BB594A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C064226-5C6D-442B-ABE1-EFC3F8BB594A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C064226-5C6D-442B-ABE1-EFC3F8BB594A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C064226-5C6D-442B-ABE1-EFC3F8BB594A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEF5A13C-BB09-4AD1-847C-97A223723C26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEF5A13C-BB09-4AD1-847C-97A223723C26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEF5A13C-BB09-4AD1-847C-97A223723C26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEF5A13C-BB09-4AD1-847C-97A223723C26}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1819C25D-62B5-4F48-9C71-F172634AA695} = {7FD13CC5-E093-4689-9493-1F2CBD72D288}
+		{9C064226-5C6D-442B-ABE1-EFC3F8BB594A} = {7FD13CC5-E093-4689-9493-1F2CBD72D288}
+		{CEF5A13C-BB09-4AD1-847C-97A223723C26} = {7FD13CC5-E093-4689-9493-1F2CBD72D288}
 	EndGlobalSection
 EndGlobal
