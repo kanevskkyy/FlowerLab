@@ -1,4 +1,7 @@
 
+using CatalogService.DAL.Context;
+using Microsoft.EntityFrameworkCore;
+
 namespace CatalogService.API
 {
     public class Program
@@ -8,6 +11,8 @@ namespace CatalogService.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddDbContext<CatalogDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
