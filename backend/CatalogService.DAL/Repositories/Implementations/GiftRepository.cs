@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Repositories.Implementations
 {
-    public class FlowerRepository : GenericRepository<Flower>, IFlowerRepository
+    public class GiftRepository : GenericRepository<Gift>, IGiftRepository
     {
-        public FlowerRepository(CatalogDbContext context) : base(context) { }
+        public GiftRepository(CatalogDbContext context) : base(context) { }
 
         public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null)
         {
-            return await _dbSet.AnyAsync(f => f.Name == name && (!excludeId.HasValue || f.Id != excludeId.Value));
+            return await _dbSet.AnyAsync(g => g.Name == name && (!excludeId.HasValue || g.Id != excludeId.Value));
         }
     }
 }
