@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,8 +20,7 @@ namespace CatalogService.BLL.DTO
         public List<Guid> EventIds { get; set; } = new();
         public List<Guid> RecipientIds { get; set; } = new();
 
-        public List<FileContentDto> Images { get; set; } = new();
-
-        public FileContentDto? MainPhoto { get; set; }
+        public IFormFile? MainPhoto { get; set; }
+        public List<IFormFile> Images { get; set; } = new();
     }
 }

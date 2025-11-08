@@ -33,6 +33,8 @@ namespace CatalogService.BLL.Automapper
             CreateMap<Recipient, RecipientDto>();
             CreateMap<Gift, GiftDto>();
             CreateMap<BouquetImage, BouquetImageDto>();
+            CreateMap<Flower, FlowerDto>();
+            CreateMap<Flower, FlowerCreateUpdateDto>();
         }
     }
 }
