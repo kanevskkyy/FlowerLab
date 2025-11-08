@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Specification
 {
-    public abstract class BaseSpecification<T> : ISpecification<T>
+    public abstract class BaseSpecification<T> where T : class
     {
-        public Expression<Func<T, bool>> Criteria { get; private set; }
+        public Expression<Func<T, bool>> Criteria { get; }
         public List<Expression<Func<T, object>>> Includes { get; } = new();
 
         protected BaseSpecification(Expression<Func<T, bool>> criteria)

@@ -23,16 +23,13 @@ namespace CatalogService.DAL.Specification
                 (string.IsNullOrEmpty(parameters.FlowerColor) || b.BouquetFlowers.Any(f => f.Flower.Color.Contains(parameters.FlowerColor)))
             )
         {
+            // Include без Select
             AddInclude(b => b.BouquetFlowers);
-            AddInclude(b => b.BouquetFlowers.Select(f => f.Flower));
             AddInclude(b => b.BouquetSizes);
-            AddInclude(b => b.BouquetSizes.Select(s => s.Size));
             AddInclude(b => b.BouquetEvents);
-            AddInclude(b => b.BouquetEvents.Select(e => e.Event));
             AddInclude(b => b.BouquetRecipients);
-            AddInclude(b => b.BouquetRecipients.Select(r => r.Recipient));
             AddInclude(b => b.BouquetGifts);
-            AddInclude(b => b.BouquetGifts.Select(g => g.Gift));
+            AddInclude(b => b.BouquetImages);
         }
     }
 }

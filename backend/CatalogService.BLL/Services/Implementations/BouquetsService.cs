@@ -41,29 +41,25 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<BouquetDto> CreateAsync(BouquetCreateDto dto)
         {
-            // перевірка унікальності
+            // 1. Перевірка унікальності
             if (await _uow.Bouquets.ExistsAsync(b => b.Name == dto.Name))
                 throw new AlreadyExistsException($"Bouquet with name '{dto.Name}' already exists.");
 
-            // Перевірка існування size
+            // 2. Перевірка існування Size
             var size = await _uow.Sizes.GetByIdAsync(dto.SizeId);
             if (size == null) throw new NotFoundException($"Size {dto.SizeId} not found.");
 
-            // перевірити events
+            // 3. Перевірка Events
             foreach (var evId in dto.EventIds)
-            {
                 if (!await _uow.Events.ExistsAsync(e => e.Id == evId))
                     throw new NotFoundException($"Event {evId} not found.");
-            }
 
-            // recipients
+            // 4. Перевірка Recipients
             foreach (var rId in dto.RecipientIds)
-            {
                 if (!await _uow.Recipients.ExistsAsync(r => r.Id == rId))
                     throw new NotFoundException($"Recipient {rId} not found.");
-            }
 
-            // flowers наявність та кількість в складі
+            // 5. Перевірка Flowers (наявність та кількість)
             foreach (var fq in dto.Flowers)
             {
                 var flower = await _uow.Flowers.GetByIdAsync(fq.FlowerId);
@@ -72,20 +68,22 @@ namespace CatalogService.BLL.Services.Implementations
                     throw new Exception($"Not enough flower '{flower.Name}' in stock. Requested {fq.Quantity}, available {flower.Quantity}.");
             }
 
-            // Gift optional
-            if (dto.GiftId.HasValue)
-            {
-                if (!await _uow.Gifts.ExistsAsync(g => g.Id == dto.GiftId.Value))
-                    throw new NotFoundException($"Gift {dto.GiftId.Value} not found.");
-            }
+            // 6. Gift (опціонально)
+            if (dto.GiftId.HasValue && !await _uow.Gifts.ExistsAsync(g => g.Id == dto.GiftId.Value))
+                throw new NotFoundException($"Gift {dto.GiftId.Value} not found.");
 
-            // create bouquet entity
+            // 7. Створення Bouquet
             var bouquet = new Bouquet
             {
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
-                // MainPhoto will be set after uploading
+                BouquetSizes = new List<BouquetSize> { new BouquetSize { SizeId = dto.SizeId } },
+                BouquetFlowers = new List<BouquetFlower>(),
+                BouquetEvents = new List<BouquetEvent>(),
+                BouquetRecipients = new List<BouquetRecipient>(),
+                BouquetGifts = new List<BouquetGift>(),
+                BouquetImages = new List<BouquetImage>()
             };
 
             // main photo
@@ -97,49 +95,29 @@ namespace CatalogService.BLL.Services.Implementations
                 bouquet.MainPhotoUrl = mainUrl;
             }
 
-            await _uow.Bouquets.AddAsync(bouquet);
-            // save to get Id
-            await _uow.SaveChangesAsync();
-
-            // sizes (many-to-many) — прив'язка
-            var bouquetSize = new BouquetSize { BouquetId = bouquet.Id, SizeId = size.Id };
-            // directly add to context set through repo pattern? we can use DbContext via UoW or repo; for simplicity, create in DbContext via repos not supported for join tables — but we can add to bouquet collection
-            bouquet.BouquetSizes.Add(bouquetSize);
-
-            // bouquet flowers
+            // 9. Flowers + зменшення складу
             foreach (var fq in dto.Flowers)
             {
-                var bf = new BouquetFlower
-                {
-                    BouquetId = bouquet.Id,
-                    FlowerId = fq.FlowerId,
-                    Quantity = fq.Quantity
-                };
-                bouquet.BouquetFlowers.Add(bf);
-
-                // optionally reduce flower stock or leave for "UpdateStock" request — depending on business logic
                 var flower = await _uow.Flowers.GetByIdAsync(fq.FlowerId);
-                flower.Quantity -= fq.Quantity;
-                _uow.Flowers.Update(flower);
+                bouquet.BouquetFlowers.Add(new BouquetFlower
+                {
+                    Bouquet = bouquet,
+                    Flower = flower,
+                    Quantity = fq.Quantity
+                });
             }
 
-            // events
+            // 10. Events
             foreach (var evId in dto.EventIds)
-            {
-                bouquet.BouquetEvents.Add(new BouquetEvent { BouquetId = bouquet.Id, EventId = evId });
-            }
+                bouquet.BouquetEvents.Add(new BouquetEvent { Bouquet = bouquet, EventId = evId });
 
-            // recipients
+            // 11. Recipients
             foreach (var rId in dto.RecipientIds)
-            {
-                bouquet.BouquetRecipients.Add(new BouquetRecipient { BouquetId = bouquet.Id, RecipientId = rId });
-            }
+                bouquet.BouquetRecipients.Add(new BouquetRecipient { Bouquet = bouquet, RecipientId = rId });
 
-            // gift
+            // 12. Gift
             if (dto.GiftId.HasValue)
-            {
-                bouquet.BouquetGifts.Add(new BouquetGift { BouquetId = bouquet.Id, GiftId = dto.GiftId.Value });
-            }
+                bouquet.BouquetGifts.Add(new BouquetGift { Bouquet = bouquet, GiftId = dto.GiftId.Value });
 
             // images
             short pos = 1;
@@ -160,10 +138,11 @@ namespace CatalogService.BLL.Services.Implementations
                 pos++;
             }
 
-            // persist changes
-            _uow.Bouquets.Update(bouquet); // attach changes
-            await _uow.SaveChangesAsync();
+            // 14. Додаємо bouquet у репозиторій
+            await _uow.Bouquets.AddAsync(bouquet);
+            await _uow.SaveChangesAsync(); // збереження всіх зв’язків
 
+            // 15. Маппінг у DTO і повернення
             return _mapper.Map<BouquetDto>(bouquet);
         }
 
