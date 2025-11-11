@@ -12,10 +12,26 @@ namespace CatalogService.BLL.Validators
     {
         public BouquetUpdateValidator()
         {
-            RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
-            RuleFor(x => x.Price).GreaterThanOrEqualTo(0);
-            RuleFor(x => x.Flowers).NotEmpty().WithMessage("Bouquet must contain at least one flower.");
-            RuleForEach(x => x.Flowers).SetValidator(new FlowerQuantityValidator());
+            RuleFor(x => x.Name)
+     .NotEmpty()
+     .MaximumLength(100);
+
+            RuleFor(x => x.Price)
+                .GreaterThanOrEqualTo(0);
+
+            RuleFor(x => x.FlowerIds)
+                .NotEmpty()
+                .WithMessage("Bouquet must contain at least one flower.");
+
+            RuleFor(x => x.FlowerQuantities)
+                .NotEmpty()
+                .WithMessage("Bouquet must contain at least one flower quantity.")
+                .Must((dto, quantities) => quantities.Count == dto.FlowerIds.Count)
+                .WithMessage("Each flower must have a corresponding quantity.");
+
+            RuleForEach(x => x.FlowerQuantities)
+                .GreaterThan(0)
+                .WithMessage("Flower quantity must be greater than 0.");
         }
     }
 }

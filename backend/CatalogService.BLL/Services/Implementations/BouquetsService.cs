@@ -59,8 +59,12 @@ namespace CatalogService.BLL.Services.Implementations
                 if (!await _uow.Recipients.ExistsAsync(r => r.Id == rId))
                     throw new NotFoundException($"Recipient {rId} not found.");
 
+            var flowers = dto.FlowerIds
+    .Select((id, index) => new FlowerQuantityDto { FlowerId = id, Quantity = dto.FlowerQuantities[index] })
+    .ToList();
+
             // 5. Перевірка Flowers (наявність та кількість)
-            foreach (var fq in dto.Flowers)
+            foreach (var fq in flowers)
             {
                 var flower = await _uow.Flowers.GetByIdAsync(fq.FlowerId);
                 if (flower == null) throw new NotFoundException($"Flower {fq.FlowerId} not found.");
@@ -94,17 +98,22 @@ namespace CatalogService.BLL.Services.Implementations
                 var mainUrl = await _imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
                 bouquet.MainPhotoUrl = mainUrl;
             }
-
+            
             // 9. Flowers + зменшення складу
-            foreach (var fq in dto.Flowers)
+            foreach (var fq in flowers)
             {
-                var flower = await _uow.Flowers.GetByIdAsync(fq.FlowerId);
-                bouquet.BouquetFlowers.Add(new BouquetFlower
+ 
+
+                var bouquetFlower = new BouquetFlower
                 {
-                    Bouquet = bouquet,
-                    Flower = flower,
+                    Bouquet = bouquet,     
+                    FlowerId = fq.FlowerId,
                     Quantity = fq.Quantity
-                });
+                };
+
+                bouquet.BouquetFlowers.Add(bouquetFlower);
+
+
             }
 
             // 10. Events
@@ -142,8 +151,10 @@ namespace CatalogService.BLL.Services.Implementations
             await _uow.Bouquets.AddAsync(bouquet);
             await _uow.SaveChangesAsync(); // збереження всіх зв’язків
 
-            // 15. Маппінг у DTO і повернення
-            return _mapper.Map<BouquetDto>(bouquet);
+            var savedBouquet = await _uow.Bouquets.GetByIdAsync(bouquet.Id);
+
+            return _mapper.Map<BouquetDto>(savedBouquet);
+
         }
 
         public async Task<BouquetDto> UpdateAsync(BouquetUpdateDto dto)
@@ -179,12 +190,28 @@ namespace CatalogService.BLL.Services.Implementations
             }
 
             // flowers: replace existing bouquet_flowers
-            bouquet.BouquetFlowers.Clear();
-            foreach (var fq in dto.Flowers)
+            var flowers = dto.FlowerIds
+        .Select((id, index) => new FlowerQuantityDto { FlowerId = id, Quantity = dto.FlowerQuantities[index] })
+        .ToList();
+
+            // Перевірка наявності та кількості квітів у складі
+            foreach (var fq in flowers)
             {
                 var flower = await _uow.Flowers.GetByIdAsync(fq.FlowerId);
                 if (flower == null) throw new NotFoundException($"Flower {fq.FlowerId} not found.");
-                bouquet.BouquetFlowers.Add(new BouquetFlower { BouquetId = bouquet.Id, FlowerId = fq.FlowerId, Quantity = fq.Quantity });
+                if (flower.Quantity < fq.Quantity)
+                    throw new Exception($"Not enough flower '{flower.Name}' in stock. Requested {fq.Quantity}, available {flower.Quantity}.");
+            }
+
+            bouquet.BouquetFlowers.Clear();
+            foreach (var fq in flowers)
+            {
+                bouquet.BouquetFlowers.Add(new BouquetFlower
+                {
+                    BouquetId = bouquet.Id,
+                    FlowerId = fq.FlowerId,
+                    Quantity = fq.Quantity
+                });
             }
 
             // events
@@ -208,19 +235,29 @@ namespace CatalogService.BLL.Services.Implementations
             // main photo optional
             if (dto.MainPhoto != null)
             {
-                var mainUrl = await _imageService.UploadAsync(dto.MainPhoto.Content, dto.MainPhoto.FileName, "bouquets");
+                using var ms = new MemoryStream();
+                await dto.MainPhoto.CopyToAsync(ms);
+                var mainUrl = await _imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
                 bouquet.MainPhotoUrl = mainUrl;
             }
 
             // new images (append, up to 3 total)
-            var existingCount = bouquet.BouquetImages?.Count ?? 0;
-            var remainingSlots = Math.Max(0, 3 - existingCount);
-            short posStart = (short)(existingCount + 1);
-            foreach (var img in dto.NewImages.Take(remainingSlots))
+            short pos = 1;
+            foreach (var img in dto.NewImages.Take(3)) // максимум 3 фото
             {
-                var url = await _imageService.UploadAsync(img.Content, img.FileName, "bouquets");
-                bouquet.BouquetImages.Add(new BouquetImage { BouquetId = bouquet.Id, ImageUrl = url, Position = posStart });
-                posStart++;
+                using var ms = new MemoryStream();
+                await img.CopyToAsync(ms);
+
+                var url = await _imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
+
+                bouquet.BouquetImages.Add(new BouquetImage
+                {
+                    BouquetId = bouquet.Id,
+                    ImageUrl = url,
+                    Position = pos
+                });
+
+                pos++;
             }
 
             _uow.Bouquets.Update(bouquet);

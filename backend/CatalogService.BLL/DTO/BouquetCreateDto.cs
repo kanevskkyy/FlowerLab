@@ -15,7 +15,8 @@ namespace CatalogService.BLL.DTO
         public Guid SizeId { get; set; } 
         public Guid? GiftId { get; set; }
 
-        public List<FlowerQuantityDto> Flowers { get; set; } = new();
+        public List<Guid> FlowerIds { get; set; } = new();
+        public List<int> FlowerQuantities { get; set; } = new();
 
         public List<Guid> EventIds { get; set; } = new();
         public List<Guid> RecipientIds { get; set; } = new();

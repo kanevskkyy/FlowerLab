@@ -37,6 +37,7 @@ namespace CatalogService.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] BouquetCreateDto dto)
         {
+            
             var created = await _bouquetService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
