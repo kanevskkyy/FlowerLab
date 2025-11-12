@@ -1,6 +1,7 @@
 
 using CatalogService.API.Middleware;
 using CatalogService.BLL.Automapper;
+using CatalogService.BLL.DTO;
 using CatalogService.BLL.Services.Implementations;
 using CatalogService.BLL.Services.Interfaces;
 using CatalogService.BLL.Validators;
@@ -9,6 +10,7 @@ using CatalogService.DAL.Repositories.Implementations;
 using CatalogService.DAL.Repositories.Interfaces;
 using CatalogService.DAL.UnitOfWork;
 using CloudinaryDotNet;
+using DotNetEnv;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -21,9 +23,21 @@ namespace CatalogService.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            /////////////////////////////////
+            Env.Load();
+
+            // Створюємо конфігураційний об'єкт
+            builder.Services.Configure<CloudSettings>(options =>
+            {
+                options.CloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUDNAME")!;
+                options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_APIKEY")!;
+                options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_APISECRET")!;
+            });
+            ///////////////////////////////////
+
             // Add services to the container.
             builder.Services.AddDbContext<CatalogDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IFlowerRepository, FlowerRepository>();

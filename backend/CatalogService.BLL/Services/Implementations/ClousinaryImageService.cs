@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using CatalogService.BLL.DTO;
 
 namespace CatalogService.BLL.Services.Implementations
 {
@@ -14,13 +16,10 @@ namespace CatalogService.BLL.Services.Implementations
     {
         private readonly Cloudinary _cloudinary;
 
-        public CloudinaryImageService(IConfiguration configuration)
+        public CloudinaryImageService(IOptions<CloudSettings> options)
         {
-            var cloudName = configuration["Cloudinary:CloudName"];
-            var apiKey = configuration["Cloudinary:ApiKey"];
-            var apiSecret = configuration["Cloudinary:ApiSecret"];
-
-            var account = new Account(cloudName, apiKey, apiSecret);
+            var settings = options.Value;
+            var account = new Account(settings.CloudName, settings.ApiKey, settings.ApiSecret);
             _cloudinary = new Cloudinary(account);
             _cloudinary.Api.Secure = true;
         }
