@@ -26,8 +26,6 @@ namespace CatalogService.DAL.Context
         public DbSet<BouquetEvent> BouquetEvents { get; set; }
         public DbSet<Recipient> Recipients { get; set; }
         public DbSet<BouquetRecipient> BouquetRecipients { get; set; }
-        public DbSet<Gift> Gifts { get; set; }
-        public DbSet<BouquetGift> BouquetGifts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

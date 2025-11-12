@@ -18,8 +18,8 @@ namespace CatalogService.DAL.UnitOfWork
             IFlowerRepository flowerRepository,
             IEventRepository eventRepository,
             ISizeRepository sizeRepository,
-            IRecipientRepository recipientRepository,
-            IGiftRepository giftRepository)
+            IRecipientRepository recipientRepository
+            )
         {
             _context = context;
             Bouquets = bouquetRepository;
@@ -27,7 +27,7 @@ namespace CatalogService.DAL.UnitOfWork
             Events = eventRepository;
             Sizes = sizeRepository;
             Recipients = recipientRepository;
-            Gifts = giftRepository;
+            
         }
 
         public IBouquetRepository Bouquets { get; }
@@ -35,7 +35,6 @@ namespace CatalogService.DAL.UnitOfWork
         public IEventRepository Events { get; }
         public ISizeRepository Sizes { get; }
         public IRecipientRepository Recipients { get; }
-        public IGiftRepository Gifts { get; }
 
         public async Task<int> SaveChangesAsync()
         {

@@ -14,7 +14,6 @@ namespace CatalogService.BLL.DTO
         public decimal Price { get; set; }
         public string MainPhotoUrl { get; set; } = null!;
         public SizeDto? Size { get; set; }
-        public GiftDto? Gift { get; set; }
         public List<FlowerInBouquetDto> Flowers { get; set; } = new();
         public List<EventDto> Events { get; set; } = new();
         public List<RecipientDto> Recipients { get; set; } = new();

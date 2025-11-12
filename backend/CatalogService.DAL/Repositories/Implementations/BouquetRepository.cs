@@ -24,7 +24,6 @@ namespace CatalogService.DAL.Repositories.Implementations
                 .Include(b => b.BouquetSizes).ThenInclude(s => s.Size)
                 .Include(b => b.BouquetEvents).ThenInclude(e => e.Event)
                 .Include(b => b.BouquetRecipients).ThenInclude(r => r.Recipient)
-                .Include(b => b.BouquetGifts).ThenInclude(g => g.Gift)
                 .OrderByDescending(b => b.CreatedAt)
                 .ToListAsync();
         }
@@ -36,7 +35,6 @@ namespace CatalogService.DAL.Repositories.Implementations
                 .Include(b => b.BouquetSizes).ThenInclude(s => s.Size)
                 .Include(b => b.BouquetEvents).ThenInclude(e => e.Event)
                 .Include(b => b.BouquetRecipients).ThenInclude(r => r.Recipient)
-                .Include(b => b.BouquetGifts).ThenInclude(g => g.Gift)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
@@ -55,8 +53,6 @@ namespace CatalogService.DAL.Repositories.Implementations
                     .ThenInclude(be => be.Event)
                 .Include(b => b.BouquetRecipients)
                     .ThenInclude(br => br.Recipient)
-                .Include(b => b.BouquetGifts)
-                    .ThenInclude(bg => bg.Gift)
                 .Include(b => b.BouquetImages);
 
             // --- Сортування ---

@@ -14,7 +14,6 @@ namespace CatalogService.DAL.UnitOfWork
         IEventRepository Events { get; }
         ISizeRepository Sizes { get; }
         IRecipientRepository Recipients { get; }
-        IGiftRepository Gifts { get; }
 
         Task<int> SaveChangesAsync();
     }

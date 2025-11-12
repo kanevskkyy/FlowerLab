@@ -1,4 +1,5 @@
 
+using CatalogService.API.Middleware;
 using CatalogService.BLL.Automapper;
 using CatalogService.BLL.Services.Implementations;
 using CatalogService.BLL.Services.Interfaces;
@@ -29,7 +30,6 @@ namespace CatalogService.API
             builder.Services.AddScoped<IEventRepository, EventRepository>();
             builder.Services.AddScoped<ISizeRepository, SizeRepository>();
             builder.Services.AddScoped<IRecipientRepository, RecipientRepository>();
-            builder.Services.AddScoped<IGiftRepository, GiftRepository>();
             builder.Services.AddScoped<IBouquetRepository, BouquetRepository>();
 
             builder.Services.AddFluentValidationAutoValidation();
@@ -38,7 +38,6 @@ namespace CatalogService.API
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<ISizeService, SizeService>();
             builder.Services.AddScoped<IRecipientService, RecipientService>();
-            builder.Services.AddScoped<IGiftService, GiftService>();
             builder.Services.AddScoped<IFlowerService, FlowerService>();
             builder.Services.AddScoped<IBouquetService, BouquetService>();
 
@@ -52,6 +51,8 @@ namespace CatalogService.API
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            app.UseMiddleware<RequestLoggingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

@@ -72,9 +72,6 @@ namespace CatalogService.BLL.Services.Implementations
                     throw new Exception($"Not enough flower '{flower.Name}' in stock. Requested {fq.Quantity}, available {flower.Quantity}.");
             }
 
-            // 6. Gift (опціонально)
-            if (dto.GiftId.HasValue && !await _uow.Gifts.ExistsAsync(g => g.Id == dto.GiftId.Value))
-                throw new NotFoundException($"Gift {dto.GiftId.Value} not found.");
 
             // 7. Створення Bouquet
             var bouquet = new Bouquet
@@ -86,7 +83,6 @@ namespace CatalogService.BLL.Services.Implementations
                 BouquetFlowers = new List<BouquetFlower>(),
                 BouquetEvents = new List<BouquetEvent>(),
                 BouquetRecipients = new List<BouquetRecipient>(),
-                BouquetGifts = new List<BouquetGift>(),
                 BouquetImages = new List<BouquetImage>()
             };
 
@@ -124,10 +120,7 @@ namespace CatalogService.BLL.Services.Implementations
             foreach (var rId in dto.RecipientIds)
                 bouquet.BouquetRecipients.Add(new BouquetRecipient { Bouquet = bouquet, RecipientId = rId });
 
-            // 12. Gift
-            if (dto.GiftId.HasValue)
-                bouquet.BouquetGifts.Add(new BouquetGift { Bouquet = bouquet, GiftId = dto.GiftId.Value });
-
+            
             // images
             short pos = 1;
             foreach (var img in dto.Images.Take(3)) // максимум 3 фото
@@ -176,18 +169,6 @@ namespace CatalogService.BLL.Services.Implementations
             bouquet.BouquetSizes.Clear();
             bouquet.BouquetSizes.Add(new BouquetSize { BouquetId = bouquet.Id, SizeId = dto.SizeId });
 
-            // gift
-            if (dto.GiftId.HasValue)
-            {
-                if (!await _uow.Gifts.ExistsAsync(g => g.Id == dto.GiftId.Value))
-                    throw new NotFoundException($"Gift {dto.GiftId} not found.");
-                bouquet.BouquetGifts.Clear();
-                bouquet.BouquetGifts.Add(new BouquetGift { BouquetId = bouquet.Id, GiftId = dto.GiftId.Value });
-            }
-            else
-            {
-                bouquet.BouquetGifts.Clear();
-            }
 
             // flowers: replace existing bouquet_flowers
             var flowers = dto.FlowerIds
