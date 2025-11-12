@@ -19,12 +19,23 @@ namespace OrderService.BLL.FluentValidation
                 .NotEmpty().WithMessage("User first name is required")
                 .MaximumLength(50).WithMessage("User first name cannot exceed 50 characters");
 
+            RuleFor(o => o.Notes)
+                .MaximumLength(500)
+                .WithMessage("Notes cannot exceed 500 characters");
+
+            RuleFor(o => o.GiftMessage)
+                .MaximumLength(300)
+                .WithMessage("Gift message cannot exceed 300 characters");
+
             RuleFor(o => o.UserLastName)
                 .NotEmpty().WithMessage("User last name is required")
                 .MaximumLength(50).WithMessage("User last name cannot exceed 50 characters");
 
             RuleForEach(o => o.Items)
                 .SetValidator(new OrderItemCreateDtoValidator());
+
+            RuleForEach(o => o.Gifts)
+                .SetValidator(new OrderGiftCreateDtoValidator());
 
             When(o => o.IsDelivery, () =>
             {

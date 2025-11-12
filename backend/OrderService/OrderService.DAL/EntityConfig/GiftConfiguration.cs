@@ -16,7 +16,8 @@ namespace OrderService.Domain.EntityConfig
             builder.HasKey(g => g.Id);
             builder.Property(g => g.Name).IsRequired().HasMaxLength(100);
             builder.HasIndex(g => g.Name).IsUnique();
-            builder.Property(g => g.ImageUrl).IsRequired();
+            builder.Property(g => g.ImageUrl).IsRequired().HasMaxLength(2000);
+            builder.Property(g => g.AvailableCount).IsRequired();
         }
     }
 }

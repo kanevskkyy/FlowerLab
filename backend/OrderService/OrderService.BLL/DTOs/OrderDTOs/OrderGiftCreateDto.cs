@@ -4,14 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrderService.Domain.Entities
+namespace OrderService.BLL.DTOs.OrderDTOs
 {
-    public class OrderGift
+    public class OrderGiftCreateDto
     {
-        public Guid OrderId { get; set; }
-        public Order Order { get; set; } = null!;
         public Guid GiftId { get; set; }
-        public Gift Gift { get; set; } = null!;
         public int Count { get; set; } = 1;
     }
 }

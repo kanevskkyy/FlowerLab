@@ -19,6 +19,9 @@ namespace OrderService.BLL.FluentValidation
                 .NotEmpty().WithMessage("Gift name is required")
                 .MaximumLength(100).WithMessage("Gift name cannot exceed 100 characters");
 
+            RuleFor(g => g.AvailableCount)
+                .GreaterThanOrEqualTo(0).WithMessage("Gift count must be greater than 0");
+
             RuleFor(g => g.Image)
                 .NotNull().WithMessage("Gift image file is required")
                 .Must(IsValidFileType).WithMessage("Invalid image format (only .jpg, .jpeg, .png, .webp are allowed)");

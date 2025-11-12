@@ -10,6 +10,7 @@ using OrderService.DAL.Repositories;
 using OrderService.DAL.Repositories.Interfaces;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Database;
+using OrderService.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

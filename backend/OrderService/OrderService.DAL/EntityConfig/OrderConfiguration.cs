@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
 using OrderService.Domain.Entities;
 
 namespace OrderService.Domain.EntityConfig
@@ -14,6 +9,23 @@ namespace OrderService.Domain.EntityConfig
         public void Configure(EntityTypeBuilder<Order> builder)
         {
             builder.HasKey(o => o.Id);
+
+            builder.Property(o => o.UserFirstName)
+                   .IsRequired()
+                   .HasMaxLength(100);
+
+            builder.Property(o => o.UserLastName)
+                   .IsRequired()
+                   .HasMaxLength(100);
+
+            builder.Property(o => o.Notes)
+                   .HasMaxLength(500);
+
+            builder.Property(o => o.GiftMessage)
+                   .HasMaxLength(300);
+
+            builder.Property(o => o.TotalPrice)
+                   .HasColumnType("decimal(18,2)");
 
             builder.HasOne(o => o.Status)
                    .WithMany(s => s.Orders)
