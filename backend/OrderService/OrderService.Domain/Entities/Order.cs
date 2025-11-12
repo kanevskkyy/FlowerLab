@@ -20,6 +20,8 @@ namespace OrderService.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();
         public DateTime? UpdatedAt { get; set; } 
         public bool IsDelivery { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? GiftMessage { get; set; }
 
         public Guid? DeliveryInformationId { get; set; }
         public DeliveryInformation? DeliveryInformation { get; set; }

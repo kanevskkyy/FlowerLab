@@ -15,7 +15,7 @@ namespace OrderService.Domain.EntityConfig
         {
             builder.HasKey(i => i.Id);
             builder.Property(i => i.BouquetName).IsRequired().HasMaxLength(100);
-            builder.Property(i => i.BouquetImage).IsRequired();
+            builder.Property(i => i.BouquetImage).IsRequired().HasMaxLength(2000);
             builder.Property(i => i.BouquetId).IsRequired();
             builder.Property(i => i.Price).HasColumnType("decimal(10,2)");
             builder.Property(i => i.Count).IsRequired();

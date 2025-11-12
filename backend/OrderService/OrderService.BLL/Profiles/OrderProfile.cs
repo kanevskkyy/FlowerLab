@@ -21,16 +21,19 @@ namespace OrderService.BLL.Profiles
             CreateMap<DeliveryInformationCreateDto, DeliveryInformation>();
 
             CreateMap<OrderStatus, OrderStatusReadDto>();
-            
+
+            CreateMap<OrderGift, OrderGiftReadDto>()
+                .ForMember(dest => dest.Gift, opt => opt.MapFrom(src => src.Gift))
+                .ForMember(dest => dest.OrderedCount, opt => opt.MapFrom(src => src.Count));
+
             CreateMap<Order, OrderSummaryDto>()
-                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Items.Sum(i => i.Price * i.Count)))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
             CreateMap<Order, OrderDetailDto>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
                 .ForMember(dest => dest.DeliveryInformation, opt => opt.MapFrom(src => src.DeliveryInformation))
-                .ForMember(dest => dest.Gifts, opt => opt.MapFrom(src => src.OrderGifts.Select(og => og.Gift)))
-                .ForMember(dest => dest.TotalPrice, opt => opt.Ignore()); 
+                .ForMember(dest => dest.Gifts, opt => opt.MapFrom(src => src.OrderGifts)) 
+                .ForMember(dest => dest.TotalPrice, opt => opt.Ignore());
         }
     }
 }

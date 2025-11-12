@@ -13,9 +13,10 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public string UserLastName { get; set; } = null!;
         public string? Notes { get; set; }
         public bool IsDelivery { get; set; }
+        public string? GiftMessage { get; set; }
         public DeliveryInformationCreateDto? DeliveryInformation { get; set; }
         public IEnumerable<OrderItemCreateDto> Items { get; set; } = new List<OrderItemCreateDto>();
-        public IEnumerable<Guid> GiftIds { get; set; } = new List<Guid>();
+        public IEnumerable<OrderGiftCreateDto> Gifts { get; set; } = new List<OrderGiftCreateDto>();
     }
 
 }
