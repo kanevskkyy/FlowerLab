@@ -1,0 +1,20 @@
+﻿using CatalogService.Domain.Entities;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CatalogService.DAL.EntityConfiguration
+{
+    public class BouquetRecipientConfiguration : IEntityTypeConfiguration<BouquetRecipient>
+    {
+        public void Configure(EntityTypeBuilder<BouquetRecipient> builder)
+        {
+            builder.ToTable("BouquetRecipients");
+            builder.HasKey(br => new { br.BouquetId, br.RecipientId });
+        }
+    }
+}

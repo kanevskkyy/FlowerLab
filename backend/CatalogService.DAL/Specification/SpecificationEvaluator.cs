@@ -1,0 +1,26 @@
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CatalogService.DAL.Specification
+{
+    public static class SpecificationEvaluator<T> where T : class
+    {
+        public static IQueryable<T> GetQuery(IQueryable<T> inputQuery, BaseSpecification<T> spec)
+        {
+            var query = inputQuery;
+
+            // Фільтри
+            if (spec.Criteria != null)
+                query = query.Where(spec.Criteria);
+
+            // Include (без Select)
+            query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
+
+            return query;
+        }
+    }
+}
