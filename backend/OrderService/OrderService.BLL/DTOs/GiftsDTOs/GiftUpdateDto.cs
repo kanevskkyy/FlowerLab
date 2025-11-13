@@ -10,6 +10,7 @@ namespace OrderService.BLL.DTOs.GiftsDTOs
     public class GiftUpdateDto
     {
         public string Name { get; set; } = null!;
+        public int AvailableCount { get; set; }
         public IFormFile? Image { get; set; } 
     }
 }

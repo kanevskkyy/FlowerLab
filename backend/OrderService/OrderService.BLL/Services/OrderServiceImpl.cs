@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,72 +40,94 @@ namespace OrderService.BLL.Services
             if (order == null)
                 throw new NotFoundException($"Order with ID {orderId} not found");
 
-            var dto = _mapper.Map<OrderDetailDto>(order);
-            dto.TotalPrice = order.Items.Sum(i => i.Price * i.Count);
-            return dto;
+            return _mapper.Map<OrderDetailDto>(order);
         }
 
         public async Task<OrderDetailDto> CreateAsync(OrderCreateDto dto, CancellationToken cancellationToken = default)
         {
-            var pendingStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("Pending");
+            OrderStatus? pendingStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("Pending");
             if (pendingStatus == null)
             {
-                var orderStatus = new OrderStatus { Name = "Pending", CreatedAt = DateTime.UtcNow.ToUniversalTime(), UpdatedAt = DateTime.UtcNow.ToUniversalTime() };
+                OrderStatus orderStatus = new OrderStatus
+                {
+                    Name = "Pending",
+                    CreatedAt = DateTime.UtcNow.ToUniversalTime(),
+                    UpdatedAt = DateTime.UtcNow.ToUniversalTime()
+                };
                 await _unitOfWork.OrderStatuses.AddAsync(orderStatus);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 pendingStatus = orderStatus;
             }
 
             var existingOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(
-                new OrderSpecificationParameters { 
-                    UserId = dto.UserId 
-                }, cancellationToken);
+                new OrderSpecificationParameters { UserId = dto.UserId },
+                cancellationToken);
 
             bool isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
 
-            var validGifts = new List<Gift>();
-            if (dto.GiftIds != null && dto.GiftIds.Any())
+            if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
+                throw new ValidationException("Duplicate gifts are not allowed in the order.");
+
+            List<Gift> validGifts = new List<Gift>();
+            List<OrderGift> orderGifts = new();
+            if (dto.Gifts != null && dto.Gifts.Any())
             {
-                foreach (var giftId in dto.GiftIds)
+                foreach (var giftDto in dto.Gifts)
                 {
-                    var gift = await _unitOfWork.Gifts.GetByIdAsync(giftId);
+                    Gift? gift = await _unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId);
                     if (gift == null)
-                        throw new NotFoundException($"Gift with ID {giftId} not found");
-                    validGifts.Add(gift);
+                        throw new NotFoundException($"Gift with ID {giftDto.GiftId} not found");
+
+                    if (gift.AvailableCount < giftDto.Count)
+                        throw new ValidationException($"Not enough '{gift.Name}' gifts available. Requested {giftDto.Count}, but only {gift.AvailableCount} in stock.");
+
+                    gift.AvailableCount -= giftDto.Count; 
+                    gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+
+                    _unitOfWork.Gifts.Update(gift);
+
+                    orderGifts.Add(new OrderGift
+                    {
+                        GiftId = gift.Id,
+                        Gift = gift,
+                        Count = giftDto.Count
+                    });
                 }
             }
 
-            var order = new Order
+            await _unitOfWork.SaveChangesAsync();
+
+            Order order = new Order
             {
-                UserId = dto.UserId,        
+                UserId = dto.UserId,
                 UserFirstName = dto.UserFirstName,
                 UserLastName = dto.UserLastName,
                 Notes = dto.Notes,
+                GiftMessage = dto.GiftMessage, 
                 StatusId = pendingStatus.Id,
                 IsDelivery = dto.IsDelivery,
                 Items = dto.Items.Select(i => _mapper.Map<OrderItem>(i)).ToList(),
-                DeliveryInformation = dto.DeliveryInformation != null ? _mapper.Map<DeliveryInformation>(dto.DeliveryInformation) : null
+                DeliveryInformation = dto.DeliveryInformation != null
+                    ? _mapper.Map<DeliveryInformation>(dto.DeliveryInformation)
+                    : null,
+                OrderGifts = orderGifts
             };
 
-            foreach (var gift in validGifts)
-                order.OrderGifts.Add(new OrderGift { GiftId = gift.Id, Gift = gift });
+            decimal itemsTotal = order.Items.Sum(i => i.Price * i.Count);
+
+            if (!string.IsNullOrWhiteSpace(order.GiftMessage))
+                itemsTotal += 50m;
+
+            if (isFirstOrder)
+                itemsTotal *= 0.9m;
+
+            order.TotalPrice = itemsTotal;
 
             await _unitOfWork.Orders.AddAsync(order);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var resultDto = _mapper.Map<OrderDetailDto>(order);
-
-            decimal itemsTotal = order.Items.Sum(i => i.Price * i.Count);
-            if (!string.IsNullOrWhiteSpace(order.Notes))
-            {
-                itemsTotal += 50m;
-            }
-            if (isFirstOrder)
-            {
-                itemsTotal *= 0.9m;
-            }
-
-            resultDto.TotalPrice = itemsTotal;
+            resultDto.TotalPrice = order.TotalPrice;
 
             return resultDto;
         }
