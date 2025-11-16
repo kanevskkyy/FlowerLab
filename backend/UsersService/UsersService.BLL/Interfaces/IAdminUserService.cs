@@ -1,0 +1,15 @@
+﻿// UsersService.BLL/Interfaces/IAdminUserService.cs
+
+using UsersService.BLL.Models;
+using System.Collections.Generic;
+
+namespace UsersService.BLL.Interfaces
+{
+    public interface IAdminUserService
+    {
+        Task<IEnumerable<AdminUserDto>> GetAllUsersAsync();
+        Task<AdminUserDto?> GetUserByIdAsync(string userId);
+        Task<bool> UpdateUserDiscountAsync(string userId, int discount);
+        Task<bool> UpdateUserRoleAsync(string userId, string newRole);
+    }
+}
