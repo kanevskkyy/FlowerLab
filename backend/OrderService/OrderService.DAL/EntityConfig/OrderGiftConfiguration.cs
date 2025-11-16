@@ -22,6 +22,8 @@ namespace OrderService.Domain.EntityConfig
             builder.HasOne(og => og.Gift)
                    .WithMany(g => g.OrderGifts)
                    .HasForeignKey(og => og.GiftId);
+
+            builder.Property(g => g.Count).IsRequired();
         }
     }
 }

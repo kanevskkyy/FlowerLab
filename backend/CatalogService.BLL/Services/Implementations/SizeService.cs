@@ -1,0 +1,75 @@
+﻿using AutoMapper;
+using CatalogService.BLL.DTO;
+using CatalogService.BLL.Exceptions;
+using CatalogService.BLL.Services.Interfaces;
+using CatalogService.DAL.UnitOfWork;
+using CatalogService.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CatalogService.BLL.Services.Implementations
+{
+    public class SizeService : ISizeService
+    {
+        private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
+
+        public SizeService(IUnitOfWork uow, IMapper mapper)
+        {
+            _uow = uow;
+            _mapper = mapper;
+        }
+
+        public async Task<IEnumerable<SizeDto>> GetAllAsync()
+        {
+            var sizes = await _uow.Sizes.GetAllAsync();
+            return _mapper.Map<IEnumerable<SizeDto>>(sizes);
+        }
+
+        public async Task<SizeDto> GetByIdAsync(Guid id)
+        {
+            var size = await _uow.Sizes.GetByIdAsync(id);
+            if (size == null) throw new NotFoundException($"Size {id} not found");
+            return _mapper.Map<SizeDto>(size);
+        }
+
+        public async Task<SizeDto> CreateAsync(string name)
+        {
+            if (await _uow.Sizes.ExistsWithNameAsync(name))
+                throw new AlreadyExistsException($"Size '{name}' already exists.");
+
+            var entity = new Size { Name = name };
+            await _uow.Sizes.AddAsync(entity);
+            await _uow.SaveChangesAsync();
+
+            return _mapper.Map<SizeDto>(entity);
+        }
+
+        public async Task<SizeDto> UpdateAsync(Guid id, string name)
+        {
+            var size = await _uow.Sizes.GetByIdAsync(id);
+            if (size == null) throw new NotFoundException($"Size {id} not found");
+
+            if (await _uow.Sizes.ExistsWithNameAsync(name, id))
+                throw new AlreadyExistsException($"Size '{name}' already exists.");
+
+            size.Name = name;
+            _uow.Sizes.Update(size);
+            await _uow.SaveChangesAsync();
+
+            return _mapper.Map<SizeDto>(size);
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var size = await _uow.Sizes.GetByIdAsync(id);
+            if (size == null) throw new NotFoundException($"Size {id} not found");
+
+            _uow.Sizes.Delete(size);
+            await _uow.SaveChangesAsync();
+        }
+    }
+}

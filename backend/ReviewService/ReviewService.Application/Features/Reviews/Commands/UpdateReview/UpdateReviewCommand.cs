@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ReviewService.Application.Interfaces.Commands;
+
+namespace ReviewService.Application.Features.Reviews.Commands.UpdateReview
+{
+    public record UpdateReviewCommand(
+        string Comment,
+        int Rating
+    ) : ICommand;
+}

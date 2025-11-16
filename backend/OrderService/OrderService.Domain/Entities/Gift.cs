@@ -11,6 +11,7 @@ namespace OrderService.Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
         public string ImageUrl { get; set; } = null!;
+        public int AvailableCount { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();
         public DateTime? UpdatedAt { get; set; }
 

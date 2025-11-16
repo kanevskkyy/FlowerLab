@@ -12,5 +12,6 @@ namespace OrderService.Domain.Entities
         public Order Order { get; set; } = null!;
         public Guid GiftId { get; set; }
         public Gift Gift { get; set; } = null!;
+        public int Count { get; set; } = 1;
     }
 }
