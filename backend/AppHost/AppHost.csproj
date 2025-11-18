@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>0c0700c4-432b-43b2-88c1-4ebf78f03291</UserSecretsId>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting" Version="9.5.2" />
+		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+		<PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.5.2" />
+		<PackageReference Include="Aspire.Hosting.MongoDB" Version="9.5.2" />
+		<PackageReference Include="DotNetEnv" Version="3.1.1" />
+		<PackageReference Include="Aspire.Hosting.Redis" Version="9.5.2" />
+		<PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.5.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\CatalogService\CatalogService.API\CatalogService.API.csproj" />
+	  <ProjectReference Include="..\Gateway\Gateway.csproj" />
+	  <ProjectReference Include="..\OrderService\OrderService.API\OrderService.API.csproj" />
+	  <ProjectReference Include="..\ReviewService\ReviewService.API\ReviewService.API.csproj" />
+	  <ProjectReference Include="..\UsersService\UsersService.API\UsersService.API.csproj" />
+	</ItemGroup>
+</Project>

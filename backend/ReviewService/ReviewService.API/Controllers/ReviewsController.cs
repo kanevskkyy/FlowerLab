@@ -12,7 +12,7 @@ using ReviewService.Domain.Entities.QueryParameters;
 namespace ReviewService.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/reviews")]
     public class ReviewsController : ControllerBase
     {
         private IMediator mediator;

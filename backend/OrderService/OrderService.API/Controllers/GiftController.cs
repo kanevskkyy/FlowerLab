@@ -5,7 +5,7 @@ using OrderService.BLL.Services.Interfaces;
 namespace OrderService.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/gifts")]
     public class GiftController : ControllerBase
     {
         private readonly IGiftService _giftService;

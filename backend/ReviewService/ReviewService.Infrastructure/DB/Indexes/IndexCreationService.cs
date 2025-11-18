@@ -10,21 +10,29 @@ namespace ReviewService.Infrastructure.DB.Indexes
 {
     public class IndexCreationService : IIndexCreationService
     {
-        private MongoDbContext dbContext;
+        private readonly IMongoDatabase _database;
 
-        public IndexCreationService(MongoDbContext context)
+        public IndexCreationService(IMongoDatabase database)
         {
-            dbContext = context;
+            _database = database;
         }
 
         public void CreateIndexes()
         {
-            var reviewCollection = dbContext.Reviews;
+            var reviewCollection = _database.GetCollection<Review>("Reviews");
             var reviewKeys = Builders<Review>.IndexKeys;
 
-            reviewCollection.Indexes.CreateOne(new CreateIndexModel<Review>(reviewKeys.Ascending(r => r.User.UserId)));
-            reviewCollection.Indexes.CreateOne(new CreateIndexModel<Review>(reviewKeys.Ascending(r => r.BouquetId)));
-            reviewCollection.Indexes.CreateOne(new CreateIndexModel<Review>(reviewKeys.Ascending(r => r.Rating)));
+            reviewCollection.Indexes.CreateOne(new CreateIndexModel<Review>(
+                reviewKeys.Ascending(r => r.User.UserId)
+            ));
+
+            reviewCollection.Indexes.CreateOne(new CreateIndexModel<Review>(
+                reviewKeys.Ascending(r => r.BouquetId)
+            ));
+
+            reviewCollection.Indexes.CreateOne(new CreateIndexModel<Review>(
+                reviewKeys.Ascending(r => r.Rating)
+            ));
         }
     }
 }

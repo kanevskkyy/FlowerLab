@@ -16,15 +16,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddDbContext<OrderDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("OrderDatabase"))
-);
+builder.AddNpgsqlDbContext<OrderDbContext>("FlowerLabOrder");
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
 builder.Services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
 
 builder.Services.AddScoped<IImageService, ImageService>();
 
@@ -49,6 +46,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

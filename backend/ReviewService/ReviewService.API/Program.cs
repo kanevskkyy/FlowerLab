@@ -14,9 +14,11 @@ using ReviewService.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 ValueObjectMappings.Register();
-builder.Services.AddMongoDb(builder.Configuration);
+
+builder.AddMongoDBClient("FlowerLabReviews");
+
+builder.Services.AddMongoDb();
 
 builder.Services.AddHealthChecks()
     .AddCheck<MongoHealthCheck>("MongoDB");
@@ -33,14 +35,12 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssembly(typeof(UserInfoValidator).Assembly);
 
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -48,7 +48,6 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -59,10 +58,12 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     services.EnsureIndexes();
+
     List<IDataSeeder> seeders = new List<IDataSeeder>()
     {
         services.GetRequiredService<ReviewSeeder>(),
     };
+
     foreach (var seeder in seeders)
     {
         await seeder.SeedAsync();
@@ -70,9 +71,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

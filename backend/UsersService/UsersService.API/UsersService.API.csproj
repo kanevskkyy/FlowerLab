@@ -6,6 +6,9 @@
     </ItemGroup>
 
     <ItemGroup>
+		<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
+		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+		<PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.0" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">

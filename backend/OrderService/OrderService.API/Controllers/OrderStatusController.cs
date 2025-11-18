@@ -5,7 +5,7 @@ using OrderService.BLL.Services.Interfaces;
 namespace OrderService.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/order-statuses")]
     public class OrderStatusController : ControllerBase
     {
         private readonly IOrderStatusService _orderStatusService;

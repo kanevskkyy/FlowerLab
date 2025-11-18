@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using ReviewService.Domain.Entities;
 using ReviewService.Domain.Interfaces;
-using ReviewService.Infrastructure.DB;
 
 namespace ReviewService.Infrastructure.Repositories
 {
@@ -15,23 +14,22 @@ namespace ReviewService.Infrastructure.Repositories
         protected IMongoCollection<T> collection;
         protected IClientSessionHandle? session;
 
-        public GenericRepository(MongoDbContext context, IClientSessionHandle? session = null)
+        public GenericRepository(IMongoDatabase database, IClientSessionHandle? session = null)
         {
             collection = typeof(T).Name switch
             {
-                nameof(Review) => (IMongoCollection<T>)context.Reviews,
+                nameof(Review) => database.GetCollection<T>("Reviews"),
                 _ => throw new ArgumentException($"No collection mapping found for type {typeof(T).Name}")
             };
-
             this.session = session;
         }
 
-
         public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            if (session != null) await collection.InsertOneAsync(session, entity, cancellationToken: cancellationToken);
-            else await collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
-
+            if (session != null)
+                await collection.InsertOneAsync(session, entity, cancellationToken: cancellationToken);
+            else
+                await collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
             return entity;
         }
 

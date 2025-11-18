@@ -7,7 +7,7 @@ using UsersService.BLL.Interfaces;
 using UsersService.BLL.Models;
 
 [Authorize] // Всі методи вимагають дійсного Access Token!
-[Route("api/[controller]")]
+[Route("api/users")]
 [ApiController]
 public class UsersController : ControllerBase
 {

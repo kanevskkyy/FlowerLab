@@ -8,15 +8,14 @@ using ReviewService.Domain.Entities.QueryParameters;
 using ReviewService.Domain.Entities;
 using ReviewService.Domain.Helpers;
 using ReviewService.Domain.Interfaces;
-using ReviewService.Infrastructure.DB;
 
 namespace ReviewService.Infrastructure.Repositories
 {
     public class ReviewRepository : GenericRepository<Review>, IReviewRepository
     {
-        public ReviewRepository(MongoDbContext context, IClientSessionHandle? session = null) : base(context, session)
+        public ReviewRepository(IMongoDatabase database, IClientSessionHandle? session = null)
+            : base(database, session)
         {
-
         }
 
         public async Task<PagedList<Review>> GetReviewsAsync(ReviewQueryParameters queryParameters, CancellationToken cancellationToken = default)
@@ -30,7 +29,6 @@ namespace ReviewService.Infrastructure.Repositories
             if (queryParameters.BouquetId.HasValue)
             {
                 filter &= filterBuilder.Eq(r => r.BouquetId, queryParameters.BouquetId.Value);
-
                 if (!queryParameters.Status.HasValue)
                     filter &= filterBuilder.Eq(r => r.Status, ReviewStatus.Confirmed);
             }

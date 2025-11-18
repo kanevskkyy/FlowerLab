@@ -10,16 +10,20 @@ namespace ReviewService.Infrastructure.DB.Seeding
 {
     public class ReviewSeeder : IDataSeeder
     {
-        private readonly IMongoCollection<Review> reviews;
+        private readonly IMongoCollection<Review> _reviews;
 
-        public ReviewSeeder(MongoDbContext context)
+        public ReviewSeeder(IMongoDatabase database)
         {
-            reviews = context.Reviews;
+            _reviews = database.GetCollection<Review>("Reviews");
         }
 
         public async Task SeedAsync(CancellationToken cancellationToken = default)
         {
-            var existingCount = await reviews.CountDocumentsAsync(FilterDefinition<Review>.Empty, cancellationToken: cancellationToken);
+            var existingCount = await _reviews.CountDocumentsAsync(
+                FilterDefinition<Review>.Empty,
+                cancellationToken: cancellationToken
+            );
+
             if (existingCount > 0) return;
 
             List<Review> fakeData = new List<Review>
@@ -65,10 +69,11 @@ namespace ReviewService.Infrastructure.DB.Seeding
             var rnd = new Random();
             foreach (var review in fakeData)
             {
-                if (rnd.NextDouble() > 0.5) review.Confirm(); 
+                if (rnd.NextDouble() > 0.5)
+                    review.Confirm();
             }
 
-            await reviews.InsertManyAsync(fakeData, cancellationToken: cancellationToken);
+            await _reviews.InsertManyAsync(fakeData, cancellationToken: cancellationToken);
         }
     }
 }

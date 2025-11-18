@@ -24,16 +24,14 @@ namespace ReviewService.API.Middleware
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unhandled exception caught by middleware.");
-
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = ex switch
                 {
                     NotFoundException => (int)HttpStatusCode.NotFound,
                     AlreadyExistsException => (int)HttpStatusCode.Conflict,
-                    MongoConnectionException => (int)HttpStatusCode.ServiceUnavailable,
-                    MongoWriteException => (int)HttpStatusCode.BadRequest,
+                    MongoConnectionException => (int)HttpStatusCode.Conflict,
+                    MongoWriteConcernException => (int)HttpStatusCode.BadRequest,
                     MongoException => (int)HttpStatusCode.ServiceUnavailable,
-
                     _ => (int)HttpStatusCode.InternalServerError
                 };
 

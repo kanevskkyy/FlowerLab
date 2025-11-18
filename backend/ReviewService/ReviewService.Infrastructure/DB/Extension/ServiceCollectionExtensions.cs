@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
-using ReviewService.Infrastructure.DB.Settings;
+using MongoDB.Driver;
 using ReviewService.Infrastructure.DB.UOW;
 using ReviewService.Infrastructure.DB.Indexes;
 using ReviewService.Infrastructure.DB.Seeding;
@@ -20,29 +14,30 @@ namespace ReviewService.Infrastructure.DB.Extension
         private static bool isGuidSerializerRegistered = false;
         private static readonly object _lock = new object();
 
-        public static IServiceCollection AddMongoDb(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddMongoDb(this IServiceCollection services)
         {
             ConfigureMongoDbSerialization();
 
-            var mongoSettings = configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
-
-            services.AddSingleton(mongoSettings);
-
-            MongoDbContext context = new MongoDbContext(mongoSettings);
-            services.AddSingleton(context);
-
             services.AddScoped<IUnitOfWork>(sp =>
             {
-                var mongoDb = sp.GetRequiredService<MongoDbContext>().Database;
+                var mongoDb = sp.GetRequiredService<IMongoDatabase>();
                 return new UnitOfWork(mongoDb);
             });
 
-            services.AddSingleton<IIndexCreationService, IndexCreationService>();
-            services.AddSingleton<ReviewSeeder>();
+            services.AddSingleton<IIndexCreationService>(sp =>
+            {
+                var mongoDb = sp.GetRequiredService<IMongoDatabase>();
+                return new IndexCreationService(mongoDb);
+            });
+
+            services.AddSingleton<ReviewSeeder>(sp =>
+            {
+                var mongoDb = sp.GetRequiredService<IMongoDatabase>();
+                return new ReviewSeeder(mongoDb);
+            });
 
             return services;
         }
-
 
         private static void ConfigureMongoDbSerialization()
         {

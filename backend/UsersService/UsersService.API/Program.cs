@@ -36,9 +36,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
-// 2. Реєстрація DbContext та PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("UsersDbConnection")));
+builder.AddNpgsqlDbContext<ApplicationDbContext>("FlowerLabUsers");
 
 // 3. Реєстрація ASP.NET Identity (Core)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -114,6 +112,12 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 app.UseExceptionHandlingMiddleware();
+
+using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 // 7. Ініціалізація БД (Створення ролей та Admin користувача)
 using (var scope = app.Services.CreateScope())
 {
