@@ -9,6 +9,7 @@ using UsersService.Domain.Entities;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.Text;
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using UsersService.API.Helpers; // Для ініціалізації БД
@@ -17,6 +18,7 @@ using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using UsersService.BLL;
+using UsersService.BLL.FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -74,17 +76,25 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 4;
+    options.Password.RequiredLength = 8;
     options.User.RequireUniqueEmail = true; 
 });
 // 1. Реєстрація AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 // 2. Реєстрація AddressService
-builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 // Додавання контролерів та Swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    // 1. Додаємо Fluent Validation до конвеєра MVC
+    .AddFluentValidation(fv => 
+    {
+        // 2. Реєструємо всі валідатори, знайдені в асемблеї, де знаходиться RegistrationDtoValidator (тобто в BLL)
+        fv.RegisterValidatorsFromAssemblyContaining<RegistrationDtoValidator>();
+        
+        // Опціонально: зупиняти виконання при першій помилці валідації
+        fv.ImplicitlyValidateChildProperties = true;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -103,7 +113,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
-
+app.UseExceptionHandlingMiddleware();
 // 7. Ініціалізація БД (Створення ролей та Admin користувача)
 using (var scope = app.Services.CreateScope())
 {

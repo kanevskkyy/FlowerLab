@@ -12,12 +12,10 @@ using UsersService.BLL.Models;
 public class UsersController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IAddressService _addressService;
     
-    public UsersController(UserManager<ApplicationUser> userManager, IAddressService addressService)
+    public UsersController(UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
-        _addressService = addressService;
     }   
 
     /// <summary>
@@ -76,64 +74,6 @@ public class UsersController : ControllerBase
         {
             return BadRequest(new { Message = "Account deletion failed." });
         }
-        return NoContent(); // 204 No Content
-    }
-    
-    [HttpGet("me/addresses")]
-    public async Task<IActionResult> GetSavedAddresses()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-        var addresses = await _addressService.GetAddressesByUserIdAsync(userId);
-        return Ok(addresses);
-    }
-
-    /// <summary>
-    /// Створити нову адресу доставки
-    /// </summary>
-    [HttpPost("me/addresses")]
-    public async Task<IActionResult> CreateAddress([FromBody] AddressDto model)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-        var newAddress = await _addressService.CreateAddressAsync(userId, model);
-        return CreatedAtAction(nameof(GetSavedAddresses), newAddress);
-    }
-    [HttpPut("me/addresses/{id}")]
-    public async Task<IActionResult> UpdateAddress(int id, [FromBody] AddressDto model)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-        var result = await _addressService.UpdateAddressAsync(userId, id, model);
-    
-        if (!result)
-        {
-            // 404, якщо адреса не існує або не належить цьому користувачеві
-            return NotFound(new { Message = "Address not found or access denied." });
-        }
-    
-        return NoContent(); // 204 No Content - стандартна відповідь для успішного PUT
-    }
-
-    /// <summary>
-    /// Видалити адресу
-    /// </summary>
-    [HttpDelete("me/addresses/{id}")]
-    public async Task<IActionResult> DeleteAddress(int id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-        var result = await _addressService.DeleteAddressAsync(userId, id);
-    
-        if (!result)
-        {
-            return NotFound(new { Message = "Address not found or access denied." });
-        }
-    
         return NoContent(); // 204 No Content
     }
 }

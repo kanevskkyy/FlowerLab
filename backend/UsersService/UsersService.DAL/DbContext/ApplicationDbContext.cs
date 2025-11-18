@@ -7,7 +7,6 @@ using UsersService.Domain.Entities; // Припускаючи, що ви вик�
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<RefreshToken> RefreshTokens { get; set; }
-    public DbSet<UserAddress> Addresses { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
