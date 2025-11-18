@@ -9,7 +9,7 @@ namespace UsersService.API.Helpers
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             
-            string[] roleNames = { "Admin", "Manager", "Client" };
+            string[] roleNames = {"Admin", "Client" };
             
             foreach (var roleName in roleNames)
             {
