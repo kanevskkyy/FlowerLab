@@ -13,6 +13,7 @@ using OrderService.DAL.Specification;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
 using OrderService.Domain.QueryParams;
+using Grpc.Core;
 
 namespace OrderService.BLL.Services
 {
@@ -20,11 +21,13 @@ namespace OrderService.BLL.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly CheckOrder.CheckOrderClient _catalogClient;
 
-        public OrderServiceImpl(IUnitOfWork unitOfWork, IMapper mapper)
+        public OrderServiceImpl(IUnitOfWork unitOfWork, IMapper mapper, CheckOrder.CheckOrderClient catalogClient)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _catalogClient = catalogClient;
         }
 
         public async Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
@@ -45,6 +48,38 @@ namespace OrderService.BLL.Services
 
         public async Task<OrderDetailDto> CreateAsync(OrderCreateDto dto, CancellationToken cancellationToken = default)
         {
+            // Перевірка букетів через gRPC
+            var grpcRequest = new OrderedBouquetsIdList();
+            foreach (var item in dto.Items)
+            {
+                grpcRequest.OrderedBouquets.Add(new OrderedBouquetsId
+                {
+                    Id = item.BouquetId.ToString(),
+                    Count = item.Count
+                });
+            }
+
+            OrderedResponseList catalogResponse;
+            try
+            {
+                catalogResponse = await _catalogClient.CheckOrderItemsAsync(grpcRequest, cancellationToken: cancellationToken);
+            }
+            catch (RpcException ex)
+            {
+                throw new ValidationException($"Error while checking bouquets: {ex.Status.Detail}");
+            }
+
+            var invalidItems = catalogResponse.OrderedResponseList_
+                .Where(r => !r.IsValid)
+                .ToList();
+
+            if (invalidItems.Any())
+            {
+                var errors = string.Join("; ", invalidItems.Select(i =>
+                    $"Bouquet '{i.BouquetName}': {i.ErrorMessage}"));
+                throw new ValidationException($"Error while checking bouquets: {errors}");
+            }
+
             OrderStatus? pendingStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("Pending");
             if (pendingStatus == null)
             {
@@ -55,7 +90,6 @@ namespace OrderService.BLL.Services
                     UpdatedAt = DateTime.UtcNow.ToUniversalTime()
                 };
                 await _unitOfWork.OrderStatuses.AddAsync(orderStatus);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
                 pendingStatus = orderStatus;
             }
 
@@ -66,9 +100,8 @@ namespace OrderService.BLL.Services
             bool isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
 
             if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
-                throw new ValidationException("Duplicate gifts are not allowed in the order.");
+                throw new ValidationException("Duplicate gifts are not allowed in an order.");
 
-            List<Gift> validGifts = new List<Gift>();
             List<OrderGift> orderGifts = new();
             if (dto.Gifts != null && dto.Gifts.Any())
             {
@@ -79,9 +112,9 @@ namespace OrderService.BLL.Services
                         throw new NotFoundException($"Gift with ID {giftDto.GiftId} not found");
 
                     if (gift.AvailableCount < giftDto.Count)
-                        throw new ValidationException($"Not enough '{gift.Name}' gifts available. Requested {giftDto.Count}, but only {gift.AvailableCount} in stock.");
+                        throw new ValidationException($"Not enough gifts for '{gift.Name}'. Requested {giftDto.Count}, but only {gift.AvailableCount} are available.");
 
-                    gift.AvailableCount -= giftDto.Count; 
+                    gift.AvailableCount -= giftDto.Count;
                     gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
 
                     _unitOfWork.Gifts.Update(gift);
@@ -95,7 +128,29 @@ namespace OrderService.BLL.Services
                 }
             }
 
-            await _unitOfWork.SaveChangesAsync();
+            var itemsList = dto.Items.ToList();
+            List<OrderItem> orderItems = new List<OrderItem>();
+
+            for (int i = 0; i < itemsList.Count; i++)
+            {
+                var itemDto = itemsList[i];
+                var catalogItem = catalogResponse.OrderedResponseList_[i];
+
+                if (!decimal.TryParse(catalogItem.Price, out decimal price))
+                {
+                    throw new ValidationException($"Invalid price for bouquet {catalogItem.BouquetName}");
+                }
+
+                orderItems.Add(new OrderItem
+                {
+                    Id = Guid.NewGuid(),
+                    BouquetId = itemDto.BouquetId,
+                    BouquetName = catalogItem.BouquetName,
+                    BouquetImage = catalogItem.BouquetImage,
+                    Price = price,
+                    Count = itemDto.Count
+                });
+            }
 
             Order order = new Order
             {
@@ -103,10 +158,10 @@ namespace OrderService.BLL.Services
                 UserFirstName = dto.UserFirstName,
                 UserLastName = dto.UserLastName,
                 Notes = dto.Notes,
-                GiftMessage = dto.GiftMessage, 
+                GiftMessage = dto.GiftMessage,
                 StatusId = pendingStatus.Id,
                 IsDelivery = dto.IsDelivery,
-                Items = dto.Items.Select(i => _mapper.Map<OrderItem>(i)).ToList(),
+                Items = orderItems,
                 DeliveryInformation = dto.DeliveryInformation != null
                     ? _mapper.Map<DeliveryInformation>(dto.DeliveryInformation)
                     : null,

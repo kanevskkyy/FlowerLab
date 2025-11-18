@@ -1,10 +1,7 @@
 ﻿using CatalogService.Domain.Entities;
 using CatalogService.Domain.QueryParametrs;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Specification
 {
@@ -14,16 +11,19 @@ namespace CatalogService.DAL.Specification
             : base(b =>
                 (!parameters.MinPrice.HasValue || b.Price >= parameters.MinPrice) &&
                 (!parameters.MaxPrice.HasValue || b.Price <= parameters.MaxPrice) &&
-                (!parameters.MinFlowerCount.HasValue || b.BouquetFlowers.Sum(f => f.Quantity) >= parameters.MinFlowerCount) &&
-                (!parameters.MaxFlowerCount.HasValue || b.BouquetFlowers.Sum(f => f.Quantity) <= parameters.MaxFlowerCount) &&
+
+                // Фільтр за розмірами, подіями та отримувачами
                 (!parameters.SizeIds.Any() || b.BouquetSizes.Any(s => parameters.SizeIds.Contains(s.SizeId))) &&
                 (!parameters.EventIds.Any() || b.BouquetEvents.Any(e => parameters.EventIds.Contains(e.EventId))) &&
                 (!parameters.RecipientIds.Any() || b.BouquetRecipients.Any(r => parameters.RecipientIds.Contains(r.RecipientId))) &&
-                (string.IsNullOrEmpty(parameters.FlowerName) || b.BouquetFlowers.Any(f => f.Flower.Name.Contains(parameters.FlowerName))) &&
-                (string.IsNullOrEmpty(parameters.FlowerColor) || b.BouquetFlowers.Any(f => f.Flower.Color.Contains(parameters.FlowerColor)))
+
+                (!parameters.FlowerIds.Any() || parameters.FlowerIds.All(fId => b.BouquetFlowers.Any(bf => bf.FlowerId == fId)))
+
+                && (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity)))
+
             )
         {
-            // Include без Select
+            // Include для навігаційних властивостей
             AddInclude(b => b.BouquetFlowers);
             AddInclude(b => b.BouquetSizes);
             AddInclude(b => b.BouquetEvents);

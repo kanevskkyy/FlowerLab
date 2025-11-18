@@ -21,8 +21,8 @@ namespace CatalogService.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] BouquetQueryParameters query)
         {
-            var bouquets = await _bouquetService.GetAllAsync(query);
-            return Ok(bouquets);
+            var result = await _bouquetService.GetAllAsync(query);
+            return Ok(result);
         }
 
         // Отримати букет за id

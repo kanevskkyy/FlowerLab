@@ -50,7 +50,6 @@ namespace CatalogService.BLL.Services.Implementations
             {
                 Name = dto.Name,
                 Color = dto.Color,
-                Size = dto.Size,
                 Description = dto.Description,
                 Quantity = dto.Quantity
             };
@@ -75,7 +74,6 @@ namespace CatalogService.BLL.Services.Implementations
 
             flower.Name = dto.Name;
             flower.Color = dto.Color;
-            flower.Size = dto.Size;
             flower.Description = dto.Description;
             flower.Quantity = dto.Quantity;
 

@@ -1,0 +1,26 @@
+﻿syntax = "proto3";
+
+message OrderedBouquetsId {
+	string id = 1;
+	int32 count = 2;
+}
+
+message OrderedBouquetsIdList {
+	repeated OrderedBouquetsId orderedBouquets = 1;
+}
+
+message OrderedRequest {
+	bool isValid = 1;
+	string errorMessage = 2;
+	string bouquetName = 3;
+	string bouquetImage = 4;
+	string price = 5;
+}
+
+message OrderedResponseList {
+	repeated OrderedRequest orderedResponseList = 1;
+}
+
+service CheckOrder{
+	rpc CheckOrderItems (OrderedBouquetsIdList) returns (OrderedResponseList);
+}

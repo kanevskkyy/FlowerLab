@@ -1,0 +1,14 @@
+﻿syntax = "proto3";
+
+message ReviewCheckIdRequest {
+	string id = 1;
+}
+
+message ReviewCheckIdResponse {
+	bool isValid = 1;
+	string errorMessage = 2;
+}
+
+service CheckIdInReviews {
+	rpc CheckId (ReviewCheckIdRequest) returns (ReviewCheckIdResponse);
+}

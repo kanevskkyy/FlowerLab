@@ -27,10 +27,6 @@ namespace CatalogService.DAL.EntityConfiguration
             builder.Property(f => f.Color)
                 .HasMaxLength(50);
 
-            builder.Property(f => f.Size)
-                .HasMaxLength(50)
-                .IsRequired();
-
             builder.Property(f => f.Description)
                 .HasMaxLength(500);
 

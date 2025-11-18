@@ -2,6 +2,7 @@
 using CatalogService.API.Middleware;
 using CatalogService.BLL.Automapper;
 using CatalogService.BLL.DTO;
+using CatalogService.BLL.GrpcServer;
 using CatalogService.BLL.Services.Implementations;
 using CatalogService.BLL.Services.Interfaces;
 using CatalogService.BLL.Validators;
@@ -57,6 +58,11 @@ namespace CatalogService.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddGrpc();
+            builder.Services.AddScoped<CheckIdInReviewsService>();
+            builder.Services.AddScoped<CheckOrderService>();
+            builder.Services.AddScoped<FilterServiceImpl>();
+
             var app = builder.Build();
 
             app.UseMiddleware<RequestLoggingMiddleware>();
@@ -74,6 +80,9 @@ namespace CatalogService.API
                 db.Database.Migrate();
             }
 
+            app.MapGrpcService<CheckIdInReviewsService>();
+            app.MapGrpcService<CheckOrderService>();
+            app.MapGrpcService<FilterServiceImpl>();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

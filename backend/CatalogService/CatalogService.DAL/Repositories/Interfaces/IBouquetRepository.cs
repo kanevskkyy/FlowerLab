@@ -1,4 +1,5 @@
-﻿using CatalogService.Domain.Entities;
+﻿using CatalogService.DAL.Helpers;
+using CatalogService.Domain.Entities;
 using CatalogService.Domain.QueryParametrs;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace CatalogService.DAL.Repositories.Interfaces
 {
     public interface IBouquetRepository : IGenericRepository<Bouquet>
     {
-        Task<IEnumerable<Bouquet>> GetBySpecificationAsync(BouquetQueryParameters parameters);
+        Task<Bouquet?> GetWithDetailsAsync(Guid id);
+        Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters);
     }
 }

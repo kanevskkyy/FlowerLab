@@ -17,8 +17,6 @@ namespace CatalogService.BLL.Validators
             RuleFor(x => x.MinPrice).GreaterThanOrEqualTo(0).When(x => x.MinPrice.HasValue);
             RuleFor(x => x.MaxPrice).GreaterThanOrEqualTo(0).When(x => x.MaxPrice.HasValue);
             RuleFor(x => x.MaxPrice).GreaterThanOrEqualTo(x => x.MinPrice).When(x => x.MinPrice.HasValue && x.MaxPrice.HasValue);
-            RuleFor(x => x.MinFlowerCount).GreaterThanOrEqualTo(0).When(x => x.MinFlowerCount.HasValue);
-            RuleFor(x => x.MaxFlowerCount).GreaterThanOrEqualTo(0).When(x => x.MaxFlowerCount.HasValue);
             RuleFor(x => x.SortBy).Must(s => s == null || new[] { "price_asc", "price_desc", "newest" }.Contains(s))
                 .WithMessage("SortBy must be 'price_asc', 'price_desc' or 'newest'");
         }

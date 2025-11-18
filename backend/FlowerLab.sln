@@ -47,6 +47,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppHost", "AppHost\AppHost.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "Gateway\Gateway.csproj", "{2CADB68C-FB3B-D474-56C8-AE901F365B9C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shared", "shared\shared.csproj", "{3080AC11-B398-44DB-83D6-E212ADF8FA54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AggregatorService", "AggregatorService\AggregatorService.csproj", "{118BABD1-1719-064E-189C-7604804884E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +129,14 @@ Global
 		{2CADB68C-FB3B-D474-56C8-AE901F365B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CADB68C-FB3B-D474-56C8-AE901F365B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CADB68C-FB3B-D474-56C8-AE901F365B9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3080AC11-B398-44DB-83D6-E212ADF8FA54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3080AC11-B398-44DB-83D6-E212ADF8FA54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3080AC11-B398-44DB-83D6-E212ADF8FA54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3080AC11-B398-44DB-83D6-E212ADF8FA54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{118BABD1-1719-064E-189C-7604804884E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{118BABD1-1719-064E-189C-7604804884E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{118BABD1-1719-064E-189C-7604804884E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{118BABD1-1719-064E-189C-7604804884E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,7 +160,7 @@ Global
 		{FF1C6316-C7CF-3EFF-4E12-F2D3B5E11602} = {E399426C-2DB4-4473-87F1-8C4090A15D7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		       SolutionGuid = {DDA80D23-98FE-43BE-BA3E-10BFFA13CB46}
 		SolutionGuid = {AF21AA19-D6BC-4A49-9686-C3139AE67324}
+		       SolutionGuid = {DDA80D23-98FE-43BE-BA3E-10BFFA13CB46}
 	EndGlobalSection
 EndGlobal

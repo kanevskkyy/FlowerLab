@@ -1,4 +1,5 @@
 ﻿using CatalogService.BLL.DTO;
+using CatalogService.DAL.Helpers;
 using CatalogService.Domain.QueryParametrs;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace CatalogService.BLL.Services.Interfaces
 {
     public interface IBouquetService
     {
-        Task<IEnumerable<BouquetDto>> GetAllAsync(BouquetQueryParameters parameters);
+        Task<PagedList<BouquetDto>> GetAllAsync(BouquetQueryParameters parameters);
         Task<BouquetDto> GetByIdAsync(Guid id);
         Task<BouquetDto> CreateAsync(BouquetCreateDto dto);
         Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto);

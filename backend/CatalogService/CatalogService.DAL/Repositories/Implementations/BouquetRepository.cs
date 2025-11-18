@@ -28,34 +28,31 @@ namespace CatalogService.DAL.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public override async Task<Bouquet> GetByIdAsync(Guid id)
+        public async Task<Bouquet?> GetWithDetailsAsync(Guid id)
         {
             return await _dbSet
-                .Include(b => b.BouquetFlowers).ThenInclude(f => f.Flower)
-                .Include(b => b.BouquetSizes).ThenInclude(s => s.Size)
-                .Include(b => b.BouquetEvents).ThenInclude(e => e.Event)
-                .Include(b => b.BouquetRecipients).ThenInclude(r => r.Recipient)
+                .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)
+                .Include(b => b.BouquetSizes).ThenInclude(bs => bs.Size)
+                .Include(b => b.BouquetEvents).ThenInclude(be => be.Event)
+                .Include(b => b.BouquetRecipients).ThenInclude(br => br.Recipient)
+                .Include(b => b.BouquetImages)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        public async Task<IEnumerable<Bouquet>> GetBySpecificationAsync(BouquetQueryParameters parameters)
+        public async Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters)
         {
             var spec = new BouquetSpecification(parameters);
             var query = SpecificationEvaluator<Bouquet>.GetQuery(_dbSet.AsQueryable(), spec);
 
-            // --- Many-to-Many Include/ThenInclude ---
+            // Include
             query = query
-                .Include(b => b.BouquetFlowers)
-                    .ThenInclude(bf => bf.Flower)
-                .Include(b => b.BouquetSizes)
-                    .ThenInclude(bs => bs.Size)
-                .Include(b => b.BouquetEvents)
-                    .ThenInclude(be => be.Event)
-                .Include(b => b.BouquetRecipients)
-                    .ThenInclude(br => br.Recipient)
+                .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)
+                .Include(b => b.BouquetSizes).ThenInclude(bs => bs.Size)
+                .Include(b => b.BouquetEvents).ThenInclude(be => be.Event)
+                .Include(b => b.BouquetRecipients).ThenInclude(br => br.Recipient)
                 .Include(b => b.BouquetImages);
 
-            // --- Сортування ---
+            // Sorting
             query = parameters.SortBy switch
             {
                 "price_asc" => query.OrderBy(b => b.Price),
@@ -63,10 +60,23 @@ namespace CatalogService.DAL.Repositories.Implementations
                 _ => query.OrderByDescending(b => b.CreatedAt)
             };
 
-            // --- Пагінація ---
-            query = query.ApplyPagination(parameters.Page, parameters.PageSize);
+            // Availability check
+            if (parameters.AvailableOnly)
+            {
+                query = query.Where(b =>
+                    b.BouquetFlowers.All(bf => bf.Flower.Quantity >= bf.Quantity));
+            }
 
-            return await query.ToListAsync();
+            // Total before pagination
+            var totalCount = await query.CountAsync();
+
+            // Pagination
+            var items = await query
+                .Skip((parameters.Page - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
+                .ToListAsync();
+
+            return new PagedList<Bouquet>(items, totalCount, parameters.Page, parameters.PageSize);
         }
     }
 }

@@ -1,0 +1,55 @@
+﻿syntax = "proto3";
+
+message FilterEmptyRequest {
+
+}
+
+message SizeResponse {
+	string id = 1;
+	string name = 2;
+}
+
+message SizeResponseList {
+	repeated SizeResponse sizes = 1;
+}
+
+message EventResponse {
+	string id = 1;
+	string name = 2;
+}
+
+message EventResponseList {
+	repeated EventResponse events = 1;
+}
+
+message ReceivmentResponse {
+	string id = 1;
+	string name = 2;
+}
+
+message ReceivmentResponseList {
+	repeated ReceivmentResponse receivments = 1;
+}
+
+message FlowerResponse {
+	string id = 1;
+	string name = 2;
+	string color = 3;
+	string description = 4;
+	int32 quantity = 5;
+}
+
+message FlowerResponseList {
+	repeated FlowerResponse flowers = 1;
+}
+
+message FilterResponse {
+	SizeResponseList sizeResponseList = 1;
+	EventResponseList eventResponseList = 2;
+	ReceivmentResponseList receivmentResponseList = 3;
+	FlowerResponseList flowerResponseList = 4;
+}
+
+service FilterService{
+	rpc GetAllFilters (FilterEmptyRequest) returns (FilterResponse);
+}

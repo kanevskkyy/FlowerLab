@@ -27,32 +27,7 @@ namespace OrderService.DAL.UOW
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            if (_context.Database.CurrentTransaction == null)
-            {
-                _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            }
-
-            try
-            {
-                var result = await _context.SaveChangesAsync(cancellationToken);
-                if (_transaction != null)
-                {
-                    await _transaction.CommitAsync(cancellationToken);
-                    await _transaction.DisposeAsync();
-                    _transaction = null;
-                }
-                return result;
-            }
-            catch
-            {
-                if (_transaction != null)
-                {
-                    await _transaction.RollbackAsync(cancellationToken);
-                    await _transaction.DisposeAsync();
-                    _transaction = null;
-                }
-                throw;
-            }
+            return await _context.SaveChangesAsync(cancellationToken);
         }
 
         public void Dispose()

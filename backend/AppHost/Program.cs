@@ -47,4 +47,10 @@ var gateway = builder.AddProject<Gateway>("gateway")
     .WithReference(userService)
     .WithExternalHttpEndpoints();
 
+var aggregator = builder.AddProject<AggregatorService>("aggregator")
+    .WithReference(catalogService)
+    .WithReference(reviewsService)
+    .WaitFor(catalogService)
+    .WaitFor(reviewsService);
+
 builder.Build().Run();

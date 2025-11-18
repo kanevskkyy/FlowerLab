@@ -15,13 +15,12 @@ namespace CatalogService.Domain.QueryParametrs
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
 
-        public int? MinFlowerCount { get; set; }
-        public int? MaxFlowerCount { get; set; }
+        public List<int> Quantities { get; set; } = new();
+        public bool AvailableOnly { get; set; } = true;
 
-        public string? FlowerName { get; set; }
-        public string? FlowerColor { get; set; }
+        public List<Guid> FlowerIds { get; set; } = new();
 
-        public string? SortBy { get; set; } // price_asc, price_desc, default => newest
+        public string? SortBy { get; set; } 
 
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;

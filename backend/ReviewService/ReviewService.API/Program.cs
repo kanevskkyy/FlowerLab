@@ -11,6 +11,7 @@ using ReviewService.Infrastructure.DB.Seeding;
 using ReviewService.Infrastructure.Repositories;
 using ReviewService.Application.Validation.Additional;
 using ReviewService.API.Middleware;
+using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,24 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var catalogAddress = builder.Configuration["services:catalog:https:0"]
+    ?? builder.Configuration["services:catalog:http:0"];
+
+if (string.IsNullOrEmpty(catalogAddress))
+{
+    throw new InvalidOperationException("Не знайдено адресу catalog service");
+}
+
+builder.Services.AddGrpcClient<CheckIdInReviews.CheckIdInReviewsClient>(options =>
+{
+    options.Address = new Uri(catalogAddress);
+}).ConfigureChannel(channelOptions =>
+{
+    channelOptions.MaxReceiveMessageSize = 5 * 1024 * 1024;
+    channelOptions.MaxSendMessageSize = 5 * 1024 * 1024;
+});
+
 
 var app = builder.Build();
 

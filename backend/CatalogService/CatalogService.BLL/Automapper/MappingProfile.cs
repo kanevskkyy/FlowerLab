@@ -24,7 +24,6 @@ namespace CatalogService.BLL.Automapper
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Flower.Id))
                 .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Flower.Name))
                 .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Flower.Color))
-                .ForMember(d => d.Size, opt => opt.MapFrom(s => s.Flower.Size))
                 .ForMember(d => d.Quantity, opt => opt.MapFrom(s => s.Quantity));
 
             CreateMap<Size, SizeDto>();

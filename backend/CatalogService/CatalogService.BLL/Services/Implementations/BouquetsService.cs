@@ -2,6 +2,7 @@
 using CatalogService.BLL.DTO;
 using CatalogService.BLL.Exceptions;
 using CatalogService.BLL.Services.Interfaces;
+using CatalogService.DAL.Helpers;
 using CatalogService.DAL.UnitOfWork;
 using CatalogService.Domain.Entities;
 using CatalogService.Domain.QueryParametrs;
@@ -26,15 +27,24 @@ namespace CatalogService.BLL.Services.Implementations
             _imageService = imageService;
         }
 
-        public async Task<IEnumerable<BouquetDto>> GetAllAsync(BouquetQueryParameters parameters)
+        public async Task<PagedList<BouquetDto>> GetAllAsync(BouquetQueryParameters parameters)
         {
-            var bouquets = await _uow.Bouquets.GetBySpecificationAsync(parameters);
-            return _mapper.Map<IEnumerable<BouquetDto>>(bouquets);
-        }
+            var pagedBouquets = await _uow.Bouquets.GetBySpecificationPagedAsync(parameters);
 
+            var mapped = pagedBouquets.Items
+                .Select(b => _mapper.Map<BouquetDto>(b))
+                .ToList();
+
+            return new PagedList<BouquetDto>(
+                mapped,
+                pagedBouquets.TotalCount,
+                pagedBouquets.CurrentPage,
+                pagedBouquets.PageSize
+            );
+        }
         public async Task<BouquetDto> GetByIdAsync(Guid id)
         {
-            var bouquet = await _uow.Bouquets.GetByIdAsync(id);
+            var bouquet = await _uow.Bouquets.GetWithDetailsAsync(id);
             if (bouquet == null) throw new NotFoundException($"Bouquet with id {id} not found.");
             return _mapper.Map<BouquetDto>(bouquet);
         }
@@ -144,7 +154,7 @@ namespace CatalogService.BLL.Services.Implementations
             await _uow.Bouquets.AddAsync(bouquet);
             await _uow.SaveChangesAsync(); // збереження всіх зв’язків
 
-            var savedBouquet = await _uow.Bouquets.GetByIdAsync(bouquet.Id);
+            var savedBouquet = await _uow.Bouquets.GetWithDetailsAsync(bouquet.Id);
 
             return _mapper.Map<BouquetDto>(savedBouquet);
 
@@ -152,7 +162,7 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto)
         {
-            var bouquet = await _uow.Bouquets.GetByIdAsync(id);
+            var bouquet = await _uow.Bouquets.GetWithDetailsAsync(id);
             if (bouquet == null) throw new NotFoundException($"Bouquet {id} not found.");
 
             if (bouquet.Name != dto.Name && await _uow.Bouquets.ExistsAsync(b => b.Name == dto.Name))
@@ -259,7 +269,7 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            var bouquet = await _uow.Bouquets.GetByIdAsync(id);
+            var bouquet = await _uow.Bouquets.GetWithDetailsAsync(id);
             if (bouquet == null)
                 throw new NotFoundException($"Bouquet with id {id} not found.");
 

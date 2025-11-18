@@ -20,10 +20,6 @@ namespace CatalogService.BLL.Validators
                 .NotEmpty().WithMessage("Color is required.")
                 .MaximumLength(50);
 
-            RuleFor(x => x.Size)
-                .NotEmpty().WithMessage("Size is required.")
-                .MaximumLength(50);
-
             RuleFor(x => x.Quantity)
                 .GreaterThanOrEqualTo(0).WithMessage("Quantity cannot be negative.");
         }
