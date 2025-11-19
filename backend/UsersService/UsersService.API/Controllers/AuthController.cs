@@ -73,7 +73,6 @@ namespace UsersService.API.Controllers
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto model)
         {
             await _authService.LogoutAsync(model.RefreshToken);
-            // Навіть якщо токен не знайдено, ми повертаємо 204, щоб не давати хакеру підказки.
             return NoContent(); 
         }
     }

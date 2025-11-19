@@ -7,6 +7,7 @@ using UsersService.Domain.Entities;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using UsersService.BLL.Helpers;
 
 namespace UsersService.BLL.Services
 {
@@ -16,9 +17,12 @@ namespace UsersService.BLL.Services
         private readonly IJwtService _jwtService;
         private readonly ApplicationDbContext _dbContext;
         private readonly JwtSettings _jwtSettings;
+        private readonly IUserImageService _imageService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IJwtService jwtService, ApplicationDbContext dbContext, IOptions<JwtSettings> jwtSettings)
+
+        public AuthService(UserManager<ApplicationUser> userManager, IJwtService jwtService, ApplicationDbContext dbContext, IOptions<JwtSettings> jwtSettings, IUserImageService userImageService)
         {
+            _imageService = userImageService;
             _userManager = userManager;
             _jwtService = jwtService;
             _dbContext = dbContext;
@@ -27,39 +31,47 @@ namespace UsersService.BLL.Services
 
         public async Task<TokenResponseDto?> RegisterAsync(RegistrationDto model)
         {
-            if (await _userManager.FindByEmailAsync(model.Email) != null)
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
             {
-                return null; 
+                throw new InvalidOperationException($"User with email '{model.Email}' already exists.");
             }
 
-            var user = new ApplicationUser 
+            var user = new ApplicationUser
             {
                 Email = model.Email,
                 UserName = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                PhoneNumber = model.PhoneNumber 
+                PhoneNumber = model.PhoneNumber
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-
             if (!result.Succeeded)
             {
-                return null; 
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"User creation failed: {errors}");
             }
-            
+
             await _userManager.AddToRoleAsync(user, "Client");
-            
+
             return await GenerateAndSaveTokens(user);
         }
 
-        public async Task<TokenResponseDto?> LoginAsync(LoginDto model)
+
+        public async Task<TokenResponseDto> LoginAsync(LoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
-            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            if (user == null)
             {
-                return null;
+                throw new InvalidOperationException($"User with email '{model.Email}' does not exist.");
+            }
+
+            var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
+            if (!passwordValid)
+            {
+                throw new UnauthorizedAccessException("Invalid password or email.");
             }
 
             return await GenerateAndSaveTokens(user);
@@ -95,7 +107,7 @@ namespace UsersService.BLL.Services
 
             if (storedToken == null)
             {
-                return false;
+                throw new InvalidOperationException("Refresh token not found.");
             }
 
             // Анулювання
@@ -104,6 +116,74 @@ namespace UsersService.BLL.Services
 
             return true;
         }
+
+        public async Task<TokenResponseDto> UpdateUserAsync(string userId, UpdateUserDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new InvalidOperationException($"User with ID '{userId}' does not exist.");
+
+            bool isUpdated = false;
+
+            if (!string.IsNullOrEmpty(dto.FirstName) && dto.FirstName != user.FirstName)
+            {
+                user.FirstName = dto.FirstName;
+                isUpdated = true;
+            }
+
+            if (!string.IsNullOrEmpty(dto.LastName) && dto.LastName != user.LastName)
+            {
+                user.LastName = dto.LastName;
+                isUpdated = true;
+            }
+
+            if (!string.IsNullOrEmpty(dto.PhoneNumber) && dto.PhoneNumber != user.PhoneNumber)
+            {
+                user.PhoneNumber = dto.PhoneNumber;
+                isUpdated = true;
+            }
+
+            if (dto.Photo != null)
+            {
+                if (!string.IsNullOrEmpty(user.PhotoUrl))
+                {
+                    try
+                    {
+                        var publicId = GetPublicIdFromUrl(user.PhotoUrl);
+                        await _imageService.DeleteAsync(publicId);
+                    }
+                    catch { }
+                }
+
+                var url = await _imageService.UploadAsync(dto.Photo, "users/photos");
+                user.PhotoUrl = url;
+                isUpdated = true;
+            }
+
+            if (!isUpdated)
+            {
+                // Якщо нічого не змінено, просто повертаємо існуючі токени
+                return await GenerateAndSaveTokens(user);
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Failed to update user: {errors}");
+            }
+
+            // Після успішного оновлення — перегенеруємо токени
+            return await GenerateAndSaveTokens(user);
+        }
+
+
+        private string GetPublicIdFromUrl(string url)
+        {
+            var fileName = url.Split('/').Last();
+            return fileName.Split('.').First();
+        }
+
         private async Task<TokenResponseDto> GenerateAndSaveTokens(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);

@@ -53,9 +53,9 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpPatch("{id}/stock")]
-        public async Task<IActionResult> UpdateStock(Guid id, [FromQuery] int quantity)
+        public async Task<IActionResult> UpdateStock(Guid id, [FromBody] UpdateStockDto dto)
         {
-            var updated = await _flowerService.UpdateStockAsync(id, quantity);
+            var updated = await _flowerService.UpdateStockAsync(id, dto.Quantity);
             return Ok(updated);
         }
     }

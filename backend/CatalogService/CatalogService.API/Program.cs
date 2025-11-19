@@ -61,6 +61,7 @@ namespace CatalogService.API
             builder.Services.AddGrpc();
             builder.Services.AddScoped<CheckIdInReviewsService>();
             builder.Services.AddScoped<CheckOrderService>();
+            builder.Services.AddScoped<BouquetServiceGrpc>(); 
             builder.Services.AddScoped<FilterServiceImpl>();
 
             var app = builder.Build();
@@ -80,6 +81,7 @@ namespace CatalogService.API
                 db.Database.Migrate();
             }
 
+            app.MapGrpcService<BouquetServiceGrpc>(); 
             app.MapGrpcService<CheckIdInReviewsService>();
             app.MapGrpcService<CheckOrderService>();
             app.MapGrpcService<FilterServiceImpl>();

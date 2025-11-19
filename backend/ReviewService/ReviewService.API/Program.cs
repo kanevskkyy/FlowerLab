@@ -12,10 +12,23 @@ using ReviewService.Infrastructure.Repositories;
 using ReviewService.Application.Validation.Additional;
 using ReviewService.API.Middleware;
 using System.Net.Sockets;
+using ReviewService.Application.GrpcServer;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Налаштування MongoDB GUID serialization
+BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
+var pack = new ConventionPack
+{
+    new EnumRepresentationConvention(BsonType.String)
+};
+ConventionRegistry.Register("EnumStringConvention", pack, t => true);
+
 ValueObjectMappings.Register();
+builder.Services.AddGrpc();
+
 
 builder.AddMongoDBClient("FlowerLabReviews");
 
@@ -32,6 +45,8 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBe
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+builder.Services.AddScoped<ReviewsByBouquetServiceImpl>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssembly(typeof(UserInfoValidator).Assembly);
@@ -66,6 +81,7 @@ builder.Services.AddGrpcClient<CheckIdInReviews.CheckIdInReviewsClient>(options 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.MapGrpcService<ReviewsByBouquetServiceImpl>();
 
 if (app.Environment.IsDevelopment())
 {

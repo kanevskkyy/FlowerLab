@@ -19,6 +19,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using UsersService.BLL;
 using UsersService.BLL.FluentValidation;
+using UsersService.BLL.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -63,8 +64,15 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+/////////////////////////////////
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("Cloudinary")
+);
+///////////////////////////////////
+
 // 5. Реєстрація BLL сервісів (DI)
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUserImageService, UserImageService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // 6. Налаштування вимог до пароля

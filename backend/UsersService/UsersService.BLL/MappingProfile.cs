@@ -8,11 +8,12 @@ namespace UsersService.BLL
     {
         public MappingProfile()
         {
-            // Мапінг DTO <-> Entity
             CreateMap<ApplicationUser, AdminUserDto>()
-                .ForMember(dest => dest.Role, opt => opt.Ignore()); // Ігноруємо, оскільки це поле заповнюється вручну в сервісі
-            // Мапінг для User (додамо пізніше)
-            // CreateMap<ApplicationUser, UserResponseDto>();
+                .ForMember(dest => dest.PhotoURL, opt => opt.MapFrom(opt => opt.PhotoUrl))
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
+
+            CreateMap<ApplicationUser, UserResponseDto>()
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(opt => opt.PhotoUrl));
         }
     }
 }

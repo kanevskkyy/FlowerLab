@@ -1,0 +1,51 @@
+﻿syntax  = "proto3";
+
+message GetBouquetRequest {
+    string id = 1; 
+}
+
+message SizeModel {
+    string id = 1;
+    string name = 2;
+}
+
+message FlowerInBouquetModel {
+    string id = 1;
+    string name = 2;
+    string color = 3;
+    int32 quantity = 4;
+}
+
+message EventModel {
+    string id = 1;
+    string name = 2;
+}
+
+message RecipientModel {
+    string id = 1;
+    string name = 2;
+}
+
+message BouquetImageModel {
+    string id = 1;
+    string imageUrl = 2;
+    int32 position = 3;
+}
+
+message BouquetResponse {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    string mainPhotoUrl = 5;
+    SizeModel size = 6;
+    repeated FlowerInBouquetModel flowers = 7;
+    repeated EventModel events = 8;
+    repeated RecipientModel recipients = 9;
+    repeated BouquetImageModel images = 10;
+    string createdAt = 11; 
+}
+
+service BouquetGrpcService {
+    rpc GetBouquetById (GetBouquetRequest) returns (BouquetResponse);
+}

@@ -10,7 +10,7 @@ namespace ReviewService.Domain.Entities
 {
     public class Review : BaseEntity
     {
-        [BsonElement("clotheItemId")]
+        [BsonElement("bouquetId")]
         public Guid BouquetId { get; private set; }
 
         [BsonElement("user")]

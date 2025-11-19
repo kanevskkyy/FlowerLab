@@ -1,0 +1,28 @@
+﻿syntax = "proto3";
+
+message ReviewBouquetIdGrpcRequest {
+    string id = 1;
+}
+
+message UserGrpcResponse {
+    string id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string photoUrl = 4;
+}
+
+message ReviewGrpcResponse {
+    string id = 1;
+    UserGrpcResponse user = 2;
+    int32 rating = 3;
+    string comment = 4;
+    string createdAt = 5;
+}
+
+message ReviewsListGrpcResponse {
+    repeated ReviewGrpcResponse reviews = 1;
+}
+
+service ReviewsByBouquetId {
+    rpc GetReviewsByBouquetId (ReviewBouquetIdGrpcRequest) returns (ReviewsListGrpcResponse);
+}

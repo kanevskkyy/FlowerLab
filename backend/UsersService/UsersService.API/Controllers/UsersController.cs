@@ -1,79 +1,90 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using UsersService.Domain.Entities;
 using System.Security.Claims;
 using UsersService.BLL.Interfaces;
 using UsersService.BLL.Models;
+using UsersService.Domain.Entities;
 
-[Authorize] // Всі методи вимагають дійсного Access Token!
-[Route("api/users")]
-[ApiController]
-public class UsersController : ControllerBase
+namespace UsersService.API.Controllers
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    
-    public UsersController(UserManager<ApplicationUser> userManager)
+    [Authorize] // Всі методи вимагають дійсного Access Token!
+    [Route("api/users")]
+    [ApiController]
+    public class UsersController : ControllerBase
     {
-        _userManager = userManager;
-    }   
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IAuthService _authService;
 
-    /// <summary>
-    /// Отримати дані поточного користувача (Personal Information)
-    /// </summary>
-    [HttpGet("me")]
-    public async Task<IActionResult> GetCurrentUser()
-    {
-        // Отримуємо ID користувача з JWT Claim
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        
-        var user = await _userManager.FindByIdAsync(userId);
-        
-        if (user == null)
+        public UsersController(UserManager<ApplicationUser> userManager, IAuthService authService)
         {
-            return NotFound();
+            _userManager = userManager;
+            _authService = authService;
         }
 
-        // TODO: Використовувати DTO для повернення лише необхідних даних
-        return Ok(new 
+        /// <summary>
+        /// Отримати дані поточного користувача (Personal Information)
+        /// </summary>
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
         {
-            user.FirstName,
-            user.LastName,
-            user.Email,
-            user.PhoneNumber
-        });
-    }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
 
-    /// <summary>
-    /// Оновити персональні дані (Personal Information)
-    /// </summary>
-    [HttpPut("me")]
-    // TODO: Створити DTO для запиту оновлення
-    public async Task<IActionResult> UpdateCurrentUser([FromBody] object updateModel) 
-    {
-        // Логіка оновлення даних користувача
-        return Ok(new { Message = "User data updated successfully." });
-    }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
 
-    /// <summary>
-    /// Ендпоїнт для видалення облікового запису
-    /// </summary>
-    [HttpDelete("me")]
-    public async Task<IActionResult> DeleteAccount()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null) return NotFound();
-
-        // TODO: Додаткова логіка (наприклад, анулювання всіх токенів)
-
-        var result = await _userManager.DeleteAsync(user);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest(new { Message = "Account deletion failed." });
+            return Ok(new UserResponseDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                PhotoUrl = user.PhotoUrl
+            });
         }
-        return NoContent(); // 204 No Content
+
+        /// <summary>
+        /// Оновити персональні дані (Personal Information)
+        /// </summary>
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateCurrentUser([FromForm] UpdateUserDto updateModel)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                var tokenResponse = await _authService.UpdateUserAsync(userId, updateModel);
+                return Ok(tokenResponse); // Повертаємо прямо TokenResponseDto
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+
+
+        /// <summary>
+        /// Ендпоїнт для видалення облікового запису
+        /// </summary>
+        [HttpDelete("me")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            // TODO: додати анулювання токенів та інші залежності
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded) return BadRequest(new { Message = "Account deletion failed." });
+
+            return NoContent();
+        }
     }
 }

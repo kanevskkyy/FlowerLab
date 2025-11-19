@@ -8,5 +8,6 @@ namespace UsersService.BLL.Interfaces
         Task<TokenResponseDto?> LoginAsync(LoginDto model);
         Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken);
         Task<bool> LogoutAsync(string refreshToken);
+        Task<TokenResponseDto> UpdateUserAsync(string userId, UpdateUserDto dto);
     }
 }

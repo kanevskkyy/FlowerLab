@@ -18,6 +18,8 @@
 		<Protobuf Include="protos/Reviews.proto" GrpcServices="Both" />
 		<Protobuf Include="protos/Filters.proto" GrpcServices="Both" />
 		<Protobuf Include="protos/Orders.proto" GrpcServices="Both" />
+		<Protobuf Include="protos/BouquetDetail.proto" GrpcServices="Both" />
+		<Protobuf Include="protos/ReviewsByBouquet.proto" GrpcServices="Both" />
 	</ItemGroup>
 	
 </Project>

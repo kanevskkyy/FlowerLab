@@ -29,11 +29,10 @@ public class ExceptionHandlingMiddleware
     private Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
-        var statusCode = HttpStatusCode.InternalServerError; 
+        var statusCode = HttpStatusCode.InternalServerError;
         var message = "An unexpected error occurred.";
         object errors = null;
 
-        // Обробка специфічних помилок
         switch (exception)
         {
             case ValidationException validationException:
@@ -41,22 +40,33 @@ public class ExceptionHandlingMiddleware
                 message = "Validation failed.";
                 errors = validationException.Errors.Select(e => new { Field = e.PropertyName, Error = e.ErrorMessage });
                 break;
+
             case EntityNotFoundException notFoundException:
                 statusCode = HttpStatusCode.NotFound;
                 message = notFoundException.Message;
                 break;
-            // Можна додати обробку інших Identity помилок
+
+            case InvalidOperationException invalidOpEx:
+                statusCode = HttpStatusCode.BadRequest;
+                message = invalidOpEx.Message;
+                break;
+
+            case UnauthorizedAccessException unauthorizedEx:
+                statusCode = HttpStatusCode.Unauthorized;
+                message = unauthorizedEx.Message;
+                break;
+
             default:
-                // Log the full exception details
                 _logger.LogError(exception, "Unhandled exception occurred: {message}", exception.Message);
+                message = exception.Message; // Використовуємо message самого exception
                 break;
         }
 
-        var errorDetails = new 
+        var errorDetails = new
         {
             Status = (int)statusCode,
             Message = message,
-            Errors = errors // Буде null для загальних помилок
+            Errors = errors // null для загальних помилок
         };
 
         context.Response.StatusCode = (int)statusCode;

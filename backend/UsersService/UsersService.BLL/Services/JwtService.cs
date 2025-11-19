@@ -24,11 +24,13 @@ namespace UsersService.BLL.Services
             // 1. Створення Claims
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id), 
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(ClaimTypes.GivenName, user.FirstName ?? ""),
-                new Claim("Discount", user.PersonalDiscountPercentage.ToString())
+                new Claim(ClaimTypes.Surname, user.LastName ?? ""),
+                new Claim("Discount", user.PersonalDiscountPercentage.ToString()),
+                new Claim("PhotoUrl", user.PhotoUrl ?? "")
             };
 
             // Додавання ролей до Claims
