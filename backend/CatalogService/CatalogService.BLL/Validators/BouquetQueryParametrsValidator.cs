@@ -8,17 +8,33 @@ using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Validators
 {
+    using FluentValidation;
+
     public class BouquetQueryParametersValidator : AbstractValidator<BouquetQueryParameters>
     {
         public BouquetQueryParametersValidator()
         {
-            RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
-            RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
-            RuleFor(x => x.MinPrice).GreaterThanOrEqualTo(0).When(x => x.MinPrice.HasValue);
-            RuleFor(x => x.MaxPrice).GreaterThanOrEqualTo(0).When(x => x.MaxPrice.HasValue);
-            RuleFor(x => x.MaxPrice).GreaterThanOrEqualTo(x => x.MinPrice).When(x => x.MinPrice.HasValue && x.MaxPrice.HasValue);
-            RuleFor(x => x.SortBy).Must(s => s == null || new[] { "price_asc", "price_desc", "newest" }.Contains(s))
-                .WithMessage("SortBy must be 'price_asc', 'price_desc' or 'newest'");
+            RuleFor(x => x.MinPrice)
+                .GreaterThanOrEqualTo(0)
+                .When(x => x.MinPrice.HasValue)
+                .WithMessage("MinPrice must be greater than or equal to 0");
+
+            RuleFor(x => x.MaxPrice)
+                .GreaterThanOrEqualTo(0)
+                .When(x => x.MaxPrice.HasValue)
+                .WithMessage("MaxPrice must be greater than or equal to 0");
+
+            RuleForEach(x => x.Quantities)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Quantities must be greater than or equal to 0");
+
+            RuleFor(x => x.Page)
+                .GreaterThan(0)
+                .WithMessage("Page must be greater than 0");
+
+            RuleFor(x => x.PageSize)
+                .GreaterThan(0)
+                .WithMessage("PageSize must be greater than 0");
         }
     }
 }
