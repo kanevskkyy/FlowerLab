@@ -46,7 +46,11 @@ namespace OrderService.BLL.Services
             return _mapper.Map<OrderDetailDto>(order);
         }
 
-        public async Task<OrderDetailDto> CreateAsync(OrderCreateDto dto, CancellationToken cancellationToken = default)
+        public async Task<OrderDetailDto> CreateAsync(Guid userId,
+            string userFirstName,
+            string userLastName,
+            OrderCreateDto dto,
+            CancellationToken cancellationToken = default)
         {
             // Перевірка букетів через gRPC
             var grpcRequest = new OrderedBouquetsIdList();
@@ -94,7 +98,7 @@ namespace OrderService.BLL.Services
             }
 
             var existingOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(
-                new OrderSpecificationParameters { UserId = dto.UserId },
+                new OrderSpecificationParameters { UserId = userId },
                 cancellationToken);
 
             bool isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
@@ -154,9 +158,9 @@ namespace OrderService.BLL.Services
 
             Order order = new Order
             {
-                UserId = dto.UserId,
-                UserFirstName = dto.UserFirstName,
-                UserLastName = dto.UserLastName,
+                UserId = userId,
+                UserFirstName = userFirstName,
+                UserLastName = userLastName,
                 Notes = dto.Notes,
                 GiftMessage = dto.GiftMessage,
                 StatusId = pendingStatus.Id,

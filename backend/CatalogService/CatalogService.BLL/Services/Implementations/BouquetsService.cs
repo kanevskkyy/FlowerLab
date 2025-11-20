@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MassTransit; 
+using FlowerLab.Shared.Events;
 
 namespace CatalogService.BLL.Services.Implementations
 {
@@ -19,12 +21,14 @@ namespace CatalogService.BLL.Services.Implementations
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
-
-        public BouquetService(IUnitOfWork uow, IMapper mapper, IImageService imageService)
+        private readonly IPublishEndpoint _publishEndpoint;
+        
+        public BouquetService(IUnitOfWork uow, IMapper mapper, IImageService imageService, IPublishEndpoint publishEndpoint)
         {
             _uow = uow;
             _mapper = mapper;
             _imageService = imageService;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<PagedList<BouquetDto>> GetAllAsync(BouquetQueryParameters parameters)
@@ -276,6 +280,8 @@ namespace CatalogService.BLL.Services.Implementations
             // Видаляємо усі join-таблиці, якщо потрібно (EF Core cascade може це зробити)
             _uow.Bouquets.Delete(bouquet);
             await _uow.SaveChangesAsync();
+            
+            await _publishEndpoint.Publish(new BouquetDeletedEvent(id));
         }
     }
 }

@@ -11,6 +11,7 @@ namespace ReviewService.Domain.Interfaces
 {
     public interface IReviewRepository : IGenericRepository<Review>
     {
+        Task DeleteByBouquetIdAsync(Guid bouquetId, CancellationToken cancellationToken);
         Task<bool> HasUserReviewedBouquetAsync(Guid userId, Guid bouquetId, CancellationToken cancellationToken = default);
         Task<PagedList<Review>> GetReviewsAsync(ReviewQueryParameters queryParameters, CancellationToken cancellationToken = default);
     }

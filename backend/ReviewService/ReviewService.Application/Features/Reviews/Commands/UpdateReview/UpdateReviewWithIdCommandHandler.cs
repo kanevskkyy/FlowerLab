@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using ReviewService.Application.Interfaces.Commands;
@@ -25,10 +23,18 @@ namespace ReviewService.Application.Features.Reviews.Commands.UpdateReview
             Review? review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
             if (review == null) throw new NotFoundException($"Review with ID {request.ReviewId} not found!");
 
+            // --- ЗАВДАННЯ 7: Перевірка прав ---
+            // Редагувати може тільки власник (навіть адмін зазвичай не редагує чужі тексти, тільки видаляє)
+            if (review.User.UserId != request.RequesterId)
+            {
+                throw new UnauthorizedAccessException("You can only edit your own reviews.");
+            }
+            // ----------------------------------
+
             review.UpdateComment(request.Comment, request.Rating);
             await reviewRepository.UpdateAsync(review, cancellationToken);
 
             return Unit.Value;
         }
-    }
+    } 
 }

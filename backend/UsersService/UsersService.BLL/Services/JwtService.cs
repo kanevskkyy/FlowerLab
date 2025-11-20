@@ -29,6 +29,7 @@ namespace UsersService.BLL.Services
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(ClaimTypes.GivenName, user.FirstName ?? ""),
                 new Claim(ClaimTypes.Surname, user.LastName ?? ""),
+                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? ""),
                 new Claim("Discount", user.PersonalDiscountPercentage.ToString()),
                 new Claim("PhotoUrl", user.PhotoUrl ?? "")
             };

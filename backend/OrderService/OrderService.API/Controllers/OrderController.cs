@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using OrderService.BLL.DTOs.OrderDTOs;
 using OrderService.BLL.Services.Interfaces;
 using OrderService.Domain.QueryParams;
-
+using Microsoft.AspNetCore.Authorization;
 namespace OrderService.API.Controllers
 {
     [ApiController]
     [Route("api/orders")]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -33,11 +35,29 @@ namespace OrderService.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] OrderCreateDto dto, CancellationToken cancellationToken)
         {
-            var createdOrder = await _orderService.CreateAsync(dto, cancellationToken);
+            // 1. Витягуємо дані користувача з токена
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var firstName = User.FindFirstValue(ClaimTypes.GivenName) ?? "";
+            var lastName = User.FindFirstValue(ClaimTypes.Surname) ?? "";
+
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized("Invalid User ID in token");
+            }
+
+            // 2. Передаємо їх у сервіс разом з DTO
+            var createdOrder = await _orderService.CreateAsync(
+                userId, 
+                firstName, 
+                lastName, 
+                dto, 
+                cancellationToken);
+
             return CreatedAtRoute("GetOrderById", new { id = createdOrder.Id }, createdOrder);
         }
 
         [HttpPut("{id:guid}/status")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] OrderUpdateDto dto, CancellationToken cancellationToken)
         {
             var updatedOrder = await _orderService.UpdateStatusAsync(id, dto, cancellationToken);
