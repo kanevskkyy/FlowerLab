@@ -7,7 +7,7 @@ namespace UsersService.BLL.Interfaces
 {
     public interface IAdminUserService
     {
-        Task<IEnumerable<AdminUserDto>> GetAllUsersAsync();
+        Task<IEnumerable<AdminUserDto>> GetAllUsersAsync(UsersFilterDto filter);
         Task<AdminUserDto?> GetUserByIdAsync(string userId);
         Task<bool> UpdateUserDiscountAsync(string userId, int discount);
         Task<bool> UpdateUserRoleAsync(string userId, string newRole);

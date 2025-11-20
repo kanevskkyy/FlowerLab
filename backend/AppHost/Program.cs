@@ -20,24 +20,34 @@ var mongo = builder.AddMongoDB("flower-lab-mongo")
 
 var mongoReviews = mongo.AddDatabase("FlowerLabReviews");
 
+var rabbitmq = builder.AddRabbitMQ("rabbitmq")
+    .WithManagementPlugin(); // Додає адмінку на порті 15672
+
 var catalogService = builder.AddProject<CatalogService_API>("catalog")
     .WithReference(postgresCatalog)
-    .WaitFor(postgresCatalog);
+    .WithReference(rabbitmq)
+    .WaitFor(postgresCatalog)
+    .WaitFor(rabbitmq); 
 
 var orderService = builder.AddProject<OrderService_API>("orders")
     .WithReference(postgresOrder)
     .WithReference(catalogService)
+    .WithReference(rabbitmq)
     .WaitFor(catalogService)
-    .WaitFor(postgresOrder);
+    .WaitFor(postgresOrder)
+    .WaitFor(rabbitmq);
 
 var reviewsService = builder.AddProject<ReviewService_API>("reviews")
     .WithReference(mongoReviews)
     .WithReference(catalogService)
+    .WithReference(rabbitmq)
     .WaitFor(mongoReviews)
-    .WaitFor(catalogService);
+    .WaitFor(catalogService)
+    .WaitFor(rabbitmq);
 
 var userService = builder.AddProject<UsersService_API>("users")
     .WithReference(postgresUsers)
+    .WithReference(rabbitmq)
     .WaitFor(postgresUsers);
 
 var gateway = builder.AddProject<Gateway>("gateway")

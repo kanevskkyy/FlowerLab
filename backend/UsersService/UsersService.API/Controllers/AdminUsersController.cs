@@ -20,12 +20,13 @@ namespace UsersService.API.Controllers
         }
 
         /// <summary>
-        /// Отримати список усіх користувачів
+        /// Отримати список користувачів з можливістю фільтрації
         /// </summary>
+        /// <param name="filter">Параметри фільтрації (Email, Phone, SearchTerm)</param>
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] UsersFilterDto filter)
         {
-            var users = await _adminUserService.GetAllUsersAsync();
+            var users = await _adminUserService.GetAllUsersAsync(filter);
             return Ok(users);
         }
 

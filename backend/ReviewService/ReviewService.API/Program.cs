@@ -15,10 +15,16 @@ using System.Net.Sockets;
 using ReviewService.Application.GrpcServer;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+using MassTransit;
+using ReviewService.Application.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ������������ MongoDB GUID serialization
+// Налаштування MongoDB GUID serialization
 BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
 var pack = new ConventionPack
 {
@@ -28,7 +34,30 @@ ConventionRegistry.Register("EnumStringConvention", pack, t => true);
 
 ValueObjectMappings.Register();
 builder.Services.AddGrpc();
+builder.Services.AddMassTransit(x =>
+{
+    // Реєструємо консюмер
+    x.AddConsumer<BouquetDeletedConsumer>();
 
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var rabbitMqConnection = builder.Configuration.GetConnectionString("rabbitmq");
+        if (!string.IsNullOrEmpty(rabbitMqConnection))
+        {
+            cfg.Host(rabbitMqConnection);
+        }
+        else
+        {
+            cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest"); });
+        }
+
+        // Налаштування черги (endpoint)
+        cfg.ReceiveEndpoint("review-bouquet-deleted", e =>
+        {
+            e.ConfigureConsumer<BouquetDeletedConsumer>(context);
+        });
+    });
+});
 
 builder.AddMongoDBClient("FlowerLabReviews");
 
@@ -58,25 +87,80 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
+
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var secretKey = jwtSection["Secret"];
+var issuer = jwtSection["Issuer"];
+var audience = jwtSection["Audience"];
+
+if (string.IsNullOrEmpty(secretKey)) throw new Exception("JWT Secret is missing in appsettings.json");
+
+var key = Encoding.UTF8.GetBytes(secretKey!);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
 
 var catalogAddress = builder.Configuration["services:catalog:https:0"]
     ?? builder.Configuration["services:catalog:http:0"];
 
 if (string.IsNullOrEmpty(catalogAddress))
 {
-    throw new InvalidOperationException("�� �������� ������ catalog service");
+    throw new InvalidOperationException("Не знайдено адресу catalog service");
 }
-
-builder.Services.AddGrpcClient<CheckIdInReviews.CheckIdInReviewsClient>(options =>
+else 
 {
-    options.Address = new Uri(catalogAddress);
-}).ConfigureChannel(channelOptions =>
-{
-    channelOptions.MaxReceiveMessageSize = 5 * 1024 * 1024;
-    channelOptions.MaxSendMessageSize = 5 * 1024 * 1024;
-});
-
+    builder.Services.AddGrpcClient<CheckIdInReviews.CheckIdInReviewsClient>(options =>
+    {
+        options.Address = new Uri(catalogAddress);
+    }).ConfigureChannel(channelOptions =>
+    {
+        channelOptions.MaxReceiveMessageSize = 5 * 1024 * 1024;
+        channelOptions.MaxSendMessageSize = 5 * 1024 * 1024;
+    });
+}
 
 var app = builder.Build();
 
@@ -94,6 +178,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     services.EnsureIndexes();
 
+    // Сідінг краще робити обережно в продакшені, але для дев - ок
     List<IDataSeeder> seeders = new List<IDataSeeder>()
     {
         services.GetRequiredService<ReviewSeeder>(),
@@ -106,6 +191,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

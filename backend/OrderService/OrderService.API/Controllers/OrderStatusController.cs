@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderService.BLL.DTOs.OrderStatusDTOs;
 using OrderService.BLL.Services.Interfaces;
 
@@ -16,6 +17,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
             var statuses = await _orderStatusService.GetAllAsync();
@@ -23,6 +25,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
             var status = await _orderStatusService.GetByIdAsync(id);
@@ -30,6 +33,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync([FromBody] OrderStatusCreateDto dto)
         {
             var createdStatus = await _orderStatusService.CreateAsync(dto);
@@ -37,6 +41,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] OrderStatusUpdateDto dto)
         {
             var updatedStatus = await _orderStatusService.UpdateAsync(id, dto);
@@ -44,6 +49,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             await _orderStatusService.DeleteAsync(id);

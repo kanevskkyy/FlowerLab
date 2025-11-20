@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrderService.BLL.DTOs.GiftsDTOs;
 using OrderService.BLL.Services.Interfaces;
-
+using Microsoft.AspNetCore.Authorization;
 namespace OrderService.API.Controllers
 {
     [ApiController]
@@ -16,6 +16,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
             var gifts = await _giftService.GetAllAsync();
@@ -23,6 +24,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("{id:guid}", Name = "GetGiftById")]
+        [Authorize]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
             var gift = await _giftService.GetByIdAsync(id);
@@ -31,6 +33,7 @@ namespace OrderService.API.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync([FromForm] GiftCreateDto dto)
         {
             var createdGift = await _giftService.CreateAsync(dto);
@@ -39,6 +42,7 @@ namespace OrderService.API.Controllers
 
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromForm] GiftUpdateDto dto)
         {
             var updatedGift = await _giftService.UpdateAsync(id, dto);
@@ -46,6 +50,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             await _giftService.DeleteAsync(id);
