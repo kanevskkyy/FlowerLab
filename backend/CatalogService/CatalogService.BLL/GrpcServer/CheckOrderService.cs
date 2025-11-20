@@ -22,8 +22,8 @@ namespace CatalogService.BLL.GrpcServer
         {
             if (request == null)
             {
-                _logger.LogWarning("Received null request");
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "Request cannot be null"));
+                _logger.LogWarning("Отримано порожній запит");
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Запит не може бути порожнім"));
             }
 
             var responseList = new OrderedResponseList();
@@ -34,11 +34,11 @@ namespace CatalogService.BLL.GrpcServer
                 {
                     if (!Guid.TryParse(item.Id, out Guid bouquetId))
                     {
-                        _logger.LogWarning("Invalid GUID format for bouquet: {BouquetId}", item.Id);
+                        _logger.LogWarning("Недійсний формат GUID для букета: {BouquetId}", item.Id);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
-                            ErrorMessage = "Invalid GUID format",
+                            ErrorMessage = "Недійсний формат GUID",
                             BouquetName = "",
                             BouquetImage = "",
                             Price = "0"
@@ -46,17 +46,17 @@ namespace CatalogService.BLL.GrpcServer
                         continue;
                     }
 
-                    _logger.LogInformation("Checking bouquet ID: {BouquetId} with count {Count}", bouquetId, item.Count);
+                    _logger.LogInformation("Перевірка букета ID: {BouquetId} з кількістю {Count}", bouquetId, item.Count);
 
                     var bouquet = await _unitOfWork.Bouquets.GetWithDetailsAsync(bouquetId);
 
                     if (bouquet == null)
                     {
-                        _logger.LogWarning("Bouquet not found: {BouquetId}", bouquetId);
+                        _logger.LogWarning("Букет не знайдено: {BouquetId}", bouquetId);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
-                            ErrorMessage = "Bouquet not found",
+                            ErrorMessage = "Букет не знайдено",
                             BouquetName = "",
                             BouquetImage = "",
                             Price = "0"
@@ -66,11 +66,11 @@ namespace CatalogService.BLL.GrpcServer
 
                     if (bouquet.BouquetFlowers == null || !bouquet.BouquetFlowers.Any())
                     {
-                        _logger.LogWarning("Bouquet {BouquetId} has no flowers configured", bouquetId);
+                        _logger.LogWarning("Букет {BouquetId} не має налаштованих квітів", bouquetId);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
-                            ErrorMessage = "Bouquet has no flowers configured",
+                            ErrorMessage = "Букет не має налаштованих квітів",
                             BouquetName = bouquet.Name,
                             BouquetImage = bouquet.MainPhotoUrl,
                             Price = bouquet.Price.ToString("F2")
@@ -85,23 +85,23 @@ namespace CatalogService.BLL.GrpcServer
                     {
                         if (bf.Flower == null)
                         {
-                            _logger.LogWarning("BouquetFlower has null Flower reference in bouquet {BouquetId}", bouquetId);
+                            _logger.LogWarning("У BouquetFlower порожня посилання на квітку в букеті {BouquetId}", bouquetId);
                             enoughStock = false;
-                            stockError = "Invalid bouquet configuration";
+                            stockError = "Недійсна конфігурація букета";
                             break;
                         }
 
                         int requiredQuantity = bf.Quantity * item.Count;
                         int availableQuantity = bf.Flower.Quantity;
 
-                        _logger.LogInformation("Flower {FlowerName}: required {Required}, available {Available}",
+                        _logger.LogInformation("Квітка {FlowerName}: потрібно {Required}, доступно {Available}",
                             bf.Flower.Name, requiredQuantity, availableQuantity);
 
                         if (availableQuantity < requiredQuantity)
                         {
                             enoughStock = false;
-                            stockError = $"Not enough stock for flower '{bf.Flower.Name}'. Required: {requiredQuantity}, available: {availableQuantity}";
-                            _logger.LogWarning("Not enough stock: {Error}", stockError);
+                            stockError = $"Недостатньо квіток '{bf.Flower.Name}' на складі. Потрібно: {requiredQuantity}, доступно: {availableQuantity}";
+                            _logger.LogWarning("Недостатньо квіток: {Error}", stockError);
                             break;
                         }
                     }
@@ -117,17 +117,17 @@ namespace CatalogService.BLL.GrpcServer
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogWarning("Request was cancelled for bouquet {BouquetId}", item.Id);
-                    throw new RpcException(new Status(StatusCode.Cancelled, "Request was cancelled"));
+                    _logger.LogWarning("Запит був скасований для букета {BouquetId}", item.Id);
+                    throw new RpcException(new Status(StatusCode.Cancelled, "Запит був скасований"));
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error while checking bouquet {BouquetId}", item.Id);
-                    throw new RpcException(new Status(StatusCode.Internal, "Internal server error"));
+                    _logger.LogError(ex, "Несподівана помилка при перевірці букета {BouquetId}", item.Id);
+                    throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
                 }
             }
 
-            _logger.LogInformation("Finished checking {Count} bouquets", request.OrderedBouquets.Count);
+            _logger.LogInformation("Завершено перевірку {Count} букетів", request.OrderedBouquets.Count);
             return responseList;
         }
     }

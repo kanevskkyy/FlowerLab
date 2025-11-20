@@ -30,14 +30,14 @@ public class ExceptionHandlingMiddleware
     {
         context.Response.ContentType = "application/json";
         var statusCode = HttpStatusCode.InternalServerError;
-        var message = "An unexpected error occurred.";
+        var message = "Сталася непередбачена помилка.";
         object errors = null;
 
         switch (exception)
         {
             case ValidationException validationException:
                 statusCode = HttpStatusCode.BadRequest;
-                message = "Validation failed.";
+                message = "Помилка валідації.";
                 errors = validationException.Errors.Select(e => new { Field = e.PropertyName, Error = e.ErrorMessage });
                 break;
 
@@ -57,8 +57,8 @@ public class ExceptionHandlingMiddleware
                 break;
 
             default:
-                _logger.LogError(exception, "Unhandled exception occurred: {message}", exception.Message);
-                message = exception.Message; // Використовуємо message самого exception
+                _logger.LogError(exception, "Виникла непередбачена помилка: {message}", exception.Message);
+                message = exception.Message;
                 break;
         }
 
@@ -66,7 +66,7 @@ public class ExceptionHandlingMiddleware
         {
             Status = (int)statusCode,
             Message = message,
-            Errors = errors // null для загальних помилок
+            Errors = errors
         };
 
         context.Response.StatusCode = (int)statusCode;

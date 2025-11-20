@@ -57,15 +57,13 @@ namespace UsersService.API.Controllers
             try
             {
                 var tokenResponse = await _authService.UpdateUserAsync(userId, updateModel);
-                return Ok(tokenResponse); // Повертаємо прямо TokenResponseDto
+                return Ok(tokenResponse);
             }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { Message = ex.Message });
             }
         }
-
-
 
         /// <summary>
         /// Ендпоїнт для видалення облікового запису
@@ -79,10 +77,8 @@ namespace UsersService.API.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
 
-            // TODO: додати анулювання токенів та інші залежності
-
             var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded) return BadRequest(new { Message = "Account deletion failed." });
+            if (!result.Succeeded) return BadRequest(new { Message = "Не вдалося видалити обліковий запис." });
 
             return NoContent();
         }

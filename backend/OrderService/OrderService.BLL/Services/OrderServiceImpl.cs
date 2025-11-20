@@ -41,14 +41,13 @@ namespace OrderService.BLL.Services
         {
             var order = await _unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken);
             if (order == null)
-                throw new NotFoundException($"Order with ID {orderId} not found");
+                throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
 
             return _mapper.Map<OrderDetailDto>(order);
         }
 
         public async Task<OrderDetailDto> CreateAsync(OrderCreateDto dto, CancellationToken cancellationToken = default)
         {
-            // Перевірка букетів через gRPC
             var grpcRequest = new OrderedBouquetsIdList();
             foreach (var item in dto.Items)
             {
@@ -66,7 +65,7 @@ namespace OrderService.BLL.Services
             }
             catch (RpcException ex)
             {
-                throw new ValidationException($"Error while checking bouquets: {ex.Status.Detail}");
+                throw new ValidationException($"Помилка перевірки букетів: {ex.Status.Detail}");
             }
 
             var invalidItems = catalogResponse.OrderedResponseList_
@@ -76,8 +75,8 @@ namespace OrderService.BLL.Services
             if (invalidItems.Any())
             {
                 var errors = string.Join("; ", invalidItems.Select(i =>
-                    $"Bouquet '{i.BouquetName}': {i.ErrorMessage}"));
-                throw new ValidationException($"Error while checking bouquets: {errors}");
+                    $"Букет '{i.BouquetName}': {i.ErrorMessage}"));
+                throw new ValidationException($"Помилка перевірки букетів: {errors}");
             }
 
             OrderStatus? pendingStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("Pending");
@@ -100,7 +99,7 @@ namespace OrderService.BLL.Services
             bool isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
 
             if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
-                throw new ValidationException("Duplicate gifts are not allowed in an order.");
+                throw new ValidationException("У замовленні не дозволяється дублювати подарунки.");
 
             List<OrderGift> orderGifts = new();
             if (dto.Gifts != null && dto.Gifts.Any())
@@ -109,10 +108,10 @@ namespace OrderService.BLL.Services
                 {
                     Gift? gift = await _unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId);
                     if (gift == null)
-                        throw new NotFoundException($"Gift with ID {giftDto.GiftId} not found");
+                        throw new NotFoundException($"Подарунок з ID {giftDto.GiftId} не знайдено");
 
                     if (gift.AvailableCount < giftDto.Count)
-                        throw new ValidationException($"Not enough gifts for '{gift.Name}'. Requested {giftDto.Count}, but only {gift.AvailableCount} are available.");
+                        throw new ValidationException($"Недостатньо подарунків '{gift.Name}'. Запитано {giftDto.Count}, доступно лише {gift.AvailableCount}.");
 
                     gift.AvailableCount -= giftDto.Count;
                     gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
@@ -138,7 +137,7 @@ namespace OrderService.BLL.Services
 
                 if (!decimal.TryParse(catalogItem.Price, out decimal price))
                 {
-                    throw new ValidationException($"Invalid price for bouquet {catalogItem.BouquetName}");
+                    throw new ValidationException($"Некоректна ціна для букета {catalogItem.BouquetName}");
                 }
 
                 orderItems.Add(new OrderItem
@@ -191,11 +190,11 @@ namespace OrderService.BLL.Services
         {
             var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
             if (order == null)
-                throw new NotFoundException($"Order with ID {orderId} not found");
+                throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
 
             var status = await _unitOfWork.OrderStatuses.GetByIdAsync(dto.StatusId);
             if (status == null)
-                throw new NotFoundException($"OrderStatus with ID {dto.StatusId} not found");
+                throw new NotFoundException($"Статус замовлення з ID {dto.StatusId} не знайдено");
 
             order.StatusId = dto.StatusId;
             _unitOfWork.Orders.Update(order);

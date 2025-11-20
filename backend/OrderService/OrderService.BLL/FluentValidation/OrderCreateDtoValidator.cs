@@ -13,23 +13,23 @@ namespace OrderService.BLL.FluentValidation
         public OrderCreateDtoValidator()
         {
             RuleFor(o => o.UserId)
-                .NotEmpty().WithMessage("UserId is required");
+                .NotEmpty().WithMessage("UserId є обов’язковим");
 
             RuleFor(o => o.UserFirstName)
-                .NotEmpty().WithMessage("User first name is required")
-                .MaximumLength(50).WithMessage("User first name cannot exceed 50 characters");
+                .NotEmpty().WithMessage("Ім’я користувача є обов’язковим")
+                .MaximumLength(50).WithMessage("Ім’я користувача не може перевищувати 50 символів");
 
             RuleFor(o => o.Notes)
                 .MaximumLength(500)
-                .WithMessage("Notes cannot exceed 500 characters");
+                .WithMessage("Примітки не можуть перевищувати 500 символів");
 
             RuleFor(o => o.GiftMessage)
                 .MaximumLength(300)
-                .WithMessage("Gift message cannot exceed 300 characters");
+                .WithMessage("Поздоровлення не може перевищувати 300 символів");
 
             RuleFor(o => o.UserLastName)
-                .NotEmpty().WithMessage("User last name is required")
-                .MaximumLength(50).WithMessage("User last name cannot exceed 50 characters");
+                .NotEmpty().WithMessage("Прізвище користувача є обов’язковим")
+                .MaximumLength(50).WithMessage("Прізвище користувача не може перевищувати 50 символів");
 
             RuleForEach(o => o.Items)
                 .SetValidator(new OrderItemCreateDtoValidator());
@@ -40,7 +40,7 @@ namespace OrderService.BLL.FluentValidation
             When(o => o.IsDelivery, () =>
             {
                 RuleFor(o => o.DeliveryInformation)
-                    .NotNull().WithMessage("Delivery information is required when delivery is enabled")
+                    .NotNull().WithMessage("Інформація про доставку є обов’язковою, якщо доставка увімкнена")
                     .SetValidator(new DeliveryInformationCreateDtoValidator());
             });
         }

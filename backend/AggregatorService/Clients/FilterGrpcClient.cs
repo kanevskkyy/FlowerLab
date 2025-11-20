@@ -23,12 +23,12 @@ namespace AggregatorService.Clients
             }
             catch (RpcException ex)
             {
-                logger.LogError(ex, "gRPC error while fetching filters from CatalogService");
+                logger.LogError(ex, "Помилка gRPC під час отримання фільтрів з CatalogService");
                 return null;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unexpected error while fetching filters from CatalogService");
+                logger.LogError(ex, "Несподівана помилка під час отримання фільтрів з CatalogService");
                 return null;
             }
         }

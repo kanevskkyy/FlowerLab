@@ -24,12 +24,14 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
         public async Task<Review> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
         {
             var grpcResponse = await grpcClient.CheckIdAsync(new ReviewCheckIdRequest { Id = request.BouquetId.ToString() });
-            if (!grpcResponse.IsValid) throw new InvalidOperationException($"Bouquet ID is invalid: {grpcResponse.ErrorMessage}");
+            if (!grpcResponse.IsValid)
+                throw new InvalidOperationException($"ID букета недійсний: {grpcResponse.ErrorMessage}");
 
             Review review = new Review(request.BouquetId, request.User, request.Rating, request.Comment);
 
             bool alreadyExists = await reviewRepository.HasUserReviewedBouquetAsync(review.User.UserId, review.BouquetId, cancellationToken);
-            if (alreadyExists) throw new AlreadyExistsException("User has already reviewed this bouquet!");
+            if (alreadyExists)
+                throw new AlreadyExistsException("Користувач вже залишив відгук для цього букету!");
 
             await reviewRepository.AddAsync(review, cancellationToken);
             return review;

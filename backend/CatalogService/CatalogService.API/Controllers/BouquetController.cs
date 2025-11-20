@@ -17,7 +17,6 @@ namespace CatalogService.API.Controllers
             _bouquetService = bouquetService;
         }
 
-        // Отримати всі букети з фільтрацією, сортуванням та пагінацією
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] BouquetQueryParameters query)
         {
@@ -25,7 +24,6 @@ namespace CatalogService.API.Controllers
             return Ok(result);
         }
 
-        // Отримати букет за id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -33,7 +31,6 @@ namespace CatalogService.API.Controllers
             return Ok(bouquet);
         }
 
-        // Створити букет
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] BouquetCreateDto dto)
         {
@@ -42,7 +39,6 @@ namespace CatalogService.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // Оновити букет
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromForm] BouquetUpdateDto dto)
         {
@@ -50,7 +46,6 @@ namespace CatalogService.API.Controllers
             return Ok(updated);
         }
 
-        // Видалити букет
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

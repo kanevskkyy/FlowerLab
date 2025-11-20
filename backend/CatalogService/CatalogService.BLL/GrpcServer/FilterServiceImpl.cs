@@ -23,7 +23,7 @@ namespace CatalogService.BLL.GrpcServer
 
         public override async Task<FilterResponse> GetAllFilters(FilterEmptyRequest request, ServerCallContext context)
         {
-            logger.LogInformation("Fetching all filters");
+            logger.LogInformation("Отримання всіх фільтрів");
 
             try
             {
@@ -34,43 +34,43 @@ namespace CatalogService.BLL.GrpcServer
 
                 var sizeResponse = new SizeResponseList
                 {
-                    Sizes = { sizes.Select(s => new SizeResponse { 
-                        Id = s.Id.ToString(), 
-                        Name = s.Name }) 
-                    }
+                    Sizes = { sizes.Select(s => new SizeResponse {
+                    Id = s.Id.ToString(),
+                    Name = s.Name })
+                }
                 };
 
                 var eventResponse = new EventResponseList
                 {
-                    Events = { 
-                        events.Select(e => new EventResponse { 
-                            Id = e.Id.ToString(), 
-                            Name = e.Name 
-                        }) 
-                    }
+                    Events = {
+                    events.Select(e => new EventResponse {
+                        Id = e.Id.ToString(),
+                        Name = e.Name
+                    })
+                }
                 };
 
                 var receivmentResponse = new ReceivmentResponseList
                 {
-                    Receivments = { 
-                        receivments.Select(r => new ReceivmentResponse { 
-                            Id = r.Id.ToString(), 
-                            Name = r.Name 
-                        }) 
-                    }
+                    Receivments = {
+                    receivments.Select(r => new ReceivmentResponse {
+                        Id = r.Id.ToString(),
+                        Name = r.Name
+                    })
+                }
                 };
 
                 var flowerResponse = new FlowerResponseList
                 {
                     Flowers = { flowers.Select(f => new FlowerResponse
-                {
-                    Id = f.Id.ToString(),
-                    Name = f.Name,
-                    Color = f.Color,
-                    Description = f.Description,
-                    Quantity = f.Quantity
-                }) }
-                    };
+            {
+                Id = f.Id.ToString(),
+                Name = f.Name,
+                Color = f.Color,
+                Description = f.Description,
+                Quantity = f.Quantity
+            }) }
+                };
 
                 return new FilterResponse
                 {
@@ -82,8 +82,8 @@ namespace CatalogService.BLL.GrpcServer
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to fetch filters");
-                throw new RpcException(new Status(StatusCode.Internal, "Internal server error"));
+                logger.LogError(ex, "Не вдалося отримати фільтри");
+                throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
             }
         }
     }

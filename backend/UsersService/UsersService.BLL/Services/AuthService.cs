@@ -19,7 +19,6 @@ namespace UsersService.BLL.Services
         private readonly JwtSettings _jwtSettings;
         private readonly IUserImageService _imageService;
 
-
         public AuthService(UserManager<ApplicationUser> userManager, IJwtService jwtService, ApplicationDbContext dbContext, IOptions<JwtSettings> jwtSettings, IUserImageService userImageService)
         {
             _imageService = userImageService;
@@ -34,7 +33,7 @@ namespace UsersService.BLL.Services
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser != null)
             {
-                throw new InvalidOperationException($"User with email '{model.Email}' already exists.");
+                throw new InvalidOperationException($"Користувач з email '{model.Email}' вже існує.");
             }
 
             var user = new ApplicationUser
@@ -50,7 +49,7 @@ namespace UsersService.BLL.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"User creation failed: {errors}");
+                throw new InvalidOperationException($"Створення користувача не вдалося: {errors}");
             }
 
             await _userManager.AddToRoleAsync(user, "Client");
@@ -58,20 +57,19 @@ namespace UsersService.BLL.Services
             return await GenerateAndSaveTokens(user);
         }
 
-
         public async Task<TokenResponseDto> LoginAsync(LoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
             {
-                throw new InvalidOperationException($"User with email '{model.Email}' does not exist.");
+                throw new InvalidOperationException($"Користувач з email '{model.Email}' не існує.");
             }
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
             if (!passwordValid)
             {
-                throw new UnauthorizedAccessException("Invalid password or email.");
+                throw new UnauthorizedAccessException("Невірний пароль або email.");
             }
 
             return await GenerateAndSaveTokens(user);
@@ -79,38 +77,31 @@ namespace UsersService.BLL.Services
 
         public async Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken)
         {
-            // 1. Знайти токен у БД
             var storedToken = await _dbContext.RefreshTokens
                 .Include(t => t.User)
                 .SingleOrDefaultAsync(t => t.Token == refreshToken);
 
             if (storedToken == null || storedToken.IsRevoked || storedToken.ExpiryDate < DateTime.UtcNow)
             {
-                return null; // Токен не знайдено, анульований або прострочений
+                return null;
             }
 
-            // 2. Генерація нових токенів
             var user = storedToken.User;
-    
-            // 3. Анулювати старий токен і створити новий
             storedToken.IsRevoked = true;
-    
-            // 4. Згенерувати та зберегти новий
-            return await GenerateAndSaveTokens(user); 
+
+            return await GenerateAndSaveTokens(user);
         }
 
         public async Task<bool> LogoutAsync(string refreshToken)
         {
-            // Знайти токен у БД
             var storedToken = await _dbContext.RefreshTokens
                 .SingleOrDefaultAsync(t => t.Token == refreshToken);
 
             if (storedToken == null)
             {
-                throw new InvalidOperationException("Refresh token not found.");
+                throw new InvalidOperationException("Токен оновлення не знайдено.");
             }
 
-            // Анулювання
             storedToken.IsRevoked = true;
             await _dbContext.SaveChangesAsync();
 
@@ -121,7 +112,7 @@ namespace UsersService.BLL.Services
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new InvalidOperationException($"User with ID '{userId}' does not exist.");
+                throw new InvalidOperationException($"Користувач з ID '{userId}' не існує.");
 
             bool isUpdated = false;
 
@@ -162,7 +153,6 @@ namespace UsersService.BLL.Services
 
             if (!isUpdated)
             {
-                // Якщо нічого не змінено, просто повертаємо існуючі токени
                 return await GenerateAndSaveTokens(user);
             }
 
@@ -170,13 +160,11 @@ namespace UsersService.BLL.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Failed to update user: {errors}");
+                throw new InvalidOperationException($"Не вдалося оновити користувача: {errors}");
             }
 
-            // Після успішного оновлення — перегенеруємо токени
             return await GenerateAndSaveTokens(user);
         }
-
 
         private string GetPublicIdFromUrl(string url)
         {
@@ -187,21 +175,19 @@ namespace UsersService.BLL.Services
         private async Task<TokenResponseDto> GenerateAndSaveTokens(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            
             var tokenData = _jwtService.CreateTokens(user, roles);
 
-            // Анулюємо старі токени, щоб уникнути їх накопичення (опціонально, але рекомендовано)
             var oldTokens = _dbContext.RefreshTokens.Where(t => t.UserId == user.Id && !t.IsRevoked);
             _dbContext.RefreshTokens.RemoveRange(oldTokens);
-            
+
             var refreshTokenEntity = new RefreshToken
             {
                 Token = tokenData.RefreshToken,
-                ExpiryDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays), 
+                ExpiryDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
                 UserId = user.Id,
                 IsRevoked = false
             };
-            
+
             await _dbContext.RefreshTokens.AddAsync(refreshTokenEntity);
             await _dbContext.SaveChangesAsync();
 

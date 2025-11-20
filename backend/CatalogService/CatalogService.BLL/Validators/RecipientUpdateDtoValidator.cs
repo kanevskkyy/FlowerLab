@@ -13,8 +13,8 @@ namespace CatalogService.BLL.Validators
         public RecipientUpdateDtoValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Name is required")
-                .MaximumLength(100).WithMessage("Name must be at most 100 characters");
+                .NotEmpty().WithMessage("Ім'я є обов'язковим")
+                .MaximumLength(100).WithMessage("Ім'я повинно містити максимум 100 символів");
         }
     }
 }

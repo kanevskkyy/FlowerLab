@@ -11,8 +11,6 @@ namespace CatalogService.DAL.Specification
             : base(b =>
                 (!parameters.MinPrice.HasValue || b.Price >= parameters.MinPrice) &&
                 (!parameters.MaxPrice.HasValue || b.Price <= parameters.MaxPrice) &&
-
-                // Фільтр за розмірами, подіями та отримувачами
                 (!parameters.SizeIds.Any() || b.BouquetSizes.Any(s => parameters.SizeIds.Contains(s.SizeId))) &&
                 (!parameters.EventIds.Any() || b.BouquetEvents.Any(e => parameters.EventIds.Contains(e.EventId))) &&
                 (!parameters.RecipientIds.Any() || b.BouquetRecipients.Any(r => parameters.RecipientIds.Contains(r.RecipientId))) &&
@@ -23,7 +21,6 @@ namespace CatalogService.DAL.Specification
 
             )
         {
-            // Include для навігаційних властивостей
             AddInclude(b => b.BouquetFlowers);
             AddInclude(b => b.BouquetSizes);
             AddInclude(b => b.BouquetEvents);

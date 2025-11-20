@@ -23,7 +23,8 @@ namespace ReviewService.Application.Features.Reviews.Commands.DeleteReview
         public async Task<Unit> Handle(DeleteReviewCommand request, CancellationToken cancellationToken)
         {
             Review? review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
-            if (review == null) throw new NotFoundException($"Review with ID {request.ReviewId} not found!");
+            if (review == null)
+                throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
 
             await reviewRepository.DeleteAsync(request.ReviewId, cancellationToken);
             return Unit.Value;

@@ -32,14 +32,14 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<RecipientDto> GetByIdAsync(Guid id)
         {
             var rec = await _uow.Recipients.GetByIdAsync(id);
-            if (rec == null) throw new NotFoundException($"Recipient {id} not found");
+            if (rec == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
             return _mapper.Map<RecipientDto>(rec);
         }
 
         public async Task<RecipientDto> CreateAsync(string name)
         {
             if (await _uow.Recipients.ExistsWithNameAsync(name))
-                throw new AlreadyExistsException($"Recipient '{name}' already exists.");
+                throw new AlreadyExistsException($"Отримувач '{name}' уже існує.");
 
             var entity = new Recipient { Name = name };
             await _uow.Recipients.AddAsync(entity);
@@ -51,10 +51,10 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<RecipientDto> UpdateAsync(Guid id, string name)
         {
             var rec = await _uow.Recipients.GetByIdAsync(id);
-            if (rec == null) throw new NotFoundException($"Recipient {id} not found");
+            if (rec == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
 
             if (await _uow.Recipients.ExistsWithNameAsync(name, id))
-                throw new AlreadyExistsException($"Recipient '{name}' already exists.");
+                throw new AlreadyExistsException($"Отримувач '{name}' уже існує.");
 
             rec.Name = name;
             _uow.Recipients.Update(rec);
@@ -66,10 +66,11 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task DeleteAsync(Guid id)
         {
             var rec = await _uow.Recipients.GetByIdAsync(id);
-            if (rec == null) throw new NotFoundException($"Recipient {id} not found");
+            if (rec == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
 
             _uow.Recipients.Delete(rec);
             await _uow.SaveChangesAsync();
         }
     }
+
 }

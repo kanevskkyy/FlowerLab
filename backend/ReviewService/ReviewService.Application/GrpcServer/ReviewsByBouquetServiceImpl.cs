@@ -26,18 +26,18 @@ namespace ReviewService.Application.GrpcServer
             ReviewBouquetIdGrpcRequest request,
             ServerCallContext context)
         {
-            _logger.LogInformation($"Received gRPC request for BouquetId: {request.Id}");
+            _logger.LogInformation($"Отримано gRPC запит для BouquetId: {request.Id}");
 
             Guid bouquetId;
             try
             {
                 bouquetId = Guid.Parse(request.Id);
-                _logger.LogInformation($"Parsed BouquetId as Guid: {bouquetId}");
+                _logger.LogInformation($"Преобразовано BouquetId у Guid: {bouquetId}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to parse BouquetId: {ex.Message}");
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid BouquetId format"));
+                _logger.LogError($"Не вдалося перетворити BouquetId: {ex.Message}");
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Невірний формат BouquetId"));
             }
 
             var queryParams = new ReviewQueryParameters
@@ -46,17 +46,17 @@ namespace ReviewService.Application.GrpcServer
                 Status = ReviewStatus.Confirmed
             };
 
-            _logger.LogInformation($"Calling repository with BouquetId: {queryParams.BouquetId}");
+            _logger.LogInformation($"Виклик репозиторію з BouquetId: {queryParams.BouquetId}");
 
             var reviews = await _reviewRepository.GetReviewsAsync(queryParams);
 
-            _logger.LogInformation($"Repository returned {reviews.Items.Count} reviews, Total: {reviews.TotalCount}");
+            _logger.LogInformation($"Репозиторій повернув {reviews.Items.Count} відгуків, Загалом: {reviews.TotalCount}");
 
             var grpcResponse = new ReviewsListGrpcResponse();
 
             foreach (var review in reviews.Items)
             {
-                _logger.LogInformation($"Processing review ID: {review.Id}, BouquetId: {review.BouquetId}, Status: {review.Status}");
+                _logger.LogInformation($"Обробка відгуку ID: {review.Id}, BouquetId: {review.BouquetId}, Статус: {review.Status}");
 
                 var reviewGrpcResponse = new ReviewGrpcResponse
                 {
@@ -76,7 +76,7 @@ namespace ReviewService.Application.GrpcServer
                 grpcResponse.Reviews.Add(reviewGrpcResponse);
             }
 
-            _logger.LogInformation($"Returning {grpcResponse.Reviews.Count} reviews in gRPC response");
+            _logger.LogInformation($"Повертається {grpcResponse.Reviews.Count} відгуків у gRPC відповіді");
 
             return grpcResponse;
         }

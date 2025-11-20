@@ -23,7 +23,8 @@ namespace ReviewService.API.Middleware
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unhandled exception caught by middleware.");
+                logger.LogError(ex, "Неперехоплена помилка перехоплена middleware.");
+
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = ex switch
                 {
@@ -38,7 +39,7 @@ namespace ReviewService.API.Middleware
                 var response = new
                 {
                     type = ex.GetType().Name,
-                    message = ex.Message,
+                    message = ex.Message
                 };
 
                 await context.Response.WriteAsJsonAsync(response);

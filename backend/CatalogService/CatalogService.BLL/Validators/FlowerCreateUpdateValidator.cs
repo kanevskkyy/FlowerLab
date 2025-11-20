@@ -13,15 +13,15 @@ namespace CatalogService.BLL.Validators
         public FlowerCreateUpdateValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Name is required.")
+                .NotEmpty().WithMessage("Назва є обов'язковою.")
                 .MaximumLength(100);
 
             RuleFor(x => x.Color)
-                .NotEmpty().WithMessage("Color is required.")
+                .NotEmpty().WithMessage("Колір є обов'язковим.")
                 .MaximumLength(50);
 
             RuleFor(x => x.Quantity)
-                .GreaterThanOrEqualTo(0).WithMessage("Quantity cannot be negative.");
+                .GreaterThanOrEqualTo(0).WithMessage("Кількість не може бути від’ємною.");
         }
     }
 }

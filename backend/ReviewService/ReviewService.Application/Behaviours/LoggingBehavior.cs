@@ -21,11 +21,11 @@ namespace ReviewService.Application.Behaviours
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             string requestId = Guid.NewGuid().ToString();
-            logger.LogInformation("[START] {RequestName} ({RequestId}) - {Request}", typeof(TRequest).Name, requestId, JsonSerializer.Serialize(request));
+            logger.LogInformation("[ПОЧАТОК] {RequestName} ({RequestId}) - {Request}", typeof(TRequest).Name, requestId, JsonSerializer.Serialize(request));
 
             TResponse response = await next();
 
-            logger.LogInformation("[SUCCESS] {RequestName} ({RequestId}) completed", typeof(TRequest).Name, requestId);
+            logger.LogInformation("[УСПІХ] {RequestName} ({RequestId}) завершено", typeof(TRequest).Name, requestId);
             return response;
         }
     }

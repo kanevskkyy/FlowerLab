@@ -32,14 +32,14 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<SizeDto> GetByIdAsync(Guid id)
         {
             var size = await _uow.Sizes.GetByIdAsync(id);
-            if (size == null) throw new NotFoundException($"Size {id} not found");
+            if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
             return _mapper.Map<SizeDto>(size);
         }
 
         public async Task<SizeDto> CreateAsync(string name)
         {
             if (await _uow.Sizes.ExistsWithNameAsync(name))
-                throw new AlreadyExistsException($"Size '{name}' already exists.");
+                throw new AlreadyExistsException($"Розмір '{name}' уже існує.");
 
             var entity = new Size { Name = name };
             await _uow.Sizes.AddAsync(entity);
@@ -51,10 +51,10 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<SizeDto> UpdateAsync(Guid id, string name)
         {
             var size = await _uow.Sizes.GetByIdAsync(id);
-            if (size == null) throw new NotFoundException($"Size {id} not found");
+            if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
 
             if (await _uow.Sizes.ExistsWithNameAsync(name, id))
-                throw new AlreadyExistsException($"Size '{name}' already exists.");
+                throw new AlreadyExistsException($"Розмір '{name}' уже існує.");
 
             size.Name = name;
             _uow.Sizes.Update(size);
@@ -66,7 +66,7 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task DeleteAsync(Guid id)
         {
             var size = await _uow.Sizes.GetByIdAsync(id);
-            if (size == null) throw new NotFoundException($"Size {id} not found");
+            if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
 
             _uow.Sizes.Delete(size);
             await _uow.SaveChangesAsync();

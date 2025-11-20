@@ -13,7 +13,7 @@ namespace OrderService.BLL.FluentValidation
         public OrderStatusCreateDtoValidator()
         {
             RuleFor(s => s.Name)
-                .NotEmpty().WithMessage("Status name is required")
+                .NotEmpty().WithMessage("Назва статусу є обов’язковою")
                 .MaximumLength(50);
         }
     }

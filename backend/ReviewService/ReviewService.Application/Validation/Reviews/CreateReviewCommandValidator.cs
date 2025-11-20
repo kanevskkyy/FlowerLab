@@ -14,18 +14,18 @@ namespace ReviewService.Application.Validation.Reviews
         public CreateReviewCommandValidator()
         {
             RuleFor(x => x.BouquetId)
-                .NotEmpty().WithMessage("BouquetId is required.");
+                .NotEmpty().WithMessage("Ідентифікатор букета (BouquetId) обов'язковий.");
 
             RuleFor(x => x.User)
-                .NotNull().WithMessage("User information is required.")
+                .NotNull().WithMessage("Інформація про користувача обов'язкова.")
                 .SetValidator(new UserInfoValidator());
 
             RuleFor(x => x.Rating)
-                .InclusiveBetween(1, 5).WithMessage("Rating must be between 1 and 5.");
+                .InclusiveBetween(1, 5).WithMessage("Рейтинг має бути між 1 та 5.");
 
             RuleFor(x => x.Comment)
-                .NotEmpty().WithMessage("Comment cannot be empty.")
-                .MaximumLength(500).WithMessage("Comment cannot exceed 500 characters.");
+                .NotEmpty().WithMessage("Коментар не може бути порожнім.")
+                .MaximumLength(500).WithMessage("Коментар не може перевищувати 500 символів.");
         }
     }
 }

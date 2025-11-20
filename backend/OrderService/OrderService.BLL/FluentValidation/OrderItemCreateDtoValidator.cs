@@ -13,10 +13,10 @@ namespace OrderService.BLL.FluentValidation
         public OrderItemCreateDtoValidator()
         {
             RuleFor(i => i.BouquetId)
-                .NotEmpty().WithMessage("BouquetId is required");
+                .NotEmpty().WithMessage("BouquetId є обов’язковим");
 
             RuleFor(i => i.Count)
-                .GreaterThan(0).WithMessage("The quantity must be greater than 0");
+                .GreaterThan(0).WithMessage("Кількість повинна бути більшою за 0");
         }
     }
 }

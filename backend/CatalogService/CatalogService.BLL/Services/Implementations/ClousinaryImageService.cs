@@ -40,7 +40,7 @@ namespace CatalogService.BLL.Services.Implementations
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
                 return result.SecureUrl.ToString();
 
-            throw new Exception("Image upload failed: " + result.Error?.Message);
+            throw new Exception("Не вдалося завантажити зображення: " + result.Error?.Message);
         }
 
         public async Task<bool> DeleteAsync(string publicId)
@@ -50,4 +50,5 @@ namespace CatalogService.BLL.Services.Implementations
             return result.Result == "ok" || result.Result == "not found";
         }
     }
+
 }

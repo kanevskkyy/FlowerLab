@@ -32,14 +32,14 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<EventDto> GetByIdAsync(Guid id)
         {
             var ev = await _uow.Events.GetByIdAsync(id);
-            if (ev == null) throw new NotFoundException($"Event {id} not found");
+            if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
             return _mapper.Map<EventDto>(ev);
         }
 
         public async Task<EventDto> CreateAsync(string name)
         {
             if (await _uow.Events.ExistsWithNameAsync(name))
-                throw new AlreadyExistsException($"Event '{name}' already exists.");
+                throw new AlreadyExistsException($"Подія '{name}' уже існує.");
 
             var entity = new Event { Name = name };
             await _uow.Events.AddAsync(entity);
@@ -51,10 +51,10 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<EventDto> UpdateAsync(Guid id, string name)
         {
             var ev = await _uow.Events.GetByIdAsync(id);
-            if (ev == null) throw new NotFoundException($"Event {id} not found");
+            if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
 
             if (await _uow.Events.ExistsWithNameAsync(name, id))
-                throw new AlreadyExistsException($"Event '{name}' already exists.");
+                throw new AlreadyExistsException($"Подія '{name}' уже існує.");
 
             ev.Name = name;
             _uow.Events.Update(ev);
@@ -66,10 +66,11 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task DeleteAsync(Guid id)
         {
             var ev = await _uow.Events.GetByIdAsync(id);
-            if (ev == null) throw new NotFoundException($"Event {id} not found");
+            if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
 
             _uow.Events.Delete(ev);
             await _uow.SaveChangesAsync();
         }
     }
+
 }

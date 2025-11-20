@@ -22,7 +22,7 @@ namespace CatalogService.BLL.GrpcServer
         {
             var bouquet = await _bouquetService.GetByIdAsync(Guid.Parse(request.Id));
 
-            if (bouquet == null) throw new RpcException(new Status(StatusCode.NotFound, "Bouquet not found"));
+            if (bouquet == null) throw new RpcException(new Status(StatusCode.NotFound, "Букет не знайдено."));
 
             return Map(bouquet);
         }

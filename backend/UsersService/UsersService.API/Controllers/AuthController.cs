@@ -28,8 +28,7 @@ namespace UsersService.API.Controllers
 
             if (result == null)
             {
-                // Помилка реєстрації
-                return BadRequest(new { Message = "Registration failed. User already exists or invalid password." });
+                return BadRequest(new { Message = "Реєстрація не вдалася. Користувач вже існує або пароль некоректний." });
             }
 
             return Ok(result);
@@ -47,12 +46,12 @@ namespace UsersService.API.Controllers
 
             if (result == null)
             {
-                // Помилка логіну
-                return Unauthorized(new { Message = "Invalid email or password." });
+                return Unauthorized(new { Message = "Неправильний email або пароль." });
             }
 
             return Ok(result);
         }
+
         [HttpPost("refresh")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenResponseDto))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -62,7 +61,7 @@ namespace UsersService.API.Controllers
 
             if (result == null)
             {
-                return Unauthorized(new { Message = "Invalid or expired refresh token." });
+                return Unauthorized(new { Message = "Неправильний або прострочений refresh token." });
             }
 
             return Ok(result);
@@ -73,7 +72,7 @@ namespace UsersService.API.Controllers
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto model)
         {
             await _authService.LogoutAsync(model.RefreshToken);
-            return NoContent(); 
+            return NoContent();
         }
     }
 }

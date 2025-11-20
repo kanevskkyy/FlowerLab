@@ -12,25 +12,25 @@ namespace UsersService.BLL.FluentValidation
     public class UpdateUserDtoValidator : AbstractValidator<UpdateUserDto>
     {
         private readonly string[] _permittedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
-        private const long MaxFileSize = 5 * 1024 * 1024; 
+        private const long MaxFileSize = 5 * 1024 * 1024;
 
         public UpdateUserDtoValidator()
         {
             RuleFor(x => x.FirstName)
-                .NotEmpty().WithMessage("First name is required")
-                .MaximumLength(50).WithMessage("First name must be less than 50 characters");
+                .NotEmpty().WithMessage("Ім'я є обов'язковим")
+                .MaximumLength(50).WithMessage("Ім'я не може перевищувати 50 символів");
 
             RuleFor(x => x.LastName)
-                .NotEmpty().WithMessage("Last name is required")
-                .MaximumLength(50).WithMessage("Last name must be less than 50 characters");
+                .NotEmpty().WithMessage("Прізвище є обов'язковим")
+                .MaximumLength(50).WithMessage("Прізвище не може перевищувати 50 символів");
 
             RuleFor(x => x.PhoneNumber)
-                .Matches(@"^\+?\d{10,15}$").WithMessage("Phone number must be valid")
+                .Matches(@"^\+?\d{10,15}$").WithMessage("Номер телефону має бути валідним")
                 .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
 
             RuleFor(x => x.Photo)
-                .Must(BeAValidFile).WithMessage("Photo must be a valid image file (.jpg, .jpeg, .png, .webp)")
-                .Must(f => f.Length <= MaxFileSize).WithMessage("Photo size must be less than 5 MB")
+                .Must(BeAValidFile).WithMessage("Фото має бути валідним зображенням (.jpg, .jpeg, .png, .webp)")
+                .Must(f => f.Length <= MaxFileSize).WithMessage("Розмір фото має бути менше 5 МБ")
                 .When(x => x.Photo != null);
         }
 

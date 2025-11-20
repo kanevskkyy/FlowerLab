@@ -13,20 +13,20 @@ namespace ReviewService.Application.Validation.Additional
         public UserInfoValidator()
         {
             RuleFor(u => u.UserId)
-                .NotEmpty().WithMessage("UserId is required.");
+                .NotEmpty().WithMessage("Ідентифікатор користувача (UserId) обов'язковий.");
 
             RuleFor(u => u.FirstName)
-                .NotEmpty().WithMessage("First name is required.")
-                .MaximumLength(100).WithMessage("First name cannot exceed 100 characters.");
+                .NotEmpty().WithMessage("Ім'я обов'язкове.")
+                .MaximumLength(100).WithMessage("Ім'я не може перевищувати 100 символів.");
 
             RuleFor(u => u.LastName)
-                .NotEmpty().WithMessage("Last name is required.")
-                .MaximumLength(100).WithMessage("Last name cannot exceed 100 characters.");
+                .NotEmpty().WithMessage("Прізвище обов'язкове.")
+                .MaximumLength(100).WithMessage("Прізвище не може перевищувати 100 символів.");
 
             RuleFor(x => x.PhotoUrl)
-                .NotEmpty().WithMessage("PhotoUrl is required.")
-                .Must(BeValidUrl).WithMessage("PhotoUrl must be a valid URL.")
-                .Must(x => x.Contains("res.cloudinary")).WithMessage("PhotoUrl must be a Cloudinary URL.");
+                .NotEmpty().WithMessage("URL фотографії обов'язковий.")
+                .Must(BeValidUrl).WithMessage("URL фотографії має бути дійсним URL.")
+                .Must(x => x.Contains("res.cloudinary")).WithMessage("URL фотографії має бути посиланням Cloudinary.");
         }
 
         private bool BeValidUrl(string url)
