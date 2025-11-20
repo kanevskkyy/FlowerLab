@@ -27,13 +27,13 @@ namespace ReviewService.Application.Behaviours
             {
                 foreach (var failure in validationsErrors.Errors)
                 {
-                    logger.LogWarning(validationsErrors, "Validation failed in {RequestName}: Property {PropertyName}, Error: {ErrorMessage}", typeof(TRequest).Name, failure.PropertyName, failure.ErrorMessage);
+                    logger.LogWarning(validationsErrors, "Помилка валідації у {RequestName}: Властивість {PropertyName}, Помилка: {ErrorMessage}", typeof(TRequest).Name, failure.PropertyName, failure.ErrorMessage);
                 }
                 throw;
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, "Unhandled exception in {RequestName}: {@Request}", typeof(TRequest).Name, request);
+                logger.LogError(exception, "Неперехоплена помилка у {RequestName}: {@Request}", typeof(TRequest).Name, request);
                 throw;
             }
         }

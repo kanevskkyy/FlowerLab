@@ -33,7 +33,7 @@ namespace OrderService.BLL.Services
         {
             var status = await unitOfWork.OrderStatuses.GetByIdAsync(id);
             if (status == null)
-                throw new NotFoundException($"OrderStatus with ID {id} not found");
+                throw new NotFoundException($"Статус замовлення з ID {id} не знайдено");
 
             return mapper.Map<OrderStatusReadDto>(status);
         }
@@ -42,7 +42,7 @@ namespace OrderService.BLL.Services
         {
             var isDuplicate = await unitOfWork.OrderStatuses.IsNameDuplicatedAsync(dto.Name);
             if (isDuplicate)
-                throw new AlreadyExistsException($"OrderStatus '{dto.Name}' already exists");
+                throw new AlreadyExistsException($"Статус замовлення '{dto.Name}' вже існує");
 
             var entity = mapper.Map<OrderStatus>(dto);
 
@@ -56,11 +56,11 @@ namespace OrderService.BLL.Services
         {
             var status = await unitOfWork.OrderStatuses.GetByIdAsync(id);
             if (status == null)
-                throw new NotFoundException($"OrderStatus with ID {id} not found");
+                throw new NotFoundException($"Статус замовлення з ID {id} не знайдено");
 
             var isDuplicate = await unitOfWork.OrderStatuses.IsNameDuplicatedAsync(dto.Name, id);
             if (isDuplicate)
-                throw new AlreadyExistsException($"OrderStatus '{dto.Name}' already exists");
+                throw new AlreadyExistsException($"Статус замовлення '{dto.Name}' вже існує");
 
             mapper.Map(dto, status);
 
@@ -74,7 +74,7 @@ namespace OrderService.BLL.Services
         {
             var status = await unitOfWork.OrderStatuses.GetByIdAsync(id);
             if (status == null)
-                throw new NotFoundException($"OrderStatus with ID {id} not found");
+                throw new NotFoundException($"Статус замовлення з ID {id} не знайдено");
 
             unitOfWork.OrderStatuses.Delete(status);
             await unitOfWork.SaveChangesAsync();

@@ -21,7 +21,6 @@ namespace UsersService.BLL.Services
 
         public TokenResponseDto CreateTokens(ApplicationUser user, IList<string> roles)
         {
-            // 1. Створення Claims
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
@@ -34,13 +33,11 @@ namespace UsersService.BLL.Services
                 new Claim("PhotoUrl", user.PhotoUrl ?? "")
             };
 
-            // Додавання ролей до Claims
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            // 2. Створення Access Token
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             
@@ -55,7 +52,6 @@ namespace UsersService.BLL.Services
 
             string accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-            // 3. Створення Refresh Token
             string refreshToken = GenerateRefreshToken();
             
             return new TokenResponseDto

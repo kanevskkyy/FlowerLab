@@ -19,7 +19,7 @@ namespace ReviewService.Infrastructure.Repositories
             collection = typeof(T).Name switch
             {
                 nameof(Review) => database.GetCollection<T>("Reviews"),
-                _ => throw new ArgumentException($"No collection mapping found for type {typeof(T).Name}")
+                _ => throw new ArgumentException($"Не знайдено відповідності колекції для типу {typeof(T).Name}")
             };
             this.session = session;
         }

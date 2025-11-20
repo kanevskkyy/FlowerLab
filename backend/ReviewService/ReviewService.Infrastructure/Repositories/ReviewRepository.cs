@@ -38,39 +38,36 @@ namespace ReviewService.Infrastructure.Repositories
             var filterBuilder = Builders<Review>.Filter;
             FilterDefinition<Review> filter = filterBuilder.Empty;
 
-            _logger.LogInformation("=== GetReviewsAsync called ===");
+            _logger.LogInformation("=== Виклик GetReviewsAsync ===");
             _logger.LogInformation($"UserId: {queryParameters.UserId}");
             _logger.LogInformation($"BouquetId: {queryParameters.BouquetId}");
             _logger.LogInformation($"Rating: {queryParameters.Rating}");
             _logger.LogInformation($"Status: {queryParameters.Status}");
 
-            // --- UserId ---
             if (queryParameters.UserId.HasValue)
             {
                 filter &= filterBuilder.Eq(r => r.User.UserId, queryParameters.UserId.Value);
-                _logger.LogInformation("Added UserId filter");
+                _logger.LogInformation("Додано фільтр UserId");
             }
 
             // --- BouquetId ---
             if (queryParameters.BouquetId.HasValue)
             {
                 filter &= filterBuilder.Eq(r => r.BouquetId, queryParameters.BouquetId.Value);
-                _logger.LogInformation($"Added BouquetId filter: {queryParameters.BouquetId.Value}");
+                _logger.LogInformation($"Додано фільтр BouquetId: {queryParameters.BouquetId.Value}");
             }
 
-            // --- Rating ---
             if (queryParameters.Rating.HasValue)
             {
                 filter &= filterBuilder.Eq(r => r.Rating, queryParameters.Rating.Value);
-                _logger.LogInformation("Added Rating filter");
+                _logger.LogInformation("Додано фільтр Rating");
             }
 
-            // --- Status ---
             if (queryParameters.Status.HasValue)
             {
                 // Якщо статус явно вказано - фільтруємо по ньому
                 filter &= filterBuilder.Eq(r => r.Status, queryParameters.Status.Value);
-                _logger.LogInformation($"Added Status filter: {queryParameters.Status.Value}");
+                _logger.LogInformation($"Додано фільтр Status: {queryParameters.Status.Value}");
             }
             else if (queryParameters.BouquetId.HasValue)
             {
@@ -78,6 +75,16 @@ namespace ReviewService.Infrastructure.Repositories
                 // то показуємо ТІЛЬКИ підтверджені (Confirmed).
                 // Щоб клієнти не бачили спам або нові неперевірені відгуки.
                 filter &= filterBuilder.Eq(r => r.Status, ReviewStatus.Confirmed);
+                _logger.LogInformation("Додано фільтр за замовчуванням Status: Confirmed");
+            }
+
+            var renderedFilter = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
+            _logger.LogInformation($"Фінальний фільтр MongoDB: {renderedFilter}");
+
+            var findFluent = collection.Find(filter);
+
+            var totalCount = await findFluent.CountDocumentsAsync(cancellationToken);
+            _logger.LogInformation($"Знайдено всього документів: {totalCount}");
                 _logger.LogInformation("Added default Status filter: Confirmed (because BouquetId is present and Status is null)");
             }
 
@@ -99,7 +106,6 @@ namespace ReviewService.Infrastructure.Repositories
             // Використовуємо _reviews (або collection з базового класу)
             var findFluent = _reviews.Find(filter);
 
-            // --- Сортування ---
             if (!string.IsNullOrWhiteSpace(queryParameters.OrderBy))
             {
                 var sortHelper = new MongoSortHelper<Review>();
@@ -123,7 +129,7 @@ namespace ReviewService.Infrastructure.Repositories
                 cancellationToken
             );
 
-            _logger.LogInformation($"Returning {result.Items.Count} items from page {queryParameters.PageNumber}");
+            _logger.LogInformation($"Повертається {result.Items.Count} елементів зі сторінки {queryParameters.PageNumber}");
 
             return result;
         }

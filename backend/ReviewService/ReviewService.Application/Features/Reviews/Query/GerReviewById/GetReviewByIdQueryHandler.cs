@@ -22,7 +22,7 @@ namespace ReviewService.Application.Features.Reviews.Query.GerReviewById
         public async Task<Review?> Handle(GetReviewByIdQuery request, CancellationToken cancellationToken)
         {
             Review? review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
-            if (review == null) throw new NotFoundException($"Review with ID {request.ReviewId} not found!");
+            if (review == null) throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
 
             return review;
         }

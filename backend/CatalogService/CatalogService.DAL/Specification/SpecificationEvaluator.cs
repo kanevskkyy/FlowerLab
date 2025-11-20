@@ -13,11 +13,9 @@ namespace CatalogService.DAL.Specification
         {
             var query = inputQuery;
 
-            // Фільтри
             if (spec.Criteria != null)
                 query = query.Where(spec.Criteria);
 
-            // Include (без Select)
             query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
 
             return query;

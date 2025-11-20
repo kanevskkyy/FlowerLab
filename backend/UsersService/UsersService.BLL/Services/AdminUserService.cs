@@ -23,7 +23,6 @@ namespace UsersService.BLL.Services
         private async Task<string> GetUserPrimaryRoleAsync(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            // Припускаємо, що нам потрібна лише одна основна роль для відображення
             return roles.FirstOrDefault() ?? "Client"; 
         }
 
@@ -76,18 +75,15 @@ namespace UsersService.BLL.Services
 
             if (user == null)
             {
-                return null; // Користувача не знайдено
+                return null; 
             }
 
-            // Мапінг сутності на DTO
             var userDto = _mapper.Map<AdminUserDto>(user);
 
-            // Отримання та встановлення ролі вручну
             userDto.Role = await GetUserPrimaryRoleAsync(user);
 
             return userDto;
         }
-        // ... GetUserByIdAsync (аналогічно GetAll, але для одного)
 
         public async Task<bool> UpdateUserDiscountAsync(string userId, int discount)
         {
@@ -102,7 +98,6 @@ namespace UsersService.BLL.Services
             return result.Succeeded;
         }
 
-        // ... UpdateUserRoleAsync (буде реалізовано пізніше, тут потрібна складніша логіка з Remove/AddRole)
         public Task<bool> UpdateUserRoleAsync(string userId, string newRole)
         {
             throw new NotImplementedException(); 

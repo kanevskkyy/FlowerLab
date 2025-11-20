@@ -27,11 +27,11 @@ namespace ReviewService.Application.Behaviours
             long elapsedMs = stopwatch.ElapsedMilliseconds;
             if (elapsedMs > 500)
             {
-                logger.LogWarning("[PERFORMANCE] {RequestName} took {ElapsedMilliseconds}ms", typeof(TRequest).Name, elapsedMs);
+                logger.LogWarning("[ПРОДУКТИВНІСТЬ] {RequestName} виконання зайняло {ElapsedMilliseconds} мс", typeof(TRequest).Name, elapsedMs);
             }
             else
             {
-                logger.LogInformation("[PERFORMANCE] {RequestName} executed in {ElapsedMilliseconds}ms", typeof(TRequest).Name, elapsedMs);
+                logger.LogInformation("[ПРОДУКТИВНІСТЬ] {RequestName} виконано за {ElapsedMilliseconds} мс", typeof(TRequest).Name, elapsedMs);
             }
 
             return response;

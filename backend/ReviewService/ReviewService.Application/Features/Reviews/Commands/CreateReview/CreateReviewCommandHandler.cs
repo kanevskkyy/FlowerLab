@@ -25,7 +25,8 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
         {
             // 1. Перевіряємо існування букета через gRPC
             var grpcResponse = await grpcClient.CheckIdAsync(new ReviewCheckIdRequest { Id = request.BouquetId.ToString() });
-            if (!grpcResponse.IsValid) throw new InvalidOperationException($"Bouquet ID is invalid: {grpcResponse.ErrorMessage}");
+            if (!grpcResponse.IsValid)
+                throw new InvalidOperationException($"ID букета недійсний: {grpcResponse.ErrorMessage}");
 
             // 2. Перевіряємо, чи дані юзера були передані з контролера
             if (request.User == null)
@@ -38,6 +39,8 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
 
             // 4. Перевірка дублікатів
             bool alreadyExists = await reviewRepository.HasUserReviewedBouquetAsync(review.User.UserId, review.BouquetId, cancellationToken);
+            if (alreadyExists)
+                throw new AlreadyExistsException("Користувач вже залишив відгук для цього букету!");
             if (alreadyExists) throw new InvalidOperationException("User has already reviewed this bouquet!"); 
 
             await reviewRepository.AddAsync(review, cancellationToken);

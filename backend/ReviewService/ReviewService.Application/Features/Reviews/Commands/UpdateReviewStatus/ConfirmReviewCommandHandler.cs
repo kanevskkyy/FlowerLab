@@ -23,7 +23,7 @@ namespace ReviewService.Application.Features.Reviews.Commands.UpdateReviewStatus
         {
             var review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
             if (review == null)
-                throw new NotFoundException($"Review with ID {request.ReviewId} not found.");
+                throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено.");
 
             review.Confirm();
 

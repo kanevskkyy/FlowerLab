@@ -21,17 +21,18 @@ namespace CatalogService.BLL.Validators
 
             RuleFor(x => x.FlowerIds)
                 .NotEmpty()
-                .WithMessage("Bouquet must contain at least one flower.");
+                .WithMessage("Букет повинен містити принаймні одну квітку.");
 
             RuleFor(x => x.FlowerQuantities)
                 .NotEmpty()
-                .WithMessage("Bouquet must contain at least one flower quantity.")
+                .WithMessage("Букет повинен містити принаймні одну кількість квітки.")
                 .Must((dto, quantities) => quantities.Count == dto.FlowerIds.Count)
-                .WithMessage("Each flower must have a corresponding quantity.");
+                .WithMessage("Кожна квітка повинна мати відповідну кількість.");
 
             RuleForEach(x => x.FlowerQuantities)
                 .GreaterThan(0)
-                .WithMessage("Flower quantity must be greater than 0.");
+                .WithMessage("Кількість квітки повинна бути більше 0.");
         }
+
     }
 }

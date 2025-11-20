@@ -23,7 +23,7 @@ namespace AggregatorService.Controllers
                 var bouquetInfo = await _bouquetService.GetAggegatedBouquetInfo(id);
 
                 if (bouquetInfo == null)
-                    return NotFound(new { message = "Bouquet not found" });
+                    return NotFound(new { message = "Букет не знайдено" });
 
                 return Ok(bouquetInfo);
             }
@@ -33,7 +33,7 @@ namespace AggregatorService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
+                return StatusCode(500, new { message = "Внутрішня помилка сервера", detail = ex.Message });
             }
         }
     }

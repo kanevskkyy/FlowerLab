@@ -21,7 +21,8 @@ namespace ReviewService.Application.Features.Reviews.Commands.UpdateReview
         public async Task<Unit> Handle(UpdateReviewWithIdCommand request, CancellationToken cancellationToken)
         {
             Review? review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
-            if (review == null) throw new NotFoundException($"Review with ID {request.ReviewId} not found!");
+            if (review == null)
+                throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
 
             // --- ЗАВДАННЯ 7: Перевірка прав ---
             // Редагувати може тільки власник (навіть адмін зазвичай не редагує чужі тексти, тільки видаляє)

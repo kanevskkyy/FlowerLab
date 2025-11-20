@@ -22,8 +22,8 @@ namespace AggregatorService.Controllers
             FilterResponse? filters = await filterClient.GetAllFiltersAsync();
             if (filters == null)
             {
-                logger.LogWarning("Failed to get filters");
-                return StatusCode(500, "Could not retrieve filters");
+                logger.LogWarning("Не вдалося отримати фільтри");
+                return StatusCode(500, "Не вдалося отримати фільтри");
             }
 
             return Ok(filters);

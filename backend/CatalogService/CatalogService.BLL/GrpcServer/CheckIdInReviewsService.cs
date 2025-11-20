@@ -23,14 +23,14 @@ namespace CatalogService.BLL.GrpcServer
 
         public override async Task<ReviewCheckIdResponse> CheckId(ReviewCheckIdRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Checking bouquet with ID: {Id}", request.Id);
+            _logger.LogInformation("Перевірка букета з ID: {Id}", request.Id);
 
             if (string.IsNullOrWhiteSpace(request.Id))
             {
                 return new ReviewCheckIdResponse
                 {
                     IsValid = false,
-                    ErrorMessage = "ID cannot be empty"
+                    ErrorMessage = "ID не може бути порожнім"
                 };
             }
 
@@ -39,7 +39,7 @@ namespace CatalogService.BLL.GrpcServer
                 return new ReviewCheckIdResponse
                 {
                     IsValid = false,
-                    ErrorMessage = "ID is not a valid GUID"
+                    ErrorMessage = "ID не є дійсним GUID"
                 };
             }
 
@@ -50,13 +50,13 @@ namespace CatalogService.BLL.GrpcServer
                 return new ReviewCheckIdResponse
                 {
                     IsValid = bouquet != null,
-                    ErrorMessage = bouquet != null ? "" : "Bouquet with this ID does not exist"
+                    ErrorMessage = bouquet != null ? "" : "Букет з цим ID не існує"
                 };
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, "Error checking bouquet with ID {Id}", request.Id);
-                throw new RpcException(new Status(StatusCode.Internal, "Internal server error"));
+                _logger.LogError(ex, "Помилка при перевірці букета з ID {Id}", request.Id);
+                throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
             }
         }
     }

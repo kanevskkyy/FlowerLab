@@ -40,10 +40,11 @@ namespace UsersService.API.Controllers
 
             if (!result)
             {
-                return NotFound(); // Якщо користувача не знайдено
+                return NotFound(); 
             }
 
-            return Ok(new { Message = $"Discount for user {userId} updated to {model.PersonalDiscountPercentage}%." });
+            return Ok(new { Message = $"Знижка для користувача {userId} оновлена до {model.PersonalDiscountPercentage}%." });
         }
+
     }
 }
