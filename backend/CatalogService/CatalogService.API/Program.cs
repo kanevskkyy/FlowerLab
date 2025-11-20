@@ -1,4 +1,3 @@
-
 using CatalogService.API.Middleware;
 using CatalogService.BLL.Automapper;
 using CatalogService.BLL.DTO;
@@ -15,6 +14,11 @@ using DotNetEnv;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+using MassTransit;
 
 namespace CatalogService.API
 {
@@ -49,16 +53,84 @@ namespace CatalogService.API
             builder.Services.AddScoped<IFlowerService, FlowerService>();
             builder.Services.AddScoped<IBouquetService, BouquetService>();
 
-            // –Â∫ÒÚÛ∫ÏÓ UnitOfWork
+            // –†–µ—î—Å—Ç—Ä–∞—Ü—ñ—è UnitOfWork
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IImageService, CloudinaryImageService>();
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
+            });
+
+            var jwtSection = builder.Configuration.GetSection("Jwt");
+            var secretKey = jwtSection["Secret"];
+            var issuer = jwtSection["Issuer"];
+            var audience = jwtSection["Audience"];
+            
+            if (string.IsNullOrEmpty(secretKey)) throw new Exception("JWT Secret is missing");
+
+            var key = Encoding.UTF8.GetBytes(secretKey!);
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+            });
 
             builder.Services.AddGrpc();
+            builder.Services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    var rabbitMqConnection = builder.Configuration.GetConnectionString("rabbitmq");
+                    if (!string.IsNullOrEmpty(rabbitMqConnection))
+                    {
+                        cfg.Host(rabbitMqConnection);
+                    }
+                    else
+                    {
+                        cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest"); });
+                    }
+                });
+            });
             builder.Services.AddScoped<CheckIdInReviewsService>();
             builder.Services.AddScoped<CheckOrderService>();
             builder.Services.AddScoped<BouquetServiceGrpc>(); 
@@ -86,10 +158,9 @@ namespace CatalogService.API
             app.MapGrpcService<CheckOrderService>();
             app.MapGrpcService<FilterServiceImpl>();
             app.UseHttpsRedirection();
-
+            
+            app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();

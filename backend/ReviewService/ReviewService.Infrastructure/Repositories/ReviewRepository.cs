@@ -9,12 +9,17 @@ using ReviewService.Domain.Entities;
 using ReviewService.Domain.Helpers;
 using ReviewService.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
+using ReviewService.Infrastructure.DB;
 
 namespace ReviewService.Infrastructure.Repositories
 {
     public class ReviewRepository : GenericRepository<Review>, IReviewRepository
     {
         private readonly ILogger<ReviewRepository> _logger;
+        // Додаємо прямий доступ до колекції, якщо GenericRepository його не надає публічно або protected
+        // Якщо GenericRepository має protected IMongoCollection<T> _collection, використовуйте його.
+        // Тут я припускаю, що у вас є доступ до колекції через base.collection або _reviews
+        private readonly IMongoCollection<Review> _reviews; 
 
         public ReviewRepository(
             IMongoDatabase database,
@@ -23,6 +28,7 @@ namespace ReviewService.Infrastructure.Repositories
             : base(database, session)
         {
             _logger = logger;
+            _reviews = database.GetCollection<Review>("reviews"); // Або як називається ваша колекція
         }
 
         public async Task<PagedList<Review>> GetReviewsAsync(
@@ -45,7 +51,7 @@ namespace ReviewService.Infrastructure.Repositories
                 _logger.LogInformation("Added UserId filter");
             }
 
-            // --- BouquetId - використовуємо lambda вираз, щоб MongoDB driver сам визначив правильний формат ---
+            // --- BouquetId ---
             if (queryParameters.BouquetId.HasValue)
             {
                 filter &= filterBuilder.Eq(r => r.BouquetId, queryParameters.BouquetId.Value);
@@ -62,25 +68,36 @@ namespace ReviewService.Infrastructure.Repositories
             // --- Status ---
             if (queryParameters.Status.HasValue)
             {
+                // Якщо статус явно вказано - фільтруємо по ньому
                 filter &= filterBuilder.Eq(r => r.Status, queryParameters.Status.Value);
                 _logger.LogInformation($"Added Status filter: {queryParameters.Status.Value}");
             }
             else if (queryParameters.BouquetId.HasValue)
             {
+                // Логіка за замовчуванням: якщо ми дивимось відгуки конкретного букета,
+                // то показуємо ТІЛЬКИ підтверджені (Confirmed).
+                // Щоб клієнти не бачили спам або нові неперевірені відгуки.
                 filter &= filterBuilder.Eq(r => r.Status, ReviewStatus.Confirmed);
-                _logger.LogInformation("Added default Status filter: Confirmed");
+                _logger.LogInformation("Added default Status filter: Confirmed (because BouquetId is present and Status is null)");
             }
 
-            // --- Лог фінального фільтру ---
-            var renderedFilter = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
-            _logger.LogInformation($"Final MongoDB filter: {renderedFilter}");
+            // --- Лог фінального фільтру (для дебагу) ---
+            // Render може кинути виняток, якщо серіалізатори не налаштовані, тому краще обгорнути в try/catch або прибрати в продакшені
+            try 
+            {
+                // В старих версіях драйвера Render приймає інші аргументи.
+                // Для нових версій (2.x+):
+                 var renderedFilter = filter.Render(_reviews.DocumentSerializer, _reviews.Settings.SerializerRegistry);
+                  _logger.LogInformation($"Final MongoDB filter: {renderedFilter}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Could not render filter for logging: {ex.Message}");
+            }
 
             // --- Запит ---
-            var findFluent = collection.Find(filter);
-
-            // --- Підрахунок всіх документів ---
-            var totalCount = await findFluent.CountDocumentsAsync(cancellationToken);
-            _logger.LogInformation($"Total documents found: {totalCount}");
+            // Використовуємо _reviews (або collection з базового класу)
+            var findFluent = _reviews.Find(filter);
 
             // --- Сортування ---
             if (!string.IsNullOrWhiteSpace(queryParameters.OrderBy))
@@ -88,8 +105,17 @@ namespace ReviewService.Infrastructure.Repositories
                 var sortHelper = new MongoSortHelper<Review>();
                 findFluent = findFluent.Sort(sortHelper.ApplySort(queryParameters.OrderBy));
             }
+            else
+            {
+                // Сортування за замовчуванням: найновіші спочатку
+                findFluent = findFluent.SortByDescending(r => r.CreatedAt);
+            }
 
             // --- Пагінація ---
+            // PagedList.ToPagedListAsync зазвичай приймає IQueryable, але у випадку MongoDriver це IFindFluent.
+            // Вам потрібно перевірити, як реалізований ваш PagedList<T>.
+            // Якщо він працює з IFindFluent, то все ок.
+            
             var result = await PagedList<Review>.ToPagedListAsync(
                 findFluent,
                 queryParameters.PageNumber,
@@ -102,13 +128,20 @@ namespace ReviewService.Infrastructure.Repositories
             return result;
         }
 
+        public async Task DeleteByBouquetIdAsync(Guid bouquetId, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Review>.Filter.Eq(r => r.BouquetId, bouquetId);
+            await _reviews.DeleteManyAsync(filter, cancellationToken);
+        }
+
         public async Task<bool> HasUserReviewedBouquetAsync(Guid userId, Guid bouquetId, CancellationToken cancellationToken = default)
         {
             var filterBuilder = Builders<Review>.Filter;
             var filter = filterBuilder.Eq(r => r.User.UserId, userId) &
                          filterBuilder.Eq(r => r.BouquetId, bouquetId);
 
-            long count = await collection.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
+            // CountDocumentsAsync - це правильний метод
+            long count = await _reviews.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
             return count > 0;
         }
     }

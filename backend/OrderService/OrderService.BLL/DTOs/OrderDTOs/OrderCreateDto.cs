@@ -8,9 +8,6 @@ namespace OrderService.BLL.DTOs.OrderDTOs
 {
     public class OrderCreateDto
     {
-        public Guid UserId { get; set; }
-        public string UserFirstName { get; set; } = null!;
-        public string UserLastName { get; set; } = null!;
         public string? Notes { get; set; }
         public bool IsDelivery { get; set; }
         public string? GiftMessage { get; set; }

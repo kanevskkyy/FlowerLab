@@ -1,7 +1,7 @@
 ﻿using CatalogService.BLL.DTO;
 using CatalogService.BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace CatalogService.API.Controllers
 {
     [ApiController]
@@ -16,14 +16,17 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll() =>
             Ok(await _sizeService.GetAllAsync());
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id) =>
             Ok(await _sizeService.GetByIdAsync(id));
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] SizeCreateDto dto)
         {
             var created = await _sizeService.CreateAsync(dto.Name);
@@ -31,6 +34,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] SizeUpdateDto dto)
         {
             var updated = await _sizeService.UpdateAsync(id, dto.Name);
@@ -38,6 +42,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _sizeService.DeleteAsync(id);

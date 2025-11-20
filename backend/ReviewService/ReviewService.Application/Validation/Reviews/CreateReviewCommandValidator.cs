@@ -16,10 +16,6 @@ namespace ReviewService.Application.Validation.Reviews
             RuleFor(x => x.BouquetId)
                 .NotEmpty().WithMessage("BouquetId is required.");
 
-            RuleFor(x => x.User)
-                .NotNull().WithMessage("User information is required.")
-                .SetValidator(new UserInfoValidator());
-
             RuleFor(x => x.Rating)
                 .InclusiveBetween(1, 5).WithMessage("Rating must be between 1 and 5.");
 

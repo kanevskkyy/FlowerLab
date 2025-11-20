@@ -27,12 +27,41 @@ namespace UsersService.BLL.Services
             return roles.FirstOrDefault() ?? "Client"; 
         }
 
-        public async Task<IEnumerable<AdminUserDto>> GetAllUsersAsync()
+        public async Task<IEnumerable<AdminUserDto>> GetAllUsersAsync(UsersFilterDto filter)
         {
-            var users = await _userManager.Users.ToListAsync();
+            // 1. Починаємо будувати запит, але ще НЕ виконуємо його
+            var query = _userManager.Users.AsQueryable();
+
+            // 2. Застосовуємо фільтри, якщо вони передані
+
+            // Фільтр по Email (частковий збіг)
+            if (!string.IsNullOrWhiteSpace(filter.Email))
+            {
+                query = query.Where(u => u.Email.Contains(filter.Email));
+            }
+
+            // Фільтр по Телефону (частковий збіг)
+            if (!string.IsNullOrWhiteSpace(filter.PhoneNumber))
+            {
+                query = query.Where(u => u.PhoneNumber != null && u.PhoneNumber.Contains(filter.PhoneNumber));
+            }
+
+            // Загальний пошук по Імені або Прізвищу
+            if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+            {
+                var term = filter.SearchTerm.ToLower();
+                // Шукаємо збіг в FirstName АБО LastName
+                query = query.Where(u => 
+                    (u.FirstName != null && u.FirstName.ToLower().Contains(term)) || 
+                    (u.LastName != null && u.LastName.ToLower().Contains(term)));
+            }
+
+            // 3. Виконуємо запит до БД тільки тут (ToListAsync)
+            var users = await query.ToListAsync();
+    
+            // 4. Мапінг (залишається як було)
             var userDtos = _mapper.Map<IEnumerable<AdminUserDto>>(users).ToList();
 
-            // Оскільки роль не мапиться автоматично, отримуємо її вручну
             foreach (var dto in userDtos)
             {
                 var user = users.First(u => u.Id == dto.Id);

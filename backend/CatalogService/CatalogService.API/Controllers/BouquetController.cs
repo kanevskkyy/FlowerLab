@@ -3,7 +3,7 @@ using CatalogService.BLL.Services.Interfaces;
 using CatalogService.Domain.QueryParametrs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace CatalogService.API.Controllers
 {
     [ApiController]
@@ -19,6 +19,7 @@ namespace CatalogService.API.Controllers
 
         // Отримати всі букети з фільтрацією, сортуванням та пагінацією
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery] BouquetQueryParameters query)
         {
             var result = await _bouquetService.GetAllAsync(query);
@@ -27,6 +28,7 @@ namespace CatalogService.API.Controllers
 
         // Отримати букет за id
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
             var bouquet = await _bouquetService.GetByIdAsync(id);
@@ -35,6 +37,7 @@ namespace CatalogService.API.Controllers
 
         // Створити букет
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromForm] BouquetCreateDto dto)
         {
             
@@ -44,6 +47,7 @@ namespace CatalogService.API.Controllers
 
         // Оновити букет
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromForm] BouquetUpdateDto dto)
         {
             var updated = await _bouquetService.UpdateAsync(id, dto);
@@ -52,6 +56,7 @@ namespace CatalogService.API.Controllers
 
         // Видалити букет
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _bouquetService.DeleteAsync(id);

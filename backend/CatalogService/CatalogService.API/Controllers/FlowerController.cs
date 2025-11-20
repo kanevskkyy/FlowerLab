@@ -2,7 +2,7 @@
 using CatalogService.BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace CatalogService.API.Controllers
 {
 
@@ -18,6 +18,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var flowers = await _flowerService.GetAllAsync();
@@ -25,6 +26,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
             var flower = await _flowerService.GetByIdAsync(id);
@@ -32,6 +34,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] FlowerCreateUpdateDto dto)
         {
             var created = await _flowerService.CreateAsync(dto);
@@ -39,6 +42,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] FlowerCreateUpdateDto dto)
         {
             var updated = await _flowerService.UpdateAsync(id, dto);
@@ -46,6 +50,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _flowerService.DeleteAsync(id);
@@ -53,6 +58,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpPatch("{id}/stock")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStock(Guid id, [FromBody] UpdateStockDto dto)
         {
             var updated = await _flowerService.UpdateStockAsync(id, dto.Quantity);
