@@ -8,7 +8,7 @@ using UsersService.Domain.Entities;
 
 namespace UsersService.API.Controllers
 {
-    [Authorize] // Всі методи вимагають дійсного Access Token!
+    [Authorize]
     [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase

@@ -1,6 +1,4 @@
-﻿// UsersService.BLL/Services/AdminUserService.cs
-
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UsersService.BLL.Interfaces;
@@ -87,11 +85,6 @@ namespace UsersService.BLL.Services
             var result = await _userManager.UpdateAsync(user);
             
             return result.Succeeded;
-        }
-
-        public Task<bool> UpdateUserRoleAsync(string userId, string newRole)
-        {
-            throw new NotImplementedException(); 
         }
     }
 }

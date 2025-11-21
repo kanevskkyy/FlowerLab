@@ -33,6 +33,7 @@ namespace UsersService.API.Helpers
                     Email = "admin@flowerlab.com",
                     FirstName = "System",
                     LastName = "Admin",
+                    PhotoUrl = "https://res.cloudinary.com/dg9clyn4k/image/upload/v1763712578/order-service/gifts/mpfiss97mfebcqwm6elb.jpg",
                     EmailConfirmed = true,
                 };
                 
