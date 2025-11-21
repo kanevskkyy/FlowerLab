@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using ReviewService.Application.Features.Reviews.Commands.CreateReview;
-using ReviewService.Application.Validation.Additional;
 
 namespace ReviewService.Application.Validation.Reviews
 {
@@ -15,10 +14,6 @@ namespace ReviewService.Application.Validation.Reviews
         {
             RuleFor(x => x.BouquetId)
                 .NotEmpty().WithMessage("Ідентифікатор букета (BouquetId) обов'язковий.");
-
-            RuleFor(x => x.User)
-                .NotNull().WithMessage("Інформація про користувача обов'язкова.")
-                .SetValidator(new UserInfoValidator());
 
             RuleFor(x => x.Rating)
                 .InclusiveBetween(1, 5).WithMessage("Рейтинг має бути між 1 та 5.");

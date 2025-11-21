@@ -16,7 +16,6 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
             var gifts = await _giftService.GetAllAsync();
@@ -24,7 +23,6 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("{id:guid}", Name = "GetGiftById")]
-        [Authorize]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
             var gift = await _giftService.GetByIdAsync(id);

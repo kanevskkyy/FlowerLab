@@ -13,10 +13,11 @@ namespace OrderService.BLL.Services.Interfaces
     {
         Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
         Task<OrderDetailDto> GetByIdAsync(Guid orderId, CancellationToken cancellationToken = default);
-        Task<OrderDetailDto> CreateAsync(Guid userId,
+        Task<OrderDetailDto> CreateAsync(Guid? userId,
             string userFirstName,
             string userLastName,
-            OrderCreateDto dto, 
+            OrderCreateDto dto,
+            decimal personalDiscount,
             CancellationToken cancellationToken = default);
         Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default);
     }

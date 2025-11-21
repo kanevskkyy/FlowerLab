@@ -8,7 +8,6 @@ namespace OrderService.API.Controllers
 {
     [ApiController]
     [Route("api/orders")]
-    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -19,6 +18,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPagedOrders([FromQuery] OrderSpecificationParameters parameters, CancellationToken cancellationToken)
         {
             var pagedOrders = await _orderService.GetPagedOrdersAsync(parameters, cancellationToken);
@@ -35,26 +35,27 @@ namespace OrderService.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] OrderCreateDto dto, CancellationToken cancellationToken)
         {
-            // 1. Витягуємо дані користувача з токена
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var firstName = User.FindFirstValue(ClaimTypes.GivenName) ?? "";
-            var lastName = User.FindFirstValue(ClaimTypes.Surname) ?? "";
+            Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
+            var firstName = User.FindFirstValue(ClaimTypes.GivenName);
+            var lastName = User.FindFirstValue(ClaimTypes.Surname);
 
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
-            {
-                return Unauthorized("Invalid User ID in token");
-            }
+            dto.UserId = userId;
+            dto.FirstName ??= firstName;
+            dto.LastName ??= lastName;
 
-            // 2. Передаємо їх у сервіс разом з DTO
             var createdOrder = await _orderService.CreateAsync(
-                userId, 
-                firstName, 
-                lastName, 
-                dto, 
+                userId,
+                firstName,
+                lastName,
+                dto,
+                personalDiscount: decimal.Parse(User.FindFirstValue("Discount") ?? "0"),
                 cancellationToken);
 
             return CreatedAtRoute("GetOrderById", new { id = createdOrder.Id }, createdOrder);
         }
+
+
 
         [HttpPut("{id:guid}/status")]
         [Authorize(Roles = "Admin")]

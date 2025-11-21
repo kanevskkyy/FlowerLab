@@ -10,8 +10,8 @@ namespace OrderService.BLL.DTOs.OrderDTOs
     public class OrderSummaryDto
     {
         public Guid Id { get; set; }
-        public string UserFirstName { get; set; } = null!;
-        public string UserLastName { get; set; } = null!;
+        public string? UserFirstName { get; set; } 
+        public string? UserLastName { get; set; }
         public decimal TotalPrice { get; set; }
         public OrderStatusReadDto Status { get; set; } = null!;
     }

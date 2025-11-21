@@ -1,13 +1,11 @@
-﻿// UsersService.API/Controllers/AdminUsersController.cs
-
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UsersService.BLL.Interfaces;
 using UsersService.BLL.Models;
 
 namespace UsersService.API.Controllers
 {
-    [Authorize(Roles = "Admin")] // Тільки Admin має доступ
+    [Authorize(Roles = "Admin")] 
     [Route("api/admin/users")]
     [ApiController]
     public class AdminUsersController : ControllerBase

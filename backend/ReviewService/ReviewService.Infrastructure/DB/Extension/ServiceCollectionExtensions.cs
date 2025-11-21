@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using ReviewService.Infrastructure.DB.UOW;
 using ReviewService.Infrastructure.DB.Indexes;
 using ReviewService.Infrastructure.DB.Seeding;
+using Microsoft.Extensions.Logging;
 
 namespace ReviewService.Infrastructure.DB.Extension
 {
@@ -30,10 +31,11 @@ namespace ReviewService.Infrastructure.DB.Extension
                 return new IndexCreationService(mongoDb);
             });
 
-            services.AddSingleton<ReviewSeeder>(sp =>
+            services.AddScoped<ReviewSeeder>(sp =>
             {
                 var mongoDb = sp.GetRequiredService<IMongoDatabase>();
-                return new ReviewSeeder(mongoDb);
+                var logger = sp.GetRequiredService<ILogger<ReviewSeeder>>();
+                return new ReviewSeeder(mongoDb, logger);
             });
 
             return services;

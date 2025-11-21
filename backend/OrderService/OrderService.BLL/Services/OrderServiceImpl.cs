@@ -14,6 +14,8 @@ using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
 using OrderService.Domain.QueryParams;
 using Grpc.Core;
+using shared.events;
+using MassTransit;
 
 namespace OrderService.BLL.Services
 {
@@ -22,9 +24,11 @@ namespace OrderService.BLL.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly CheckOrder.CheckOrderClient _catalogClient;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public OrderServiceImpl(IUnitOfWork unitOfWork, IMapper mapper, CheckOrder.CheckOrderClient catalogClient)
+        public OrderServiceImpl(IUnitOfWork unitOfWork, IMapper mapper, CheckOrder.CheckOrderClient catalogClient, IPublishEndpoint publishEndpoint)
         {
+            _publishEndpoint = publishEndpoint;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _catalogClient = catalogClient;
@@ -46,12 +50,11 @@ namespace OrderService.BLL.Services
             return _mapper.Map<OrderDetailDto>(order);
         }
 
-        public async Task<OrderDetailDto> CreateAsync(Guid userId,
-            string userFirstName,
-            string userLastName,
-            OrderCreateDto dto,
-            CancellationToken cancellationToken = default)
+        public async Task<OrderDetailDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
         {
+            var finalFirstName = userFirstName ?? dto.FirstName;
+            var finalLastName = userLastName ?? dto.LastName;
+
             var grpcRequest = new OrderedBouquetsIdList();
             foreach (var item in dto.Items)
             {
@@ -65,7 +68,8 @@ namespace OrderService.BLL.Services
             OrderedResponseList catalogResponse;
             try
             {
-                catalogResponse = await _catalogClient.CheckOrderItemsAsync(grpcRequest, cancellationToken: cancellationToken);
+                catalogResponse = await _catalogClient.CheckOrderItemsAsync(
+                    grpcRequest, cancellationToken: cancellationToken);
             }
             catch (RpcException ex)
             {
@@ -83,17 +87,17 @@ namespace OrderService.BLL.Services
                 throw new ValidationException($"Помилка перевірки букетів: {errors}");
             }
 
-            OrderStatus? pendingStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("Pending");
+            var pendingStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("Pending");
             if (pendingStatus == null)
             {
-                OrderStatus orderStatus = new OrderStatus
+                pendingStatus = new OrderStatus
                 {
                     Name = "Pending",
-                    CreatedAt = DateTime.UtcNow.ToUniversalTime(),
-                    UpdatedAt = DateTime.UtcNow.ToUniversalTime()
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
-                await _unitOfWork.OrderStatuses.AddAsync(orderStatus);
-                pendingStatus = orderStatus;
+
+                await _unitOfWork.OrderStatuses.AddAsync(pendingStatus);
             }
 
             var existingOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(
@@ -106,20 +110,20 @@ namespace OrderService.BLL.Services
                 throw new ValidationException("У замовленні не дозволяється дублювати подарунки.");
 
             List<OrderGift> orderGifts = new();
-            if (dto.Gifts != null && dto.Gifts.Any())
+            if (dto.Gifts != null)
             {
                 foreach (var giftDto in dto.Gifts)
                 {
-                    Gift? gift = await _unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId);
-                    if (gift == null)
-                        throw new NotFoundException($"Подарунок з ID {giftDto.GiftId} не знайдено");
+                    var gift = await _unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId)
+                               ?? throw new NotFoundException($"Подарунок з ID {giftDto.GiftId} не знайдено");
 
                     if (gift.AvailableCount < giftDto.Count)
-                        throw new ValidationException($"Недостатньо подарунків '{gift.Name}'. Запитано {giftDto.Count}, доступно лише {gift.AvailableCount}.");
+                        throw new ValidationException(
+                            $"Недостатньо подарунків '{gift.Name}'. Запитано {giftDto.Count}, " +
+                            $"доступно {gift.AvailableCount}.");
 
                     gift.AvailableCount -= giftDto.Count;
-                    gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-
+                    gift.UpdatedAt = DateTime.UtcNow;
                     _unitOfWork.Gifts.Update(gift);
 
                     orderGifts.Add(new OrderGift
@@ -132,7 +136,7 @@ namespace OrderService.BLL.Services
             }
 
             var itemsList = dto.Items.ToList();
-            List<OrderItem> orderItems = new List<OrderItem>();
+            List<OrderItem> orderItems = new();
 
             for (int i = 0; i < itemsList.Count; i++)
             {
@@ -140,9 +144,8 @@ namespace OrderService.BLL.Services
                 var catalogItem = catalogResponse.OrderedResponseList_[i];
 
                 if (!decimal.TryParse(catalogItem.Price, out decimal price))
-                {
-                    throw new ValidationException($"Некоректна ціна для букета {catalogItem.BouquetName}");
-                }
+                    throw new ValidationException(
+                        $"Некоректна ціна для букета {catalogItem.BouquetName}");
 
                 orderItems.Add(new OrderItem
                 {
@@ -155,11 +158,11 @@ namespace OrderService.BLL.Services
                 });
             }
 
-            Order order = new Order
+            var order = new Order
             {
-                UserId = userId,
-                UserFirstName = userFirstName,
-                UserLastName = userLastName,
+                UserId = userId,                  
+                UserFirstName = finalFirstName,    
+                UserLastName = finalLastName,      
                 Notes = dto.Notes,
                 GiftMessage = dto.GiftMessage,
                 StatusId = pendingStatus.Id,
@@ -173,22 +176,33 @@ namespace OrderService.BLL.Services
 
             decimal itemsTotal = order.Items.Sum(i => i.Price * i.Count);
 
-            if (!string.IsNullOrWhiteSpace(order.GiftMessage))
-                itemsTotal += 50m;
+            if (!string.IsNullOrWhiteSpace(order.GiftMessage)) itemsTotal += 50m;
+            if (isFirstOrder) itemsTotal *= 0.9m;
 
-            if (isFirstOrder)
-                itemsTotal *= 0.9m;
+            if (personalDiscount > 0) itemsTotal *= 1 - personalDiscount;
 
             order.TotalPrice = itemsTotal;
 
             await _unitOfWork.Orders.AddAsync(order);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            var orderCreatedEvent = new OrderCreatedEvent
+            {
+                OrderId = order.Id,
+                Bouquets = order.Items.Select(i => new OrderBouquetItem
+                {
+                    BouquetId = i.BouquetId,
+                    Count = i.Count
+                }).ToList()
+            };
+            await _publishEndpoint.Publish(orderCreatedEvent, cancellationToken);
+
             var resultDto = _mapper.Map<OrderDetailDto>(order);
             resultDto.TotalPrice = order.TotalPrice;
 
             return resultDto;
         }
+
 
         public async Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default)
         {

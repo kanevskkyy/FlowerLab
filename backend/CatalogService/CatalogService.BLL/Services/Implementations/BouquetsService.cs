@@ -252,8 +252,20 @@ namespace CatalogService.BLL.Services.Implementations
 
             _uow.Bouquets.Delete(bouquet);
             await _uow.SaveChangesAsync();
-            
-            await _publishEndpoint.Publish(new BouquetDeletedEvent(id));
+
+            Console.WriteLine($"[CATALOG] Букет {id} видалено з БД");
+            Console.WriteLine($"[CATALOG] Публікую BouquetDeletedEvent для ID: {id}");
+
+            try
+            {
+                await _publishEndpoint.Publish(new BouquetDeletedEvent(id));
+                Console.WriteLine($"[CATALOG] ✓ Event успішно опубліковано для ID: {id}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CATALOG] ✗ Помилка публікації event: {ex.Message}");
+                throw;
+            }
         }
     }
 

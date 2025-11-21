@@ -12,9 +12,9 @@ namespace OrderService.Domain.Entities
         public Guid StatusId { get; set; }
         public OrderStatus Status { get; set; } = null!;
 
-        public Guid UserId { get; set; }
-        public string UserFirstName { get; set; } = null!;
-        public string UserLastName { get; set; } = null!;
+        public Guid? UserId { get; set; }
+        public string? UserFirstName { get; set; } = null!;
+        public string? UserLastName { get; set; } = null!;
         public string? Notes { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();

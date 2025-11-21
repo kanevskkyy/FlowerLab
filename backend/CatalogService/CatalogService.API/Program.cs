@@ -19,6 +19,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using MassTransit;
+using FlowerLab.Shared.Events;
+using CatalogService.BLL.Consumers;
 
 namespace CatalogService.API
 {
@@ -116,8 +118,11 @@ namespace CatalogService.API
             });
 
             builder.Services.AddGrpc();
+
             builder.Services.AddMassTransit(x =>
             {
+                x.AddConsumer<OrderCreatedConsumer>();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     var rabbitMqConnection = builder.Configuration.GetConnectionString("rabbitmq");
@@ -127,10 +132,33 @@ namespace CatalogService.API
                     }
                     else
                     {
-                        cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest"); });
+                        cfg.Host("localhost", "/", h =>
+                        {
+                            h.Username("guest");
+                            h.Password("guest");
+                        });
                     }
+
+                    cfg.ReceiveEndpoint("catalog-order-created-queue", e =>
+                    {
+                        e.ConfigureConsumer<OrderCreatedConsumer>(context);
+                        e.Bind("order-created-exchange", s =>
+                        {
+                            s.ExchangeType = "fanout";
+                        });
+                    });
+
+                    cfg.Message<BouquetDeletedEvent>(m =>
+                    {
+                        m.SetEntityName("bouquet-deleted-exchange");
+                    });
+                    cfg.Publish<BouquetDeletedEvent>(p =>
+                    {
+                        p.ExchangeType = "fanout";
+                    });
                 });
             });
+
             builder.Services.AddScoped<CheckIdInReviewsService>();
             builder.Services.AddScoped<CheckOrderService>();
             builder.Services.AddScoped<BouquetServiceGrpc>(); 

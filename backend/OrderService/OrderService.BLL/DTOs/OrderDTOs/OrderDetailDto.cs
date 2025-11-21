@@ -11,7 +11,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
     public class OrderDetailDto
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
         public string UserFirstName { get; set; } = null!;
         public string UserLastName { get; set; } = null!;
         public string? Notes { get; set; }

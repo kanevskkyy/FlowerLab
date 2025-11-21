@@ -16,6 +16,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using MassTransit;
+using FlowerLab.Shared.Events;
+using shared.events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,29 +50,35 @@ builder.Services.AddScoped<IOrderStatusService, OrderStatusService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IOrderService, OrderServiceImpl>();
 
-// --- NEW: Налаштування MassTransit (RabbitMQ) ---
 builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((context, cfg) =>
     {
-        // Отримуємо рядок підключення від Aspire або appsettings
-        var rabbitMqConnection = builder.Configuration.GetConnectionString("rabbitmq"); 
-        // Якщо Aspire немає, можна використати: cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest"); });
-        
+        var rabbitMqConnection = builder.Configuration.GetConnectionString("rabbitmq");
         if (!string.IsNullOrEmpty(rabbitMqConnection))
         {
-             cfg.Host(rabbitMqConnection);
+            cfg.Host(rabbitMqConnection);
         }
-        else 
+        else
         {
-             // Fallback для локального запуску без Aspire
-             cfg.Host("localhost", "/", h => {
-                 h.Username("guest");
-                 h.Password("guest");
-             });
+            cfg.Host("localhost", "/", h =>
+            {
+                h.Username("guest");
+                h.Password("guest");
+            });
         }
+
+        cfg.Message<OrderCreatedEvent>(m =>
+        {
+            m.SetEntityName("order-created-exchange"); 
+        });
+        cfg.Publish<OrderCreatedEvent>(p =>
+        {
+            p.ExchangeType = "fanout"; 
+        });
     });
 });
+
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var secretKey = jwtSection["Secret"];
@@ -150,8 +158,6 @@ if (!string.IsNullOrEmpty(catalogAddress))
 
 
 var app = builder.Build();
-
-// app.MapDefaultEndpoints(); // Для Aspire
 
 using (var scope = app.Services.CreateAsyncScope())
 {

@@ -8,7 +8,7 @@ var postgresPassword = builder.AddParameter("postgres-password", secret: true);
 
 var postgres = builder.AddPostgres("flower-lab-postgres", password: postgresPassword)
     .WithImage("postgres:16")
-    .WithDataVolume("flowerlab-mongodata");
+    .WithDataVolume("flowerlab-postgres");
 
 var postgresCatalog = postgres.AddDatabase("FlowerLabCatalog");
 var postgresOrder = postgres.AddDatabase("FlowerLabOrder");
@@ -21,7 +21,8 @@ var mongo = builder.AddMongoDB("flower-lab-mongo")
 var mongoReviews = mongo.AddDatabase("FlowerLabReviews");
 
 var rabbitmq = builder.AddRabbitMQ("rabbitmq")
-    .WithManagementPlugin(); // Додає адмінку на порті 15672
+    .WithManagementPlugin()
+    .WithDataVolume("FlowerLabRabbitMQ");
 
 var catalogService = builder.AddProject<CatalogService_API>("catalog")
     .WithReference(postgresCatalog)
@@ -48,12 +49,15 @@ var reviewsService = builder.AddProject<ReviewService_API>("reviews")
 var userService = builder.AddProject<UsersService_API>("users")
     .WithReference(postgresUsers)
     .WithReference(rabbitmq)
+    .WaitFor(rabbitmq)
     .WaitFor(postgresUsers);
 
 var gateway = builder.AddProject<Gateway>("gateway")
     .WithReference(catalogService)
     .WithReference(orderService)
     .WithReference(reviewsService)
+    .WithReference(rabbitmq)
+    .WaitFor(rabbitmq)
     .WithReference(userService)
     .WithExternalHttpEndpoints();
 

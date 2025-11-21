@@ -55,13 +55,9 @@ namespace ReviewService.API.Controllers
 
             var firstName = User.FindFirstValue(ClaimTypes.GivenName) ?? "Unknown";
             var lastName = User.FindFirstValue(ClaimTypes.Surname) ?? "";
-            // PhotoUrl може бути відсутнім, якщо ми його ще не додали в UsersService
             var photoUrl = User.FindFirstValue("PhotoUrl") ?? ""; 
 
-            // Створюємо UserInfo і передаємо в команду
             command.User = new UserInfo(userId, firstName, lastName, photoUrl);
-            // -------------------------------------------
-
             var review = await mediator.Send(command, cancellationToken);
 
             return CreatedAtAction(nameof(GetReviewById), new { id = review.Id }, review);
@@ -69,23 +65,19 @@ namespace ReviewService.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        // 1. Назвіть вхідний параметр "requestDto" або залиште "dto", щоб уникнути плутанини
         public async Task<IActionResult> UpdateReview(string id, [FromBody] UpdateReviewCommand requestDto, CancellationToken cancellationToken)
         {
-            // Отримуємо ID того, хто стукає
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdString, out var userId)) return Unauthorized();
             
             var role = User.FindFirstValue(ClaimTypes.Role);
 
-            // 2. Створюємо внутрішню команду з іншою назвою (наприклад, "mediatorCommand")
             var mediatorCommand = new UpdateReviewWithIdCommand(id, requestDto.Comment, requestDto.Rating)
             {
                 RequesterId = userId,
                 RequesterRole = role ?? "Client"
             };
 
-            // 3. Відправляємо правильну команду
             await mediator.Send(mediatorCommand, cancellationToken);
 
             return NoContent();
@@ -105,7 +97,6 @@ namespace ReviewService.API.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteReview(string id, CancellationToken cancellationToken)
         {        
-            // Отримуємо ID того, хто стукає
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdString, out var userId)) return Unauthorized();
             var role = User.FindFirstValue(ClaimTypes.Role);

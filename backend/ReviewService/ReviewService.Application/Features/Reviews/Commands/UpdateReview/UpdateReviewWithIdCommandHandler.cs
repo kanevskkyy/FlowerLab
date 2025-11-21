@@ -24,13 +24,10 @@ namespace ReviewService.Application.Features.Reviews.Commands.UpdateReview
             if (review == null)
                 throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
 
-            // --- ЗАВДАННЯ 7: Перевірка прав ---
-            // Редагувати може тільки власник (навіть адмін зазвичай не редагує чужі тексти, тільки видаляє)
             if (review.User.UserId != request.RequesterId)
             {
                 throw new UnauthorizedAccessException("You can only edit your own reviews.");
             }
-            // ----------------------------------
 
             review.UpdateComment(request.Comment, request.Rating);
             await reviewRepository.UpdateAsync(review, cancellationToken);

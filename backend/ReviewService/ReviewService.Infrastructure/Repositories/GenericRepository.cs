@@ -18,7 +18,7 @@ namespace ReviewService.Infrastructure.Repositories
         {
             collection = typeof(T).Name switch
             {
-                nameof(Review) => database.GetCollection<T>("Reviews"),
+                nameof(Review) => database.GetCollection<T>("reviews"),
                 _ => throw new ArgumentException($"Не знайдено відповідності колекції для типу {typeof(T).Name}")
             };
             this.session = session;

@@ -24,7 +24,6 @@ namespace ReviewService.Application.Features.Reviews.Commands.DeleteReview
             if (review == null)
                 throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
 
-            // --- ЗАВДАННЯ 7: Перевірка прав ---
             bool isAdmin = request.RequesterRole == "Admin";
             bool isOwner = review.User.UserId == request.RequesterId;
 
@@ -32,7 +31,6 @@ namespace ReviewService.Application.Features.Reviews.Commands.DeleteReview
             {
                 throw new UnauthorizedAccessException("You do not have permission to delete this review.");
             }
-            // ----------------------------------
 
             await reviewRepository.DeleteAsync(request.ReviewId, cancellationToken);
             return Unit.Value;

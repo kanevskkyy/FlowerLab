@@ -9,7 +9,6 @@ using ReviewService.Infrastructure.DB.HealthCheck;
 using ReviewService.Infrastructure.DB.MappingConfig;
 using ReviewService.Infrastructure.DB.Seeding;
 using ReviewService.Infrastructure.Repositories;
-using ReviewService.Application.Validation.Additional;
 using ReviewService.API.Middleware;
 using System.Net.Sockets;
 using ReviewService.Application.GrpcServer;
@@ -21,6 +20,8 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using MassTransit;
 using ReviewService.Application.Consumers;
+using ReviewService.Application.Validation.Reviews;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,6 @@ ValueObjectMappings.Register();
 builder.Services.AddGrpc();
 builder.Services.AddMassTransit(x =>
 {
-    // Реєструємо консюмер
     x.AddConsumer<BouquetDeletedConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
@@ -48,19 +48,29 @@ builder.Services.AddMassTransit(x =>
         }
         else
         {
-            cfg.Host("localhost", "/", h => { h.Username("guest"); h.Password("guest"); });
+            cfg.Host("localhost", "/", h =>
+            {
+                h.Username("guest");
+                h.Password("guest");
+            });
         }
 
-        // Налаштування черги (endpoint)
-        cfg.ReceiveEndpoint("review-bouquet-deleted", e =>
+        cfg.ReceiveEndpoint("review-service-bouquet-events", e =>
         {
+            e.Bind("bouquet-deleted-exchange", s =>
+            {
+                s.ExchangeType = "fanout";
+            });
+
             e.ConfigureConsumer<BouquetDeletedConsumer>(context);
         });
     });
 });
 
+// Aspire MongoDB реєстрація
 builder.AddMongoDBClient("FlowerLabReviews");
 
+// Реєстрація MongoDB сервісів з використанням Aspire's IMongoDatabase
 builder.Services.AddMongoDb();
 
 builder.Services.AddHealthChecks()
@@ -78,7 +88,7 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<ReviewsByBouquetServiceImpl>();
 
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssembly(typeof(UserInfoValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(CreateReviewCommandValidator).Assembly);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -150,7 +160,7 @@ if (string.IsNullOrEmpty(catalogAddress))
 {
     throw new InvalidOperationException("Не знайдено адресу catalog service");
 }
-else 
+else
 {
     builder.Services.AddGrpcClient<CheckIdInReviews.CheckIdInReviewsClient>(options =>
     {
@@ -178,7 +188,6 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     services.EnsureIndexes();
 
-    // Сідінг краще робити обережно в продакшені, але для дев - ок
     List<IDataSeeder> seeders = new List<IDataSeeder>()
     {
         services.GetRequiredService<ReviewSeeder>(),
