@@ -9,15 +9,25 @@ namespace CatalogService.BLL.Consumers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<OrderCreatedConsumer> _logger;
+        private readonly IEventLogService _eventLogService;
 
-        public OrderCreatedConsumer(IUnitOfWork unitOfWork, ILogger<OrderCreatedConsumer> logger)
+        public OrderCreatedConsumer(IUnitOfWork unitOfWork, ILogger<OrderCreatedConsumer> logger, IEventLogService eventLogService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _eventLogService = eventLogService;
         }
 
         public async Task Consume(ConsumeContext<OrderCreatedEvent> context)
         {
+            var eventId = context.Message.EventId;
+
+            if (await _eventLogService.HasEventProcessedAsync(eventId))
+            {
+                _logger.LogWarning("Подія {EventId} вже оброблена. Пропуск…", eventId);
+                return;
+            }
+
             var orderEvent = context.Message;
             _logger.LogInformation("Обробка нового замовлення {OrderId}", orderEvent.OrderId);
 
@@ -32,23 +42,31 @@ namespace CatalogService.BLL.Consumers
 
                 foreach (var bf in bouquet.BouquetFlowers)
                 {
-                    if (bf.Flower.Quantity < bf.Quantity * item.Count)
+                    int required = bf.Quantity * item.Count;
+
+                    if (bf.Flower.Quantity < required)
                     {
-                        var msg = $"Недостатньо квітів '{bf.Flower.Name}'. Запитано {bf.Quantity * item.Count}, доступно {bf.Flower.Quantity}.";
+                        var msg = $"Недостатньо квітів '{bf.Flower.Name}'. " +
+                                  $"Запитано {required}, доступно {bf.Flower.Quantity}.";
                         _logger.LogError(msg);
                         throw new InvalidOperationException(msg);
                     }
 
-                    bf.Flower.Quantity -= bf.Quantity * item.Count;
-                    bf.Flower.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+                    bf.Flower.Quantity -= required;
+                    bf.Flower.UpdatedAt = DateTime.UtcNow;
 
                     _unitOfWork.Flowers.Update(bf.Flower);
-                    _logger.LogInformation("Віднято {Count} квіток '{FlowerName}' (ID: {FlowerId})",
-                        bf.Quantity * item.Count, bf.Flower.Name, bf.Flower.Id);
+
+                    _logger.LogInformation(
+                        "Віднято {Count} квіток '{FlowerName}' (ID: {FlowerId})",
+                        required, bf.Flower.Name, bf.Flower.Id);
                 }
             }
 
             await _unitOfWork.SaveChangesAsync();
+
+            await _eventLogService.MarkEventAsProcessedAsync(eventId);
+
             _logger.LogInformation("Замовлення {OrderId} успішно оброблено", orderEvent.OrderId);
         }
     }

@@ -16,7 +16,6 @@ namespace CatalogService.Domain.QueryParametrs
         public decimal? MaxPrice { get; set; }
 
         public List<int> Quantities { get; set; } = new();
-        public bool AvailableOnly { get; set; } = true;
 
         public List<Guid> FlowerIds { get; set; } = new();
 

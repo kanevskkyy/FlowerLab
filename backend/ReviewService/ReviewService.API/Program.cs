@@ -22,16 +22,31 @@ using MassTransit;
 using ReviewService.Application.Consumers;
 using ReviewService.Application.Validation.Reviews;
 using MongoDB.Driver;
+using shared.events;
+using ReviewService.Application.Consumers.EventLog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Налаштування MongoDB GUID serialization
 BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
 var pack = new ConventionPack
 {
     new EnumRepresentationConvention(BsonType.String)
 };
 ConventionRegistry.Register("EnumStringConvention", pack, t => true);
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins, policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 ValueObjectMappings.Register();
 builder.Services.AddGrpc();
@@ -67,10 +82,7 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-// Aspire MongoDB реєстрація
 builder.AddMongoDBClient("FlowerLabReviews");
-
-// Реєстрація MongoDB сервісів з використанням Aspire's IMongoDatabase
 builder.Services.AddMongoDb();
 
 builder.Services.AddHealthChecks()
@@ -84,6 +96,8 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBe
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+builder.Services.AddScoped<IEventLogService, EventLogService>();
 
 builder.Services.AddScoped<ReviewsByBouquetServiceImpl>();
 
@@ -173,6 +187,7 @@ else
 }
 
 var app = builder.Build();
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapGrpcService<ReviewsByBouquetServiceImpl>();

@@ -18,12 +18,23 @@ using Microsoft.OpenApi.Models;
 using MassTransit;
 using FlowerLab.Shared.Events;
 using shared.events;
+using OrderService.BLL.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.AddServiceDefaults(); // Якщо використовуєте Aspire, тут має бути цей рядок
-
-// Add services to the container.
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins, policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 builder.AddNpgsqlDbContext<OrderDbContext>("FlowerLabOrder");
 
@@ -40,6 +51,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<GiftCreateDtoValidator>();
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("Cloudinary")
 );
+
+builder.Services.Configure<LiqPaySettings>(builder.Configuration.GetSection("LiqPay"));
+builder.Services.AddScoped<ILiqPayService, LiqPayService>();
+
 
 builder.Services.AddAutoMapper(cfg =>
 {
@@ -158,6 +173,7 @@ if (!string.IsNullOrEmpty(catalogAddress))
 
 
 var app = builder.Build();
+app.UseCors(MyAllowSpecificOrigins);
 
 using (var scope = app.Services.CreateAsyncScope())
 {

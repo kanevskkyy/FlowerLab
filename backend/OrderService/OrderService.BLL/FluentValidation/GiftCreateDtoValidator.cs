@@ -25,6 +25,9 @@ namespace OrderService.BLL.FluentValidation
             RuleFor(g => g.Image)
                 .NotNull().WithMessage("Файл зображення подарунка є обов’язковим")
                 .Must(IsValidFileType).WithMessage("Недійсний формат зображення (дозволені: .jpg, .jpeg, .png, .webp)");
+
+            RuleFor(g => g.Price)
+              .GreaterThan(0).WithMessage("Ціна має бути більшою за 0");
         }
 
         private bool IsValidFileType(IFormFile? file)

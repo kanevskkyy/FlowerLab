@@ -43,8 +43,6 @@ namespace CatalogService.DAL.Repositories.Implementations
         {
             var spec = new BouquetSpecification(parameters);
             var query = SpecificationEvaluator<Bouquet>.GetQuery(_dbSet.AsQueryable(), spec);
-
-            // Include
             query = query
                 .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)
                 .Include(b => b.BouquetSizes).ThenInclude(bs => bs.Size)
@@ -52,7 +50,6 @@ namespace CatalogService.DAL.Repositories.Implementations
                 .Include(b => b.BouquetRecipients).ThenInclude(br => br.Recipient)
                 .Include(b => b.BouquetImages);
 
-            // Sorting
             query = parameters.SortBy switch
             {
                 "price_asc" => query.OrderBy(b => b.Price),
@@ -60,17 +57,9 @@ namespace CatalogService.DAL.Repositories.Implementations
                 _ => query.OrderByDescending(b => b.CreatedAt)
             };
 
-            // Availability check
-            if (parameters.AvailableOnly)
-            {
-                query = query.Where(b =>
-                    b.BouquetFlowers.All(bf => bf.Flower.Quantity >= bf.Quantity));
-            }
-
-            // Total before pagination
+            
             var totalCount = await query.CountAsync();
 
-            // Pagination
             var items = await query
                 .Skip((parameters.Page - 1) * parameters.PageSize)
                 .Take(parameters.PageSize)

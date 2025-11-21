@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using shared.events;
 
 namespace CatalogService.DAL.Context
 {
@@ -25,11 +26,11 @@ namespace CatalogService.DAL.Context
         public DbSet<Event> Events { get; set; }
         public DbSet<BouquetEvent> BouquetEvents { get; set; }
         public DbSet<Recipient> Recipients { get; set; }
+        public DbSet<ProcessedEvent> ProcessedEvents { get; set; }
         public DbSet<BouquetRecipient> BouquetRecipients { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Підключає всі конфігурації з Assembly
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);
 
             base.OnModelCreating(modelBuilder);

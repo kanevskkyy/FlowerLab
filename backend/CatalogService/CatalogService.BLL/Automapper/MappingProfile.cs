@@ -18,7 +18,10 @@ namespace CatalogService.BLL.Automapper
                 .ForMember(d => d.Size, opt => opt.MapFrom(s => s.BouquetSizes.Select(bs => bs.Size).FirstOrDefault()))
                 .ForMember(d => d.Events, opt => opt.MapFrom(s => s.BouquetEvents.Select(be => be.Event)))
                 .ForMember(d => d.Recipients, opt => opt.MapFrom(s => s.BouquetRecipients.Select(br => br.Recipient)))
-                .ForMember(d => d.Images, opt => opt.MapFrom(s => s.BouquetImages));
+                .ForMember(d => d.Images, opt => opt.MapFrom(s => s.BouquetImages))
+                .ForMember(d => d.IsAvailable, opt => opt.MapFrom(s =>
+                    s.BouquetFlowers.All(bf => bf.Flower.Quantity >= bf.Quantity)
+                ));
 
             CreateMap<BouquetFlower, FlowerInBouquetDto>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Flower.Id))

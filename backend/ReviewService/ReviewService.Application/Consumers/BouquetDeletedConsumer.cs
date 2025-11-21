@@ -2,39 +2,47 @@
 using FlowerLab.Shared.Events;
 using ReviewService.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
+using shared.events;
 
 namespace ReviewService.Application.Consumers
 {
     public class BouquetDeletedConsumer : IConsumer<BouquetDeletedEvent>
     {
         private readonly IReviewRepository _reviewRepository;
+        private readonly IEventLogService _eventLogService;
         private readonly ILogger<BouquetDeletedConsumer> _logger;
 
         public BouquetDeletedConsumer(
-            IReviewRepository reviewRepository,
-            ILogger<BouquetDeletedConsumer> logger)
+            IReviewRepository reviewRepository, IEventLogService eventLogService,ILogger<BouquetDeletedConsumer> logger)
         {
             _reviewRepository = reviewRepository;
+            _eventLogService = eventLogService;
             _logger = logger;
         }
 
         public async Task Consume(ConsumeContext<BouquetDeletedEvent> context)
         {
-            var bouquetId = context.Message.BouquetId;
+            var eventId = context.Message.EventId;
 
-            _logger.LogInformation($"[REVIEWS] ✓ Отримано BouquetDeletedEvent для букету: {bouquetId}");
-            Console.WriteLine($"[REVIEWS] ✓ Отримано BouquetDeletedEvent для букету: {bouquetId}");
+            if (await _eventLogService.HasEventProcessedAsync(eventId, context.CancellationToken))
+            {
+                _logger.LogWarning("[REVIEWS] Подія {EventId} вже оброблена. Пропуск…", eventId);
+                return;
+            }
+
+            var bouquetId = context.Message.BouquetId;
+            _logger.LogInformation($"[REVIEWS] Отримано BouquetDeletedEvent для букету: {bouquetId}");
 
             try
             {
                 await _reviewRepository.DeleteByBouquetIdAsync(bouquetId, context.CancellationToken);
-                _logger.LogInformation($"[REVIEWS] ✓ Видалено відгуки для букету: {bouquetId}");
-                Console.WriteLine($"[REVIEWS] ✓ Видалено відгуки для букету: {bouquetId}");
+                await _eventLogService.MarkEventAsProcessedAsync(eventId, context.CancellationToken);
+
+                _logger.LogInformation($"[REVIEWS] Видалено відгуки для букету: {bouquetId}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[REVIEWS] ✗ Помилка видалення відгуків: {ex.Message}");
-                Console.WriteLine($"[REVIEWS] ✗ Помилка видалення відгуків: {ex.Message}");
+                _logger.LogError(ex, "[REVIEWS] Помилка видалення відгуків");
                 throw;
             }
         }

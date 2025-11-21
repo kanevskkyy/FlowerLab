@@ -4,6 +4,7 @@ using OrderService.BLL.DTOs.OrderDTOs;
 using OrderService.BLL.Services.Interfaces;
 using OrderService.Domain.QueryParams;
 using Microsoft.AspNetCore.Authorization;
+
 namespace OrderService.API.Controllers
 {
     [ApiController]
@@ -37,6 +38,7 @@ namespace OrderService.API.Controllers
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
+
             var firstName = User.FindFirstValue(ClaimTypes.GivenName);
             var lastName = User.FindFirstValue(ClaimTypes.Surname);
 
@@ -44,7 +46,7 @@ namespace OrderService.API.Controllers
             dto.FirstName ??= firstName;
             dto.LastName ??= lastName;
 
-            var createdOrder = await _orderService.CreateAsync(
+            var result = await _orderService.CreateAsync(
                 userId,
                 firstName,
                 lastName,
@@ -52,10 +54,17 @@ namespace OrderService.API.Controllers
                 personalDiscount: decimal.Parse(User.FindFirstValue("Discount") ?? "0"),
                 cancellationToken);
 
-            return CreatedAtRoute("GetOrderById", new { id = createdOrder.Id }, createdOrder);
+            return CreatedAtRoute("GetOrderById", new { id = result.Order.Id }, result);
         }
 
-
+        
+        [HttpPost("liqpay-callback")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LiqPayCallback([FromForm] string data, [FromForm] string signature, CancellationToken cancellationToken)
+        {
+            await _orderService.ProcessPaymentCallbackAsync(data, signature, cancellationToken);
+            return Ok();
+        }
 
         [HttpPut("{id:guid}/status")]
         [Authorize(Roles = "Admin")]

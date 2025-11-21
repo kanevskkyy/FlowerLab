@@ -19,5 +19,7 @@ namespace CatalogService.BLL.DTO
         public List<RecipientDto> Recipients { get; set; } = new();
         public List<BouquetImageDto> Images { get; set; } = new();
         public DateTime CreatedAt { get; set; }
+
+        public bool IsAvailable { get; set; }
     }
 }

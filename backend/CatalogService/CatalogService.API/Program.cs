@@ -21,6 +21,8 @@ using Microsoft.OpenApi.Models;
 using MassTransit;
 using FlowerLab.Shared.Events;
 using CatalogService.BLL.Consumers;
+using shared.events;
+using CatalogService.BLL.EventLogService;
 
 namespace CatalogService.API
 {
@@ -30,14 +32,25 @@ namespace CatalogService.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            /////////////////////////////////
             builder.Services.Configure<CloudSettings>(
                 builder.Configuration.GetSection("Cloudinary")
             );
-            ///////////////////////////////////
-
-            // Add services to the container.
+            
             builder.AddNpgsqlDbContext<CatalogDbContext>("FlowerLabCatalog");
+
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(MyAllowSpecificOrigins, policy =>
+                {
+                    policy
+                        .WithOrigins(allowedOrigins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
 
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IFlowerRepository, FlowerRepository>();
@@ -54,6 +67,8 @@ namespace CatalogService.API
             builder.Services.AddScoped<IRecipientService, RecipientService>();
             builder.Services.AddScoped<IFlowerService, FlowerService>();
             builder.Services.AddScoped<IBouquetService, BouquetService>();
+
+            builder.Services.AddScoped<IEventLogService, EventLogService>();
 
             // Реєстрація UnitOfWork
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -165,6 +180,7 @@ namespace CatalogService.API
             builder.Services.AddScoped<FilterServiceImpl>();
 
             var app = builder.Build();
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseMiddleware<RequestLoggingMiddleware>();
 

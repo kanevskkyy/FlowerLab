@@ -12,6 +12,7 @@ namespace OrderService.BLL.DTOs.GiftsDTOs
         public string Name { get; set; } = null!;
         public IFormFile Image { get; set; } = null!;
         public int AvailableCount { get; set; }
+        public decimal Price { get; set; }
     }
 
 }
