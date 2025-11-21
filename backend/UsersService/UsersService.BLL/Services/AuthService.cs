@@ -28,6 +28,23 @@ namespace UsersService.BLL.Services
             _jwtSettings = jwtSettings.Value;
         }
 
+        public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new InvalidOperationException($"Користувача з ID '{userId}' не знайдено.");
+
+            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Не вдалося змінити пароль: {errors}");
+            }
+
+            return true;
+        }
+
         public async Task<TokenResponseDto?> RegisterAsync(RegistrationDto model)
         {
             var existingUser = await _userManager.FindByEmailAsync(model.Email);

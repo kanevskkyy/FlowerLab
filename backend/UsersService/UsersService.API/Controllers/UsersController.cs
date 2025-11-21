@@ -65,6 +65,23 @@ namespace UsersService.API.Controllers
             }
         }
 
+        [HttpPut("me/password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                var result = await _authService.ChangePasswordAsync(userId, dto);
+                return Ok(new { Message = "Пароль успішно змінено." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         /// <summary>
         /// Ендпоїнт для видалення облікового запису
         /// </summary>

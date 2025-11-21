@@ -20,7 +20,8 @@ namespace UsersService.BLL.FluentValidation
                 .EmailAddress().WithMessage("Невірний формат email.");
 
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Пароль є обов'язковим.");
+                .NotEmpty().WithMessage("Пароль є обов'язковим.")
+                .MinimumLength(8).WithMessage("Пароль має містити мінімум 8 символів."); // 👍
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty().WithMessage("Номер телефону є обов'язковим.")
@@ -28,5 +29,6 @@ namespace UsersService.BLL.FluentValidation
                 .WithMessage("Невірний формат номера телефону.");
         }
     }
+
 
 }
