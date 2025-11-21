@@ -20,6 +20,7 @@ namespace CatalogService.BLL.DTO
         public List<BouquetImageDto> Images { get; set; } = new();
         public DateTime CreatedAt { get; set; }
 
+        public int MaxAssemblableCount { get; set; }
         public bool IsAvailable { get; set; }
     }
 }
