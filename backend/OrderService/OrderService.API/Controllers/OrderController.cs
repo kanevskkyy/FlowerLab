@@ -57,7 +57,19 @@ namespace OrderService.API.Controllers
             return CreatedAtRoute("GetOrderById", new { id = result.Order.Id }, result);
         }
 
-        
+        [HttpGet("my")]
+        [Authorize]
+        public async Task<IActionResult> GetMyOrders([FromQuery] OrderSpecificationParameters parameters, CancellationToken cancellationToken)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+
+            var userId = Guid.Parse(userIdString);
+            var pagedOrders = await _orderService.GetMyOrdersAsync(userId, parameters, cancellationToken);
+            return Ok(pagedOrders);
+        }
+
+
         [HttpPost("liqpay-callback")]
         [AllowAnonymous]
         public async Task<IActionResult> LiqPayCallback([FromForm] string data, [FromForm] string signature, CancellationToken cancellationToken)

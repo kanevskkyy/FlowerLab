@@ -54,7 +54,17 @@ namespace OrderService.BLL.Services
             if (order == null)
                 throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
 
-            return _mapper.Map<OrderDetailDto>(order);
+            var resultDto = _mapper.Map<OrderDetailDto>(order);
+
+            if (order.Status?.Name == "AwaitingPayment")
+            {
+                resultDto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
+                    order.Id,
+                    order.TotalPrice,
+                    $"Оплата замовлення #{order.Id}");
+            }
+
+            return resultDto;
         }
 
         public async Task<OrderCreateResultDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
@@ -267,6 +277,14 @@ namespace OrderService.BLL.Services
                 _unitOfWork.Orders.Update(order);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
+        }
+
+        public async Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid userId, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
+        {
+            parameters.UserId = userId;
+            var pagedOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
+            var dtoList = pagedOrders.Items.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
+            return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 
         public async Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default)

@@ -11,6 +11,7 @@ namespace OrderService.BLL.Services.Interfaces
 {
     public interface IOrderService
     {
+        Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid userId, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
         Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
         Task<OrderDetailDto> GetByIdAsync(Guid orderId, CancellationToken cancellationToken = default);
         Task<OrderCreateResultDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default);
