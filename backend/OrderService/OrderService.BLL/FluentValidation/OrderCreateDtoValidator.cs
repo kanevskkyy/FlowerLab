@@ -12,6 +12,19 @@ namespace OrderService.BLL.FluentValidation
     {
         public OrderCreateDtoValidator()
         {
+
+            RuleFor(o => o.FirstName)
+                .MaximumLength(100)
+                .WithMessage("Ім'я не може перевищувати 100 символів");
+
+            RuleFor(o => o.LastName)
+                .MaximumLength(100)
+                .WithMessage("Прізвище не може перевищувати 100 символів");
+
+            RuleFor(x => x.PhoneNumber)
+                .Matches(@"^\+?\d{10,15}$").WithMessage("Номер телефону має бути валідним")
+                .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+
             RuleFor(o => o.Notes)
                 .MaximumLength(500)
                 .WithMessage("Примітки не можуть перевищувати 500 символів");

@@ -11,6 +11,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public Guid? UserId { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? Notes { get; set; }
         public bool IsDelivery { get; set; }
         public string? GiftMessage { get; set; }

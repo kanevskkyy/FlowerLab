@@ -14,7 +14,7 @@ namespace OrderService.BLL.Services.Interfaces
         Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid userId, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
         Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
         Task<OrderDetailDto> GetByIdAsync(Guid orderId, CancellationToken cancellationToken = default);
-        Task<OrderCreateResultDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default);
+        Task<OrderCreateResultDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default);
         Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default);
         Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default);
     }

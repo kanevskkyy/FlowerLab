@@ -44,7 +44,20 @@ namespace OrderService.BLL.Services
         public async Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
         {
             var pagedOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
-            var dtoList = pagedOrders.Items.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
+            var dtoList = pagedOrders.Items.Select(o =>
+            {
+                var dto = _mapper.Map<OrderSummaryDto>(o);
+                if (o.Status?.Name == "AwaitingPayment")
+                {
+                    dto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
+                        o.Id,
+                        o.TotalPrice,
+                        $"Оплата замовлення #{o.Id}");
+                }
+
+                return dto;
+            }).ToList();
+
             return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 
@@ -67,10 +80,11 @@ namespace OrderService.BLL.Services
             return resultDto;
         }
 
-        public async Task<OrderCreateResultDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
+        public async Task<OrderCreateResultDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
         {
             var finalFirstName = userFirstName ?? dto.FirstName;
             var finalLastName = userLastName ?? dto.LastName;
+            var finalPhoneNumber = userPhoneNumber ?? dto.PhoneNumber;
 
             var grpcRequest = new OrderedBouquetsIdList();
             foreach (var item in dto.Items)
@@ -169,6 +183,7 @@ namespace OrderService.BLL.Services
                 UserFirstName = finalFirstName,
                 UserLastName = finalLastName,
                 Notes = dto.Notes,
+                PhoneNumber = finalPhoneNumber,
                 GiftMessage = dto.GiftMessage,
                 StatusId = awaitingPaymentStatus.Id,
                 IsDelivery = dto.IsDelivery,
@@ -283,7 +298,21 @@ namespace OrderService.BLL.Services
         {
             parameters.UserId = userId;
             var pagedOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
-            var dtoList = pagedOrders.Items.Select(o => _mapper.Map<OrderSummaryDto>(o)).ToList();
+            var dtoList = pagedOrders.Items.Select(o =>
+            {
+                var dto = _mapper.Map<OrderSummaryDto>(o);
+
+                if (o.Status?.Name == "AwaitingPayment")
+                {
+                    dto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
+                        o.Id,
+                        o.TotalPrice,
+                        $"Оплата замовлення #{o.Id}");
+                }
+
+                return dto;
+            }).ToList();
+
             return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 

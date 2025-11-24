@@ -38,18 +38,20 @@ namespace OrderService.API.Controllers
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
-
             var firstName = User.FindFirstValue(ClaimTypes.GivenName);
             var lastName = User.FindFirstValue(ClaimTypes.Surname);
+            var phoneNumber = User.FindFirstValue(ClaimTypes.MobilePhone); 
 
             dto.UserId = userId;
             dto.FirstName ??= firstName;
             dto.LastName ??= lastName;
+            dto.PhoneNumber ??= phoneNumber; 
 
             var result = await _orderService.CreateAsync(
                 userId,
                 firstName,
                 lastName,
+                phoneNumber, 
                 dto,
                 personalDiscount: decimal.Parse(User.FindFirstValue("Discount") ?? "0"),
                 cancellationToken);

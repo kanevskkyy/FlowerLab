@@ -32,6 +32,9 @@ namespace OrderService.Domain.EntityConfig
                    .HasForeignKey(o => o.StatusId)
                    .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Property(o => o.PhoneNumber) 
+                    .HasMaxLength(20);
+
             builder.HasMany(o => o.Items)
                    .WithOne(i => i.Order)
                    .HasForeignKey(i => i.OrderId);
