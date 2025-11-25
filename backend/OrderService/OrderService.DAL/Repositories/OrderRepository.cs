@@ -26,6 +26,7 @@ namespace OrderService.DAL.Repositories
                 .Include(o => o.Status)
                 .Include(o => o.Items)
                 .Include(o => o.OrderGifts)
+                 .ThenInclude(og => og.Gift) 
                 .Include(o => o.DeliveryInformation)
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }

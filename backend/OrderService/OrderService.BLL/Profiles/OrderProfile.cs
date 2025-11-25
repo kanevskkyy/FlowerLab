@@ -33,7 +33,7 @@ namespace OrderService.BLL.Profiles
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
                 .ForMember(dest => dest.DeliveryInformation, opt => opt.MapFrom(src => src.DeliveryInformation))
                 .ForMember(dest => dest.Gifts, opt => opt.MapFrom(src => src.OrderGifts)) 
-                .ForMember(dest => dest.TotalPrice, opt => opt.Ignore());
+                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice));
         }
     }
 }
