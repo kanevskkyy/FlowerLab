@@ -80,7 +80,7 @@ namespace OrderService.BLL.Services
             return resultDto;
         }
 
-        public async Task<OrderCreateResultDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
+        public async Task<OrderDetailDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
         {
             var finalFirstName = userFirstName ?? dto.FirstName;
             var finalLastName = userLastName ?? dto.LastName;
@@ -214,16 +214,13 @@ namespace OrderService.BLL.Services
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var resultDto = _mapper.Map<OrderDetailDto>(order);
-            resultDto.TotalPrice = order.TotalPrice;
-
-            return new OrderCreateResultDto
-            {
-                Order = resultDto,
-                PaymentUrl = _liqPayService.GeneratePaymentUrl(
+            resultDto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
                     order.Id,
                     order.TotalPrice,
-                    $"Оплата замовлення #{order.Id}")
-            };
+                    $"Оплата замовлення #{order.Id}");
+            resultDto.TotalPrice = order.TotalPrice;
+
+            return resultDto;
         }
 
         public async Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default)

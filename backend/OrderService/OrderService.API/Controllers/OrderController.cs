@@ -56,7 +56,7 @@ namespace OrderService.API.Controllers
                 personalDiscount: decimal.Parse(User.FindFirstValue("Discount") ?? "0"),
                 cancellationToken);
 
-            return CreatedAtRoute("GetOrderById", new { id = result.Order.Id }, result);
+            return CreatedAtRoute("GetOrderById", new { id = result.Id }, result);
         }
 
         [HttpGet("my")]
