@@ -26,10 +26,18 @@ namespace OrderService.API.Controllers
             return Ok(pagedOrders);
         }
 
+        [Authorize]
         [HttpGet("{id:guid}", Name = "GetOrderById")]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
             var order = await _orderService.GetByIdAsync(id, cancellationToken);
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (role != "Admin" && order.UserId?.ToString() != userId)
+                return Forbid();
+
             return Ok(order);
         }
 
