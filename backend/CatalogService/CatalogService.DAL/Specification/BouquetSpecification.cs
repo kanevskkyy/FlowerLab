@@ -22,7 +22,13 @@ namespace CatalogService.DAL.Specification
 
                 && (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity)))
 
-            )
+                &&
+                (string.IsNullOrEmpty(parameters.BouquetName) || b.Name.Contains(parameters.BouquetName))
+
+                &&
+                (string.IsNullOrEmpty(parameters.FlowerName) || b.BouquetFlowers.Any(bf => bf.Flower.Name.Contains(parameters.FlowerName)))
+
+                )
         {
             AddInclude(b => b.BouquetFlowers);
             AddInclude(b => b.BouquetSizes);

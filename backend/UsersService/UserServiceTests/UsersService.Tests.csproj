@@ -17,10 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UsersService\UsersService.API\UsersService.API.csproj" />
-    <ProjectReference Include="..\UsersService\UsersService.BLL\UsersService.BLL.csproj" />
-    <ProjectReference Include="..\UsersService\UsersService.DAL\UsersService.DAL.csproj" />
-    <ProjectReference Include="..\UsersService\UsersService.Domain\UsersService.Domain.csproj" />
+    <ProjectReference Include="..\UsersService.API\UsersService.API.csproj" />
+    <ProjectReference Include="..\UsersService.BLL\UsersService.BLL.csproj" />
+    <ProjectReference Include="..\UsersService.DAL\UsersService.DAL.csproj" />
+    <ProjectReference Include="..\UsersService.Domain\UsersService.Domain.csproj" />
   </ItemGroup>
 
 </Project>
