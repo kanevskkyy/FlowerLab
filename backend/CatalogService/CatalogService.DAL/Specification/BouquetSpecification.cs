@@ -22,11 +22,11 @@ namespace CatalogService.DAL.Specification
 
                 && (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity)))
 
-                &&
-                (string.IsNullOrEmpty(parameters.BouquetName.ToLower()) || b.Name.ToLower().Contains(parameters.BouquetName.ToLower()))
-
-                &&
-                (string.IsNullOrEmpty(parameters.FlowerName) || b.BouquetFlowers.Any(bf => bf.Flower.Name.ToLower().Contains(parameters.FlowerName.ToLower())))
+               &&
+                (string.IsNullOrEmpty(parameters.Name) ||
+                    b.Name.ToLower().Contains(parameters.Name.ToLower()) ||
+                    b.BouquetFlowers.Any(bf => bf.Flower.Name.ToLower().Contains(parameters.Name.ToLower()))
+                )
 
                 )
         {

@@ -19,9 +19,7 @@ namespace CatalogService.Domain.QueryParametrs
 
         public List<Guid> FlowerIds { get; set; } = new();
 
-        public string? BouquetName { get; set; }
-        public string? FlowerName { get; set; }
-
+        public string? Name { get; set; }
         public string? SortBy { get; set; } 
 
         public int Page { get; set; } = 1;
