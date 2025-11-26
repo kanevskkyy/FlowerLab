@@ -30,12 +30,18 @@ namespace CatalogService.DAL.Repositories.Implementations
 
         public async Task<Bouquet?> GetWithDetailsAsync(Guid id)
         {
-            return await _dbSet
-                .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)
-                .Include(b => b.BouquetSizes).ThenInclude(bs => bs.Size)
-                .Include(b => b.BouquetEvents).ThenInclude(be => be.Event)
-                .Include(b => b.BouquetRecipients).ThenInclude(br => br.Recipient)
+            return await _context.Bouquets
+                .Include(b => b.BouquetSizes)
+                    .ThenInclude(bs => bs.Size)
+                .Include(b => b.BouquetSizes)
+                    .ThenInclude(bs => bs.BouquetSizeFlowers)
+                        .ThenInclude(bsf => bsf.Flower)
+                .Include(b => b.BouquetEvents)
+                    .ThenInclude(be => be.Event)
+                .Include(b => b.BouquetRecipients)
+                    .ThenInclude(br => br.Recipient)
                 .Include(b => b.BouquetImages)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
@@ -43,29 +49,28 @@ namespace CatalogService.DAL.Repositories.Implementations
         {
             var spec = new BouquetSpecification(parameters);
             var query = SpecificationEvaluator<Bouquet>.GetQuery(_dbSet.AsQueryable(), spec);
+
             query = query
                 .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)
                 .Include(b => b.BouquetSizes).ThenInclude(bs => bs.Size)
-                .Include(b => b.BouquetEvents).ThenInclude(be => be.Event)
-                .Include(b => b.BouquetRecipients).ThenInclude(br => br.Recipient)
-                .Include(b => b.BouquetImages);
+                .Include(b => b.BouquetSizes).ThenInclude(bs => bs.BouquetSizeFlowers).ThenInclude(bsf => bsf.Flower);
 
             query = parameters.SortBy switch
             {
-                "price_asc" => query.OrderBy(b => b.Price),
-                "price_desc" => query.OrderByDescending(b => b.Price),
+                "price_asc" => query.OrderBy(b => b.BouquetSizes.Min(bs => bs.Price)),
+                "price_desc" => query.OrderByDescending(b => b.BouquetSizes.Min(bs => bs.Price)),
                 _ => query.OrderByDescending(b => b.CreatedAt)
             };
 
-            
             var totalCount = await query.CountAsync();
-
             var items = await query
                 .Skip((parameters.Page - 1) * parameters.PageSize)
                 .Take(parameters.PageSize)
+                .AsNoTracking()
                 .ToListAsync();
 
             return new PagedList<Bouquet>(items, totalCount, parameters.Page, parameters.PageSize);
         }
+
     }
 }

@@ -9,7 +9,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
     public class OrderItemCreateDto
     {
         public Guid BouquetId { get; set; }
+        public Guid SizeId { get; set; }
         public int Count { get; set; }
     }
-
 }

@@ -15,7 +15,6 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
         string Comment
     ) : ICommand<Review>
     {
-        // Це поле заповнить Контролер з токена. Клієнт його не бачить.
         [JsonIgnore]
         public UserInfo? User { get; set; }
     }

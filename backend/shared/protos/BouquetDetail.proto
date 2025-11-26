@@ -1,4 +1,4 @@
-﻿syntax  = "proto3";
+﻿syntax = "proto3";
 
 message GetBouquetRequest {
     string id = 1; 
@@ -14,6 +14,15 @@ message FlowerInBouquetModel {
     string name = 2;
     string color = 3;
     int32 quantity = 4;
+}
+
+message BouquetSizeModel {
+    string sizeId = 1;
+    string sizeName = 2;
+    double price = 3; // ⬅️ ДОДАЛИ ЦІНУ ТУТ!
+    repeated FlowerInBouquetModel flowers = 4; // ⬅️ Змінили номер
+    int32 maxAssemblableCount = 5; // ⬅️ Змінили номер
+    bool isAvailable = 6; // ⬅️ Змінили номер
 }
 
 message EventModel {
@@ -36,14 +45,12 @@ message BouquetResponse {
     string id = 1;
     string name = 2;
     string description = 3;
-    double price = 4;
-    string mainPhotoUrl = 5;
-    SizeModel size = 6;
-    repeated FlowerInBouquetModel flowers = 7;
-    repeated EventModel events = 8;
-    repeated RecipientModel recipients = 9;
-    repeated BouquetImageModel images = 10;
-    string createdAt = 11; 
+    string mainPhotoUrl = 4; 
+    repeated BouquetSizeModel sizes = 5; 
+    repeated EventModel events = 6; 
+    repeated RecipientModel recipients = 7; 
+    repeated BouquetImageModel images = 8; 
+    string createdAt = 9; 
 }
 
 service BouquetGrpcService {

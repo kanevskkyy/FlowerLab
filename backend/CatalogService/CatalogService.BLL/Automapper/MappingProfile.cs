@@ -1,11 +1,7 @@
 ﻿using AutoMapper;
 using CatalogService.BLL.DTO;
 using CatalogService.Domain.Entities;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Automapper
 {
@@ -14,19 +10,28 @@ namespace CatalogService.BLL.Automapper
         public MappingProfile()
         {
             CreateMap<Bouquet, BouquetDto>()
-            .ForMember(d => d.Flowers, opt => opt.MapFrom(s => s.BouquetFlowers))
-            .ForMember(d => d.Size, opt => opt.MapFrom(s => s.BouquetSizes.Select(bs => bs.Size).FirstOrDefault()))
-            .ForMember(d => d.Events, opt => opt.MapFrom(s => s.BouquetEvents.Select(be => be.Event)))
-            .ForMember(d => d.Recipients, opt => opt.MapFrom(s => s.BouquetRecipients.Select(br => br.Recipient)))
-            .ForMember(d => d.Images, opt => opt.MapFrom(s => s.BouquetImages))
-            .ForMember(d => d.IsAvailable, opt => opt.MapFrom(s =>
-                s.BouquetFlowers.All(bf => bf.Flower.Quantity >= bf.Quantity)
-            ))
-            .ForMember(d => d.MaxAssemblableCount, opt => opt.MapFrom(s =>
-                s.BouquetFlowers.Any()
-                    ? s.BouquetFlowers.Min(bf => bf.Flower.Quantity / bf.Quantity)
-                    : 0
-            ));
+                .ForMember(d => d.Sizes, opt => opt.MapFrom(s => s.BouquetSizes))
+                .ForMember(d => d.Events, opt => opt.MapFrom(s => s.BouquetEvents.Select(be => be.Event)))
+                .ForMember(d => d.Recipients, opt => opt.MapFrom(s => s.BouquetRecipients.Select(br => br.Recipient)))
+                .ForMember(d => d.Images, opt => opt.MapFrom(s => s.BouquetImages));
+
+            CreateMap<BouquetSize, BouquetSizeDto>()
+                .ForMember(d => d.SizeId, opt => opt.MapFrom(s => s.SizeId))
+                .ForMember(d => d.SizeName, opt => opt.MapFrom(s => s.Size.Name))
+                .ForMember(d => d.Price, opt => opt.MapFrom(s => s.Price)) 
+                .ForMember(d => d.Flowers, opt => opt.MapFrom(s => s.BouquetSizeFlowers))
+                .ForMember(d => d.MaxAssemblableCount, opt => opt.MapFrom(s =>
+                    s.BouquetSizeFlowers.Any()
+                        ? s.BouquetSizeFlowers.Min(bsf => bsf.Flower.Quantity / bsf.Quantity)
+                        : 0))
+                .ForMember(d => d.IsAvailable, opt => opt.MapFrom(s =>
+                    s.BouquetSizeFlowers.All(bsf => bsf.Flower.Quantity >= bsf.Quantity)));
+
+            CreateMap<BouquetSizeFlower, FlowerInBouquetDto>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.FlowerId))
+                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Flower.Name))
+                .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Flower.Color))
+                .ForMember(d => d.Quantity, opt => opt.MapFrom(s => s.Quantity));
 
             CreateMap<BouquetFlower, FlowerInBouquetDto>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Flower.Id))
@@ -34,12 +39,17 @@ namespace CatalogService.BLL.Automapper
                 .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Flower.Color))
                 .ForMember(d => d.Quantity, opt => opt.MapFrom(s => s.Quantity));
 
+            CreateMap<Bouquet, BouquetSummaryDto>()
+            .ForMember(d => d.Price, opt => opt.MapFrom(s =>
+                s.BouquetSizes.Any() ? s.BouquetSizes.Min(bs => bs.Price) : 0m
+            ))
+            .ForMember(d => d.MainPhotoUrl, opt => opt.MapFrom(s => s.MainPhotoUrl));
+
             CreateMap<Size, SizeDto>();
             CreateMap<Event, EventDto>();
             CreateMap<Recipient, RecipientDto>();
             CreateMap<BouquetImage, BouquetImageDto>();
             CreateMap<Flower, FlowerDto>();
-            CreateMap<Flower, FlowerCreateUpdateDto>();
         }
     }
 }

@@ -10,7 +10,6 @@ using OrderService.DAL.Repositories;
 using OrderService.DAL.Repositories.Interfaces;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Database;
-using OrderService.API.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -19,6 +18,7 @@ using MassTransit;
 using FlowerLab.Shared.Events;
 using shared.events;
 using OrderService.BLL.DTOs;
+using CatalogService.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -181,7 +181,7 @@ using (var scope = app.Services.CreateAsyncScope())
     db.Database.Migrate();
 }
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

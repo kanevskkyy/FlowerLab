@@ -38,15 +38,32 @@ namespace CatalogService.BLL.GrpcServer
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
-                            ErrorMessage = "Недійсний формат GUID",
+                            ErrorMessage = "Недійсний формат GUID букета",
                             BouquetName = "",
                             BouquetImage = "",
-                            Price = "0"
+                            Price = "0",
+                            SizeName = ""
                         });
                         continue;
                     }
 
-                    _logger.LogInformation("Перевірка букета ID: {BouquetId} з кількістю {Count}", bouquetId, item.Count);
+                    if (!Guid.TryParse(item.SizeId, out Guid sizeId))
+                    {
+                        _logger.LogWarning("Недійсний формат GUID для розміру: {SizeId}", item.SizeId);
+                        responseList.OrderedResponseList_.Add(new OrderedRequest
+                        {
+                            IsValid = false,
+                            ErrorMessage = "Недійсний формат GUID розміру",
+                            BouquetName = "",
+                            BouquetImage = "",
+                            Price = "0",
+                            SizeName = ""
+                        });
+                        continue;
+                    }
+
+                    _logger.LogInformation("Перевірка букета ID: {BouquetId}, розмір: {SizeId}, кількість: {Count}",
+                        bouquetId, sizeId, item.Count);
 
                     var bouquet = await _unitOfWork.Bouquets.GetWithDetailsAsync(bouquetId);
 
@@ -59,61 +76,96 @@ namespace CatalogService.BLL.GrpcServer
                             ErrorMessage = "Букет не знайдено",
                             BouquetName = "",
                             BouquetImage = "",
-                            Price = "0"
+                            Price = "0",
+                            SizeName = ""
                         });
                         continue;
                     }
 
-                    if (bouquet.BouquetFlowers == null || !bouquet.BouquetFlowers.Any())
+                    var bouquetSize = bouquet.BouquetSizes.FirstOrDefault(bs => bs.SizeId == sizeId);
+
+                    if (bouquetSize == null)
                     {
-                        _logger.LogWarning("Букет {BouquetId} не має налаштованих квітів", bouquetId);
+                        _logger.LogWarning("Розмір {SizeId} не знайдено для букета {BouquetId}", sizeId, bouquetId);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
-                            ErrorMessage = "Букет не має налаштованих квітів",
+                            ErrorMessage = "Вказаний розмір недоступний для цього букета",
                             BouquetName = bouquet.Name,
                             BouquetImage = bouquet.MainPhotoUrl,
-                            Price = bouquet.Price.ToString("F2")
+                            Price = "0", 
+                            SizeName = ""
+                        });
+                        continue;
+                    }
+
+                    if (bouquetSize.BouquetSizeFlowers == null || !bouquetSize.BouquetSizeFlowers.Any())
+                    {
+                        _logger.LogWarning("Розмір {SizeId} букета {BouquetId} не має налаштованих квітів",
+                            sizeId, bouquetId);
+                        responseList.OrderedResponseList_.Add(new OrderedRequest
+                        {
+                            IsValid = false,
+                            ErrorMessage = "Розмір букета не має налаштованих квітів",
+                            BouquetName = bouquet.Name,
+                            BouquetImage = bouquet.MainPhotoUrl,
+                            Price = bouquetSize.Price.ToString("F2"),
+                            SizeName = bouquetSize.Size?.Name ?? ""
                         });
                         continue;
                     }
 
                     bool enoughStock = true;
                     string stockError = "";
+                    var flowerInfoList = new System.Collections.Generic.List<FlowerInfo>();
 
-                    foreach (var bf in bouquet.BouquetFlowers)
+                    foreach (var bsf in bouquetSize.BouquetSizeFlowers)
                     {
-                        if (bf.Flower == null)
+                        if (bsf.Flower == null)
                         {
-                            _logger.LogWarning("У BouquetFlower порожня посилання на квітку в букеті {BouquetId}", bouquetId);
+                            _logger.LogWarning("У BouquetSizeFlower порожнє посилання на квітку в букеті {BouquetId}",
+                                bouquetId);
                             enoughStock = false;
                             stockError = "Недійсна конфігурація букета";
                             break;
                         }
 
-                        int requiredQuantity = bf.Quantity * item.Count;
-                        int availableQuantity = bf.Flower.Quantity;
+                        int requiredQuantity = bsf.Quantity * item.Count;
+                        int availableQuantity = bsf.Flower.Quantity;
 
                         _logger.LogInformation("Квітка {FlowerName}: потрібно {Required}, доступно {Available}",
-                            bf.Flower.Name, requiredQuantity, availableQuantity);
+                            bsf.Flower.Name, requiredQuantity, availableQuantity);
+
+                        flowerInfoList.Add(new FlowerInfo
+                        {
+                            FlowerId = bsf.Flower.Id.ToString(),
+                            FlowerName = bsf.Flower.Name,
+                            FlowerColor = bsf.Flower.Color,
+                            Quantity = bsf.Quantity
+                        });
 
                         if (availableQuantity < requiredQuantity)
                         {
                             enoughStock = false;
-                            stockError = $"Недостатньо квіток '{bf.Flower.Name}' на складі. Потрібно: {requiredQuantity}, доступно: {availableQuantity}";
+                            stockError = $"Недостатньо квіток '{bsf.Flower.Name}' на складі. " +
+                                       $"Потрібно: {requiredQuantity}, доступно: {availableQuantity}";
                             _logger.LogWarning("Недостатньо квіток: {Error}", stockError);
                             break;
                         }
                     }
 
-                    responseList.OrderedResponseList_.Add(new OrderedRequest
+                    var response = new OrderedRequest
                     {
                         IsValid = enoughStock,
                         ErrorMessage = enoughStock ? "" : stockError,
                         BouquetName = bouquet.Name,
                         BouquetImage = bouquet.MainPhotoUrl,
-                        Price = bouquet.Price.ToString("F2")
-                    });
+                        Price = bouquetSize.Price.ToString("F2"), 
+                        SizeName = bouquetSize.Size?.Name ?? ""
+                    };
+
+                    response.Flowers.AddRange(flowerInfoList);
+                    responseList.OrderedResponseList_.Add(response);
                 }
                 catch (OperationCanceledException)
                 {

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CatalogService.DAL.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20251112132617_RemoveGiftEntities")]
-    partial class RemoveGiftEntities
+    [Migration("20251126090537_RemoveSizeId1")]
+    partial class RemoveSizeId1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,6 +167,32 @@ namespace CatalogService.DAL.Migrations
                     b.ToTable("BouquetSizes", (string)null);
                 });
 
+            modelBuilder.Entity("CatalogService.Domain.Entities.BouquetSizeFlower", b =>
+                {
+                    b.Property<Guid>("BouquetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SizeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FlowerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.HasKey("BouquetId", "SizeId", "FlowerId");
+
+                    b.HasIndex("FlowerId");
+
+                    b.ToTable("BouquetSizeFlowers", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_BouquetSizeFlower_Quantity_Positive", "\"Quantity\" > 0");
+                        });
+                });
+
             modelBuilder.Entity("CatalogService.Domain.Entities.Event", b =>
                 {
                     b.Property<Guid>("Id")
@@ -221,11 +247,6 @@ namespace CatalogService.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
-
-                    b.Property<string>("Size")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -291,6 +312,26 @@ namespace CatalogService.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("Sizes", (string)null);
+                });
+
+            modelBuilder.Entity("shared.events.ProcessedEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId")
+                        .IsUnique();
+
+                    b.ToTable("ProcessedEvents", (string)null);
                 });
 
             modelBuilder.Entity("CatalogService.Domain.Entities.BouquetEvent", b =>
@@ -380,6 +421,25 @@ namespace CatalogService.DAL.Migrations
                     b.Navigation("Size");
                 });
 
+            modelBuilder.Entity("CatalogService.Domain.Entities.BouquetSizeFlower", b =>
+                {
+                    b.HasOne("CatalogService.Domain.Entities.Flower", "Flower")
+                        .WithMany("BouquetSizeFlowers")
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CatalogService.Domain.Entities.BouquetSize", "BouquetSize")
+                        .WithMany("BouquetSizeFlowers")
+                        .HasForeignKey("BouquetId", "SizeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BouquetSize");
+
+                    b.Navigation("Flower");
+                });
+
             modelBuilder.Entity("CatalogService.Domain.Entities.Bouquet", b =>
                 {
                     b.Navigation("BouquetEvents");
@@ -393,6 +453,11 @@ namespace CatalogService.DAL.Migrations
                     b.Navigation("BouquetSizes");
                 });
 
+            modelBuilder.Entity("CatalogService.Domain.Entities.BouquetSize", b =>
+                {
+                    b.Navigation("BouquetSizeFlowers");
+                });
+
             modelBuilder.Entity("CatalogService.Domain.Entities.Event", b =>
                 {
                     b.Navigation("BouquetEvents");
@@ -401,6 +466,8 @@ namespace CatalogService.DAL.Migrations
             modelBuilder.Entity("CatalogService.Domain.Entities.Flower", b =>
                 {
                     b.Navigation("BouquetFlowers");
+
+                    b.Navigation("BouquetSizeFlowers");
                 });
 
             modelBuilder.Entity("CatalogService.Domain.Entities.Recipient", b =>

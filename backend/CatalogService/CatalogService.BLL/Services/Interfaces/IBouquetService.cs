@@ -11,7 +11,7 @@ namespace CatalogService.BLL.Services.Interfaces
 {
     public interface IBouquetService
     {
-        Task<PagedList<BouquetDto>> GetAllAsync(BouquetQueryParameters parameters);
+        Task<PagedList<BouquetSummaryDto>> GetAllAsync(BouquetQueryParameters parameters);
         Task<BouquetDto> GetByIdAsync(Guid id);
         Task<BouquetDto> CreateAsync(BouquetCreateDto dto);
         Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto);

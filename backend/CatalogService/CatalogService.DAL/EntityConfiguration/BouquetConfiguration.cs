@@ -31,10 +31,6 @@ namespace CatalogService.DAL.EntityConfiguration
                 .HasMaxLength(255)
                 .IsRequired();
 
-            builder.Property(b => b.Price)
-                .HasColumnType("numeric(10,2)")
-                .IsRequired();
-
             builder.Property(b => b.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 

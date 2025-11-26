@@ -23,6 +23,7 @@ namespace CatalogService.DAL.Context
         public DbSet<BouquetFlower> BouquetFlowers { get; set; }
         public DbSet<Size> Sizes { get; set; }
         public DbSet<BouquetSize> BouquetSizes { get; set; }
+        public DbSet<BouquetSizeFlower> BouquetSizeFlowers { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<BouquetEvent> BouquetEvents { get; set; }
         public DbSet<Recipient> Recipients { get; set; }

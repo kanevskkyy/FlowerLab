@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CatalogService.BLL.DTO;
 using CatalogService.BLL.Services.Interfaces;
@@ -11,7 +9,7 @@ namespace CatalogService.BLL.GrpcServer
 {
     public class BouquetServiceGrpc : BouquetGrpcService.BouquetGrpcServiceBase
     {
-        private IBouquetService _bouquetService;
+        private readonly IBouquetService _bouquetService;
 
         public BouquetServiceGrpc(IBouquetService bouquetService)
         {
@@ -21,39 +19,37 @@ namespace CatalogService.BLL.GrpcServer
         public override async Task<BouquetResponse> GetBouquetById(GetBouquetRequest request, ServerCallContext context)
         {
             var bouquet = await _bouquetService.GetByIdAsync(Guid.Parse(request.Id));
-
-            if (bouquet == null) throw new RpcException(new Status(StatusCode.NotFound, "Букет не знайдено."));
+            if (bouquet == null)
+                throw new RpcException(new Status(StatusCode.NotFound, "Букет не знайдено."));
 
             return Map(bouquet);
         }
 
         private BouquetResponse Map(BouquetDto dto)
         {
-            BouquetResponse response = new BouquetResponse
+            var response = new BouquetResponse
             {
                 Id = dto.Id.ToString(),
                 Name = dto.Name,
                 Description = dto.Description ?? "",
-                Price = (double)dto.Price,
                 MainPhotoUrl = dto.MainPhotoUrl,
                 CreatedAt = dto.CreatedAt.ToString("O")
             };
 
-            if (dto.Size != null)
+            response.Sizes.AddRange(dto.Sizes.Select(s => new BouquetSizeModel
             {
-                response.Size = new SizeModel
+                SizeId = s.SizeId.ToString(),
+                SizeName = s.SizeName,
+                Price = (double)s.Price,
+                MaxAssemblableCount = s.MaxAssemblableCount,
+                IsAvailable = s.IsAvailable,
+                Flowers = { s.Flowers.Select(f => new FlowerInBouquetModel
                 {
-                    Id = dto.Size.Id.ToString(),
-                    Name = dto.Size.Name
-                };
-            }
-
-            response.Flowers.AddRange(dto.Flowers.Select(f => new FlowerInBouquetModel
-            {
-                Id = f.Id.ToString(),
-                Name = f.Name,
-                Color = f.Color,
-                Quantity = f.Quantity
+                    Id = f.Id.ToString(),
+                    Name = f.Name,
+                    Color = f.Color,
+                    Quantity = f.Quantity
+                })}
             }));
 
             response.Events.AddRange(dto.Events.Select(e => new EventModel

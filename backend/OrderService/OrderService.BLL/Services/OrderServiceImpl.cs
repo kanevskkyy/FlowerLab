@@ -80,7 +80,14 @@ namespace OrderService.BLL.Services
             return resultDto;
         }
 
-        public async Task<OrderDetailDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
+        public async Task<OrderDetailDto> CreateAsync(
+            Guid? userId,
+            string? userFirstName,
+            string? userLastName,
+            string? userPhoneNumber,
+            OrderCreateDto dto,
+            decimal personalDiscount,
+            CancellationToken cancellationToken = default)
         {
             var finalFirstName = userFirstName ?? dto.FirstName;
             var finalLastName = userLastName ?? dto.LastName;
@@ -92,6 +99,7 @@ namespace OrderService.BLL.Services
                 grpcRequest.OrderedBouquets.Add(new OrderedBouquetsId
                 {
                     Id = item.BouquetId.ToString(),
+                    SizeId = item.SizeId.ToString(), 
                     Count = item.Count
                 });
             }
@@ -114,7 +122,7 @@ namespace OrderService.BLL.Services
             if (invalidItems.Any())
             {
                 var errors = string.Join("; ", invalidItems.Select(i =>
-                    $"Букет '{i.BouquetName}': {i.ErrorMessage}"));
+                    $"Букет '{i.BouquetName}' (розмір {i.SizeName}): {i.ErrorMessage}"));
                 throw new ValidationException($"Помилка перевірки букетів: {errors}");
             }
 
@@ -136,15 +144,20 @@ namespace OrderService.BLL.Services
 
             bool isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
 
-            if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1)) throw new ValidationException("У замовленні не дозволяється дублювати подарунки.");
+            if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
+                throw new ValidationException("У замовленні не дозволяється дублювати подарунки.");
 
             List<OrderGift> orderGifts = new();
             if (dto.Gifts != null)
             {
                 foreach (var giftDto in dto.Gifts)
                 {
-                    var gift = await _unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId) ?? throw new NotFoundException($"Подарунок з ID {giftDto.GiftId} не знайдено");
-                    if (gift.AvailableCount < giftDto.Count) throw new ValidationException($"Недостатньо подарунків '{gift.Name}'. Запитано {giftDto.Count}, доступно {gift.AvailableCount}.");
+                    var gift = await _unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId)
+                        ?? throw new NotFoundException($"Подарунок з ID {giftDto.GiftId} не знайдено");
+
+                    if (gift.AvailableCount < giftDto.Count)
+                        throw new ValidationException($"Недостатньо подарунків '{gift.Name}'. " +
+                            $"Запитано {giftDto.Count}, доступно {gift.AvailableCount}.");
 
                     orderGifts.Add(new OrderGift
                     {
@@ -166,15 +179,35 @@ namespace OrderService.BLL.Services
                 if (!decimal.TryParse(catalogItem.Price, out decimal price))
                     throw new ValidationException($"Некоректна ціна для букета {catalogItem.BouquetName}");
 
-                orderItems.Add(new OrderItem
+                var orderItem = new OrderItem
                 {
                     Id = Guid.NewGuid(),
                     BouquetId = itemDto.BouquetId,
+                    SizeId = itemDto.SizeId,
                     BouquetName = catalogItem.BouquetName,
                     BouquetImage = catalogItem.BouquetImage,
+                    SizeName = catalogItem.SizeName,
                     Price = price,
-                    Count = itemDto.Count
-                });
+                    Count = itemDto.Count,
+                    Flowers = new List<OrderItemFlower>()
+                };
+
+                foreach (var flowerInfo in catalogItem.Flowers)
+                {
+                    if (Guid.TryParse(flowerInfo.FlowerId, out Guid flowerId))
+                    {
+                        orderItem.Flowers.Add(new OrderItemFlower
+                        {
+                            OrderItemId = orderItem.Id,
+                            FlowerId = flowerId,
+                            FlowerName = flowerInfo.FlowerName,
+                            FlowerColor = flowerInfo.FlowerColor,
+                            Quantity = flowerInfo.Quantity
+                        });
+                    }
+                }
+
+                orderItems.Add(orderItem);
             }
 
             var order = new Order
@@ -215,9 +248,9 @@ namespace OrderService.BLL.Services
 
             var resultDto = _mapper.Map<OrderDetailDto>(order);
             resultDto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
-                    order.Id,
-                    order.TotalPrice,
-                    $"Оплата замовлення #{order.Id}");
+                order.Id,
+                order.TotalPrice,
+                $"Оплата замовлення #{order.Id}");
             resultDto.TotalPrice = order.TotalPrice;
 
             return resultDto;

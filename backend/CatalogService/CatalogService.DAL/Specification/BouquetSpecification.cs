@@ -9,8 +9,11 @@ namespace CatalogService.DAL.Specification
     {
         public BouquetSpecification(BouquetQueryParameters parameters)
             : base(b =>
-                (!parameters.MinPrice.HasValue || b.Price >= parameters.MinPrice) &&
-                (!parameters.MaxPrice.HasValue || b.Price <= parameters.MaxPrice) &&
+                ((!parameters.MinPrice.HasValue && !parameters.MaxPrice.HasValue) ||
+                 b.BouquetSizes.Any(bs =>
+                     (!parameters.MinPrice.HasValue || bs.Price >= parameters.MinPrice) &&
+                     (!parameters.MaxPrice.HasValue || bs.Price <= parameters.MaxPrice)
+                 )) &&
                 (!parameters.SizeIds.Any() || b.BouquetSizes.Any(s => parameters.SizeIds.Contains(s.SizeId))) &&
                 (!parameters.EventIds.Any() || b.BouquetEvents.Any(e => parameters.EventIds.Contains(e.EventId))) &&
                 (!parameters.RecipientIds.Any() || b.BouquetRecipients.Any(r => parameters.RecipientIds.Contains(r.RecipientId))) &&

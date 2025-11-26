@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CatalogService.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class RemoveSizeId1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,7 +49,6 @@ namespace CatalogService.DAL.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Color = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Size = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Quantity = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
@@ -62,20 +61,16 @@ namespace CatalogService.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Gifts",
+                name: "ProcessedEvents",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    GiftType = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    ImageUrl = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Gifts", x => x.Id);
+                    table.PrimaryKey("PK_ProcessedEvents", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -180,30 +175,6 @@ namespace CatalogService.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BouquetGifts",
-                columns: table => new
-                {
-                    BouquetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    GiftId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BouquetGifts", x => new { x.BouquetId, x.GiftId });
-                    table.ForeignKey(
-                        name: "FK_BouquetGifts_Bouquets_BouquetId",
-                        column: x => x.BouquetId,
-                        principalTable: "Bouquets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BouquetGifts_Gifts_GiftId",
-                        column: x => x.GiftId,
-                        principalTable: "Gifts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "BouquetRecipients",
                 columns: table => new
                 {
@@ -251,6 +222,33 @@ namespace CatalogService.DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BouquetSizeFlowers",
+                columns: table => new
+                {
+                    BouquetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SizeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FlowerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false, defaultValue: 1)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BouquetSizeFlowers", x => new { x.BouquetId, x.SizeId, x.FlowerId });
+                    table.CheckConstraint("CK_BouquetSizeFlower_Quantity_Positive", "\"Quantity\" > 0");
+                    table.ForeignKey(
+                        name: "FK_BouquetSizeFlowers_BouquetSizes_BouquetId_SizeId",
+                        columns: x => new { x.BouquetId, x.SizeId },
+                        principalTable: "BouquetSizes",
+                        principalColumns: new[] { "BouquetId", "SizeId" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BouquetSizeFlowers_Flowers_FlowerId",
+                        column: x => x.FlowerId,
+                        principalTable: "Flowers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_BouquetEvents_EventId",
                 table: "BouquetEvents",
@@ -260,11 +258,6 @@ namespace CatalogService.DAL.Migrations
                 name: "IX_BouquetFlowers_FlowerId",
                 table: "BouquetFlowers",
                 column: "FlowerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BouquetGifts_GiftId",
-                table: "BouquetGifts",
-                column: "GiftId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BouquetImages_BouquetId",
@@ -281,6 +274,11 @@ namespace CatalogService.DAL.Migrations
                 table: "Bouquets",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BouquetSizeFlowers_FlowerId",
+                table: "BouquetSizeFlowers",
+                column: "FlowerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BouquetSizes_SizeId",
@@ -300,9 +298,10 @@ namespace CatalogService.DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Gifts_Name",
-                table: "Gifts",
-                column: "Name");
+                name: "IX_ProcessedEvents_EventId",
+                table: "ProcessedEvents",
+                column: "EventId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Recipients_Name",
@@ -327,28 +326,28 @@ namespace CatalogService.DAL.Migrations
                 name: "BouquetFlowers");
 
             migrationBuilder.DropTable(
-                name: "BouquetGifts");
-
-            migrationBuilder.DropTable(
                 name: "BouquetImages");
 
             migrationBuilder.DropTable(
                 name: "BouquetRecipients");
 
             migrationBuilder.DropTable(
-                name: "BouquetSizes");
+                name: "BouquetSizeFlowers");
+
+            migrationBuilder.DropTable(
+                name: "ProcessedEvents");
 
             migrationBuilder.DropTable(
                 name: "Events");
 
             migrationBuilder.DropTable(
-                name: "Flowers");
-
-            migrationBuilder.DropTable(
-                name: "Gifts");
-
-            migrationBuilder.DropTable(
                 name: "Recipients");
+
+            migrationBuilder.DropTable(
+                name: "BouquetSizes");
+
+            migrationBuilder.DropTable(
+                name: "Flowers");
 
             migrationBuilder.DropTable(
                 name: "Bouquets");

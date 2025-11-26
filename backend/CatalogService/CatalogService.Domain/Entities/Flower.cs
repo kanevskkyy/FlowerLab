@@ -14,5 +14,6 @@ namespace CatalogService.Domain.Entities
         public int Quantity { get; set; }  
 
         public ICollection<BouquetFlower> BouquetFlowers { get; set; } = new List<BouquetFlower>();
+        public ICollection<BouquetSizeFlower> BouquetSizeFlowers { get; set; } = new List<BouquetSizeFlower>();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CatalogService.BLL.DTO;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,28 +11,53 @@ namespace CatalogService.BLL.Validators
 {
     public class BouquetUpdateValidator : AbstractValidator<BouquetUpdateDto>
     {
+        private readonly string[] _allowedImageTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+
         public BouquetUpdateValidator()
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .MaximumLength(100);
+                .WithMessage("Назва букета обов'язкова.")
+                .MaximumLength(100)
+                .WithMessage("Назва букета не може перевищувати 100 символів.");
 
-            RuleFor(x => x.Price)
-                .GreaterThanOrEqualTo(0);
-
-            RuleFor(x => x.FlowerIds)
+            RuleFor(x => x.Sizes)
                 .NotEmpty()
-                .WithMessage("Букет повинен містити принаймні одну квітку.");
+                .WithMessage("Букет повинен мати принаймні один розмір.");
 
-            RuleFor(x => x.FlowerQuantities)
-                .NotEmpty()
-                .WithMessage("Букет повинен містити принаймні одну кількість квітки.")
-                .Must((dto, quantities) => quantities.Count == dto.FlowerIds.Count)
-                .WithMessage("Кожна квітка повинна мати відповідну кількість.");
+            RuleForEach(x => x.Sizes)
+                .SetValidator(new BouquetSizeCreateValidator());
 
-            RuleForEach(x => x.FlowerQuantities)
-                .GreaterThan(0)
-                .WithMessage("Кількість квітки повинна бути більше 0.");
+            RuleFor(x => x.Sizes)
+                .Must(HaveUniqueSize)
+                .WithMessage("Розміри не повинні повторюватися.");
+
+            When(x => x.MainPhoto != null, () =>
+            {
+                RuleFor(x => x.MainPhoto)
+                    .Must(BeAValidImage)
+                    .WithMessage("Головне фото має бути зображенням формату jpg, png, gif або webp.");
+            });
+
+            RuleForEach(x => x.NewImages)
+                .Must(BeAValidImage)
+                .WithMessage("Додаткові фото мають бути зображеннями формату jpg, png, gif або webp.");
+
+            RuleFor(x => x.NewImages)
+                .Must(images => images == null || images.Count <= 3)
+                .WithMessage("Можна завантажити максимум 3 додаткових зображення.");
+        }
+
+        private bool BeAValidImage(IFormFile? file)
+        {
+            if (file == null) return false;
+            return _allowedImageTypes.Contains(file.ContentType.ToLower());
+        }
+
+        private bool HaveUniqueSize(List<BouquetSizeCreateDto> sizes)
+        {
+            if (sizes == null || !sizes.Any()) return true;
+            return sizes.Select(s => s.SizeId).Distinct().Count() == sizes.Count;
         }
     }
 }

@@ -23,6 +23,9 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
 
         public async Task<Review> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
         {
+            if (request.User == null)
+                throw new UnauthorizedAccessException("User information is missing from the request context.");
+
             var grpcResponse = await grpcClient.CheckIdAsync(new ReviewCheckIdRequest { Id = request.BouquetId.ToString() });
             if (!grpcResponse.IsValid)
                 throw new InvalidOperationException($"ID букета недійсний: {grpcResponse.ErrorMessage}");

@@ -31,15 +31,15 @@ namespace CatalogService.BLL.Services.Implementations
             _publishEndpoint = publishEndpoint;
         }
 
-        public async Task<PagedList<BouquetDto>> GetAllAsync(BouquetQueryParameters parameters)
+        public async Task<PagedList<BouquetSummaryDto>> GetAllAsync(BouquetQueryParameters parameters)
         {
             var pagedBouquets = await _uow.Bouquets.GetBySpecificationPagedAsync(parameters);
 
             var mapped = pagedBouquets.Items
-                .Select(b => _mapper.Map<BouquetDto>(b))
+                .Select(b => _mapper.Map<BouquetSummaryDto>(b))
                 .ToList();
 
-            return new PagedList<BouquetDto>(
+            return new PagedList<BouquetSummaryDto>(
                 mapped,
                 pagedBouquets.TotalCount,
                 pagedBouquets.CurrentPage,
@@ -59,36 +59,57 @@ namespace CatalogService.BLL.Services.Implementations
             if (await _uow.Bouquets.ExistsAsync(b => b.Name == dto.Name))
                 throw new AlreadyExistsException($"Букет з назвою '{dto.Name}' уже існує.");
 
-            var size = await _uow.Sizes.GetByIdAsync(dto.SizeId);
-            if (size == null) throw new NotFoundException($"Розмір {dto.SizeId} не знайдено.");
+            if (!dto.Sizes.Any())
+                throw new Exception("Необхідно вказати хоча б один розмір.");
+
+            foreach (var sizeDto in dto.Sizes)
+            {
+                var size = await _uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                if (size == null)
+                    throw new NotFoundException($"Розмір {sizeDto.SizeId} не знайдено.");
+
+                if (sizeDto.FlowerIds.Count != sizeDto.FlowerQuantities.Count)
+                    throw new Exception($"Кількість ID квіток не відповідає кількості для розміру {size.Name}.");
+
+                if (!sizeDto.FlowerIds.Any())
+                    throw new Exception($"Необхідно вказати квіти для розміру {size.Name}.");
+            }
 
             foreach (var evId in dto.EventIds)
+            {
                 if (!await _uow.Events.ExistsAsync(e => e.Id == evId))
                     throw new NotFoundException($"Подія {evId} не знайдена.");
+            }
 
             foreach (var rId in dto.RecipientIds)
+            {
                 if (!await _uow.Recipients.ExistsAsync(r => r.Id == rId))
                     throw new NotFoundException($"Отримувач {rId} не знайдений.");
+            }
 
-            var flowers = dto.FlowerIds
-                .Select((id, index) => new FlowerQuantityDto { FlowerId = id, Quantity = dto.FlowerQuantities[index] })
-                .ToList();
-
-            foreach (var fq in flowers)
+            foreach (var sizeDto in dto.Sizes)
             {
-                var flower = await _uow.Flowers.GetByIdAsync(fq.FlowerId);
-                if (flower == null) throw new NotFoundException($"Квітка {fq.FlowerId} не знайдена.");
-                if (flower.Quantity < fq.Quantity)
-                    throw new Exception($"Недостатньо квіток '{flower.Name}' на складі. Запитано {fq.Quantity}, доступно {flower.Quantity}.");
+                for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
+                {
+                    var flower = await _uow.Flowers.GetByIdAsync(sizeDto.FlowerIds[i]);
+                    if (flower == null)
+                        throw new NotFoundException($"Квітка {sizeDto.FlowerIds[i]} не знайдена.");
+
+                    if (flower.Quantity < sizeDto.FlowerQuantities[i])
+                    {
+                        var size = await _uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                        throw new Exception($"Недостатньо квіток '{flower.Name}' для розміру {size.Name}. " +
+                            $"Запитано {sizeDto.FlowerQuantities[i]}, доступно {flower.Quantity}.");
+                    }
+                }
             }
 
             var bouquet = new Bouquet
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                Price = dto.Price,
-                BouquetSizes = new List<BouquetSize> { new BouquetSize { SizeId = dto.SizeId } },
-                BouquetFlowers = new List<BouquetFlower>(),
+                MainPhotoUrl = string.Empty, 
+                BouquetSizes = new List<BouquetSize>(),
                 BouquetEvents = new List<BouquetEvent>(),
                 BouquetRecipients = new List<BouquetRecipient>(),
                 BouquetImages = new List<BouquetImage>()
@@ -101,40 +122,66 @@ namespace CatalogService.BLL.Services.Implementations
                 var mainUrl = await _imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
                 bouquet.MainPhotoUrl = mainUrl;
             }
-
-            foreach (var fq in flowers)
+            else
             {
-                var bouquetFlower = new BouquetFlower
+                throw new Exception("Головне фото є обов'язковим.");
+            }
+
+            foreach (var sizeDto in dto.Sizes)
+            {
+                var bouquetSize = new BouquetSize
                 {
-                    Bouquet = bouquet,
-                    FlowerId = fq.FlowerId,
-                    Quantity = fq.Quantity
+                    BouquetId = bouquet.Id,
+                    SizeId = sizeDto.SizeId,
+                    Price = sizeDto.Price,
+                    BouquetSizeFlowers = new List<BouquetSizeFlower>()
                 };
 
-                bouquet.BouquetFlowers.Add(bouquetFlower);
+                for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
+                {
+                    var bouquetSizeFlower = new BouquetSizeFlower
+                    {
+                        BouquetId = bouquet.Id,
+                        SizeId = sizeDto.SizeId,
+                        FlowerId = sizeDto.FlowerIds[i],
+                        Quantity = sizeDto.FlowerQuantities[i]
+                    };
+                    bouquetSize.BouquetSizeFlowers.Add(bouquetSizeFlower);
+                }
+
+                bouquet.BouquetSizes.Add(bouquetSize);
             }
 
             foreach (var evId in dto.EventIds)
-                bouquet.BouquetEvents.Add(new BouquetEvent { Bouquet = bouquet, EventId = evId });
+            {
+                bouquet.BouquetEvents.Add(new BouquetEvent
+                {
+                    BouquetId = bouquet.Id,
+                    EventId = evId
+                });
+            }
 
             foreach (var rId in dto.RecipientIds)
-                bouquet.BouquetRecipients.Add(new BouquetRecipient { Bouquet = bouquet, RecipientId = rId });
+            {
+                bouquet.BouquetRecipients.Add(new BouquetRecipient
+                {
+                    BouquetId = bouquet.Id,
+                    RecipientId = rId
+                });
+            }
 
             short pos = 1;
             foreach (var img in dto.Images.Take(3))
             {
                 using var ms = new MemoryStream();
                 await img.CopyToAsync(ms);
-
                 var url = await _imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
-
                 bouquet.BouquetImages.Add(new BouquetImage
                 {
                     BouquetId = bouquet.Id,
                     ImageUrl = url,
                     Position = pos
                 });
-
                 pos++;
             }
 
@@ -142,64 +189,109 @@ namespace CatalogService.BLL.Services.Implementations
             await _uow.SaveChangesAsync();
 
             var savedBouquet = await _uow.Bouquets.GetWithDetailsAsync(bouquet.Id);
-
             return _mapper.Map<BouquetDto>(savedBouquet);
         }
 
         public async Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto)
         {
             var bouquet = await _uow.Bouquets.GetWithDetailsAsync(id);
-            if (bouquet == null) throw new NotFoundException($"Букет {id} не знайдено.");
+            if (bouquet == null)
+                throw new NotFoundException($"Букет {id} не знайдено.");
 
             if (bouquet.Name != dto.Name && await _uow.Bouquets.ExistsAsync(b => b.Name == dto.Name))
                 throw new AlreadyExistsException($"Букет з назвою '{dto.Name}' уже існує.");
 
-            bouquet.Name = dto.Name;
-            bouquet.Description = dto.Description;
-            bouquet.Price = dto.Price;
+            if (!dto.Sizes.Any())
+                throw new Exception("Необхідно вказати хоча б один розмір.");
 
-            var size = await _uow.Sizes.GetByIdAsync(dto.SizeId);
-            if (size == null) throw new NotFoundException($"Розмір {dto.SizeId} не знайдено.");
-            bouquet.BouquetSizes.Clear();
-            bouquet.BouquetSizes.Add(new BouquetSize { BouquetId = bouquet.Id, SizeId = dto.SizeId });
-
-            var flowers = dto.FlowerIds
-                .Select((id, index) => new FlowerQuantityDto { FlowerId = id, Quantity = dto.FlowerQuantities[index] })
-                .ToList();
-
-            foreach (var fq in flowers)
+            foreach (var sizeDto in dto.Sizes)
             {
-                var flower = await _uow.Flowers.GetByIdAsync(fq.FlowerId);
-                if (flower == null) throw new NotFoundException($"Квітка {fq.FlowerId} не знайдена.");
-                if (flower.Quantity < fq.Quantity)
-                    throw new Exception($"Недостатньо квіток '{flower.Name}' на складі. Запитано {fq.Quantity}, доступно {flower.Quantity}.");
+                var size = await _uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                if (size == null)
+                    throw new NotFoundException($"Розмір {sizeDto.SizeId} не знайдено.");
+
+                if (sizeDto.FlowerIds.Count != sizeDto.FlowerQuantities.Count)
+                    throw new Exception($"Кількість ID квіток не відповідає кількості для розміру {size.Name}.");
+
+                if (!sizeDto.FlowerIds.Any())
+                    throw new Exception($"Необхідно вказати квіти для розміру {size.Name}.");
             }
 
-            bouquet.BouquetFlowers.Clear();
-            foreach (var fq in flowers)
+            foreach (var evId in dto.EventIds)
             {
-                bouquet.BouquetFlowers.Add(new BouquetFlower
+                if (!await _uow.Events.ExistsAsync(e => e.Id == evId))
+                    throw new NotFoundException($"Подія {evId} не знайдена.");
+            }
+
+            foreach (var rId in dto.RecipientIds)
+            {
+                if (!await _uow.Recipients.ExistsAsync(r => r.Id == rId))
+                    throw new NotFoundException($"Отримувач {rId} не знайдений.");
+            }
+
+            foreach (var sizeDto in dto.Sizes)
+            {
+                for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
+                {
+                    var flower = await _uow.Flowers.GetByIdAsync(sizeDto.FlowerIds[i]);
+                    if (flower == null)
+                        throw new NotFoundException($"Квітка {sizeDto.FlowerIds[i]} не знайдена.");
+
+                    if (flower.Quantity < sizeDto.FlowerQuantities[i])
+                    {
+                        var size = await _uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                        throw new Exception($"Недостатньо квіток '{flower.Name}' для розміру {size.Name}. " +
+                            $"Запитано {sizeDto.FlowerQuantities[i]}, доступно {flower.Quantity}.");
+                    }
+                }
+            }
+
+            bouquet.Name = dto.Name;
+            bouquet.Description = dto.Description;
+
+            bouquet.BouquetSizes.Clear();
+            foreach (var sizeDto in dto.Sizes)
+            {
+                var bouquetSize = new BouquetSize
                 {
                     BouquetId = bouquet.Id,
-                    FlowerId = fq.FlowerId,
-                    Quantity = fq.Quantity
-                });
+                    Price = sizeDto.Price,
+                    SizeId = sizeDto.SizeId,
+                    BouquetSizeFlowers = new List<BouquetSizeFlower>()
+                };
+
+                for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
+                {
+                    bouquetSize.BouquetSizeFlowers.Add(new BouquetSizeFlower
+                    {
+                        BouquetId = bouquet.Id,
+                        SizeId = sizeDto.SizeId,
+                        FlowerId = sizeDto.FlowerIds[i],
+                        Quantity = sizeDto.FlowerQuantities[i]
+                    });
+                }
+
+                bouquet.BouquetSizes.Add(bouquetSize);
             }
 
             bouquet.BouquetEvents.Clear();
             foreach (var evId in dto.EventIds)
             {
-                if (!await _uow.Events.ExistsAsync(e => e.Id == evId))
-                    throw new NotFoundException($"Подія {evId} не знайдена.");
-                bouquet.BouquetEvents.Add(new BouquetEvent { BouquetId = bouquet.Id, EventId = evId });
+                bouquet.BouquetEvents.Add(new BouquetEvent
+                {
+                    BouquetId = bouquet.Id,
+                    EventId = evId
+                });
             }
 
             bouquet.BouquetRecipients.Clear();
             foreach (var rId in dto.RecipientIds)
             {
-                if (!await _uow.Recipients.ExistsAsync(r => r.Id == rId))
-                    throw new NotFoundException($"Отримувач {rId} не знайдений.");
-                bouquet.BouquetRecipients.Add(new BouquetRecipient { BouquetId = bouquet.Id, RecipientId = rId });
+                bouquet.BouquetRecipients.Add(new BouquetRecipient
+                {
+                    BouquetId = bouquet.Id,
+                    RecipientId = rId
+                });
             }
 
             if (dto.MainPhoto != null)
@@ -210,28 +302,32 @@ namespace CatalogService.BLL.Services.Implementations
                 bouquet.MainPhotoUrl = mainUrl;
             }
 
-            short pos = 1;
-            foreach (var img in dto.NewImages.Take(3))
+            if (dto.NewImages != null && dto.NewImages.Any())
             {
-                using var ms = new MemoryStream();
-                await img.CopyToAsync(ms);
+                bouquet.BouquetImages.Clear();
 
-                var url = await _imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
-
-                bouquet.BouquetImages.Add(new BouquetImage
+                short pos = 1;
+                foreach (var img in dto.NewImages.Take(3))
                 {
-                    BouquetId = bouquet.Id,
-                    ImageUrl = url,
-                    Position = pos
-                });
+                    using var ms = new MemoryStream();
+                    await img.CopyToAsync(ms);
+                    var url = await _imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
 
-                pos++;
+                    bouquet.BouquetImages.Add(new BouquetImage
+                    {
+                        BouquetId = bouquet.Id,
+                        ImageUrl = url,
+                        Position = pos
+                    });
+                    pos++;
+                }
             }
 
             _uow.Bouquets.Update(bouquet);
             await _uow.SaveChangesAsync();
 
-            return _mapper.Map<BouquetDto>(bouquet);
+            var updatedBouquet = await _uow.Bouquets.GetWithDetailsAsync(bouquet.Id);
+            return _mapper.Map<BouquetDto>(updatedBouquet);
         }
 
         public async Task UpdateFlowerQuantityAsync(Guid flowerId, int quantity)

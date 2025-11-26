@@ -11,7 +11,6 @@ namespace CatalogService.Domain.Entities
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
         public string MainPhotoUrl { get; set; } = null!;
-        public decimal Price { get; set; }
 
         public ICollection<BouquetFlower> BouquetFlowers { get; set; } = new List<BouquetFlower>();
         public ICollection<BouquetImage> BouquetImages { get; set; } = new List<BouquetImage>();

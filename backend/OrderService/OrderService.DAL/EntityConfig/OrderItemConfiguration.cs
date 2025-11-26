@@ -13,12 +13,35 @@ namespace OrderService.Domain.EntityConfig
     {
         public void Configure(EntityTypeBuilder<OrderItem> builder)
         {
-            builder.HasKey(i => i.Id);
-            builder.Property(i => i.BouquetName).IsRequired().HasMaxLength(100);
-            builder.Property(i => i.BouquetImage).IsRequired().HasMaxLength(2000);
-            builder.Property(i => i.BouquetId).IsRequired();
-            builder.Property(i => i.Price).HasColumnType("decimal(10,2)");
-            builder.Property(i => i.Count).IsRequired();
+            builder.ToTable("OrderItems");
+
+            builder.HasKey(oi => oi.Id);
+
+            builder.Property(oi => oi.BouquetName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(oi => oi.BouquetImage)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            builder.Property(oi => oi.SizeName)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            builder.Property(oi => oi.Price)
+                .HasColumnType("decimal(10,2)")
+                .IsRequired();
+
+            builder.Property(oi => oi.Count)
+                .IsRequired();
+
+            builder.HasCheckConstraint("CK_OrderItem_Count_Positive", "\"Count\" > 0");
+
+            builder.HasOne(oi => oi.Order)
+                .WithMany(o => o.Items)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
