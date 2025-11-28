@@ -62,6 +62,9 @@ namespace CatalogService.BLL.Services.Implementations
             if (!dto.Sizes.Any())
                 throw new Exception("Необхідно вказати хоча б один розмір.");
 
+            if (dto.Sizes.GroupBy(s => s.SizeId).Any(g => g.Count() > 1))
+                throw new Exception("Кожен розмір може бути вказаний лише один раз.");
+
             foreach (var sizeDto in dto.Sizes)
             {
                 var size = await _uow.Sizes.GetByIdAsync(sizeDto.SizeId);
@@ -203,6 +206,9 @@ namespace CatalogService.BLL.Services.Implementations
 
             if (!dto.Sizes.Any())
                 throw new Exception("Необхідно вказати хоча б один розмір.");
+
+            if (dto.Sizes.GroupBy(s => s.SizeId).Any(g => g.Count() > 1))
+                throw new Exception("Кожен розмір може бути вказаний лише один раз.");
 
             foreach (var sizeDto in dto.Sizes)
             {

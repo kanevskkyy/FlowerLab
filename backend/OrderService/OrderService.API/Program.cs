@@ -19,6 +19,7 @@ using FlowerLab.Shared.Events;
 using shared.events;
 using OrderService.BLL.DTOs;
 using CatalogService.API.Middleware;
+using OrderService.BLL.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -171,9 +172,13 @@ if (!string.IsNullOrEmpty(catalogAddress))
     });
 }
 
+builder.Services.AddGrpc();
+
 
 var app = builder.Build();
 app.UseCors(MyAllowSpecificOrigins);
+
+app.MapGrpcService<CheckOrderServiceGRPCImpl>();
 
 using (var scope = app.Services.CreateAsyncScope())
 {

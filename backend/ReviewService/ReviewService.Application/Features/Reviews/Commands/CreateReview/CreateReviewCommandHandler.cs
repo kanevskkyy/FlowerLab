@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using ReviewService.Application.GrpcClient;
 using ReviewService.Application.Interfaces.Commands;
 using ReviewService.Domain.Entities;
 using ReviewService.Domain.Helpers;
@@ -12,13 +11,18 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
 {
     public class CreateReviewCommandHandler : ICommandHandler<CreateReviewCommand, Review>
     {
-        private IReviewRepository reviewRepository;
-        private readonly CheckIdInReviews.CheckIdInReviewsClient grpcClient;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly CheckIdInReviews.CheckIdInReviewsClient _checkIdGrpcClient;
+        private readonly CheckOrderServiceGRPC.CheckOrderServiceGRPCClient _checkOrderGrpcClient;
 
-        public CreateReviewCommandHandler(IReviewRepository reviewRepository, CheckIdInReviews.CheckIdInReviewsClient grpcClient)
+        public CreateReviewCommandHandler(
+            IReviewRepository reviewRepository,
+            CheckIdInReviews.CheckIdInReviewsClient checkIdGrpcClient,
+            CheckOrderServiceGRPC.CheckOrderServiceGRPCClient checkOrderGrpcClient)
         {
-            this.reviewRepository = reviewRepository;
-            this.grpcClient = grpcClient;
+            _reviewRepository = reviewRepository;
+            _checkIdGrpcClient = checkIdGrpcClient;
+            _checkOrderGrpcClient = checkOrderGrpcClient;
         }
 
         public async Task<Review> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
@@ -26,23 +30,32 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
             if (request.User == null)
                 throw new UnauthorizedAccessException("User information is missing from the request context.");
 
-            var grpcResponse = await grpcClient.CheckIdAsync(new ReviewCheckIdRequest { Id = request.BouquetId.ToString() });
-            if (!grpcResponse.IsValid)
-                throw new InvalidOperationException($"ID букета недійсний: {grpcResponse.ErrorMessage}");
+            var checkIdResponse = await _checkIdGrpcClient.CheckIdAsync(
+                new ReviewCheckIdRequest { Id = request.BouquetId.ToString() });
 
-            if (request.User == null)
-            {
-                throw new UnauthorizedAccessException("User information is missing from the request context.");
-            }
+            if (!checkIdResponse.IsValid)
+                throw new InvalidOperationException($"ID букета недійсний: {checkIdResponse.ErrorMessage}");
 
-            Review review = new Review(request.BouquetId, request.User, request.Rating, request.Comment);
+            var orderCheckResponse = await _checkOrderGrpcClient.HasUserOrderedBouquetAsync(
+                new UserOrderCheckRequestMessage
+                {
+                    UserId = request.User.UserId.ToString(),
+                    BouquetId = request.BouquetId.ToString()
+                });
 
-            bool alreadyExists = await reviewRepository.HasUserReviewedBouquetAsync(review.User.UserId, review.BouquetId, cancellationToken);
-            if (alreadyExists)
+            if (!orderCheckResponse.HasOrdered)
+                throw new InvalidOperationException("Користувач не замовляв цей букет, відгук заборонено.");
+
+            bool alreadyReviewed = await _reviewRepository.HasUserReviewedBouquetAsync(
+                request.User.UserId, request.BouquetId, cancellationToken);
+
+            if (alreadyReviewed)
                 throw new AlreadyExistsException("Користувач вже залишив відгук для цього букету!");
-            if (alreadyExists) throw new InvalidOperationException("User has already reviewed this bouquet!"); 
 
-            await reviewRepository.AddAsync(review, cancellationToken);
+            var review = new Review(request.BouquetId, request.User, request.Rating, request.Comment);
+
+            await _reviewRepository.AddAsync(review, cancellationToken);
+
             return review;
         }
     }

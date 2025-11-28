@@ -30,12 +30,12 @@ namespace UsersService.BLL.Services
 
             if (!string.IsNullOrWhiteSpace(filter.Email))
             {
-                query = query.Where(u => u.Email.Contains(filter.Email));
+                query = query.Where(u => u.Email.ToLower().Contains(filter.Email.ToLower()));
             }
 
             if (!string.IsNullOrWhiteSpace(filter.PhoneNumber))
             {
-                query = query.Where(u => u.PhoneNumber != null && u.PhoneNumber.Contains(filter.PhoneNumber));
+                query = query.Where(u => u.PhoneNumber.ToLower() != null && u.PhoneNumber.ToLower().Contains(filter.PhoneNumber.ToLower()));
             }
 
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))

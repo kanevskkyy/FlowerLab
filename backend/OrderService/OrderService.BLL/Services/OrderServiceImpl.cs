@@ -346,6 +346,20 @@ namespace OrderService.BLL.Services
             return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 
+        public async Task<bool> HasUserOrderedBouquetAsync(Guid userId, Guid bouquetId)
+        {
+            var parameters = new OrderSpecificationParameters
+            {
+                UserId = userId,
+                BouquetId = bouquetId
+            };
+
+            var orders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters);
+
+            return orders.TotalCount > 0;
+        }
+
+
         public async Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default)
         {
             var order = await _unitOfWork.Orders.GetByIdAsync(orderId);

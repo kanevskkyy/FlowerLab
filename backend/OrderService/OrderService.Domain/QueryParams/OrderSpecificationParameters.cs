@@ -21,5 +21,7 @@ namespace OrderService.Domain.QueryParams
 
         public Guid? UserId { get; set; }
         public Guid? StatusId { get; set; }
+        public Guid? BouquetId { get; set; }
+
     }
 }

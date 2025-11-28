@@ -53,6 +53,12 @@ namespace UsersService.BLL.Services
                 throw new InvalidOperationException($"Користувач з email '{model.Email}' вже існує.");
             }
 
+            var phoneExists = await _userManager.Users.AnyAsync(u => u.PhoneNumber == model.PhoneNumber);
+            if (phoneExists)
+            {
+                throw new InvalidOperationException($"Користувач з номером '{model.PhoneNumber}' вже існує.");
+            }
+
             var user = new ApplicationUser
             {
                 Email = model.Email,
@@ -79,18 +85,25 @@ namespace UsersService.BLL.Services
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
-            {
                 throw new InvalidOperationException($"Користувач з email '{model.Email}' не існує.");
-            }
+
+            if (await _userManager.IsLockedOutAsync(user))
+                throw new UnauthorizedAccessException("Акаунт тимчасово заблоковано через велику кількість невдалих входів.");
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
+
             if (!passwordValid)
             {
+                await _userManager.AccessFailedAsync(user);
+
                 throw new UnauthorizedAccessException("Невірний пароль або email.");
             }
 
+            await _userManager.ResetAccessFailedCountAsync(user);
+
             return await GenerateAndSaveTokens(user);
         }
+
 
         public async Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken)
         {
@@ -147,6 +160,12 @@ namespace UsersService.BLL.Services
 
             if (!string.IsNullOrEmpty(dto.PhoneNumber) && dto.PhoneNumber != user.PhoneNumber)
             {
+                var phoneExists = await _userManager.Users
+                    .AnyAsync(u => u.PhoneNumber == dto.PhoneNumber && u.Id != user.Id);
+
+                if (phoneExists)
+                    throw new InvalidOperationException($"Номер телефону '{dto.PhoneNumber}' вже використовується іншим користувачем.");
+
                 user.PhoneNumber = dto.PhoneNumber;
                 isUpdated = true;
             }

@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+
+service CheckOrderServiceGRPC {
+  rpc HasUserOrderedBouquet (UserOrderCheckRequestMessage) returns (UserOrderCheckResponseMessage);
+}
+
+message UserOrderCheckRequestMessage {
+  string user_id = 1;
+  string bouquet_id = 2;
+}
+
+message UserOrderCheckResponseMessage {
+  bool has_ordered = 1;
+  string error_message = 2;
+}

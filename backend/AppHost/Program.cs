@@ -41,9 +41,11 @@ var orderService = builder.AddProject<OrderService_API>("orders")
 var reviewsService = builder.AddProject<ReviewService_API>("reviews")
     .WithReference(mongoReviews)
     .WithReference(catalogService)
+    .WithReference(orderService)
     .WithReference(rabbitmq)
     .WaitFor(mongoReviews)
     .WaitFor(catalogService)
+    .WaitFor(orderService)
     .WaitFor(rabbitmq);
 
 var userService = builder.AddProject<UsersService_API>("users")
