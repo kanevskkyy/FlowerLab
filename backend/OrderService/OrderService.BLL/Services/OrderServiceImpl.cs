@@ -355,7 +355,7 @@ namespace OrderService.BLL.Services
             };
 
             var orders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters);
-            var hasActiveOrders = orders.Items.Any(o => o.Status.Name != "AwaitingPayment");
+            var hasActiveOrders = orders.Items.Any(o => o.Status.Name == "Completed");
 
             return hasActiveOrders;
         }
