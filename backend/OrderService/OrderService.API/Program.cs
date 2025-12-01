@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using OrderService.BLL.FluentValidation;
 using OrderService.BLL.Helpers;
+using DotNetEnv;
 using OrderService.BLL.Profiles;
 using OrderService.BLL.Services;
 using OrderService.BLL.Services.Interfaces;
@@ -23,6 +24,8 @@ using OrderService.BLL.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Env.Load();
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
@@ -37,6 +40,20 @@ builder.Services.AddCors(options =>
     });
 });
 
+var secretKey = Env.GetString("JWT_SECRET") ?? throw new Exception("JWT_SECRET missing!");
+var issuer = Env.GetString("JWT_ISSUER") ?? throw new Exception("JWT_ISSUER missing!");
+var audience = Env.GetString("JWT_AUDIENCE") ?? throw new Exception("JWT_AUDIENCE missing!");
+var accessTokenExpiration = int.Parse(Env.GetString("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES") ?? "15");
+var refreshTokenExpiration = int.Parse(Env.GetString("JWT_REFRESH_TOKEN_EXPIRATION_DAYS") ?? "7");
+
+var cloudName = Env.GetString("CLOUDINARY_CLOUDNAME") ?? throw new Exception("CLOUDINARY_CLOUDNAME missing!");
+var apiKey = Env.GetString("CLOUDINARY_API_KEY") ?? throw new Exception("CLOUDINARY_API_KEY missing!");
+var apiSecret = Env.GetString("CLOUDINARY_API_SECRET") ?? throw new Exception("CLOUDINARY_API_SECRET missing!");
+
+var liqPayPublic = Env.GetString("LIQPAY_PUBLIC_KEY") ?? throw new Exception("LIQPAY_PUBLIC_KEY missing!");
+var liqPayPrivate = Env.GetString("LIQPAY_PRIVATE_KEY") ?? throw new Exception("LIQPAY_PRIVATE_KEY missing!");
+var liqPayServerUrl = Env.GetString("LIQPAY_SERVER_URL") ?? throw new Exception("LIQPAY_SERVER_URL missing!");
+
 builder.AddNpgsqlDbContext<OrderDbContext>("FlowerLabOrder");
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -47,13 +64,22 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<GiftCreateDtoValidator>(); 
+builder.Services.AddValidatorsFromAssemblyContaining<GiftCreateDtoValidator>();
 
-builder.Services.Configure<CloudinarySettings>(
-    builder.Configuration.GetSection("Cloudinary")
-);
+builder.Services.Configure<CloudinarySettings>(options =>
+{
+    options.CloudName = cloudName;
+    options.ApiKey = apiKey;
+    options.ApiSecret = apiSecret;
+});
 
-builder.Services.Configure<LiqPaySettings>(builder.Configuration.GetSection("LiqPay"));
+builder.Services.Configure<LiqPaySettings>(options =>
+{
+    options.PublicKey = liqPayPublic;
+    options.PrivateKey = liqPayPrivate;
+    options.ServerUrl = liqPayServerUrl;
+});
+
 builder.Services.AddScoped<ILiqPayService, LiqPayService>();
 
 
@@ -95,14 +121,7 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSection["Secret"];
-var issuer = jwtSection["Issuer"];
-var audience = jwtSection["Audience"];
-
-var key = Encoding.UTF8.GetBytes(secretKey!);
-
+var key = Encoding.UTF8.GetBytes(secretKey);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

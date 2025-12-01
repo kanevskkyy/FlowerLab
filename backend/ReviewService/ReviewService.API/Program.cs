@@ -21,11 +21,19 @@ using Microsoft.OpenApi.Models;
 using MassTransit;
 using ReviewService.Application.Consumers;
 using ReviewService.Application.Validation.Reviews;
-using MongoDB.Driver;
+using DotNetEnv;
 using shared.events;
 using ReviewService.Application.Consumers.EventLog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
+
+var secretKey = Env.GetString("JWT_SECRET") ?? throw new Exception("JWT_SECRET missing!");
+var issuer = Env.GetString("JWT_ISSUER") ?? throw new Exception("JWT_ISSUER missing!");
+var audience = Env.GetString("JWT_AUDIENCE") ?? throw new Exception("JWT_AUDIENCE missing!");
+var accessTokenExpiration = int.Parse(Env.GetString("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES") ?? "15");
+var refreshTokenExpiration = int.Parse(Env.GetString("JWT_REFRESH_TOKEN_EXPIRATION_DAYS") ?? "7");
 
 BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
 var pack = new ConventionPack
@@ -138,13 +146,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSection["Secret"];
-var issuer = jwtSection["Issuer"];
-var audience = jwtSection["Audience"];
-
-if (string.IsNullOrEmpty(secretKey)) throw new Exception("JWT Secret is missing in appsettings.json");
 
 var key = Encoding.UTF8.GetBytes(secretKey!);
 
