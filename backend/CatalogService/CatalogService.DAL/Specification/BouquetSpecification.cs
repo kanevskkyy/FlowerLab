@@ -17,24 +17,57 @@ namespace CatalogService.DAL.Specification
                 (!parameters.SizeIds.Any() || b.BouquetSizes.Any(s => parameters.SizeIds.Contains(s.SizeId))) &&
                 (!parameters.EventIds.Any() || b.BouquetEvents.Any(e => parameters.EventIds.Contains(e.EventId))) &&
                 (!parameters.RecipientIds.Any() || b.BouquetRecipients.Any(r => parameters.RecipientIds.Contains(r.RecipientId))) &&
-
-                (!parameters.FlowerIds.Any() || parameters.FlowerIds.All(fId => b.BouquetFlowers.Any(bf => bf.FlowerId == fId)))
-
-                && (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity)))
-
-               &&
+                (!parameters.FlowerIds.Any() || parameters.FlowerIds.All(fId => b.BouquetFlowers.Any(bf => bf.FlowerId == fId))) &&
+                (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity))) &&
                 (string.IsNullOrEmpty(parameters.Name) ||
                     b.Name.ToLower().Contains(parameters.Name.ToLower()) ||
                     b.BouquetFlowers.Any(bf => bf.Flower.Name.ToLower().Contains(parameters.Name.ToLower()))
                 )
-
-                )
+            )
         {
             AddInclude(b => b.BouquetFlowers);
             AddInclude(b => b.BouquetSizes);
             AddInclude(b => b.BouquetEvents);
             AddInclude(b => b.BouquetRecipients);
             AddInclude(b => b.BouquetImages);
+
+            ApplySorting(parameters.SortBy);
+        }
+
+        private void ApplySorting(string sortBy)
+        {
+            switch (sortBy?.ToLower())
+            {
+                case "price_asc":
+                    AddOrderBy(b => b.BouquetSizes.Min(bs => bs.Price));
+                    break;
+
+                case "price_desc":
+                    AddOrderByDescending(b => b.BouquetSizes.Max(bs => bs.Price));
+                    break;
+
+                case "name_asc":
+                    AddOrderBy(b => b.Name);
+                    break;
+
+                case "name_desc":
+                    AddOrderByDescending(b => b.Name);
+                    break;
+
+                case "date_asc":
+                    AddOrderBy(b => b.CreatedAt);
+                    break;
+
+                case "date_desc":
+                case null:
+                case "":
+                    AddOrderByDescending(b => b.CreatedAt);
+                    break;
+
+                default:
+                    AddOrderByDescending(b => b.CreatedAt);
+                    break;
+            }
         }
     }
 }
