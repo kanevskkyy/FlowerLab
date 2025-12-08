@@ -1,7 +1,17 @@
+/* ===== ГЛОБАЛЬНЕ ДЛЯ ВИСОТИ ЕКРАНУ ===== */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 /* ================= GLOBAL ================= */
 .catalog-page {
   font-family: "Inter", sans-serif;
   background: #ffffff;
+  min-height: 100vh; /* тягнемо на повну висоту екрану */
 }
 
 /* ================= HEADER ================= */
@@ -61,8 +71,9 @@
 
 /* ================= MAIN WRAPPER ================= */
 .catalog-page .catalog {
-  max-width: 1440px;
-  margin: 0 auto;
+  width: 100%;              /* на всю ширину */
+  /* max-width: 1440px; */  /* можна забрати, щоб взагалі не обмежувати */
+  margin: 0;
   padding: 40px 60px 80px;
 }
 
@@ -139,13 +150,12 @@
   gap: 35px;
 }
 
-/* ================== FIXED ANIMATION BLOCK ================== */
+/* ================== CARD ================== */
 .catalog-page .catalog-item {
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: center;
-
   border-radius: 16px;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -170,8 +180,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  /* smooth motion */
   transition: transform 0.25s ease;
 }
 
@@ -179,7 +187,6 @@
 .catalog-page .catalog-item:hover .item-img img {
   transform: translateY(-2px);
 }
-/* ================== END FIX ================== */
 
 .catalog-page .item-bottom {
   width: 100%;
@@ -259,71 +266,71 @@
    RESPONSIVE — TABLET (768–1199px)
 =================================================== */
 @media (max-width: 1199px) {
-  .catalog {
+  .catalog-page .catalog {
     padding: 30px 40px 60px;
   }
 
-  .catalog-grid {
+  .catalog-page .catalog-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 28px;
   }
 
-  .item-img {
+  .catalog-page .item-img {
     aspect-ratio: 1/1;
   }
 }
 
 /* ===================================================
-   MOBILE — EXACT FIGMA LAYOUT (≤767px)
+   MOBILE — ≤767px
 =================================================== */
 @media (max-width: 767px) {
-  .catalog {
+  .catalog-page .catalog {
     padding: 16px;
   }
 
-  .header {
+  .catalog-page .header {
     padding: 0 16px;
   }
 
-  .catalog-title {
+  .catalog-page .catalog-title {
     font-size: 26px;
     font-weight: 400;
     margin-bottom: 24px;
   }
 
-  .catalog-top {
+  .catalog-page .catalog-top {
     flex-direction: column;
     gap: 14px;
   }
 
-  .search-wrapper {
+  .catalog-page .search-wrapper {
     width: 85%;
     padding: 8px 16px;
   }
 
-  .catalog-grid {
+  .catalog-page .catalog-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
 
-  .product-card-item {
+  .catalog-page .product-card-item {
     max-width: 160px;
   }
 
-  .item-img {
+  .catalog-page .item-img {
     aspect-ratio: 1/1;
   }
 
-  .item-text {
+  .catalog-page .item-text {
     text-align: center;
   }
 
-  .order-btn {
+  .catalog-page .order-btn {
     width: 100%;
     padding: 10px 0;
   }
 
-  .footer {
+  .catalog-page .footer {
     flex-direction: column;
     text-align: center;
     padding: 30px 20px;
