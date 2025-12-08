@@ -1,0 +1,391 @@
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+  font-family: Arial, sans-serif;
+}
+
+/* ===== HEADER ===== */
+.home-header {
+  height: 60px;
+  background: #dcdcdc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.home-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.burger {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.burger span {
+  height: 2px;
+  background: #000;
+  width: 18px;
+}
+
+.home-header-center {
+  font-weight: 500;
+}
+
+.home-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-text {
+  font-size: 13px;
+}
+
+.icon {
+  font-size: 16px;
+}
+
+
+/* клік по UA/ENG */
+.lang-toggle {
+  cursor: pointer;
+}
+
+/* затемнений фон під боковим меню */
+.side-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  z-index: 1000;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.home-main {
+  flex: 1;
+  padding: 30px 0 40px;
+}
+
+/* Центруємо контент як у макеті */
+.hero-section,
+.popular-section,
+.about-section,
+.home-reviews-section {
+  max-width: 900px;
+  margin: 0 auto 30px;
+}
+
+/* ===== HERO / SLIDER ===== */
+.hero-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.hero-banner {
+  flex: 1;
+  height: 220px;
+  background: #dedede;
+  border-radius: 24px;
+}
+
+.hero-arrow {
+  border: none;
+  background: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: #888;
+}
+
+/* ===== ORDER BUTTON ===== */
+.order-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.order-button {
+  padding: 10px 40px;
+  border-radius: 999px;
+  border: none;
+  background: #d0d0d0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* ===== SECTION TITLES ===== */
+.section-title {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+/* ===== POPULAR BOUQUETS ===== */
+.popular-section {
+  background: #dedede;
+  border-radius: 24px;
+  padding: 24px 40px 30px;
+}
+
+.popular-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.popular-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.popular-image {
+  height: 160px;
+  background: #c3c3c3;
+  border-radius: 16px;
+  margin-bottom: 6px;
+}
+
+.popular-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.lock-icon {
+  font-size: 14px;
+}
+
+/* ===== ABOUT US ===== */
+.about-section {
+  background: #dedede;
+  border-radius: 24px;
+  padding: 24px 40px 30px;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.about-text {
+  font-size: 13px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.about-image {
+  background: #c3c3c3;
+  border-radius: 18px;
+}
+
+/* ===== REVIEWS ===== */
+.home-reviews-section {
+  background: #dedede;
+  border-radius: 24px;
+  padding: 24px 24px 26px;
+}
+
+.home-reviews-wrapper {
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.reviews-arrow {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+}
+
+.home-reviews-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.home-review-card {
+  background: #cfcfcf;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 12px;
+}
+
+.home-review-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.home-review-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #b7b7b7;
+}
+
+.home-review-name {
+  font-size: 11px;
+}
+
+.home-review-stars {
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.home-review-text {
+  font-size: 11px;
+}
+
+/* ===== FOOTER ===== */
+.home-footer {
+  background: #dedede;
+  padding: 14px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.footer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* ===================== */
+/*   Home page mobile    */
+/*   (НЕ ЧІПАЄ ПК)       */
+/* ===================== */
+
+@media (max-width: 1024px) {
+  .popular-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-reviews-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* загальні відступи */
+  .hero-section,
+  .popular-section,
+  .about-section,
+  .home-reviews-section {
+    max-width: 100%;
+    margin: 0 16px 24px;
+  }
+
+  /* HERO */
+  .hero-section {
+    gap: 8px;
+  }
+
+  .hero-banner {
+    height: 180px;
+    border-radius: 20px;
+  }
+
+  /* популярні букети */
+  .popular-section {
+    padding: 20px 20px 24px;
+  }
+
+  .popular-cards {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .popular-image {
+    height: 150px;
+  }
+
+  /* ABOUT */
+  .about-section {
+    padding: 20px 20px 24px;
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .about-image {
+    height: 160px;
+  }
+
+  /* REVIEWS */
+  .home-reviews-section {
+    padding: 20px;
+  }
+
+  .home-reviews-wrapper {
+    grid-template-columns: 24px 1fr 24px;
+  }
+
+  .home-reviews-cards {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* FOOTER */
+  .home-footer {
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* ще трохи дрібніше */
+  .hero-banner {
+    height: 160px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+
+  .order-button {
+    width: 100%;
+    max-width: 260px;
+  }
+
+  .popular-image {
+    height: 140px;
+  }
+
+  .home-review-card {
+    font-size: 11px;
+  }
+}
