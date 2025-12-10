@@ -22,6 +22,7 @@ namespace OrderService.Domain.Entities
         public bool IsDelivery { get; set; }
         public decimal TotalPrice { get; set; }
         public string? GiftMessage { get; set; }
+        public string? PickupStoreAddress { get; set; }
         public string? PhoneNumber { get; set; }
         public Guid? DeliveryInformationId { get; set; }
         public DeliveryInformation? DeliveryInformation { get; set; }

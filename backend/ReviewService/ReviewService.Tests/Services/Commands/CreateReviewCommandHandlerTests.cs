@@ -19,13 +19,22 @@ namespace ReviewService.Tests.Services.Commands
         private readonly Mock<IReviewRepository> _reviewRepositoryMock;
         private readonly Mock<CheckIdInReviews.CheckIdInReviewsClient> _grpcClientMock;
         private readonly CreateReviewCommandHandler _sut;
+        private readonly Mock<CheckOrderServiceGRPC.CheckOrderServiceGRPCClient> _checkOrderGrpcClientMock;
+
 
         public CreateReviewCommandHandlerTests()
         {
             _reviewRepositoryMock = new Mock<IReviewRepository>();
             _grpcClientMock = new Mock<CheckIdInReviews.CheckIdInReviewsClient>();
-            _sut = new CreateReviewCommandHandler(_reviewRepositoryMock.Object, _grpcClientMock.Object);
+            _checkOrderGrpcClientMock = new Mock<CheckOrderServiceGRPC.CheckOrderServiceGRPCClient>();
+
+            _sut = new CreateReviewCommandHandler(
+                _reviewRepositoryMock.Object,
+                _grpcClientMock.Object,
+                _checkOrderGrpcClientMock.Object
+            );
         }
+
 
         [Fact]
         public async Task Handle_ValidRequest_CreatesReview()

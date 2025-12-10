@@ -363,7 +363,7 @@ namespace OrderService.BLL.Services
 
         public async Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+            var order = await _unitOfWork.Orders.GetByIdWithIncludesAsync(orderId);
             if (order == null)
                 throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NpgsqlTypes;
 using OrderService.BLL.DTOs.OrderStatusDTOs;
 using OrderService.BLL.Services.Interfaces;
 
@@ -24,7 +25,7 @@ namespace OrderService.API.Controllers
             return Ok(statuses);
         }
 
-        [HttpGet("{id:guid}")]
+        [HttpGet("{id:guid}", Name = "GetOrderStatusById")]
         [Authorize]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
@@ -37,7 +38,7 @@ namespace OrderService.API.Controllers
         public async Task<IActionResult> CreateAsync([FromBody] OrderStatusCreateDto dto)
         {
             var createdStatus = await _orderStatusService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetByIdAsync), controllerName: "OrderStatus", new { id = createdStatus.Id }, createdStatus);
+            return CreatedAtRoute("GetOrderStatusById", new { id = createdStatus.Id }, createdStatus);
         }
 
         [HttpPut("{id:guid}")]

@@ -12,6 +12,7 @@ using UsersService.BLL;
 using UsersService.BLL.FluentValidation;
 using UsersService.BLL.Helpers;
 using UsersService.BLL.Interfaces;
+using UsersService.BLL.Models;
 using UsersService.BLL.Services;
 using UsersService.DAL.DbContext;
 using UsersService.Domain.Entities;
@@ -124,6 +125,16 @@ builder.Services.AddSwaggerGen(options =>
     });
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
+
+builder.Services.Configure<JwtSettings>(options =>
+{
+    options.Secret = jwtSecret;
+    options.Issuer = jwtIssuer;
+    options.Audience = jwtAudience;
+    options.AccessTokenExpirationMinutes = accessTokenExpiration;
+    options.RefreshTokenExpirationDays = refreshTokenExpiration;
+});
+
 
 var app = builder.Build();
 app.UseExceptionHandlingMiddleware();
