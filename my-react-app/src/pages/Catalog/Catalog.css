@@ -89,20 +89,29 @@ body,
   display: flex;
   align-items: center;
   gap: 16px;
+  
 }
 
 .catalog-page .filter-icon {
   font-size: 18px;
 }
 
-.catalog-page .search-wrapper {
+.search-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid #ccc;
+  border: 3px solid #ccc;
   background: #fff;
+}
+.catalog-page .search-wrapper .search-icon {
+  width: 16px;
+  height: 16px;
+  background-image: url('../../assets/images/search-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .catalog-page .search-wrapper input {
@@ -147,30 +156,33 @@ body,
 .catalog-page .catalog-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 35px;
+  gap: 100px;
+  
 }
 
 /* ================== CARD ================== */
 .catalog-page .catalog-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   align-items: center;
-  border-radius: 16px;
+  padding: 20px;
+  border-radius: 15px;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 /* HOVER EFFECT FOR CARD — SAME AS ORDER BUTTON */
 .catalog-page .catalog-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  background: #FBECF7;
 }
+
 
 /* IMAGE */
 .catalog-page .item-img {
   width: 100%;
-  aspect-ratio: 3/4;
-  border-radius: 18px;
+  aspect-ratio: 3.5/4;
+  border-radius: 15px;
   overflow: hidden;
   background: #dcdcdc;
   cursor: pointer;
@@ -196,26 +208,29 @@ body,
 }
 
 .catalog-page .item-text {
-  font-size: 14px;
+  font-size: 20px;
   text-align: left;
   line-height: 1.2;
 }
 
 /* ORDER BUTTON */
 .catalog-page .order-btn {
-  padding: 8px 26px;
-  border-radius: 26px;
+  padding: 10px 50px;
+  border-radius: 30px;
   border: none;
   background: #FBECF7;
-  font-size: 14px;
+  font-size: 20px;
   cursor: pointer;
   transition: 0.25s ease;
   margin-top: 15px;
 }
-
-.catalog-page .order-btn:hover {
-  background: #F3D7E8;
+.catalog-page .catalog-item:hover .order-btn:hover {
+  background: #D185BD;
   transform: translateY(-2px);
+}
+.catalog-page .catalog-item:hover .order-btn {
+  background: #F4BDE5; /* світліший рожевий при hover картки */
+
 }
 
 /* ================= PAGINATION ================= */

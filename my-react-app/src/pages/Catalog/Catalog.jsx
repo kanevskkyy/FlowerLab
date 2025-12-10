@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PopupMenu from "../popupMenu/PopupMenu";
 import "./Catalog.css";
@@ -8,10 +8,9 @@ import ShoppingBagIcon from "../../assets/images/ShoppingBagIcon.svg";
 import FilterIcon from "../../assets/images/FilterIcon.svg";
 import PopupFilterMenu from "../PopupFilterMenu/PopupFilterMenu";
 
-
-import img1 from "../../assets/images/testphoto.jpg";
-import img2 from "../../assets/images/testphoto.jpg";
-import img3 from "../../assets/images/testphoto.jpg";
+import bouquet1 from "../../assets/images/bouquet1.JPG";
+import bouquet2 from "../../assets/images/bouquet2.JPG";
+import bouquet3 from "../../assets/images/bouquet3.JPG";
 import img4 from "../../assets/images/testphoto.jpg";
 import img5 from "../../assets/images/testphoto.jpg";
 import img6 from "../../assets/images/testphoto.jpg";
@@ -19,17 +18,35 @@ import img7 from "../../assets/images/testphoto.jpg";
 import img8 from "../../assets/images/testphoto.jpg";
 import img9 from "../../assets/images/testphoto.jpg";
 
-
 const Catalog = () => {
   const navigate = useNavigate();
   const [sortOpen, setSortOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false); 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
+  const sortRef = useRef(null);
+  const sortButtonRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        sortRef.current &&
+        !sortRef.current.contains(event.target) &&
+        !sortButtonRef.current.contains(event.target)
+      ) {
+        setSortOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const products = [
-    { id: 1, title: "bouquet 1", price: "1000 ₴", img: img1 },
-    { id: 2, title: "bouquet 1", price: "1000 ₴", img: img2 },
-    { id: 3, title: "bouquet 1", price: "1000 ₴", img: img3 },
+    { id: 1, title: "bouquet 1", price: "1000 ₴", img: bouquet1 },
+    { id: 2, title: "bouquet 1", price: "1000 ₴", img: bouquet2 },
+    { id: 3, title: "bouquet 1", price: "1000 ₴", img: bouquet3 },
     { id: 4, title: "bouquet 1", price: "1000 ₴", img: img4 },
     { id: 5, title: "bouquet 1", price: "1000 ₴", img: img5 },
     { id: 6, title: "bouquet 1", price: "1000 ₴", img: img6 },
@@ -91,15 +108,16 @@ const Catalog = () => {
               <input type="text" placeholder="Search..." />
             </div>
           </div>
-
+        
           <div
             className="catalog-sort"
             onClick={() => setSortOpen((prev) => !prev)}
+            ref={sortButtonRef}
           >
-            <span>Sort by ⇣</span>
+            <span>SORT BY</span>
 
             {sortOpen && (
-              <div className="sort-popup">
+              <div className="sort-popup" ref={sortRef}>
                 <p>Date: New to old</p>
                 <p>Date: Old to new</p>
                 <p>Price: High to low</p>
