@@ -11,48 +11,7 @@ body,
 .catalog-page {
   font-family: "Inter", sans-serif;
   background: #ffffff;
-  min-height: 100vh; /* тягнемо на повну висоту екрану */
-}
-
-/* ================= HEADER ================= */
-.catalog-page .header {
-  width: 100%;
-  height: 70px;
-  padding: 0 40px;
-  background: #FBECF7;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #e7d0e1;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.catalog-page .header-left,
-.catalog-page .header-right {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.catalog-page .icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.catalog-page .icon {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.catalog-page .logo {
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.1;
+  min-height: 100vh;
 }
 
 /* ================= TITLE ================= */
@@ -64,17 +23,16 @@ body,
   letter-spacing: 0.5px;
   line-height: 1.1;
   text-align: center;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin-top: 10px;
+  margin-bottom: 20px;
   color: #000;
 }
 
 /* ================= MAIN WRAPPER ================= */
 .catalog-page .catalog {
-  width: 100%;              /* на всю ширину */
-  /* max-width: 1440px; */  /* можна забрати, щоб взагалі не обмежувати */
+  width: 100%;
   margin: 0;
-  padding: 40px 60px 80px;
+  padding: 40px 70px 20px;
 }
 
 /* ================= FILTER + SORT ================= */
@@ -95,14 +53,23 @@ body,
   font-size: 18px;
 }
 
-.catalog-page .search-wrapper {
+.search-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid #ccc;
+  border: 3px solid #ccc;
   background: #fff;
+}
+
+.catalog-page .search-wrapper .search-icon {
+  width: 16px;
+  height: 16px;
+  background-image: url('../../assets/images/search-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .catalog-page .search-wrapper input {
@@ -147,30 +114,30 @@ body,
 .catalog-page .catalog-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 35px;
+  gap: 75px;
 }
 
 /* ================== CARD ================== */
 .catalog-page .catalog-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   align-items: center;
-  border-radius: 16px;
+  padding: 20px;
+  border-radius: 15px;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* HOVER EFFECT FOR CARD — SAME AS ORDER BUTTON */
 .catalog-page .catalog-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  background: #FBECF7;
 }
 
 /* IMAGE */
 .catalog-page .item-img {
   width: 100%;
-  aspect-ratio: 3/4;
-  border-radius: 18px;
+  aspect-ratio: 3.5/4;
+  border-radius: 15px;
   overflow: hidden;
   background: #dcdcdc;
   cursor: pointer;
@@ -183,11 +150,11 @@ body,
   transition: transform 0.25s ease;
 }
 
-/* IMAGE MOVES UP A LITTLE TOO — MATCHING BUTTON */
 .catalog-page .catalog-item:hover .item-img img {
   transform: translateY(-2px);
 }
 
+/* BOTTOM BLOCK */
 .catalog-page .item-bottom {
   width: 100%;
   display: flex;
@@ -196,26 +163,30 @@ body,
 }
 
 .catalog-page .item-text {
-  font-size: 14px;
+  font-size: 20px;
   text-align: left;
   line-height: 1.2;
 }
 
 /* ORDER BUTTON */
 .catalog-page .order-btn {
-  padding: 8px 26px;
-  border-radius: 26px;
+  padding: 10px 50px;
+  border-radius: 30px;
   border: none;
   background: #FBECF7;
-  font-size: 14px;
+  font-size: 20px;
   cursor: pointer;
   transition: 0.25s ease;
   margin-top: 15px;
 }
 
-.catalog-page .order-btn:hover {
-  background: #F3D7E8;
+.catalog-page .catalog-item:hover .order-btn:hover {
+  background: #D185BD;
   transform: translateY(-2px);
+}
+
+.catalog-page .catalog-item:hover .order-btn {
+  background: #F4BDE5;
 }
 
 /* ================= PAGINATION ================= */
@@ -262,9 +233,7 @@ body,
   flex-direction: column;
 }
 
-/* ===================================================
-   RESPONSIVE — TABLET (768–1199px)
-=================================================== */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 1199px) {
   .catalog-page .catalog {
     padding: 30px 40px 60px;
@@ -280,22 +249,13 @@ body,
   }
 }
 
-/* ===================================================
-   MOBILE — ≤767px
-=================================================== */
 @media (max-width: 767px) {
   .catalog-page .catalog {
     padding: 16px;
   }
 
-  .catalog-page .header {
-    padding: 0 16px;
-  }
-
   .catalog-page .catalog-title {
     font-size: 26px;
-    font-weight: 400;
-    margin-bottom: 24px;
   }
 
   .catalog-page .catalog-top {
@@ -303,37 +263,18 @@ body,
     gap: 14px;
   }
 
-  .catalog-page .search-wrapper {
-    width: 85%;
-    padding: 8px 16px;
-  }
-
   .catalog-page .catalog-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
 
-  .catalog-page .product-card-item {
-    max-width: 160px;
-  }
-
-  .catalog-page .item-img {
-    aspect-ratio: 1/1;
-  }
-
-  .catalog-page .item-text {
-    text-align: center;
-  }
-
   .catalog-page .order-btn {
     width: 100%;
-    padding: 10px 0;
   }
 
   .catalog-page .footer {
     flex-direction: column;
     text-align: center;
     padding: 30px 20px;
-    gap: 18px;
   }
 }
