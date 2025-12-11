@@ -1,391 +1,512 @@
-/* ===== PAGE ===== */
+/* ===== RESET ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* ===== PAGE WRAPPER ===== */
 .cabinet-page {
+  width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
-  background: #f5f5f5;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter",
+    "Segoe UI", sans-serif;
+  background: #f4f4f4;
+  color: #000;
 }
 
 /* ===== HEADER ===== */
-.header {
-  height: 60px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
+.cabinet-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: #d9d9d9;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 32px;
+  z-index: 100;
 }
 
 .header-left,
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 24px;
 }
 
 .header-center {
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
 }
 
-.header-text {
+.lang-switch,
+.currency-switch {
   font-size: 14px;
 }
 
-.icon {
-  font-size: 18px;
-}
-
-.profile {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* ===== BURGER ===== */
-/* робимо видимим завжди, щоб не мучитись з display:none */
-.burger {
+/* Burger */
+.burger-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
+  gap: 4px;
+  padding: 0 7px;
+  cursor: pointer;
+}
+
+.burger-btn span {
+  height: 2px;
+  border-radius: 999px;
+  background: #000;
+}
+
+/* Header right icons */
+.icon-btn {
   border: none;
+  background: transparent;
   cursor: pointer;
   padding: 0;
 }
 
-/* три лінії всередині кнопки */
-.burger span {
-  display: block;
-  width: 22px;
-  height: 2px;
-  margin: 3px 0;
-  background: #000;     /* колір іконки */
-  border-radius: 2px;
+.icon-bag {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #000;
+  border-radius: 3px;
+  position: relative;
 }
 
-/* ===== MAIN LAYOUT ===== */
-.cabinet-main {
-  flex: 1;
-  display: flex;
-  gap: 32px;
-  padding: 24px 32px;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+.icon-bag::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 4px;
+  right: 4px;
+  height: 5px;
+  border-radius: 6px 6px 0 0;
+  border: 1.5px solid #000;
+  border-bottom: none;
 }
 
-/* ===== SIDEBAR (DESKTOP) ===== */
-.cabinet-sidebar {
-  width: 260px;
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 16px;
+.header-user {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
 }
 
-.sidebar-item,
-.signout-btn {
+.icon-user {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #000;
+  position: relative;
+}
+
+.icon-user::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #000;
+  transform: translateX(-50%);
+}
+
+.icon-user::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 12px;
+  height: 6px;
+  border-radius: 999px 999px 0 0;
+  border: 1.5px solid #000;
+  border-bottom: none;
+  transform: translateX(-50%);
+}
+
+.header-user-caption {
+  font-size: 14px;
+}
+
+/* ===== BODY LAYOUT ===== */
+.cabinet-body {
+  display: flex;
+  padding-top: 72px; /* height of header */
+  min-height: calc(100vh - 72px);
+}
+
+/* ===== SIDEBAR ===== */
+.cabinet-sidebar {
+  width: 260px;
+  background: #d3d3d3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-item {
+  width: 100%;
+  border: none;
+  background: transparent;
   display: flex;
   align-items: center;
   gap: 12px;
-  background: none;
-  border: none;
+  padding: 14px 24px;
+  font-size: 15px;
   cursor: pointer;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 14px;
   text-align: left;
 }
 
-.sidebar-item:hover,
-.signout-btn:hover {
-  background: #f2f2f2;
-}
-
-.sidebar-item.active {
-  background: #eaeaea;
-  font-weight: 600;
-}
-
-.sidebar-bottom {
-  margin-top: auto;
+.sidebar-item-active {
+  background: #bfbfbf;
 }
 
 .sidebar-icon {
-  font-size: 18px;
+  width: 26px;
+  height: 26px;
 }
 
-/* ===== CONTENT ===== */
+/* Personal info icon */
+.circle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-inner {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  border: 1.5px solid #000;
+}
+
+/* Orders icon */
+.rect-icon {
+  border-radius: 4px;
+  border: 1.5px solid #000;
+}
+
+/* Home icon */
+.home-icon {
+  position: relative;
+}
+
+.home-roof {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 2px;
+  height: 10px;
+  border-left: 1.5px solid #000;
+  border-top: 1.5px solid #000;
+  border-right: 1.5px solid #000;
+  transform: skewY(-25deg);
+  transform-origin: bottom left;
+}
+
+.home-body {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 3px;
+  height: 12px;
+  border: 1.5px solid #000;
+  border-radius: 2px;
+}
+section-title
+/* Sign out button */
+.sidebar-signout {
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.signout-icon {
+  position: relative;
+  width: 22px;
+  height: 18px;
+}
+
+.signout-box {
+  position: absolute;
+  right: 0;
+  top: 2px;
+  width: 11px;
+  height: 14px;
+  border-radius: 1px;
+  border: 1.5px solid #000;
+}
+
+.signout-arrow {
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 11px;
+  height: 0;
+  border-top: 1.5px solid #000;
+}
+
+.signout-arrow::before,
+.signout-arrow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 6px;
+  height: 0;
+  border-top: 1.5px solid #000;
+}
+
+.signout-arrow::before {
+  transform: rotate(35deg);
+  transform-origin: right center;
+  top: -3px;
+}
+
+.signout-arrow::after {
+  transform: rotate(-35deg);
+  transform-origin: right center;
+  top: 3px;
+}
+
+/* ===== MAIN CONTENT ===== */
 .cabinet-content {
   flex: 1;
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 24px;
+  background: #f4f4f4;
+  padding: 40px 80px 40px 80px;
 }
 
-.cabinet-title {
+.content-title {
+  margin: 0 0 36px;
   font-size: 22px;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Form rows – ТЕПЕР ТАКОЇ Ж ШИРИНИ, ЯК БЛОК З ЕМЕЙЛОМ */
+.form-row {
+  display: flex;
+  gap: 36px;
   margin-bottom: 24px;
+  max-width: 720px; /* така ж, як account-row */
 }
 
-.block-subtitle {
-  margin: 24px 0 16px;
-  font-size: 16px;
-}
-
-/* ===== FORMS ===== */
-.two-cols {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.one-col {
-  margin-bottom: 20px;
+.form-row.single {
+  max-width: 340px; /* телефон такої ж ширини */
 }
 
 .form-field {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .form-field label {
   font-size: 13px;
 }
 
+/* ВИСОТА І РАДІУС ЯК У account-card */
 .form-field input {
-  height: 38px;
-  border-radius: 999px;
-  border: 1px solid #ccc;
-  padding: 0 14px;
-}
-
-/* ===== INPUT WITH ACTION ===== */
-.input-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-icon.left {
-  position: absolute;
-  left: 12px;
+  height: 52px;              /* раніше було 48px */
+  border-radius: 26px;       /* як у account-card */
+  border: 1px solid #b3b3b3;
+  padding: 0 22px;
   font-size: 14px;
+  outline: none;
+  background: #fff;
 }
 
-.with-left-icon {
-  padding-left: 36px;
-}
-
-.small-action {
-  margin-left: 8px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid #ccc;
-  padding: 0 12px;
-  background: #f2f2f2;
-  cursor: pointer;
-}
-
-/* ===== BUTTONS ===== */
-.primary-btn {
-  margin-top: 16px;
-  padding: 10px 40px;
-  border-radius: 999px;
-  border: none;
-  background: #d0d0d0;
-  cursor: pointer;
-}
-
-.delete-account-btn {
-  background: none;
-  border: none;
-  color: #c0392b;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-/* ===== ORDERS ===== */
-.orders-section .cabinet-title {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-/* картка замовлення – велика сіра "капсула" */
-.order-card {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  padding: 20px 24px;
-  border-radius: 20px;
-  background: #f0f0f0;
-  margin-bottom: 24px;
-}
-
-/* ліва частина */
-.order-left {
-  display: flex;
-  gap: 8px;
-}
-
-/* одна велика картинка */
-.order-image {
-  background: #d3d3d3;
-  border-radius: 20px;
-}
-
-.order-image.large {
-  width: 160px;
-  height: 120px;
-}
-
-/* три маленькі квадрати */
-.order-left.multi .order-image.small {
-  width: 96px;
-  height: 96px;
-  border-radius: 16px;
-}
-
-/* середня частина */
-.order-middle {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.order-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.order-qty {
-  font-size: 14px;
-  color: #555;
-}
-
-.order-meta {
-  font-size: 12px;
+.form-field input::placeholder {
   color: #777;
 }
 
-/* спеціально для другої картки – мета зверху над списком */
-.order-meta.top {
-  margin-bottom: 8px;
+/* Section title */
+.section-title {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 500;
 }
 
-/* список товарів у другій картці */
-.order-products-list {
+/* Account cards */
+.account-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 13px;
+  gap: 32px;
+  margin-bottom: 18px;
+  max-width: 720px;
 }
 
-.product-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 8px;
+.account-row.full {
+  max-width: 340px;    /* така ж ширина як у контейнера email */
 }
 
-/* права частина – "Order Total" справа внизу */
-.order-right {
-  min-width: 140px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-}
 
-.order-total-label {
-  font-size: 13px;
-  color: #555;
-  margin-bottom: 4px;
-}
-
-.order-total-value {
-  font-weight: 600;
-  font-size: 16px;
-}
-
-/* трохи адаптиву, щоб на вузьких екранах картки не ламались */
-@media (max-width: 768px) {
-  .order-card {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .order-right {
-    align-items: flex-start;
-    margin-top: 12px;
-  }
-}
-
-/* ===== FOOTER ===== */
-.footer {
-  background: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  padding: 16px;
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.footer-item {
+.account-card {
+  flex: 1;
+  height: 56px;
+  border-radius: 26px;
+  border: 1px solid #b3b3b3;
+  background: #fff;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  padding: 0 22px;
+}
+
+.account-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 14px;
 }
 
-/* ===================== */
-/* ===== RESPONSIVE ===== */
-/* ===================== */
+/* Icons inside cards */
+.card-icon {
+  width: 26px;
+  height: 26px;
+}
 
-@media (max-width: 900px) {
-  .cabinet-main {
-    padding: 16px;
-  }
+/* Mail icon */
+.mail-icon {
+  position: relative;
+}
 
-  /* SIDEBAR на мобілці стає виїзним */
-  .cabinet-sidebar {
-    position: fixed;
-    top: 60px; /* висота header */
-    left: 0;
-    transform: translateX(-100%);
-    height: calc(100vh - 60px);
-    border-radius: 0;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
-    z-index: 1500;
-    transition: transform 0.3s ease;
-  }
+.mail-envelope {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 6px;
+  bottom: 6px;
+  border-radius: 4px;
+  border: 1.5px solid #000;
+}
 
-  .cabinet-sidebar.open {
-    transform: translateX(0);
-  }
+.mail-envelope::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 3px;
+  height: 0;
+  border-top: 1.5px solid #000;
+  transform: skewY(18deg);
+}
 
-  .cabinet-content {
-    width: 100%;
-    padding: 20px;
-  }
+.mail-envelope::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 3px;
+  height: 0;
+  border-top: 1.5px solid #000;
+  transform: skewY(-18deg);
+}
 
-  .two-cols {
-    grid-template-columns: 1fr;
-  }
+/* Lock icon */
+.lock-icon {
+  position: relative;
+}
 
-  .primary-btn {
-    width: 100%;
-  }
+.lock-body {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 4px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1.5px solid #000;
+}
+
+.lock-loop {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 4px;
+  height: 8px;
+  border-radius: 8px 8px 0 0;
+  border: 1.5px solid #000;
+  border-bottom: none;
+}
+
+/* Trash icon */
+.trash-icon {
+  position: relative;
+}
+
+.trash-body {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 4px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1.5px solid #000;
+}
+
+.trash-lid {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 4px;
+  height: 0;
+  border-top: 1.5px solid #000;
+}
+
+.delete-card {
+  justify-content: flex-start;
+}
+
+/* Change buttons */
+.card-action-btn {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Save button */
+.save-wrapper {
+  margin-top: 28px;
+}
+
+.save-btn {
+  min-width: 190px;
+  height: 52px;
+  border-radius: 26px;
+  border: none;
+  background: #d3d3d3;
+  font-size: 15px;
+  cursor: pointer;
 }

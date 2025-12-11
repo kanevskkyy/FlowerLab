@@ -1,303 +1,143 @@
-// src/pages/Cabinet/Cabinet.jsx
-import { useState } from 'react';
-import './Cabinet.css';
+import "./Cabinet.css";
 
-const TABS = {
-  PERSONAL: 'personal',
-  ORDERS: 'orders',
-  ADDRESSES: 'addresses',
-};
-
-export default function Cabinet({ userName = 'name', onSignOut }) {
-  const [activeTab, setActiveTab] = useState(TABS.PERSONAL);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // NEW
-
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-    setIsSidebarOpen(false); // щоб на мобілі меню закривалось після вибору
-  };
-
-  const handleSignOutClick = () => {
-    setIsSidebarOpen(false);
-    onSignOut && onSignOut();
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
-  };
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case TABS.PERSONAL:
-        return (
-          <div className="cabinet-section">
-            <h2 className="cabinet-title">Personal information</h2>
-
-            <div className="two-cols">
-              <div className="form-field">
-                <label>First Name</label>
-                <input type="text" placeholder="Name" />
-              </div>
-              <div className="form-field">
-                <label>Last Name</label>
-                <input type="text" placeholder="Name" />
-              </div>
-            </div>
-
-            <div className="one-col">
-              <div className="form-field">
-                <label>Phone Number</label>
-                <input type="tel" placeholder="+38 050 159 19 12" />
-              </div>
-            </div>
-
-            <h3 className="block-subtitle">Account information</h3>
-
-            <div className="two-cols">
-              <div className="form-field with-action">
-                <label>Email</label>
-                <div className="input-row">
-                  <span className="input-icon left">✉️</span>
-                  <input
-                    type="email"
-                    placeholder="youremail@gmail.com"
-                    className="with-left-icon"
-                  />
-                  <button type="button" className="small-action">
-                    Change
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-field with-action">
-                <label>Password</label>
-                <div className="input-row">
-                  <span className="input-icon left">🔒</span>
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    className="with-left-icon"
-                  />
-                  <button type="button" className="small-action">
-                    Change
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="one-col">
-              <div className="form-field">
-                <div className="input-row">
-                  <span className="input-icon left">🗑️</span>
-                  <button type="button" className="delete-account-btn">
-                    Delete account
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <button type="button" className="primary-btn">
-              Save changes
-            </button>
-          </div>
-        );
-
-      case TABS.ORDERS:
-  return (
-    <div className="cabinet-section orders-section">
-      <h2 className="cabinet-title">Orders history</h2>
-
-      {/* Order card 1 */}
-      <div className="order-card">
-        <div className="order-left">
-          <div className="order-image large" />
-        </div>
-
-        <div className="order-middle">
-          <div>
-            <div className="order-title">Bouquet name</div>
-            <div className="order-qty">1 pc</div>
-          </div>
-          <div className="order-meta">
-            №1006061&nbsp;&nbsp; at 10:06:10 25.10.25
-          </div>
-        </div>
-
-        <div className="order-right">
-          <div className="order-total-label">Order Total:</div>
-          <div className="order-total-value">1000 ₴</div>
-        </div>
-      </div>
-
-      {/* Order card 2 */}
-      <div className="order-card">
-        <div className="order-left multi">
-          <div className="order-image small" />
-          <div className="order-image small" />
-          <div className="order-image small" />
-        </div>
-
-        <div className="order-middle">
-          <div className="order-meta top">
-            №1006061&nbsp;&nbsp; at 10:06:10 25.10.25
-          </div>
-
-          <div className="order-products-list">
-            <div className="product-row">
-              <span>Bouquet name</span>
-              <span>1 pc</span>
-              <span>1000 ₴</span>
-            </div>
-            <div className="product-row">
-              <span>Bouquet name</span>
-              <span>1 pc</span>
-              <span>1000 ₴</span>
-            </div>
-            <div className="product-row">
-              <span>Bouquet name</span>
-              <span>1 pc</span>
-              <span>1000 ₴</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="order-right">
-          <div className="order-total-label">Order Total:</div>
-          <div className="order-total-value">3000 ₴</div>
-        </div>
-      </div>
-    </div>
-  );
-
-      case TABS.ADDRESSES:
-        return (
-          <div className="cabinet-section">
-            <h2 className="cabinet-title">Saved Addresses</h2>
-
-            <div className="one-col">
-              <div className="form-field">
-                <label>Address</label>
-                <input
-                  type="text"
-                  placeholder="Chernivtsi, Street Vyshneva, 32"
-                />
-              </div>
-            </div>
-
-            <div className="one-col">
-              <div className="form-field">
-                <label>Secondary address*</label>
-                <input
-                  type="text"
-                  placeholder="Chernivtsi, Street Medova, 19"
-                />
-              </div>
-            </div>
-
-            <button type="button" className="primary-btn">
-              Save changes
-            </button>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
+export default function Cabinet() {
   return (
     <div className="cabinet-page">
-      {/* HEADER */}
-      <header className="header">
+      {/* ===== HEADER ===== */}
+      <header className="cabinet-header">
         <div className="header-left">
-          <button className="burger" onClick={toggleSidebar}>
-            <span></span>
-            <span></span>
-            <span></span>
+          <button className="burger-btn" aria-label="Menu">
+            <span />
+            <span />
+            <span />
           </button>
-          <span className="header-text">UA/ENG</span>
+          <span className="lang-switch">UA/ENG</span>
         </div>
 
         <div className="header-center">[LOGO]</div>
 
         <div className="header-right">
-          <span className="header-text">UAH/USD</span>
-          <span className="icon">🛍</span>
-          <div className="profile">
-            <span className="icon">👤</span>
-            <span className="profile-name">{userName}</span>
+          <span className="currency-switch">UAH/USD</span>
+
+          <button className="icon-btn" aria-label="Bag">
+            <div className="icon-bag" />
+          </button>
+
+          <div className="header-user">
+            <div className="icon-user" />
+            <div className="header-user-text">
+              <span className="header-user-caption">Signed in</span>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* MAIN LAYOUT: sidebar + content */}
-      <main className="cabinet-main">
-        <aside
-          className={`cabinet-sidebar ${isSidebarOpen ? 'open' : ''}`}
-        >
-          <button
-            type="button"
-            className={`sidebar-item ${
-              activeTab === TABS.PERSONAL ? 'active' : ''
-            }`}
-            onClick={() => handleTabClick(TABS.PERSONAL)}
-          >
-            <span className="sidebar-icon">👥</span>
-            <span>Personal information</span>
-          </button>
-
-          <button
-            type="button"
-            className={`sidebar-item ${
-              activeTab === TABS.ORDERS ? 'active' : ''
-            }`}
-            onClick={() => handleTabClick(TABS.ORDERS)}
-          >
-            <span className="sidebar-icon">📄</span>
-            <span>My orders</span>
-          </button>
-
-          <button
-            type="button"
-            className={`sidebar-item ${
-              activeTab === TABS.ADDRESSES ? 'active' : ''
-            }`}
-            onClick={() => handleTabClick(TABS.ADDRESSES)}
-          >
-            <span className="sidebar-icon">🏠</span>
-            <span>Saved addresses</span>
-          </button>
-
-          <div className="sidebar-bottom">
-            <button
-              type="button"
-              className="signout-btn"
-              onClick={handleSignOutClick}
-            >
-              <span className="sidebar-icon">↩️</span>
-              <span>Sign out</span>
+      {/* ===== BODY ===== */}
+      <div className="cabinet-body">
+        {/* ===== SIDEBAR ===== */}
+        <aside className="cabinet-sidebar">
+          <nav className="sidebar-nav">
+            <button className="sidebar-item sidebar-item-active">
+              <div className="sidebar-icon circle-icon">
+                <div className="circle-inner" />
+              </div>
+              <span>Personal information</span>
             </button>
-          </div>
+
+            <button className="sidebar-item">
+              <div className="sidebar-icon rect-icon" />
+              <span>My orders</span>
+            </button>
+
+            <button className="sidebar-item">
+              <div className="sidebar-icon home-icon">
+                <div className="home-roof" />
+                <div className="home-body" />
+              </div>
+              <span>Saved addresses</span>
+            </button>
+          </nav>
+
+          <button className="sidebar-signout">
+            <div className="signout-icon">
+              <span className="signout-arrow" />
+              <span className="signout-box" />
+            </div>
+            <span>Sign out</span>
+          </button>
         </aside>
 
-        <section className="cabinet-content">{renderContent()}</section>
-      </main>
+        {/* ===== MAIN CONTENT ===== */}
+        <main className="cabinet-content">
+          <h1 className="content-title">Personal information</h1>
 
-      {/* FOOTER */}
-      <footer className="footer">
-        <div className="footer-item">
-          <span className="icon">📍</span>
-          <span>м. Чернівці, вул. Герцена 2а</span>
-        </div>
-        <div className="footer-item">
-          <span className="icon">📞</span>
-          <span>+38 050 159 19 12</span>
-        </div>
-        <div className="footer-item">
-          <span className="icon">📷</span>
-          <span>@flowerlab_vlada</span>
-        </div>
-      </footer>
+          {/* First/Last name */}
+          <div className="form-row">
+            <div className="form-field">
+              <label>First Name</label>
+              <input type="text" placeholder="Name" />
+            </div>
+
+            <div className="form-field">
+              <label>Last Name</label>
+              <input type="text" placeholder="Name" />
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div className="form-row single">
+            <div className="form-field">
+              <label>Phone Number</label>
+              <input type="text" placeholder="+38 050 159 19 12" />
+            </div>
+          </div>
+
+          {/* Account information title */}
+          <div className="section-title">Account information</div>
+
+          {/* Email + Password */}
+          <div className="account-row">
+            <div className="account-card">
+              <div className="account-card-left">
+                <div className="card-icon mail-icon">
+                  <div className="mail-envelope" />
+                </div>
+                <span>youremail@gmail.com</span>
+              </div>
+              <button className="card-action-btn">Change</button>
+            </div>
+
+            <div className="account-card">
+              <div className="account-card-left">
+                <div className="card-icon lock-icon">
+                  <div className="lock-body" />
+                  <div className="lock-loop" />
+                </div>
+                <span>Password</span>
+              </div>
+              <button className="card-action-btn">Change</button>
+            </div>
+          </div>
+
+          {/* Delete account */}
+          <div className="account-row full">
+            <div className="account-card delete-card">
+              <div className="account-card-left">
+                <div className="card-icon trash-icon">
+                  <div className="trash-body" />
+                  <div className="trash-lid" />
+                </div>
+                <span>Delete account</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Save changes button */}
+          <div className="save-wrapper">
+            <button className="save-btn">Save changes</button>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
