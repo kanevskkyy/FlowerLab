@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PopupMenu from "../popupMenu/PopupMenu";
-import Header from "../../components/Header/Header";    
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";    
 import { useCart } from "../../context/CartContext";    
 import "./Catalog.css";
 
@@ -154,21 +155,7 @@ const Catalog = () => {
       </main>
 
       {/* FOOTER */}
-      <footer className="footer">
-        <div className="footer-col">
-          <p>м. Київ, вул. Прикладна 7а</p>
-          <p>Пн — Пт: 9:00 — 21:00</p>
-        </div>
-
-        <div className="footer-col">
-          <p>+38 050 555 55 12</p>
-          <p>info@example.com</p>
-        </div>
-
-        <div className="footer-col">
-          <p>@florist_shop</p>
-        </div>
-      </footer>
+      <Footer />
 
     </div>
   );
