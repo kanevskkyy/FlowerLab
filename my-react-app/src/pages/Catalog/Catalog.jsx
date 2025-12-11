@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PopupMenu from "../popupMenu/PopupMenu";
+import Header from "../../components/Header/Header";    
+import { useCart } from "../../context/CartContext";    
 import "./Catalog.css";
 
-import UserProfileIcon from "../../assets/images/UserProfileIcon.svg";
-import ShoppingBagIcon from "../../assets/images/ShoppingBagIcon.svg";
 import FilterIcon from "../../assets/images/FilterIcon.svg";
 import PopupFilterMenu from "../PopupFilterMenu/PopupFilterMenu";
 
@@ -20,6 +20,7 @@ import img9 from "../../assets/images/testphoto.jpg";
 
 const Catalog = () => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [sortOpen, setSortOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -27,6 +28,7 @@ const Catalog = () => {
   const sortRef = useRef(null);
   const sortButtonRef = useRef(null);
 
+  // Закриття сортування при кліку поза межами
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -39,8 +41,7 @@ const Catalog = () => {
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const products = [
@@ -58,32 +59,8 @@ const Catalog = () => {
   return (
     <div className="page-wrapper catalog-page">
 
-      {/* ================= HEADER ================= */}
-      <header className="header">
-        <div className="header-left">
-          <button className="menu-btn" onClick={() => setMenuOpen(true)}>
-            ☰
-          </button>
-          <span className="lang">UA/ENG</span>
-        </div>
-
-        <div className="logo">
-          FLOWER LAB
-          <br />VLADA
-        </div>
-
-        <div className="header-right">
-          <span className="currency">UAH/USD</span>
-
-          <button className="icon-btn">
-            <img src={ShoppingBagIcon} alt="Cart" className="icon" />
-          </button>
-
-          <button className="icon-btn">
-            <img src={UserProfileIcon} alt="Profile" className="icon" />
-          </button>
-        </div>
-      </header>
+      {/* ✅ Глобальний хедер */}
+      <Header onMenuOpen={() => setMenuOpen(true)} />
 
       {/* POPUP MENU */}
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
@@ -94,21 +71,26 @@ const Catalog = () => {
 
         {/* FILTER + SORT */}
         <div className="catalog-top">
+          
+          {/* Фільтри */}
           <div className="catalog-filter">
             <button className="icon-btn" onClick={() => setFilterOpen(true)}>
-        <img src={FilterIcon} alt="Filter" className="icon" />
-        </button>
-        <PopupFilterMenu
-        isOpen={filterOpen}
-        onClose={() => setFilterOpen(false)}
-        onApply={(filters) => console.log("APPLIED FILTERS:", filters)}
-        />
+              <img src={FilterIcon} alt="Filter" className="icon" />
+            </button>
+
+            <PopupFilterMenu
+              isOpen={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              onApply={(filters) => console.log("APPLIED FILTERS:", filters)}
+            />
+
             <div className="search-wrapper">
               <span className="search-icon"></span>
               <input type="text" placeholder="Search..." />
             </div>
           </div>
-        
+
+          {/* Сортування */}
           <div
             className="catalog-sort"
             onClick={() => setSortOpen((prev) => !prev)}
@@ -128,10 +110,11 @@ const Catalog = () => {
           </div>
         </div>
 
-        {/* GRID */}
+        {/* GRID — PRODUCTS */}
         <div className="catalog-grid">
           {products.map((p) => (
             <div className="catalog-item" key={p.id}>
+              
               <div
                 className="item-img"
                 onClick={() => navigate(`/product/${p.id}`)}
@@ -145,8 +128,12 @@ const Catalog = () => {
                   <p>{p.price}</p>
                 </div>
 
-                <button className="order-btn" onClick={() => navigate("/order")}>ORDER</button>
+                {/* ORDER → додає в глобальний кошик */}
+                <button className="order-btn" onClick={() => addToCart(p)}>
+                  ORDER
+                </button>
               </div>
+
             </div>
           ))}
         </div>
@@ -166,7 +153,7 @@ const Catalog = () => {
         </div>
       </main>
 
-      {/* ================= FOOTER ================= */}
+      {/* FOOTER */}
       <footer className="footer">
         <div className="footer-col">
           <p>м. Київ, вул. Прикладна 7а</p>

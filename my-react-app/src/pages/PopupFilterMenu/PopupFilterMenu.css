@@ -22,7 +22,7 @@
 .filter-menu {
   width: 320px;
   height: 100%;
-  background: #FBEAF7;
+  background: #FFFFFF;
   padding: 30px;
   overflow-y: auto;
   position: absolute;
@@ -69,14 +69,14 @@
   width: 40%;
   padding: 8px;
   border-radius: 20px;
-  border: 1px solid #C86AAC;
+  border: 3px solid #F4BDE5;
   text-align: center;
 }
 
 .range-wrapper input[type="range"] {
   width: 100%;
   margin-top: 10px;
-  accent-color: #C86AAC;
+  accent-color: #F4BDE5;
 }
 
 /* TWO COLUMNS */
@@ -97,7 +97,8 @@
 
 .radio-item input,
 .checkbox-item input {
-  accent-color: #C86AAC;
+  accent-color: #F4BDE5;
+  
 }
 
 /* BUTTONS */
@@ -107,14 +108,14 @@
   padding: 12px;
   border-radius: 24px;
   margin-top: 16px;
-  border: 1px solid #C86AAC;
+  border: 3px solid #F4BDE5;
   background: white;
   cursor: pointer;
   font-size: 16px;
 }
 
 .apply-btn {
-  background: #C86AAC;
+  background: #F4BDE5;
   color: white;
   border: none;
 }

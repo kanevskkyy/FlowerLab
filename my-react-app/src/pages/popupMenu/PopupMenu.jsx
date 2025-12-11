@@ -17,7 +17,7 @@ const PopupMenu = ({ isOpen, onClose }) => {
       onClick={onClose}
     >
       <div className="popup-menu" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>✕</button>
+        <button className="close-btn" onClick={onClose}>☰</button>
 
         <ul className="menu-list">
 
