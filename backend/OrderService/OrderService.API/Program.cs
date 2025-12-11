@@ -1,26 +1,27 @@
-using FluentValidation.AspNetCore;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using OrderService.BLL.FluentValidation;
-using OrderService.BLL.Helpers;
+using CatalogService.API.Middleware;
 using DotNetEnv;
+using FlowerLab.Shared.Events;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using OrderService.BLL.DTOs;
+using OrderService.BLL.FluentValidation;
+using OrderService.BLL.Grpc;
+using OrderService.BLL.Helpers;
 using OrderService.BLL.Profiles;
 using OrderService.BLL.Services;
 using OrderService.BLL.Services.Interfaces;
+using OrderService.DAL.DbContext;
 using OrderService.DAL.Repositories;
 using OrderService.DAL.Repositories.Interfaces;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Database;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.OpenApi.Models;
-using MassTransit;
-using FlowerLab.Shared.Events;
 using shared.events;
-using OrderService.BLL.DTOs;
-using CatalogService.API.Middleware;
-using OrderService.BLL.Grpc;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -203,6 +204,8 @@ using (var scope = app.Services.CreateAsyncScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
     db.Database.Migrate();
+
+    await OrderSeeder.SeedAsync(db);
 }
 
 app.UseMiddleware<RequestLoggingMiddleware>();

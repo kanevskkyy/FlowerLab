@@ -8,6 +8,7 @@ var postgresPassword = builder.AddParameter("postgres-password", secret: true);
 
 var postgres = builder.AddPostgres("flower-lab-postgres", password: postgresPassword)
     .WithImage("postgres:16")
+    .WithPgAdmin()
     .WithDataVolume("flowerlab-postgres");
 
 var postgresCatalog = postgres.AddDatabase("FlowerLabCatalog");
