@@ -2,6 +2,13 @@
 import { useState } from 'react';
 import './Register.css';
 
+// SVG-іконки
+import logoIcon from '../../assets/icons/logo.svg';
+import lockIcon from '../../assets/icons/lock.svg';
+import hideIcon from '../../assets/icons/hide.svg';
+import showIcon from '../../assets/icons/show.svg';
+import messageIcon from '../../assets/icons/message.svg';
+
 export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName]   = useState('');
@@ -9,7 +16,8 @@ export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword]             = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSignUp = () => {
@@ -21,9 +29,15 @@ export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
 
   return (
     <div className="register-page">
-      {/* HEADER з логотипом, як на макеті */}
-      <header className="login-header">
-        <div className="login-logo-bar">[LOGO]</div>
+      {/* HEADER з SVG-логотипом, як в каталозі по стилю */}
+      <header className="header">
+        <div className="header-left"></div>
+
+        <div className="logo">
+          <img src={logoIcon} alt="FlowerLab" className="logo-img" />
+        </div>
+
+        <div className="header-right"></div>
       </header>
 
       {/* MAIN */}
@@ -71,12 +85,18 @@ export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
               <div className="input-row">
                 <input
                   type="email"
-                  className="input-base"
+                  className="input-base with-right-icon"
                   placeholder="youremail@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <span className="input-icon right">✉️</span>
+                <span className="input-icon right">
+                  <img
+                    src={messageIcon}
+                    alt="email icon"
+                    className="field-icon"
+                  />
+                </span>
               </div>
             </div>
           </div>
@@ -85,11 +105,17 @@ export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
           <div className="form-field full-width">
             <label className="field-label">Password</label>
             <div className="input-row">
-              <span className="input-icon left">🔒</span>
+              <span className="input-icon left">
+                <img
+                  src={lockIcon}
+                  alt="lock"
+                  className="field-icon"
+                />
+              </span>
               <input
                 type={showPassword ? 'text' : 'password'}
-                className="input-base with-left-icon"
-                placeholder="••••••••"
+                className="input-base with-left-icon with-right-icon"
+                placeholder="      ••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -98,7 +124,11 @@ export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
                 className="input-icon-btn right"
                 onClick={() => setShowPassword((v) => !v)}
               >
-                {showPassword ? '🙈' : '👁️'}
+                <img
+                  src={showPassword ? showIcon : hideIcon}
+                  alt={showPassword ? 'show password' : 'hide password'}
+                  className="field-icon"
+                />
               </button>
             </div>
           </div>
@@ -107,11 +137,17 @@ export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
           <div className="form-field full-width">
             <label className="field-label">Confirm password</label>
             <div className="input-row">
-              <span className="input-icon left">🔒</span>
+              <span className="input-icon left">
+                <img
+                  src={lockIcon}
+                  alt="lock"
+                  className="field-icon"
+                />
+              </span>
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
-                className="input-base with-left-icon"
-                placeholder="Password"
+                className="input-base with-left-icon with-right-icon"
+                placeholder="      Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -120,7 +156,11 @@ export default function Register({ onSwitchToLogin, onRegisterSuccess }) {
                 className="input-icon-btn right"
                 onClick={() => setShowConfirmPassword((v) => !v)}
               >
-                {showConfirmPassword ? '🙈' : '👁️'}
+                <img
+                  src={showConfirmPassword ? showIcon : hideIcon}
+                  alt={showConfirmPassword ? 'show password' : 'hide password'}
+                  className="field-icon"
+                />
               </button>
             </div>
           </div>
