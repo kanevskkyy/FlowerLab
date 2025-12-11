@@ -36,10 +36,7 @@ const PopupMenu = ({ isOpen, onClose }) => {
           {catalogOpen && (
             <ul className="submenu">
               <li onClick={() => goTo("/catalog")}>Bouquets</li>
-              <li onClick={() => goTo("/catalog")}>Baskets</li>
-              <li onClick={() => goTo("/catalog")}>Boxes</li>
               <li onClick={() => goTo("/catalog")}>Gifts</li>
-              <li onClick={() => goTo("/catalog")}>Balloons</li>
             </ul>
           )}
         </ul>

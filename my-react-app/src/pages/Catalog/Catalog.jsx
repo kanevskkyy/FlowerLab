@@ -9,9 +9,9 @@ import "./Catalog.css";
 import FilterIcon from "../../assets/images/FilterIcon.svg";
 import PopupFilterMenu from "../PopupFilterMenu/PopupFilterMenu";
 
-import bouquet1 from "../../assets/images/bouquet1.JPG";
-import bouquet2 from "../../assets/images/bouquet2.JPG";
-import bouquet3 from "../../assets/images/bouquet3.JPG";
+import bouquet1L from "../../assets/images/bouquet1L.jpg";
+import bouquet2 from "../../assets/images/bouquet2L.jpg";
+import bouquet3 from "../../assets/images/bouquet3L.jpg";
 import img4 from "../../assets/images/testphoto.jpg";
 import img5 from "../../assets/images/testphoto.jpg";
 import img6 from "../../assets/images/testphoto.jpg";
@@ -46,15 +46,15 @@ const Catalog = () => {
   }, []);
 
   const products = [
-    { id: 1, title: "bouquet 1", price: "1000 ₴", img: bouquet1 },
-    { id: 2, title: "bouquet 1", price: "1000 ₴", img: bouquet2 },
-    { id: 3, title: "bouquet 1", price: "1000 ₴", img: bouquet3 },
-    { id: 4, title: "bouquet 1", price: "1000 ₴", img: img4 },
-    { id: 5, title: "bouquet 1", price: "1000 ₴", img: img5 },
-    { id: 6, title: "bouquet 1", price: "1000 ₴", img: img6 },
-    { id: 7, title: "bouquet 1", price: "1000 ₴", img: img7 },
-    { id: 8, title: "bouquet 1", price: "1000 ₴", img: img8 },
-    { id: 9, title: "bouquet 1", price: "1000 ₴", img: img9 },
+    { id: 1, title: "bouquet 1", price: "1000 ₴", img: bouquet1L },
+    { id: 2, title: "bouquet 2", price: "2000 ₴", img: bouquet2 },
+    { id: 3, title: "bouquet 3", price: "1800 ₴", img: bouquet3 },
+    { id: 4, title: "bouquet 4", price: "1000 ₴", img: img4 },
+    { id: 5, title: "bouquet 5", price: "1000 ₴", img: img5 },
+    { id: 6, title: "bouquet 6", price: "1000 ₴", img: img6 },
+    { id: 7, title: "bouquet 7", price: "1000 ₴", img: img7 },
+    { id: 8, title: "bouquet 8", price: "1000 ₴", img: img8 },
+    { id: 9, title: "bouquet 9", price: "1000 ₴", img: img9 },
   ];
 
   return (
