@@ -18,6 +18,30 @@
 
 .breadcrumbs span {
   color: #000;
+  transition: color 0.3s ease;
+}
+
+.breadcrumbs span[style*="cursor"] {
+  position: relative;
+}
+
+.breadcrumbs span[style*="cursor"]:hover {
+  color: #C86AAC;
+}
+
+.breadcrumbs span[style*="cursor"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #C86AAC;
+  transition: width 0.3s ease;
+}
+
+.breadcrumbs span[style*="cursor"]:hover::after {
+  width: 100%;
 }
 
 .breadcrumbs .gray {
@@ -40,7 +64,7 @@
   color: #000;
 }
 
-/* ================= IMAGE BLOCK ================= */
+/* ================= IMAGE BLOCK & SLIDER ================= */
 .big-image-block {
   width: 90%;
   max-width: 1200px;
@@ -51,46 +75,30 @@
   overflow: hidden;
 }
 
-.image-placeholder {
+.slider-image {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #f5d5e8 0%, #e8c5d9 100%);
-  background-size: cover;
-  background-position: center;
-}
-
-.nav-left,
-.nav-right {
+  object-fit: cover;
+  border-radius: inherit;
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 40px;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  cursor: pointer;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  color: #C86AAC;
-  font-weight: 300;
+  top: 0;
+  left: 0;
+  transition: opacity 3s ease-in-out, 
+              transform 3s ease-in-out;
 }
 
-.nav-left:hover,
-.nav-right:hover {
-  background: rgba(255, 255, 255, 1);
-  transform: translateY(-50%) scale(1.1);
+.fade-in {
+  opacity: 1;
+  transform: translateX(0) scale(1);
 }
 
-.nav-left { 
+.fade-out {
+  opacity: 0;
+  transform: translateX(-30px) scale(0.98);
+}
+
+.nav-left {
   left: 20px;
-}
-
-.nav-right { 
-  right: 20px;
 }
 
 /* ================= ABOUT TEXT ================= */
@@ -116,8 +124,8 @@
 .section-title {
   font-family: 'Jomolhari', serif;
   text-align: center;
-  margin: 60px 0 40px;
-  font-size: 28px;
+  margin: 10px 0 40px;
+  font-size: 30px !important;
   font-weight: 400;
   letter-spacing: 0.5px;
   color: #000;
@@ -163,6 +171,12 @@
   line-height: 1.4;
 }
 
+.why-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
 /* ================= LOCATIONS & CONTACTS ================= */
 .info-container {
   width: 90%;
@@ -171,6 +185,7 @@
   display: flex;
   justify-content: center;
   gap: 150px;
+
 }
 
 .info-column {
@@ -196,10 +211,114 @@
   min-height: auto;
 }
 
-.why-icon {
-  width: 50px;
-  height: 50px;
+/* ================= FOOTER STYLES IN INFO SECTION ================= */
+.footer-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 28px;
+}
+
+.footer-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   object-fit: contain;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+
+}
+
+.location-icon {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+/* Стилі для текстових посилань (адреси) */
+.footer-link-text {
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.footer-link-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+  position: relative;
+  background: transparent;
+}
+
+.footer-link-text:hover p {
+  color: #C86AAC;
+}
+
+.footer-link-text p::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #C86AAC;
+  transition: width 0.3s ease;
+}
+
+.footer-link-text:hover p::after {
+  width: 100%;
+}
+
+/* Анімація іконки локації при наведенні на адресу */
+.footer-location:has(.footer-link-text:hover) .location-icon {
+  transform: scale(1.15);
+}
+
+/* Стилі для одиночних посилань (телефон, Instagram) */
+.footer-link-single {
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.footer-link-single p {
+  margin: 0;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+  position: relative;
+  background: transparent;
+}
+
+.footer-link-single:hover p {
+  color: #C86AAC;
+}
+
+.footer-link-single p::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #C86AAC;
+  transition: width 0.3s ease;
+}
+
+.footer-link-single:hover p::after {
+  width: 100%;
+}
+
+/* Анімація іконок телефону та Instagram */
+.footer-phone:has(.footer-link-single:hover) .phone-icon,
+.footer-instagram:has(.footer-link-single:hover) .instagram-icon {
+  transform: scale(1.15);
 }
 
 /* ===================================================
@@ -247,16 +366,6 @@
     height: 250px;
     border-radius: 12px;
   }
-
-  .nav-left,
-  .nav-right {
-    width: 40px;
-    height: 40px;
-    font-size: 32px;
-  }
-
-  .nav-left { left: 10px; }
-  .nav-right { right: 10px; }
 
   .about-text {
     font-size: 14px;
@@ -306,5 +415,21 @@
 
   .info-items .footer-item {
     width: 100%;
+  }
+
+  .footer-icon {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+  }
+
+  .location-icon {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .footer-link-text p,
+  .footer-link-single p {
+    font-size: 12px;
   }
 }

@@ -137,7 +137,7 @@
 .location-icon {
   width: 32px !important;
   height: 32px !important;
-  background: #FBECF7 !important;
+  background: clear !important;
 }
 
 .footer-link-text p::after {
