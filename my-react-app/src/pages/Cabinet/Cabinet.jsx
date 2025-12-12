@@ -1,143 +1,169 @@
+// src/pages/Cabinet/Cabinet.jsx
+import React, { useState } from "react";
+import Header from "../../components/Header/Header";
+import PopupMenu from "../popupMenu/PopupMenu";
 import "./Cabinet.css";
 
-export default function Cabinet() {
+const Cabinet = ({ userName, onSignOut }) => {
+  const [activeTab, setActiveTab] = useState("personal");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: userName || "",
+    lastName: "",
+    phone: "+38 066 002 03 01",
+    email: "youremail@gmail.com",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveChanges = () => {
+    console.log("Saving changes:", formData);
+  };
+
+  const handleSignOut = () => {
+    console.log("Signing out...");
+    if (onSignOut) {
+      onSignOut();
+    }
+  };
+
   return (
+    // 🔥 БІЛЬШЕ НІЯКОГО "page-wrapper" – тільки наш клас
     <div className="cabinet-page">
-      {/* ===== HEADER ===== */}
-      <header className="cabinet-header">
-        <div className="header-left">
-          <button className="burger-btn" aria-label="Menu">
-            <span />
-            <span />
-            <span />
-          </button>
-          <span className="lang-switch">UA/ENG</span>
-        </div>
+      {/* Header як є */}
+      <Header onMenuOpen={() => setMenuOpen(true)} />
 
-        <div className="header-center">[LOGO]</div>
+      {/* Popup меню як у каталозі */}
+      <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-        <div className="header-right">
-          <span className="currency-switch">UAH/USD</span>
-
-          <button className="icon-btn" aria-label="Bag">
-            <div className="icon-bag" />
-          </button>
-
-          <div className="header-user">
-            <div className="icon-user" />
-            <div className="header-user-text">
-              <span className="header-user-caption">Signed in</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* ===== BODY ===== */}
-      <div className="cabinet-body">
-        {/* ===== SIDEBAR ===== */}
+      {/* Власне кабінет */}
+      <div className="cabinet-container">
+        {/* Sidebar */}
         <aside className="cabinet-sidebar">
-          <nav className="sidebar-nav">
-            <button className="sidebar-item sidebar-item-active">
-              <div className="sidebar-icon circle-icon">
-                <div className="circle-inner" />
-              </div>
-              <span>Personal information</span>
+          <nav className="cabinet-nav">
+            <button
+              className={`nav-item ${
+                activeTab === "personal" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("personal")}
+            >
+              <span className="nav-icon">👤</span>
+              <span className="nav-text">Personal information</span>
             </button>
 
-            <button className="sidebar-item">
-              <div className="sidebar-icon rect-icon" />
-              <span>My orders</span>
+            <button
+              className={`nav-item ${activeTab === "orders" ? "active" : ""}`}
+              onClick={() => setActiveTab("orders")}
+            >
+              <span className="nav-icon">📋</span>
+              <span className="nav-text">My orders</span>
             </button>
 
-            <button className="sidebar-item">
-              <div className="sidebar-icon home-icon">
-                <div className="home-roof" />
-                <div className="home-body" />
-              </div>
-              <span>Saved addresses</span>
+            <button
+              className={`nav-item ${
+                activeTab === "addresses" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("addresses")}
+            >
+              <span className="nav-icon">🏠</span>
+              <span className="nav-text">Saved addresses</span>
             </button>
           </nav>
 
-          <button className="sidebar-signout">
-            <div className="signout-icon">
-              <span className="signout-arrow" />
-              <span className="signout-box" />
-            </div>
-            <span>Sign out</span>
+          <button className="sign-out-btn" onClick={handleSignOut}>
+            <span className="nav-icon">🚪</span>
+            <span className="nav-text">Sign out</span>
           </button>
         </aside>
 
-        {/* ===== MAIN CONTENT ===== */}
-        <main className="cabinet-content">
-          <h1 className="content-title">Personal information</h1>
+        {/* Main Content */}
+        <main className="cabinet-main">
+          <h1 className="cabinet-title">Personal information</h1>
 
-          {/* First/Last name */}
-          <div className="form-row">
-            <div className="form-field">
-              <label>First Name</label>
-              <input type="text" placeholder="Name" />
-            </div>
-
-            <div className="form-field">
-              <label>Last Name</label>
-              <input type="text" placeholder="Name" />
-            </div>
-          </div>
-
-          {/* Phone */}
-          <div className="form-row single">
-            <div className="form-field">
-              <label>Phone Number</label>
-              <input type="text" placeholder="+38 050 159 19 12" />
-            </div>
-          </div>
-
-          {/* Account information title */}
-          <div className="section-title">Account information</div>
-
-          {/* Email + Password */}
-          <div className="account-row">
-            <div className="account-card">
-              <div className="account-card-left">
-                <div className="card-icon mail-icon">
-                  <div className="mail-envelope" />
-                </div>
-                <span>youremail@gmail.com</span>
+          <form className="cabinet-form">
+            {/* Name Fields */}
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  className="form-input"
+                  placeholder="Name"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                />
               </div>
-              <button className="card-action-btn">Change</button>
-            </div>
 
-            <div className="account-card">
-              <div className="account-card-left">
-                <div className="card-icon lock-icon">
-                  <div className="lock-body" />
-                  <div className="lock-loop" />
-                </div>
-                <span>Password</span>
-              </div>
-              <button className="card-action-btn">Change</button>
-            </div>
-          </div>
-
-          {/* Delete account */}
-          <div className="account-row full">
-            <div className="account-card delete-card">
-              <div className="account-card-left">
-                <div className="card-icon trash-icon">
-                  <div className="trash-body" />
-                  <div className="trash-lid" />
-                </div>
-                <span>Delete account</span>
+              <div className="form-group">
+                <label className="form-label">Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  className="form-input"
+                  placeholder="Name"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                />
               </div>
             </div>
-          </div>
 
-          {/* Save changes button */}
-          <div className="save-wrapper">
-            <button className="save-btn">Save changes</button>
-          </div>
+            {/* Phone Number */}
+            <div className="form-group">
+              <label className="form-label">Phone Number</label>
+              <input
+                type="tel"
+                name="phone"
+                className="form-input phone-input"
+                placeholder="+38 066 002 03 01"
+                value={formData.phone}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Account Information Section */}
+            <h2 className="section-title">Account information</h2>
+
+            {/* Email and Password Row */}
+            <div className="form-row account-row">
+              <button type="button" className="account-btn">
+                <span className="account-icon">✉️</span>
+                <span className="account-text">{formData.email}</span>
+                <span className="change-btn">Change</span>
+              </button>
+
+              <button type="button" className="account-btn">
+                <span className="account-icon">🔒</span>
+                <span className="account-text">Password</span>
+                <span className="change-btn">Change</span>
+              </button>
+            </div>
+
+            {/* Delete Account */}
+            <button type="button" className="delete-account-btn">
+              <span className="account-icon">🗑️</span>
+              <span className="account-text">Delete account</span>
+            </button>
+
+            {/* Save Button */}
+            <button
+              type="button"
+              className="save-btn"
+              onClick={handleSaveChanges}
+            >
+              Save changes
+            </button>
+          </form>
         </main>
       </div>
     </div>
   );
-}
+};
+
+export default Cabinet;

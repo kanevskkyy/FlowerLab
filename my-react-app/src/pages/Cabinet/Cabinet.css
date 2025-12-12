@@ -1,512 +1,293 @@
-/* ===== RESET ===== */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* ================= PAGE WRAPPER ================= */
+/* ================= PAGE WRAPPER ================= */
 
-html,
-body,
-#root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
 
-/* ===== PAGE WRAPPER ===== */
+/* тільки фон для цієї сторінки */
 .cabinet-page {
-  width: 100%;
-  min-height: 100vh;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter",
-    "Segoe UI", sans-serif;
-  background: #f4f4f4;
-  color: #000;
-}
-
-/* ===== HEADER ===== */
-.cabinet-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 72px;
-  background: #d9d9d9;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  z-index: 100;
-}
-
-.header-left,
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.header-center {
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.lang-switch,
-.currency-switch {
-  font-size: 14px;
-}
-
-/* Burger */
-.burger-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding: 0 7px;
-  cursor: pointer;
+  min-height: 100vh;
+  width: 100%;
+  background: #FBECF7;
 }
 
-.burger-btn span {
-  height: 2px;
-  border-radius: 999px;
-  background: #000;
+.cabinet-container {
+  display: flex;
+  flex: 1;
+  background: #FBECF7;
+  width: 100%;
 }
 
-/* Header right icons */
-.icon-btn {
+
+
+
+/* ================= SIDEBAR ================= */
+.cabinet-sidebar {
+  width: 235px;
+  min-width: 235px; /* запобігає стисненню */
+  background: #F5E1EF;
+  padding: 40px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #e7d0e1;
+}
+
+.cabinet-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: none;
   border: none;
-  background: transparent;
   cursor: pointer;
-  padding: 0;
+  text-align: left;
+  transition: background 0.2s;
+  border-left: 3px solid transparent;
 }
 
-.icon-bag {
+.nav-item:hover {
+  background: rgba(203, 142, 186, 0.1);
+}
+
+.nav-item.active {
+  background: rgba(203, 142, 186, 0.15);
+  border-left: 3px solid #CB8EBA;
+}
+
+.nav-icon {
   width: 20px;
   height: 20px;
-  border: 1.5px solid #000;
-  border-radius: 3px;
-  position: relative;
-}
-
-.icon-bag::before {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: 4px;
-  right: 4px;
-  height: 5px;
-  border-radius: 6px 6px 0 0;
-  border: 1.5px solid #000;
-  border-bottom: none;
-}
-
-.header-user {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.icon-user {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1.5px solid #000;
-  position: relative;
-}
-
-.icon-user::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: 1.5px solid #000;
-  transform: translateX(-50%);
-}
-
-.icon-user::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 3px;
-  width: 12px;
-  height: 6px;
-  border-radius: 999px 999px 0 0;
-  border: 1.5px solid #000;
-  border-bottom: none;
-  transform: translateX(-50%);
-}
-
-.header-user-caption {
-  font-size: 14px;
-}
-
-/* ===== BODY LAYOUT ===== */
-.cabinet-body {
-  display: flex;
-  padding-top: 72px; /* height of header */
-  min-height: calc(100vh - 72px);
-}
-
-/* ===== SIDEBAR ===== */
-.cabinet-sidebar {
-  width: 260px;
-  background: #d3d3d3;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-top: 12px;
-  padding-bottom: 12px;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-item {
-  width: 100%;
-  border: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 24px;
-  font-size: 15px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.sidebar-item-active {
-  background: #bfbfbf;
-}
-
-.sidebar-icon {
-  width: 26px;
-  height: 26px;
-}
-
-/* Personal info icon */
-.circle-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 18px;
 }
 
-.circle-inner {
-  width: 19px;
-  height: 19px;
-  border-radius: 50%;
-  border: 1.5px solid #000;
+.nav-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-/* Orders icon */
-.rect-icon {
-  border-radius: 4px;
-  border: 1.5px solid #000;
+.nav-text {
+  font-size: 15px;
+  color: #000;
+  font-weight: 400;
 }
 
-/* Home icon */
-.home-icon {
-  position: relative;
-}
-
-.home-roof {
-  position: absolute;
-  left: 5px;
-  right: 5px;
-  top: 2px;
-  height: 10px;
-  border-left: 1.5px solid #000;
-  border-top: 1.5px solid #000;
-  border-right: 1.5px solid #000;
-  transform: skewY(-25deg);
-  transform-origin: bottom left;
-}
-
-.home-body {
-  position: absolute;
-  left: 7px;
-  right: 7px;
-  bottom: 3px;
-  height: 12px;
-  border: 1.5px solid #000;
-  border-radius: 2px;
-}
-section-title
-/* Sign out button */
-.sidebar-signout {
-  border: none;
-  background: transparent;
+.sign-out-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 24px;
-  font-size: 14px;
+  gap: 12px;
+  padding: 16px 24px;
+  background: none;
+  border: none;
   cursor: pointer;
-}
-
-.signout-icon {
-  position: relative;
-  width: 22px;
-  height: 18px;
-}
-
-.signout-box {
-  position: absolute;
-  right: 0;
-  top: 2px;
-  width: 11px;
-  height: 14px;
-  border-radius: 1px;
-  border: 1.5px solid #000;
-}
-
-.signout-arrow {
-  position: absolute;
-  left: 0;
-  top: 7px;
-  width: 11px;
-  height: 0;
-  border-top: 1.5px solid #000;
-}
-
-.signout-arrow::before,
-.signout-arrow::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  width: 6px;
-  height: 0;
-  border-top: 1.5px solid #000;
-}
-
-.signout-arrow::before {
-  transform: rotate(35deg);
-  transform-origin: right center;
-  top: -3px;
-}
-
-.signout-arrow::after {
-  transform: rotate(-35deg);
-  transform-origin: right center;
-  top: 3px;
-}
-
-/* ===== MAIN CONTENT ===== */
-.cabinet-content {
-  flex: 1;
-  background: #f4f4f4;
-  padding: 40px 80px 40px 80px;
-}
-
-.content-title {
-  margin: 0 0 36px;
-  font-size: 22px;
-  font-weight: 500;
   text-align: left;
+  transition: background 0.2s;
+  margin-top: auto;
 }
 
-/* Form rows – ТЕПЕР ТАКОЇ Ж ШИРИНИ, ЯК БЛОК З ЕМЕЙЛОМ */
-.form-row {
-  display: flex;
-  gap: 36px;
-  margin-bottom: 24px;
-  max-width: 720px; /* така ж, як account-row */
+.sign-out-btn:hover {
+  background: rgba(203, 142, 186, 0.1);
 }
 
-.form-row.single {
-  max-width: 340px; /* телефон такої ж ширини */
-}
-
-.form-field {
+/* ================= MAIN CONTENT ================= */
+.cabinet-main {
   flex: 1;
+  padding: 60px 80px;
+  background: #FBECF7;
+  max-width: 100%; /* запобігає виходу за межі */
+  box-sizing: border-box; /* padding враховується в ширину */
+}
+
+.cabinet-title {
+  font-size: 32px;
+  font-weight: 400;
+  color: #000;
+  margin-bottom: 40px;
+}
+
+/* ================= FORM ================= */
+.cabinet-form {
+  max-width: 800px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.form-field label {
-  font-size: 13px;
-}
-
-/* ВИСОТА І РАДІУС ЯК У account-card */
-.form-field input {
-  height: 52px;              /* раніше було 48px */
-  border-radius: 26px;       /* як у account-card */
-  border: 1px solid #b3b3b3;
-  padding: 0 22px;
+.form-label {
   font-size: 14px;
+  color: #000;
+  font-weight: 400;
+}
+
+.form-input {
+  padding: 14px 20px;
+  border: 1px solid #D4A5C8;
+  border-radius: 25px;
+  background: #FBECF7;
+  font-size: 14px;
+  color: #000;
   outline: none;
-  background: #fff;
+  transition: border-color 0.2s;
 }
 
-.form-field input::placeholder {
-  color: #777;
+.form-input::placeholder {
+  color: #999;
 }
 
-/* Section title */
+.form-input:focus {
+  border-color: #CB8EBA;
+}
+
+.phone-input {
+  max-width: 370px;
+}
+
+/* ================= SECTION TITLE ================= */
 .section-title {
-  margin-top: 16px;
-  margin-bottom: 16px;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 400;
+  color: #000;
+  margin: 48px 0 24px 0;
 }
 
-/* Account cards */
+/* ================= ACCOUNT BUTTONS ================= */
 .account-row {
-  display: flex;
-  gap: 32px;
-  margin-bottom: 18px;
-  max-width: 720px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
-.account-row.full {
-  max-width: 340px;    /* така ж ширина як у контейнера email */
-}
-
-
-.account-card {
-  flex: 1;
-  height: 56px;
-  border-radius: 26px;
-  border: 1px solid #b3b3b3;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-}
-
-.account-card-left {
+.account-btn {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 14px 20px;
+  border: 1px solid #D4A5C8;
+  border-radius: 25px;
+  background: #FBECF7;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.account-btn:hover {
+  border-color: #CB8EBA;
+  background: rgba(203, 142, 186, 0.05);
+}
+
+.account-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.account-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.account-text {
+  flex: 1;
   font-size: 14px;
+  color: #000;
+  text-align: left;
 }
 
-/* Icons inside cards */
-.card-icon {
-  width: 26px;
-  height: 26px;
-}
-
-/* Mail icon */
-.mail-icon {
-  position: relative;
-}
-
-.mail-envelope {
-  position: absolute;
-  left: 3px;
-  right: 3px;
-  top: 6px;
-  bottom: 6px;
-  border-radius: 4px;
-  border: 1.5px solid #000;
-}
-
-.mail-envelope::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  right: 2px;
-  top: 3px;
-  height: 0;
-  border-top: 1.5px solid #000;
-  transform: skewY(18deg);
-}
-
-.mail-envelope::after {
-  content: "";
-  position: absolute;
-  left: 2px;
-  right: 2px;
-  bottom: 3px;
-  height: 0;
-  border-top: 1.5px solid #000;
-  transform: skewY(-18deg);
-}
-
-/* Lock icon */
-.lock-icon {
-  position: relative;
-}
-
-.lock-body {
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  bottom: 4px;
-  height: 12px;
-  border-radius: 3px;
-  border: 1.5px solid #000;
-}
-
-.lock-loop {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  top: 4px;
-  height: 8px;
-  border-radius: 8px 8px 0 0;
-  border: 1.5px solid #000;
-  border-bottom: none;
-}
-
-/* Trash icon */
-.trash-icon {
-  position: relative;
-}
-
-.trash-body {
-  position: absolute;
-  left: 7px;
-  right: 7px;
-  bottom: 4px;
-  height: 12px;
-  border-radius: 2px;
-  border: 1.5px solid #000;
-}
-
-.trash-lid {
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 4px;
-  height: 0;
-  border-top: 1.5px solid #000;
-}
-
-.delete-card {
-  justify-content: flex-start;
-}
-
-/* Change buttons */
-.card-action-btn {
-  border: none;
-  background: transparent;
+.change-btn {
   font-size: 13px;
+  color: #CB8EBA;
+  font-weight: 500;
+}
+
+/* ================= DELETE ACCOUNT ================= */
+.delete-account-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border: 1px solid #D4A5C8;
+  border-radius: 25px;
+  background: #FBECF7;
   cursor: pointer;
+  transition: all 0.2s;
+  max-width: 370px;
+  margin-bottom: 48px;
 }
 
-/* Save button */
-.save-wrapper {
-  margin-top: 28px;
+.delete-account-btn:hover {
+  border-color: #d68a8a;
+  background: rgba(214, 138, 138, 0.05);
 }
 
+/* ================= SAVE BUTTON ================= */
 .save-btn {
-  min-width: 190px;
-  height: 52px;
-  border-radius: 26px;
+  padding: 16px 48px;
+  background: linear-gradient(135deg, #E9A5D4 0%, #CB8EBA 100%);
   border: none;
-  background: #d3d3d3;
-  font-size: 15px;
+  border-radius: 25px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(203, 142, 186, 0.3);
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(203, 142, 186, 0.4);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .cabinet-container {
+    flex-direction: column;
+  }
+
+  .cabinet-sidebar {
+    width: 100%;
+    padding: 20px 0;
+  }
+
+  .cabinet-main {
+    padding: 40px 20px;
+  }
+
+  .form-row,
+  .account-row {
+    grid-template-columns: 1fr;
+  }
+
+  .phone-input {
+    max-width: 100%;
+  }
 }
