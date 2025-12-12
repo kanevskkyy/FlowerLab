@@ -91,13 +91,13 @@ export default function HomePage() {
             <div className="about-text">
               <p>
                 Welcome to our flower shop — a place where every bouquet tells a
-                story. We believe that flowers are more than just a gift; they
+                story. We believe that fdvdvlowers are more than just a gift; they
                 are a way to express emotions, share happiness, and make every
                 moment memorable.
               </p>
               <p>
                 Our team carefully selects fresh flowers every day to ensure the
-                highest quality and beauty in every arrangement. Whether it&apos;s a
+                highest quality and befgauty in every arrangement. Whether it&apos;s a
                 romantic gesture, a celebration, or just a small token of
                 appreciation, we create bouquets that speak from the heart.
               </p>

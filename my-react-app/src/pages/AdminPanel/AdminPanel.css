@@ -1,79 +1,115 @@
-/* ===== PAGE ===== */
+/* ==================================================
+   PAGE
+================================================== */
 .admin-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f3f3f3;
-  font-family: Arial, sans-serif;
+  background: #ffffff;
+  font-family: "Inter", sans-serif;
 }
 
-/* ===== HEADER ===== */
+/* ==================================================
+   HEADER — FlowerLab style
+================================================== */
 .admin-header {
-  height: 60px;
-  background: #d9d9d9;
+  height: 70px;
+  background: #FBECF7;                 /* ✅ той самий рожевий */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e7d0e1;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .admin-logo {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 .admin-title {
-  font-size: 18px;
+  font-family: "Jomolhari", serif;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
 }
 
+/* logout */
 .logout-btn {
   border: none;
   background: none;
   cursor: pointer;
   font-size: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: background-color 0.25s ease;
 }
 
-/* ===== MAIN ===== */
+.logout-btn:hover {
+  background: #F3D7E8;
+}
+
+/* ==================================================
+   MAIN
+================================================== */
 .admin-main {
   flex: 1;
   display: flex;
 }
 
-/* ===== SIDEBAR ===== */
+/* ==================================================
+   SIDEBAR — FlowerLab style
+================================================== */
 .admin-sidebar {
   width: 220px;
-  background: #e0e0e0;
-  padding: 20px 10px;
+  background: #FBECF7;
+  padding: 20px 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  border-right: 1px solid #e7d0e1;
 }
 
-/* sidebar buttons */
+/* sidebar button */
 .admin-sidebar-item {
-  background: none;
+  background: transparent;
   border: none;
-  padding: 10px 12px;
+  padding: 10px 14px;
   text-align: left;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 999px;
   font-size: 14px;
+  transition: background-color 0.25s ease;
 }
 
 .admin-sidebar-item:hover {
-  background: #d0d0d0;
+  background: #F3D7E8; /* ✅ hover як у FlowerLab */
 }
 
 .admin-sidebar-item.active {
-  background: #c0c0c0;
-  font-weight: bold;
+  background: #e7d0e1; /* ✅ active — темніше */
+  font-weight: 600;
 }
 
-/* ===== CONTENT ===== */
+/* ==================================================
+   CONTENT
+================================================== */
 .admin-content {
   flex: 1;
   padding: 30px;
   overflow-y: auto;
+  background: #ffffff;
 }
+
+/* ==================================================
+   BURGER
+================================================== */
 .admin-burger {
   display: none;
   flex-direction: column;
@@ -91,27 +127,21 @@
   display: block;
 }
 
-/* header left wrapper */
-.admin-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* ===== MOBILE / TABLET ===== */
+/* ==================================================
+   MOBILE / TABLET
+================================================== */
 @media (max-width: 900px) {
-
   /* показуємо бургер */
   .admin-burger {
     display: flex;
   }
 
-  /* sidebar стає виїзним */
+  /* виїзний sidebar */
   .admin-sidebar {
     position: fixed;
-    top: 60px;
+    top: 70px; /* = header height */
     left: 0;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 70px);
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     z-index: 1000;
