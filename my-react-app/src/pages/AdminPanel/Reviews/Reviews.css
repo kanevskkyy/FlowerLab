@@ -1,0 +1,146 @@
+/* контейнер сторінки */
+.reviews-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* заголовок по центру */
+.reviews-title {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 24px;
+}
+
+/* список карток */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* одна картка відгуку */
+.review-card {
+  display: flex;
+  justify-content: space-between;
+  background: #e0e0e0;
+  border-radius: 22px;
+  padding: 16px 18px;
+}
+
+/* ліва частина (аватар + текст) */
+.review-left {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+
+.review-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #c4c4c4;
+}
+
+.review-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.review-stars {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.star {
+  color: #b0b0b0;
+}
+
+.star.filled {
+  color: #000;
+}
+
+.review-text {
+  font-size: 13px;
+}
+
+/* права сіра панель */
+.review-actions-panel {
+  width: 120px;
+  background: #d7d7d7;
+  border-radius: 18px;
+  padding: 10px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-left: 16px;
+}
+
+.review-actions-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.review-actions-bottom {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* кнопки ✓ та 🗑 */
+.review-action-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+/* ===== Reviews адаптація (НЕ ЧІПАЄ ПК) ===== */
+@media (max-width: 768px) {
+  .reviews-page {
+    padding: 0 16px;
+    max-width: 100%;
+  }
+
+  .review-card {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  /* ліва частина — на всю ширину */
+  .review-left {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  /* права панель стає нижнім блоком */
+  .review-actions-panel {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+  }
+
+  .review-actions-top,
+  .review-actions-bottom {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .review-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .review-text {
+    font-size: 12px;
+  }
+}

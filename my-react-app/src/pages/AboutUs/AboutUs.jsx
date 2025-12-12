@@ -1,129 +1,189 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AboutUs.css";
-import PopupMenu from "../popupMenu/PopupMenu";
 
-import UserProfileIcon from "../../assets/images/UserProfileIcon.svg";
-import ShoppingBagIcon from "../../assets/images/ShoppingBagIcon.svg";
+import PopupMenu from "../popupMenu/PopupMenu";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
+
+import LocationIcon from "../../assets/images/location-icon.svg";
+import PhoneIcon from "../../assets/images/phone-icon.svg";
+import InstagramIcon from "../../assets/images/instagram-icon.svg";
+import SparklesIcon from "../../assets/images/sparkles-icon.svg";
+import FlowerIcon from "../../assets/images/flower-icon.svg";
+import HandIcon from "../../assets/images/hand-icon.svg";
+import TruckIcon from "../../assets/images/truck-icon.svg";
+
+// Імпорт реальних фото для слайдера
+import Photo1 from "../../assets/images/headerPhoto.svg";
+import Photo2 from "../../assets/images/bouquet1.JPG";
 
 const AboutUs = () => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Масив фото
+  const images = [Photo1, Photo2, Photo1, Photo2];
+
+  const [current, setCurrent] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  // Автоматичний слайд з плавним переходом
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+
+      setTimeout(() => {
+        setCurrent((prev) => (prev + 1) % images.length);
+        setFade(true);
+      }, 800); // плавна зміна
+    }, 5000); // показ кожного зображення 5 секунд
+
+    return () => clearInterval(interval);
+  }, [images.length]);
 
   return (
     <div className="about-page">
-
-      {/* ================= HEADER ================= */}
-      <header className="header">
-        <div className="header-left">
-          <button className="menu-btn" onClick={() => setMenuOpen(true)}>☰</button>
-          <span className="lang">UA/ENG</span>
-        </div>
-
-        <div className="logo">[LOGO]</div>
-
-        <div className="header-right">
-          <span className="currency">UAH/USD</span>
-          <button className="icon-btn">
-            <img src={ShoppingBagIcon} className="icon" />
-          </button>
-          <button className="icon-btn">
-            <img src={UserProfileIcon} className="icon" />
-          </button>
-        </div>
-      </header>
-
-      {/* Popup */}
+      
+      <Header onMenuOpen={() => setMenuOpen(true)} />
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      {/* ================= BREADCRUMBS ================= */}
+      {/* Breadcrumbs */}
       <div className="breadcrumbs">
-        <span>Main page</span> <span className="arrow">›</span> <span className="gray">About us</span>
+        <span onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+          Main page
+        </span>
+        <span className="arrow">›</span>
+        <span className="gray">About us</span>
       </div>
 
-      {/* ================= TITLE ================= */}
       <h1 className="page-title">ABOUT US</h1>
 
-      {/* ================= BIG IMAGE BLOCK ================= */}
+      {/* ================= SLIDER ================= */}
       <div className="big-image-block">
-        <button className="nav-left">‹</button>
-        <div className="image-placeholder"></div>
-        <button className="nav-right">›</button>
+
+        <img
+          src={images[current]}
+          className={`slider-image ${fade ? "fade-in" : "fade-out"}`}
+          alt="Slide"
+        />
+
       </div>
 
-      {/* ================= TEXT ================= */}
+      {/* TEXT */}
       <div className="about-text">
-        <p>
-          Welcome to our flower shop — a place where every bouquet tells a story.
-          We believe that flowers are more than just a gift; they are a way to express emotions,
-          share happiness, and make every moment memorable.
-        </p>
-
-        <p>
-          Our team carefully selects fresh flowers every day to ensure the highest quality and beauty in every arrangement.
-          Whether it's a romantic gesture, a celebration, or just a small token of appreciation,
-          we create bouquets that speak from the heart.
-        </p>
-
-        <p>
-          We take pride in our attention to detail, creative designs, and friendly service.
-          Each bouquet is handcrafted with love, tailored to fit your style and occasion.
+        <p className="break-line" style={{ lineHeight: "2.0" }}>
+          We are FlowerLab Vlada, a floral design studio.<br />
+          Our team creates premium bouquets and signature floral arrangements with a focus on quality, style, and emotion. Daily deliveries of fresh flowers, a wide selection, and caring service make us the studio people trust in Chernivtsi.
+          <br />
+          We are the first in Ukraine to introduce the format of giant bouquets and large signature box compositions. This has become part of our unique style and brand identity.
+          <br />
+          We continuously grow, learn, and improve our work. We expand our team, introduce new shapes, colors, and arrangements, explore global trends, and adapt them for our clients.
+          Our studio also collaborates with various brands and venues, creating floral solutions for events, gifts, and visual decor.
+          <br />
+          FlowerLab Vlada is quality, style, and service that inspire and leave a lasting impression.
         </p>
       </div>
 
-      {/* ================= WHY CHOOSE US ================= */}
+      {/* WHY */}
       <h2 className="section-title">WHY CHOOSE US?</h2>
 
       <div className="why-grid">
         <div className="why-item">
-          <div className="icon-placeholder"></div>
-          <p>Freshness Guaranteed</p>
+          <p>Freshness<br />Guaranteed</p>
+          <div className="icon-placeholder">
+            <img src={FlowerIcon} className="why-icon" alt="Freshness" />
+          </div>
         </div>
 
         <div className="why-item">
-          <div className="icon-placeholder"></div>
-          <p>Handcrafted with Love</p>
+          <p>Handcrafted<br />with Love</p>
+          <div className="icon-placeholder">
+            <img src={HandIcon} className="why-icon" alt="Handcrafted" />
+          </div>
         </div>
 
         <div className="why-item">
-          <div className="icon-placeholder"></div>
-          <p>Fast & Reliable Delivery</p>
+          <p>Fast & Reliable<br />Delivery</p>
+          <div className="icon-placeholder">
+            <img src={TruckIcon} className="why-icon" alt="Delivery" />
+          </div>
         </div>
 
         <div className="why-item">
-          <div className="icon-placeholder"></div>
-          <p>Personalized Designs</p>
+          <p>Personalized<br />Designs</p>
+          <div className="icon-placeholder">
+            <img src={SparklesIcon} className="why-icon" alt="Personalized" />
+          </div>
         </div>
       </div>
 
-      {/* ================= LOCATIONS ================= */}
-      <h2 className="section-title">Our locations:</h2>
+      {/* CONTACTS & LOCATIONS */}
+      <div className="info-container">
 
-      <div className="locations">
-        <div className="location">
-          <span className="loc-icon">📍</span>
-          <span>м. Чернівці, вул. Василя Александрі 1</span>
+        <div className="info-column">
+          <h2 className="section-title">Our locations:</h2>
+          <div className="info-items">
+
+            <div className="footer-item footer-location">
+              <img src={LocationIcon} className="footer-icon location-icon" alt="Location" />
+              <a 
+                href="https://maps.app.goo.gl/myw4J2CtWA9AGVuj6" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="footer-link-text"
+              >
+                <p>м. Чернівці, вул. Василя Александрі, 1</p>
+              </a>
+            </div>
+
+            <div className="footer-item footer-location">
+              <img src={LocationIcon} className="footer-icon location-icon" alt="Location" />
+              <a 
+                href="https://maps.app.goo.gl/11uTt4nTxqpv2K3w5" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="footer-link-text"
+              >
+                <p>м. Чернівці, вул. Герцена 2а</p>
+              </a>
+            </div>
+
+          </div>
         </div>
 
-        <div className="location">
-          <span className="loc-icon">📍</span>
-          <span>м. Чернівці, вул. Гершана 2а</span>
+        <div className="info-column">
+          <h2 className="section-title">Our contact information:</h2>
+          <div className="info-items">
+
+            <div className="footer-item footer-phone">
+              <img src={PhoneIcon} className="footer-icon phone-icon" alt="Phone" />
+              <a 
+                href="tel:+380501591912" 
+                className="footer-link-single"
+              >
+                <p>+38 050 159 19 12</p>
+              </a>
+            </div>
+
+            <div className="footer-item footer-instagram">
+              <img src={InstagramIcon} className="footer-icon instagram-icon" alt="Instagram" />
+              <a
+                href="https://www.instagram.com/flowerlab_vlada/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link-single"
+              >
+                <p>@flowerlab_vlada</p>
+              </a>
+            </div>
+
+          </div>
         </div>
+
       </div>
 
-      {/* ================= FOOTER ================= */}
-      <footer className="footer">
-        <div className="footer-col">
-          <p>м. Чернівці, вул. Гершана 2а</p>
-          <p>вул. Василя Александрі 1</p>
-        </div>
-
-        <div className="footer-col">
-          <p>+38 050 159 12 12</p>
-        </div>
-
-        <div className="footer-col">
-          <p>@florist_vlada</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

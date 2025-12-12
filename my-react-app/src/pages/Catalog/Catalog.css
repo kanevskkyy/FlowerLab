@@ -1,48 +1,17 @@
+/* ===== ГЛОБАЛЬНЕ ДЛЯ ВИСОТИ ЕКРАНУ ===== */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 /* ================= GLOBAL ================= */
 .catalog-page {
   font-family: "Inter", sans-serif;
   background: #ffffff;
-}
-
-/* ================= HEADER ================= */
-.catalog-page .header {
-  width: 100%;
-  height: 70px;
-  padding: 0 40px;
-  background: #FBECF7;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #e7d0e1;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.catalog-page .header-left,
-.catalog-page .header-right {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.catalog-page .icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.catalog-page .icon {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.catalog-page .logo {
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.1;
+  min-height: 100vh;
 }
 
 /* ================= TITLE ================= */
@@ -54,16 +23,16 @@
   letter-spacing: 0.5px;
   line-height: 1.1;
   text-align: center;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin-top: 10px;
+  margin-bottom: 20px;
   color: #000;
 }
 
 /* ================= MAIN WRAPPER ================= */
 .catalog-page .catalog {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 40px 60px 80px;
+  width: 100%;
+  margin: 0;
+  padding: 40px 70px 20px;
 }
 
 /* ================= FILTER + SORT ================= */
@@ -84,14 +53,23 @@
   font-size: 18px;
 }
 
-.catalog-page .search-wrapper {
+.search-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid #ccc;
+  border: 3px solid #ccc;
   background: #fff;
+}
+
+.catalog-page .search-wrapper .search-icon {
+  width: 16px;
+  height: 16px;
+  background-image: url('../../assets/images/search-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .catalog-page .search-wrapper input {
@@ -136,31 +114,30 @@
 .catalog-page .catalog-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 35px;
+  gap: 75px;
 }
 
-/* ================== FIXED ANIMATION BLOCK ================== */
+/* ================== CARD ================== */
 .catalog-page .catalog-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   align-items: center;
-
-  border-radius: 16px;
+  padding: 20px;
+  border-radius: 15px;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* HOVER EFFECT FOR CARD — SAME AS ORDER BUTTON */
 .catalog-page .catalog-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  background: #FBECF7;
 }
 
 /* IMAGE */
 .catalog-page .item-img {
   width: 100%;
-  aspect-ratio: 3/4;
-  border-radius: 18px;
+  aspect-ratio: 3.5/4;
+  border-radius: 15px;
   overflow: hidden;
   background: #dcdcdc;
   cursor: pointer;
@@ -170,17 +147,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  /* smooth motion */
   transition: transform 0.25s ease;
 }
 
-/* IMAGE MOVES UP A LITTLE TOO — MATCHING BUTTON */
 .catalog-page .catalog-item:hover .item-img img {
   transform: translateY(-2px);
 }
-/* ================== END FIX ================== */
 
+/* BOTTOM BLOCK */
 .catalog-page .item-bottom {
   width: 100%;
   display: flex;
@@ -189,26 +163,30 @@
 }
 
 .catalog-page .item-text {
-  font-size: 14px;
+  font-size: 20px;
   text-align: left;
   line-height: 1.2;
 }
 
 /* ORDER BUTTON */
 .catalog-page .order-btn {
-  padding: 8px 26px;
-  border-radius: 26px;
+  padding: 10px 50px;
+  border-radius: 30px;
   border: none;
   background: #FBECF7;
-  font-size: 14px;
+  font-size: 20px;
   cursor: pointer;
   transition: 0.25s ease;
   margin-top: 15px;
 }
 
-.catalog-page .order-btn:hover {
-  background: #F3D7E8;
+.catalog-page .catalog-item:hover .order-btn:hover {
+  background: #D185BD;
   transform: translateY(-2px);
+}
+
+.catalog-page .catalog-item:hover .order-btn {
+  background: #F4BDE5;
 }
 
 /* ================= PAGINATION ================= */
@@ -238,95 +216,49 @@
   gap: 10px;
 }
 
-/* ================= FOOTER ================= */
-.catalog-page .footer {
-  width: 100%;
-  background: #FBECF7;
-  padding: 35px 60px;
-  margin-top: 80px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #444;
-}
 
-.catalog-page .footer-col {
-  display: flex;
-  flex-direction: column;
-}
-
-/* ===================================================
-   RESPONSIVE — TABLET (768–1199px)
-=================================================== */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 1199px) {
-  .catalog {
+  .catalog-page .catalog {
     padding: 30px 40px 60px;
   }
 
-  .catalog-grid {
+  .catalog-page .catalog-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 28px;
   }
 
-  .item-img {
+  .catalog-page .item-img {
     aspect-ratio: 1/1;
   }
 }
 
-/* ===================================================
-   MOBILE — EXACT FIGMA LAYOUT (≤767px)
-=================================================== */
 @media (max-width: 767px) {
-  .catalog {
+  .catalog-page .catalog {
     padding: 16px;
   }
 
-  .header {
-    padding: 0 16px;
-  }
-
-  .catalog-title {
+  .catalog-page .catalog-title {
     font-size: 26px;
-    font-weight: 400;
-    margin-bottom: 24px;
   }
 
-  .catalog-top {
+  .catalog-page .catalog-top {
     flex-direction: column;
     gap: 14px;
   }
 
-  .search-wrapper {
-    width: 85%;
-    padding: 8px 16px;
-  }
-
-  .catalog-grid {
+  .catalog-page .catalog-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
 
-  .product-card-item {
-    max-width: 160px;
-  }
-
-  .item-img {
-    aspect-ratio: 1/1;
-  }
-
-  .item-text {
-    text-align: center;
-  }
-
-  .order-btn {
+  .catalog-page .order-btn {
     width: 100%;
-    padding: 10px 0;
   }
 
-  .footer {
+  .catalog-page .footer {
     flex-direction: column;
     text-align: center;
     padding: 30px 20px;
-    gap: 18px;
   }
 }
