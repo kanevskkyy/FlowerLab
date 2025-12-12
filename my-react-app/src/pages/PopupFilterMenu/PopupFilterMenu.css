@@ -1,0 +1,125 @@
+/* OVERLAY */
+.filter-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.35s ease;
+  z-index: 3000;
+}
+
+.filter-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  background: rgba(0,0,0,0.35);
+}
+
+/* MENU PANEL */
+.filter-menu {
+  width: 320px;
+  height: 100%;
+  background: #FFFFFF;
+  padding: 30px;
+  overflow-y: auto;
+  position: absolute;
+  left: -340px;
+  transition: 0.35s ease;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+}
+
+.filter-overlay.open .filter-menu {
+  left: 0;
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+  border: none;
+}
+
+.filter-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* LABELS */
+.filter-label {
+  font-size: 15px;
+  margin-top: 20px;
+  margin-bottom: 6px;
+}
+
+/* PRICE INPUTS */
+.price-inputs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-inputs input {
+  width: 40%;
+  padding: 8px;
+  border-radius: 20px;
+  border: 3px solid #F4BDE5;
+  text-align: center;
+}
+
+.range-wrapper input[type="range"] {
+  width: 100%;
+  margin-top: 10px;
+  accent-color: #F4BDE5;
+}
+
+/* TWO COLUMNS */
+.two-columns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.radio-item,
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.radio-item input,
+.checkbox-item input {
+  accent-color: #F4BDE5;
+  
+}
+
+/* BUTTONS */
+.reset-btn,
+.apply-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 24px;
+  margin-top: 16px;
+  border: 3px solid #F4BDE5;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.apply-btn {
+  background: #F4BDE5;
+  color: white;
+  border: none;
+}
+
+.apply-btn:hover {
+  background: #b15497;
+}

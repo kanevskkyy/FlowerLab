@@ -1,0 +1,243 @@
+/* ==================================================
+   GLOBAL HEIGHT
+================================================== */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* ==================================================
+   REGISTER PAGE
+================================================== */
+.register-page {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: "Inter", sans-serif;
+}
+
+/* ==================================================
+   HEADER (IDENTICAL TO CATALOG)
+================================================== */
+.register-page .header {
+  width: 100%;
+  height: 70px;
+  padding: 0 40px;
+  background: #FBECF7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e7d0e1;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.register-page .logo-img {
+  height: 32px;
+  object-fit: contain;
+}
+
+/* ==================================================
+   SIGNUP CONTENT
+================================================== */
+.signup-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 50px;
+}
+
+.signup-box {
+  text-align: center;
+}
+
+.signup-title {
+  margin-bottom: 32px;
+  font-size: 28px;
+  font-family: "Jomolhari", serif;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* ==================================================
+   GRID
+================================================== */
+.signup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 32px;
+  row-gap: 18px;
+  margin-bottom: 24px;
+}
+
+.full-width {
+  margin-top: 12px;
+}
+
+/* ==================================================
+   FORM INPUTS
+================================================== */
+.form-field {
+  text-align: left;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 🟩 БАЗОВИЙ ІНПУТ */
+.input-base {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+  background-color: #ffffff;
+  color: #000;
+  box-sizing: border-box;
+}
+
+/* 🟩 КОЛИ Є ІКОНКА ЗЛІВА */
+.with-left-icon {
+  padding-left: 48px; /* текст + placeholder зсунуті від lock.svg */
+}
+
+/* 🟩 КОЛИ Є ІКОНКА СПРАВА */
+.with-right-icon {
+  padding-right: 48px; /* текст + placeholder зсунуті від hide/show.svg */
+}
+
+/* 🟩 PLACEHOLDER виглядає м’яко */
+.input-base::placeholder {
+  opacity: 0.6;
+}
+
+/* ==================================================
+   ICONS
+================================================== */
+.input-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-icon.left {
+  left: 12px;
+}
+
+.input-icon.right {
+  right: 12px;
+}
+
+.field-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Кнопка show/hide справа */
+.input-icon-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==================================================
+   BUTTONS
+================================================== */
+.signup-main-btn {
+  margin-top: 28px;
+  padding: 10px 50px;
+  border-radius: 999px;
+  border: none;
+  background: #e7d0e1;
+  cursor: pointer;
+}
+.signup-main-btn:hover {
+  background: #d4b5c3; /* темніший рожевий */
+  transition: 0.25s ease;
+}
+
+
+.back-to-login-btn {
+  margin-top: 16px;
+  margin-left: 15px;
+  border: none;
+  background: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* ==================================================
+   MOBILE
+================================================== */
+@media (max-width: 600px) {
+  .signup-content {
+    padding-top: 24px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .signup-box {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .signup-grid {
+    grid-template-columns: 1fr;
+    row-gap: 16px;
+  }
+
+  .full-width {
+    margin-top: 0;
+  }
+
+  .signup-main-btn {
+    width: 100%;
+  }
+
+  .back-to-login-btn {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+}
+
+/* ==================================================
+   INPUT COLORS — ALWAYS WHITE
+================================================== */
+.register-page input,
+.register-page textarea {
+  background-color: #ffffff;
+  color: #000;
+}
+
+/* Autofill fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+.register-page .input-base {
+  border-radius: 999px !important;
+}

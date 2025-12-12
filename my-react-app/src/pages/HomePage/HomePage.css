@@ -1,0 +1,297 @@
+/* ================= GLOBAL ================= */
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff; /* як в about */
+  font-family: "Inter", sans-serif;
+}
+
+/* ===== MAIN ===== */
+.home-main {
+  flex: 1;
+  padding: 40px 0 60px;
+}
+
+/* ===== HERO / SLIDER ===== */
+.hero-section {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
+
+.hero-banner {
+  position: relative;
+  width: 90%;
+  max-width: 1200px;
+  height: 400px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #FBECF7;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shopping-bag-icon {
+  display: flex;
+  align-items: center;
+}
+
+.shopping-bag-icon img {
+  width: 18px;      /* піджени під макет */
+  height: 18px;
+  object-fit: contain;
+}
+
+/* arrows */
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 42px;
+  color: #ffffff;
+  padding: 0 16px;
+  user-select: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.hero-arrow:hover {
+  opacity: 0.8;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.hero-arrow-left {
+  left: 20px;
+}
+
+.hero-arrow-right {
+  right: 20px;
+}
+
+/* ===== ORDER ===== */
+.order-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0 60px;
+}
+
+.order-button {
+  padding: 12px 48px;
+  border-radius: 999px;
+  border: none;
+  background: #FBECF7;
+  color: #000;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.3s ease, transform 0.25s ease;
+}
+
+.order-button:hover {
+  background: #f5d6ea;
+  transform: translateY(-2px);
+}
+
+/* ===== TITLES ===== */
+.section-title {
+  font-family: "Jomolhari", serif;
+  text-align: center;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  margin-bottom: 40px;
+  color: #000;
+}
+
+/* ===== POPULAR ===== */
+.popular-section {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  background: #FBECF7;
+  border-radius: 16px;
+  padding: 40px;
+}
+
+.popular-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.popular-card {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.popular-card:hover {
+  transform: translateY(-6px);
+}
+.popular-card:hover .popular-img {
+  transform: scale(1.03);
+  transition: transform 0.3s ease;
+}
+
+.popular-image {
+  height: 220px;
+  background: #f1dbe9;
+  border-radius: 16px;
+  margin-bottom: 10px;
+}
+.popular-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.popular-bottom {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ===== ABOUT ===== */
+.about-section {
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto 60px;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 40px;
+}
+
+.about-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.about-image {
+  background: #FBECF7;
+  border-radius: 16px;
+  overflow: hidden;
+   height: 320px
+}
+
+.about-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* ===== REVIEWS ===== */
+.home-reviews-section {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto 80px;
+}
+
+.home-reviews-wrapper {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  gap: 20px;
+}
+
+.home-reviews-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.home-review-card {
+  background: #FBECF7;
+  border-radius: 16px;
+  padding: 20px;
+  font-size: 13px;
+  transition: transform 0.3s ease;
+}
+
+.home-review-card:hover {
+  transform: translateY(-4px);
+}
+.reviews-arrow {
+  position: static;      /* прибираємо absolute */
+  transform: none;       /* прибираємо translateY */
+  color: #C86AAC;        /* рожевий як дизайн */
+  font-size: 42px;       /* такий самий як hero */
+  padding: 0;
+}
+
+.reviews-arrow:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 1199px) {
+  .hero-banner {
+    height: 350px;
+  }
+
+  .popular-cards,
+  .home-reviews-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-banner {
+    height: 250px;
+  }
+
+  .popular-cards,
+  .home-reviews-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-banner {
+    height: 200px;
+  }
+
+  .order-button {
+    width: 100%;
+    max-width: 260px;
+  }
+}
+/* ==================================================
+   FORCE rounded POPULAR bouquet images
+================================================== */
+/* ==================================================
+   FORCE rounded POPULAR bouquet images
+================================================== */
+.home-page .popular-image {
+  border-radius: 15px !important;
+  overflow: hidden !important;
+}
+
+.home-page .popular-image img {
+  border-radius: 15px !important;
+}
+

@@ -1,0 +1,59 @@
+.side-menu {
+  width: 280px;
+  height: calc(100vh - 40px);
+  background: #d0d0d0;
+  border-radius: 8px;
+  padding: 18px 28px;
+  margin: 20px;
+  box-sizing: border-box;
+}
+
+/* кнопка × */
+.side-menu-close {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+/* навігація */
+.side-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.side-menu-item {
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* рядок "CATALOG  ˅" */
+.catalog-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.catalog-chevron {
+  font-size: 14px;
+  color: #777;
+}
+
+/* список підкатегорій */
+.side-menu-sublist {
+  list-style: none;
+  margin: 8px 0 0 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.side-menu-subitem {
+  font-size: 15px;
+}

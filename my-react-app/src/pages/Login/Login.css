@@ -1,0 +1,219 @@
+/* ==================================================
+   LOGIN PAGE
+================================================== */
+.login-page {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: "Inter", sans-serif;
+}
+
+/* ==================================================
+   HEADER (такий самий, як у catalog/register)
+================================================== */
+.login-page .header {
+  width: 100%;
+  height: 70px;
+  padding: 0 40px;
+  background: #FBECF7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e7d0e1;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.login-page .header-left,
+.login-page .header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.login-page .logo-img {
+  height: 32px;
+  object-fit: contain;
+}
+
+/* ==================================================
+   SIGNIN CONTENT
+================================================== */
+.signin-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+}
+
+.signin-box {
+  text-align: center;
+}
+
+.signin-title {
+  margin-bottom: 32px;
+  font-size: 28px;
+  font-family: "Jomolhari", serif;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* ==================================================
+   FORM FIELDS & INPUTS
+================================================== */
+.form-field {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+}
+
+/* Базовий інпут */
+.input-base {
+  width: 320px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid #c0c0c0;
+  background: #ffffff;
+  outline: none;
+  font-size: 14px;
+  box-sizing: border-box;
+  color: #000;
+}
+
+/* Коли є іконка зліва */
+.with-left-icon {
+  padding-left: 52px; /* щоб текст не заходив на lock.svg */
+}
+
+/* Коли є іконка справа */
+.with-right-icon {
+  padding-right: 52px; /* щоб текст не заходив на show/hide/message.svg */
+}
+
+/* Placeholder */
+.input-base::placeholder {
+  opacity: 0.6;
+}
+
+/* ==================================================
+   ICONS
+================================================== */
+.input-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-icon.left {
+  left: 12px;
+}
+
+.input-icon.right {
+  right: 12px;
+}
+
+.field-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* кнопка-іконка для show/hide password */
+.input-icon-btn {
+  position: absolute;
+  right: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==================================================
+   BUTTONS
+================================================== */
+.signin-btn {
+  margin-top: 20px;
+  padding: 10px 40px;
+  border-radius: 999px;
+  border: none;
+  background: #e7d0e1;
+  cursor: pointer;
+}
+.signin-btn:hover {
+  background: #d4b5c3;   /* світло-рожева, як інші кнопки */
+  border-color: #e7d0e1;
+  transition: 0.25s ease;
+}
+
+.signup-block {
+  margin-top: 40px;
+}
+
+.signup-text {
+  margin-bottom: 12px;
+}
+
+.signup-btn {
+  padding: 8px 32px;
+  border-radius: 999px;
+  border: 1px solid #c0c0c0;
+  background: transparent;
+  cursor: pointer;
+}
+.signup-btn:hover {
+  background: #e7d0e1;   /* світло-рожева, як інші кнопки */
+  border-color: #e7d0e1;
+  transition: 0.25s ease;
+}
+
+/* ==================================================
+   MOBILE
+================================================== */
+@media (max-width: 600px) {
+  .signin-content {
+    padding-top: 40px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .input-base {
+    width: 100%;
+  }
+}
+
+/* ==================================================
+   INPUT COLORS — always white
+================================================== */
+.login-page input,
+.login-page textarea {
+  background-color: #ffffff;
+  color: #000;
+}
+
+/* Autofill fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+/* FORCE rounded inputs */
+.login-page .input-base {
+  border-radius: 999px !important;
+}
