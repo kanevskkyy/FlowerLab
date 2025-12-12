@@ -45,17 +45,23 @@ const Catalog = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ ВИПРАВЛЕНО: ціни тепер числа, а для відображення додаємо ₴
   const products = [
-    { id: 1, title: "bouquet 1", price: "1000 ₴", img: bouquet1L },
-    { id: 2, title: "bouquet 2", price: "2000 ₴", img: bouquet2 },
-    { id: 3, title: "bouquet 3", price: "1800 ₴", img: bouquet3 },
-    { id: 4, title: "bouquet 4", price: "1000 ₴", img: img4 },
-    { id: 5, title: "bouquet 5", price: "1000 ₴", img: img5 },
-    { id: 6, title: "bouquet 6", price: "1000 ₴", img: img6 },
-    { id: 7, title: "bouquet 7", price: "1000 ₴", img: img7 },
-    { id: 8, title: "bouquet 8", price: "1000 ₴", img: img8 },
-    { id: 9, title: "bouquet 9", price: "1000 ₴", img: img9 },
+    { id: 1, title: "bouquet 1", price: 1000, img: bouquet1L },
+    { id: 2, title: "bouquet 2", price: 2000, img: bouquet2 },
+    { id: 3, title: "bouquet 3", price: 1800, img: bouquet3 },
+    { id: 4, title: "bouquet 4", price: 1000, img: img4 },
+    { id: 5, title: "bouquet 5", price: 1000, img: img5 },
+    { id: 6, title: "bouquet 6", price: 1000, img: img6 },
+    { id: 7, title: "bouquet 7", price: 1000, img: img7 },
+    { id: 8, title: "bouquet 8", price: 1000, img: img8 },
+    { id: 9, title: "bouquet 9", price: 1000, img: img9 },
   ];
+
+  // ✅ Функція для додавання товару в кошик з qty = 1
+  const handleAddToCart = (product) => {
+    addToCart({ ...product, qty: 1 });
+  };
 
   return (
     <div className="page-wrapper catalog-page">
@@ -126,11 +132,12 @@ const Catalog = () => {
               <div className="item-bottom">
                 <div className="item-text">
                   <p>{p.title}</p>
-                  <p>{p.price}</p>
+                  {/* ✅ Відображаємо ціну з символом ₴ */}
+                  <p>{p.price} ₴</p>
                 </div>
 
                 {/* ORDER → додає в глобальний кошик */}
-                <button className="order-btn" onClick={() => addToCart(p)}>
+                <button className="order-btn" onClick={() => handleAddToCart(p)}>
                   ORDER
                 </button>
               </div>

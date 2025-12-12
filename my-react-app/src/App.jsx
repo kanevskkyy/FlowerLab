@@ -18,7 +18,6 @@ import OrderRouter from "./pages/OrderRouter/OrderRouter"; // якщо реал�
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Cabinet from "./pages/Cabinet/Cabinet";
-
 function App() {
   return (
     <BrowserRouter>
