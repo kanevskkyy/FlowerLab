@@ -25,10 +25,10 @@
   background: #FBEAF7;
   padding: 40px 30px;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  position: absolute;
+  position: fixed;
   left: -320px;
   top: 0;
-  transition: 0.35s ease;
+  transition: left 0.35s ease;
 }
 
 .popup-menu-overlay.open .popup-menu {
@@ -36,14 +36,22 @@
 }
 
 /* CLOSE */
-.close-btn {
+.popup-menu-overlay .close-btn {
   position: absolute;
+  left: 20px;
   top: 20px;
-  right: 20px;
-  background: none;
   border: none;
+  background: none;
   cursor: pointer;
-  font-size: 22px;
+  padding: 5px;
+  line-height: 0;
+  margin-right: 230px;
+  margin-top: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.popup-menu-overlay .close-btn:hover {
+  opacity: 0.7;
 }
 
 /* MENU ITEMS */
