@@ -1,128 +1,729 @@
-/* ===== PAGE ===== */
-.admin-page {
+/* ROOT LAYOUT */
+.admin-root {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #f3f3f3;
-  font-family: Arial, sans-serif;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: #ffffff;
+  font-family: "Inter", sans-serif;
 }
 
-/* ===== HEADER ===== */
-.admin-header {
-  height: 60px;
-  background: #d9d9d9;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+/* SIDEBAR */
+.admin-side {
+  background: #FBECF7;
+  border-right: 1px solid #efe3ea;
+  padding: 18px 0;
 }
 
-.admin-logo {
-  font-weight: bold;
+.admin-brand {
+  padding: 10px 22px 18px;
 }
 
-.admin-title {
-  font-size: 18px;
-}
-
-.logout-btn {
-  border: none;
-  background: none;
-  cursor: pointer;
+.admin-brand-top {
   font-size: 14px;
+  color: #000;
+  letter-spacing: 0.2px;
 }
 
-/* ===== MAIN ===== */
-.admin-main {
-  flex: 1;
-  display: flex;
+.admin-brand-sub {
+  font-size: 14px;
+  color: #000;
+  margin-top: 2px;
 }
 
-/* ===== SIDEBAR ===== */
-.admin-sidebar {
-  width: 220px;
-  background: #e0e0e0;
-  padding: 20px 10px;
+.admin-brand-line {
+  height: 1px;
+  width: 70px;
+  background: rgba(0, 0, 0, 0.4);
+  margin-top: 8px;
+}
+
+.admin-nav {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 18px;
+  padding: 0 10px;
 }
 
-/* sidebar buttons */
-.admin-sidebar-item {
-  background: none;
+.admin-nav-item {
+  width: 100%;
   border: none;
-  padding: 10px 12px;
-  text-align: left;
+  background: transparent;
   cursor: pointer;
-  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  font-size: 16px;
+  color: #000;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.admin-nav-item:hover {
+  background: rgba(200, 106, 172, 0.10);
+}
+
+.admin-nav-item.active {
+  background: rgba(200, 106, 172, 0.18);
+}
+
+.admin-nav-ico {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* RIGHT */
+.admin-main {
+  min-width: 0;
+  background: #ffffff;
+}
+
+/* TOPBAR */
+.admin-topbar {
+  height: 86px;
+  background: #FBECF7;
+  border-bottom: 1px solid #efe3ea;
+  display: flex;
+  align-items: center;
+  padding: 0 26px;
+}
+
+.admin-topbar-center {
+  margin: 0 auto;
+  font-size: 22px;
+  font-weight: 500;
+  color: #000;
+}
+
+.admin-topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.admin-top-ico-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px;
+  line-height: 0;
+}
+
+.admin-top-ico-btn img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.admin-top-logout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 8px 6px;
+}
+
+.admin-top-logout img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.admin-top-logout span {
+  font-size: 12px;
+  color: #000;
+  opacity: 0.9;
+}
+
+/* CONTENT */
+.admin-content {
+  padding: 40px 26px 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-section {
+  width: 100%;
+  max-width: 980px;
+}
+
+.admin-section-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
+  margin: 10px 0 28px;
+  color: #000;
+}
+
+/* TOOLBAR (Bouquets) */
+.admin-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  background: transparent;
+  padding: 10px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  min-width: 300px;
+}
+
+.admin-search-ico {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.admin-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
   font-size: 14px;
 }
 
-.admin-sidebar-item:hover {
-  background: #d0d0d0;
-}
-
-.admin-sidebar-item.active {
-  background: #c0c0c0;
-  font-weight: bold;
-}
-
-/* ===== CONTENT ===== */
-.admin-content {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
-}
-.admin-burger {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  background: none;
+.admin-add-btn {
   border: none;
+  background: #f3b8df;
   cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.admin-burger span {
-  width: 22px;
-  height: 2px;
-  background: #000;
+.admin-plus {
+  font-size: 18px;
+  line-height: 0;
+}
+
+/* BOUQUETS GRID */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 34px 34px;
+}
+
+/* CARD + hover zoom */
+.admin-card-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 26px;
+  overflow: hidden;
+  background: #fbecf7;
+}
+
+.admin-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.admin-card:hover .admin-card-img img {
+  transform: scale(1.04);
+}
+
+.admin-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.admin-card-title {
+  font-size: 13px;
+  line-height: 1.15;
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-card-title .t1 {
+  font-weight: 500;
+}
+
+.admin-card-title .t2 {
+  font-weight: 400;
+}
+
+.admin-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-mini-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  line-height: 0;
+  opacity: 0.9;
+}
+
+.admin-mini-btn img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* PLACEHOLDER */
+.admin-placeholder {
+  background: #fbecf7;
+  border: 1px dashed #e6cfe0;
+  border-radius: 18px;
+  padding: 18px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* =========================
+   ORDERS TAB (Admin)
+========================= */
+.admin-orders-title {
+  margin-bottom: 0;
+}
+
+.admin-orders-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 18px 0 18px;
+}
+
+.admin-orders-sort {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.admin-orders-sort-label {
+  font-size: 12px;
+  color: #000;
+  opacity: 0.85;
+  letter-spacing: 0.2px;
+}
+
+.admin-orders-sort-select {
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  background: transparent;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  outline: none;
+}
+
+.admin-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* order pill */
+.admin-order-card {
+  background: #f6f0f4;
+  border-radius: 24px;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: 1fr 120px 170px;
+  align-items: center;
+  gap: 10px;
+}
+
+/* left block */
+.admin-order-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.admin-order-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fbecf7;
+  flex: 0 0 auto;
+}
+
+.admin-order-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-/* header left wrapper */
-.admin-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.admin-order-mid {
+  min-width: 0;
 }
 
-/* ===== MOBILE / TABLET ===== */
-@media (max-width: 900px) {
+.admin-order-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 6px;
+}
 
-  /* показуємо бургер */
-  .admin-burger {
+.admin-order-sub {
+  display: flex;
+  gap: 18px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.admin-order-name {
+  font-size: 13px;
+  color: #000;
+  opacity: 0.9;
+}
+
+.admin-order-date {
+  font-size: 11px;
+  color: rgba(0,0,0,0.55);
+}
+
+/* qty */
+.admin-order-qty {
+  justify-self: start;
+  font-size: 13px;
+  color: #000;
+  opacity: 0.85;
+}
+
+/* right total */
+.admin-order-right {
+  justify-self: end;
+  text-align: right;
+}
+
+.admin-order-total-label {
+  font-size: 14px;
+  color: #000;
+  margin-bottom: 4px;
+}
+
+.admin-order-total-value {
+  font-size: 13px;
+  color: #000;
+}
+
+/* =========================
+   CATALOG TAB (як на скріні)
+========================= */
+.admin-catalog {
+  /* та сама ширина, що й інші вкладки */
+}
+
+.admin-catalog-head {
+  position: relative;
+  margin-bottom: 6px;
+}
+
+/* трохи піджимаємо відступ як на макеті */
+.admin-catalog-title {
+  margin-bottom: 0;
+}
+
+.admin-catalog-edit {
+  position: absolute;
+  right: 0;
+  top: 56px; /* щоб було під заголовком як на скріні */
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 8px;
+  color: #000;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.admin-catalog-edit img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.admin-catalog-groups {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* група */
+.admin-catalog-group {
+  width: 100%;
+}
+
+/* “плашка” як у тебе на скріні */
+.admin-catalog-pill {
+  width: 100%;
+  background: #f6e2ef;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 16px;
+  color: #000;
+}
+
+/* список з рисочками */
+.admin-catalog-list {
+  margin: 14px 0 0;
+  padding: 0 0 0 34px; /* відступ як на скріні */
+  list-style: none;
+}
+
+.admin-catalog-list li {
+  position: relative;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #000;
+}
+
+.admin-catalog-list li::before {
+  content: "–";
+  position: absolute;
+  left: -18px;
+  top: 0;
+  opacity: 0.95;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-order-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .admin-order-right {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .admin-orders-sort {
+    align-items: flex-start;
+  }
+
+  .admin-catalog-edit {
+    position: static;
+    margin: 10px auto 0;
     display: flex;
+    justify-content: center;
   }
 
-  /* sidebar стає виїзним */
-  .admin-sidebar {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    height: calc(100vh - 60px);
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    z-index: 1000;
+  .admin-catalog-head {
+    text-align: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-root {
+    grid-template-columns: 1fr;
   }
 
-  .admin-sidebar.open {
-    transform: translateX(0);
+  .admin-side {
+    border-right: none;
+    border-bottom: 1px solid #efe3ea;
   }
 
-  /* контент на всю ширину */
-  .admin-content {
-    padding: 20px;
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-search {
+    min-width: 0;
+    width: 100%;
+  }
+}
+/* =========================
+   REVIEWS TAB (Pending)
+========================= */
+
+.admin-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+/* pill card */
+.review-card {
+  background: #f6f0f4;
+  border-radius: 22px;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  align-items: center;
+  gap: 14px;
+}
+
+/* left block */
+.review-left {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.review-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fbecf7;
+  flex: 0 0 auto;
+}
+
+.review-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.review-body {
+  min-width: 0;
+}
+
+.review-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 4px;
+}
+
+/* stars */
+.review-stars {
+  display: flex;
+  gap: 2px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.review-stars .star {
+  font-size: 12px;
+}
+
+.review-stars .star.on {
+  color: #e29acb;
+}
+
+.review-stars .star.off {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+.review-text {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.25;
+  max-width: 560px;
+}
+
+/* right actions like in screenshot */
+.review-actions {
+  justify-self: end;
+  text-align: right;
+  width: 180px;
+}
+
+.review-actions-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+  justify-items: center;
+}
+
+.review-action-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.review-actions-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  justify-items: center;
+}
+
+/* icons */
+.review-icon-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+  line-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.review-icon-btn.ok {
+  color: #e29acb;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.review-icon-btn.del img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: none;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+  .review-card {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .review-actions {
+    justify-self: start;
+    text-align: left;
+    width: auto;
+  }
+
+  .review-actions-head,
+  .review-actions-btns {
+    justify-items: start;
   }
 }

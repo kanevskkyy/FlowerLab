@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
-import { AuthContext } from "./authContext";
+import { AuthContext } from "../context/authContext";
+
 
 const STORAGE_KEY = "flowerlab_auth_user";
 
