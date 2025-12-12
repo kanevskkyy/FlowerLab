@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { useAuth } from "../../context/useAuth";
 
-
 // SVG-іконки
 import logoIcon from "../../assets/icons/logo.svg";
 import lockIcon from "../../assets/icons/lock.svg";
@@ -19,15 +18,17 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = () => {
-    // TODO: тут потім буде API
-    login({
-      name: email ? email.split("@")[0] : "name",
-      email: email || "youremail@gmail.com",
-    });
+ const handleSignIn = () => {
+  const isAdmin = email.trim().toLowerCase() === "admin@flowerlab.com";
 
-    navigate("/cabinet", { replace: true });
-  };
+  login({
+    name: email ? email.split("@")[0] : "name",
+    email: email || "youremail@gmail.com",
+    role: isAdmin ? "admin" : "user",
+  });
+
+  navigate(isAdmin ? "/admin" : "/cabinet", { replace: true });
+};
 
   return (
     <div className="login-page">
