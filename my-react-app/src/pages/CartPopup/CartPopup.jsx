@@ -1,16 +1,28 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./CartPopup.css";
 import { useCart } from "../../context/CartContext";
 import TrashIcon from "../../assets/images/trash-icon.svg";
 import CloseIcon from "../../assets/images/close-icon.svg";
 
 const CartPopup = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const { cartItems, increaseQty, decreaseQty, removeItem } = useCart();
 
-  const total = cartItems.reduce(
-    (sum, item) => sum + (item.qty || 1) * parseFloat(item.price),
-    0
-  );
+  // ✅ Правильний розрахунокTotal з урахуванням різних форматів цін
+  const total = cartItems.reduce((sum, item) => {
+    const price = typeof item.price === 'string' 
+      ? parseFloat(item.price.replace(/[^\d]/g, '')) 
+      : item.price;
+    const qty = item.qty || 1;
+    return sum + (price * qty);
+  }, 0);
+
+  // Функція для переходу на сторінку оформлення
+  const handleCheckout = () => {
+    onClose(); // Закриваємо кошик
+    navigate('/order-registered'); // Переходимо на сторінку
+  };
 
   return (
     <div className={`cart-overlay ${isOpen ? "open" : ""}`} onClick={onClose}>
@@ -45,7 +57,9 @@ const CartPopup = ({ isOpen, onClose }) => {
                       <p className="cart-item-title">{item.title}</p>
                     </div>
 
-                    <p className="cart-item-price">{item.price} ₴</p>
+                    <p className="cart-item-price">
+                      {typeof item.price === 'string' ? item.price : `${item.price} ₴`}
+                    </p>
 
                     <div className="qty-controls">
                       <button
@@ -81,7 +95,7 @@ const CartPopup = ({ isOpen, onClose }) => {
                 <span className="total-amount">{total} ₴</span>
               </div>
 
-              <button className="checkout-btn">
+              <button className="checkout-btn" onClick={handleCheckout}>
                 PROCEED TO CHECKOUT
               </button>
 

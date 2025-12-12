@@ -7,14 +7,15 @@ import OrderPlacementPickUp from "./pages/OrderPlacementPickUp/OrderPlacementPic
 import HomePage from "./pages/HomePage/HomePage";
 import Cabinet from "./pages/Cabinet/Cabinet";
 import { CartProvider } from "./context/CartProvider";
-
+import OrderPlacementRegistered from './pages/OrderPlacementRegistered/OrderPlacementRegistered';
+import CheckOut from "./pages/CheckOut/CheckOut";
 function App() {
   return (
 
     <CartProvider>
       <BrowserRouter>
       <Routes>
-
+        <Route path="/checkout" element={<CheckOut />} />
         {/* Головна сторінка */}
         <Route path="/" element={<HomePage />} />
 
@@ -34,7 +35,7 @@ function App() {
         <Route path="*" element={<HomePage />} />
         {/* Cabinet */}
         <Route path="/cabinet" element={<Cabinet />} />
-
+        <Route path="/order-registered" element={<OrderPlacementRegistered />} />
       </Routes>
     </BrowserRouter>
     </CartProvider>

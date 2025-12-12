@@ -112,9 +112,9 @@ const ProductCard = () => {
       id: `${id}-${selectedSize}`,
       productId: id,
       title: product.title,
-      price: product.prices[selectedSize],
+      price: product.prices[selectedSize], 
       size: selectedSize,
-      image: product.images[selectedSize],
+      img: product.images[selectedSize],
       qty: 1
     };
     addToCart(cartProduct);
