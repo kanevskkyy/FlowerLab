@@ -1,36 +1,36 @@
-# FlowerLab 🍽️☁️
+# FlowerLab 🌸☁️
 
-Повнофункціональна веб‑платформа для онлайн‑замовлення квітів, керування каталогом, оформлення замовлень, відгуків та адміністрування.
-
----
-
-## ⭐ Огляд MVP
-FlowerLab — це сучасна система онлайн‑замовлення квітів з мікросервісною архітектурою.
-
-### 👤 Клієнтські можливості
-- Реєстрація та авторизація
-- Перегляд каталогу товарів
-- Замовлення букетів онлайн
-- Оплата через **LiqPay** 💳
-- Історія замовлень
-- Перегляд та додавання відгуків
-
-### 🛠️ Адмін‑можливості
-- Повне керування товарами (CRUD)
-- Керування статусами замовлень
-- Керування користувачами
-- Оновлення складу через події RabbitMQ
-
-### ⚙️ Технічні можливості
-- Подієва архітектура (RabbitMQ)
-- PostgreSQL (усі сервіси, крім ReviewService: MongoDB)
-- Cloudinary для збереження зображень
-- LiqPay для платежів
-- React фронтенд
+Full-featured web platform for online flower ordering, catalog management, order processing, reviews, and administration.
 
 ---
 
-## 📂 Налаштування оточення & Setup (Local)
+## ⭐ MVP Overview
+FlowerLab is a modern online flower ordering system with microservice architecture.
+
+### 👤 Client Features
+- Registration and authentication
+- Browse product catalog
+- Order bouquets online
+- Payment via **LiqPay** 💳
+- Order history
+- View and add reviews
+
+### 🛠️ Admin Features
+- Full product management (CRUD)
+- Order status management
+- User management
+- Inventory updates via RabbitMQ events
+
+### ⚙️ Technical Features
+- Event-driven architecture (RabbitMQ)
+- PostgreSQL (all services except ReviewService: MongoDB)
+- Cloudinary for image storage
+- LiqPay for payments
+- React frontend
+
+---
+
+## 📂 Environment Setup & Local Setup
 
 ### Requirements
 - Node.js 18+
@@ -111,7 +111,7 @@ CLOUDINARY_API_SECRET=example_cloudinary_secret
 
 ## 🚀 Backend Run
 Inside each microservice:
-```
+```bash
 dotnet restore
 dotnet build
 dotnet run
@@ -121,7 +121,7 @@ dotnet run
 
 ## 🖥️ Frontend Run
 Frontend is built with **React (JSX)**, **Axios**, **Tailwind**, without Vite.
-```
+```bash
 cd frontend
 npm install
 npm start
@@ -188,4 +188,3 @@ Used for:
 
 ## 📄 License
 This project is developed as part of university coursework.
-
