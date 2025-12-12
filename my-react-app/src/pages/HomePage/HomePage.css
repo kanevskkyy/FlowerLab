@@ -280,3 +280,18 @@
     max-width: 260px;
   }
 }
+/* ==================================================
+   FORCE rounded POPULAR bouquet images
+================================================== */
+/* ==================================================
+   FORCE rounded POPULAR bouquet images
+================================================== */
+.home-page .popular-image {
+  border-radius: 15px !important;
+  overflow: hidden !important;
+}
+
+.home-page .popular-image img {
+  border-radius: 15px !important;
+}
+

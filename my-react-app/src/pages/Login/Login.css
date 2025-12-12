@@ -76,13 +76,14 @@
   position: relative;
   display: flex;
   align-items: center;
+  border-radius: 8px;
 }
 
 /* Базовий інпут */
 .input-base {
   width: 320px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 999px;
   border: 1px solid #c0c0c0;
   background: #ffffff;
   outline: none;
@@ -93,12 +94,12 @@
 
 /* Коли є іконка зліва */
 .with-left-icon {
-  padding-left: 48px; /* щоб текст не заходив на lock.svg */
+  padding-left: 52px; /* щоб текст не заходив на lock.svg */
 }
 
 /* Коли є іконка справа */
 .with-right-icon {
-  padding-right: 48px; /* щоб текст не заходив на show/hide/message.svg */
+  padding-right: 52px; /* щоб текст не заходив на show/hide/message.svg */
 }
 
 /* Placeholder */
@@ -211,4 +212,8 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
   -webkit-text-fill-color: #000 !important;
+}
+/* FORCE rounded inputs */
+.login-page .input-base {
+  border-radius: 999px !important;
 }

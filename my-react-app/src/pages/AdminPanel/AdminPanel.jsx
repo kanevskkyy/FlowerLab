@@ -1,3 +1,6 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/useAuth";
+
 import { useMemo, useState } from "react";
 import "./AdminPanel.css";
 
@@ -29,6 +32,13 @@ const NAV = [
 export default function AdminPanel() {
   const [active, setActive] = useState("bouquets");
   const [q, setQ] = useState("");
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleSignOut = () => {
+    logout(); // очищає user / token / context
+    navigate("/login", { replace: true });
+  };
 
   // ========= BOUQUETS =========
   const bouquets = useMemo(
@@ -253,10 +263,10 @@ export default function AdminPanel() {
               <img src={bellIco} alt="" />
             </button>
 
-            <button className="admin-top-logout" type="button" onClick={() => console.log("logout")}>
-              <img src={logoutIco} alt="" />
-              <span>Log out</span>
-            </button>
+           <button className="admin-top-logout" type="button" onClick={handleSignOut}>
+  <img src={logoutIco} alt="" />
+  <span>Log out</span>
+</button>
           </div>
         </header>
 
