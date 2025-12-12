@@ -1,89 +1,129 @@
-import { useState } from 'react';
-import './HomePage.css';
-import SideMenu from '../SideMenu/SideMenu'; // шлях підкоригуй, якщо інший
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./HomePage.css";
+
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
+import PopupMenu from "../popupMenu/PopupMenu";
+
+// ===== HERO IMAGES =====
+import hero1 from "../../assets/images/bouquet1.jpg";
+import hero2 from "../../assets/images/bouquet2L.jpg";
+import hero3 from "../../assets/images/bouquet3L.jpg";
+import ShoppingBagIcon from "../../assets/icons/shopping-bag.svg";
+
+
+// ===== POPULAR IMAGES (як у Catalog) =====
+import bouquet1L from "../../assets/images/bouquet1L.jpg";
+import bouquet2 from "../../assets/images/bouquet2L.jpg";
+import bouquet3 from "../../assets/images/bouquet3L.jpg";
 
 export default function HomePage() {
-  const [language, setLanguage] = useState('en'); // 'en' або 'ua'
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
- 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [slide, setSlide] = useState(0);
+
+  // HERO SLIDER
+  const heroImages = [hero1, hero2, hero3];
+
+  const prevSlide = () => {
+    setSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  };
+
+  const nextSlide = () => {
+    setSlide((prev) => (prev + 1) % heroImages.length);
+  };
+
+  // POPULAR (IDs беруться з твого Catalog: 1,2,3)
+  const popularItems = [
+    { id: 1, title: "bouquet 1", img: bouquet1L },
+    { id: 2, title: "bouquet 2", img: bouquet2 },
+    { id: 3, title: "bouquet 3", img: bouquet3 },
+  ];
 
   return (
     <div className="home-page">
       {/* HEADER */}
-      <header className="home-header">
-       <div className="home-header-left">
-  <button
-    className="burger"
-    onClick={() => setIsMenuOpen(true)}
-    aria-label="Open menu"
-  >
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
+      <Header onMenuOpen={() => setMenuOpen(true)} />
 
-  {/* ENG/UA перемикач */}
-  <div className="lang-switch">
-    <button
-      type="button"
-      className={language === 'en' ? 'active' : ''}
-      onClick={() => setLanguage('en')}
-    >
-      ENG
-    </button>
-    <span>/</span>
-    <button
-      type="button"
-      className={language === 'ua' ? 'active' : ''}
-      onClick={() => setLanguage('ua')}
-    >
-      UA
-    </button>
-  </div>
-</div>
-
-        <div className="home-header-center">[LOGO]</div>
-
-        <div className="home-header-right">
-          <span className="header-text">UAH/USD</span>
-          <span className="icon">🛍</span>
-          <span className="icon">👤 sign up/in</span>
-        </div>
-      </header>
+      {/* POPUP MENU */}
+      <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* MAIN */}
       <main className="home-main">
-        {/* HERO / SLIDER */}
+        {/* ===== HERO SLIDER ===== */}
         <section className="hero-section">
-          <button className="hero-arrow hero-arrow-left">‹</button>
-          <div className="hero-banner" />
-          <button className="hero-arrow hero-arrow-right">›</button>
+          <div className="hero-banner">
+            <img
+              src={heroImages[slide]}
+              alt={`Hero slide ${slide + 1}`}
+              className="hero-image"
+              draggable="false"
+            />
+
+            <button
+              className="hero-arrow hero-arrow-left"
+              onClick={prevSlide}
+              aria-label="Previous slide"
+              type="button"
+            >
+              ‹
+            </button>
+
+            <button
+              className="hero-arrow hero-arrow-right"
+              onClick={nextSlide}
+              aria-label="Next slide"
+              type="button"
+            >
+              ›
+            </button>
+          </div>
         </section>
 
-        {/* ORDER BUTTON */}
+        {/* ORDER */}
         <div className="order-wrapper">
           <button className="order-button">ORDER</button>
         </div>
 
-        {/* POPULAR BOUQUETS / SALES */}
+        {/* POPULAR */}
         <section className="popular-section">
           <h2 className="section-title">POPULAR BOUQUETS / SALES</h2>
 
           <div className="popular-cards">
-            {['bouquet 1', 'bouquet 2', 'bouquet 3'].map((name) => (
-              <div key={name} className="popular-card">
-                <div className="popular-image" />
+            {popularItems.map((item) => (
+              <div
+                key={item.id}
+                className="popular-card"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/product/${item.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") navigate(`/product/${item.id}`);
+                }}
+              >
+                <div className="popular-image">
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    className="popular-img"
+                    draggable="false"
+                  />
+                </div>
+
                 <div className="popular-bottom">
-                  <span className="popular-name">{name}</span>
-                  <span className="lock-icon">🔒</span>
+                  <span className="popular-name">{item.title}</span>
+                 <span className="shopping-bag-icon">
+  <img src={ShoppingBagIcon} alt="Shopping bag" />
+</span>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ABOUT US */}
+        {/* ABOUT */}
         <section className="about-section">
           <h2 className="section-title">ABOUT US</h2>
 
@@ -97,18 +137,26 @@ export default function HomePage() {
               </p>
               <p>
                 Our team carefully selects fresh flowers every day to ensure the
-                highest quality and beauty in every arrangement. Whether it&apos;s a
-                romantic gesture, a celebration, or just a small token of
+                highest quality and beauty in every arrangement. Whether it&apos;s
+                a romantic gesture, a celebration, or just a small token of
                 appreciation, we create bouquets that speak from the heart.
               </p>
               <p>
                 We take pride in our attention to detail, creative designs, and
-                friendly service. Each bouquet is handcrafted with love, tailored
-                to fit your style and occasion.
+                friendly service. Each bouquet is handcrafted with love,
+                tailored to fit your style and occasion.
               </p>
             </div>
 
-            <div className="about-image" />
+            {/* ✅ ABOUT BANNER IMAGE */}
+            <div className="about-image">
+              <img
+                src={bouquet3}
+                alt="About banner"
+                className="about-img"
+                draggable="false"
+              />
+            </div>
           </div>
         </section>
 
@@ -117,7 +165,13 @@ export default function HomePage() {
           <h2 className="section-title">REVIEWS</h2>
 
           <div className="home-reviews-wrapper">
-            <button className="reviews-arrow">‹</button>
+           <button
+  className="hero-arrow reviews-arrow"
+  aria-label="Next review"
+  type="button"
+>
+  ‹
+</button>
 
             <div className="home-reviews-cards">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -128,7 +182,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="home-review-stars">
-                    {'★★★★★'.split('').map((star, j) => (
+                    {"★★★★★".split("").map((_, j) => (
                       <span key={j}>★</span>
                     ))}
                   </div>
@@ -139,41 +193,22 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+<button
+  className="hero-arrow reviews-arrow"
+  aria-label="Previous review"
+  type="button"
+>
+  ›
+</button>
 
-            <button className="reviews-arrow">›</button>
+
+
           </div>
         </section>
       </main>
 
       {/* FOOTER */}
-      <footer className="home-footer">
-        <div className="footer-item">
-          <span className="icon">📍</span>
-          <span>
-            м. Чернівці, вул. Герцена 2а,
-            <br />
-            вул. Васіле Александрі, 1
-          </span>
-        </div>
-        <div className="footer-item">
-          <span className="icon">📞</span>
-          <span>+38 050 159 19 12</span>
-        </div>
-        <div className="footer-item">
-          <span className="icon">📷</span>
-          <span>@flowerlab_vlada</span>
-        </div>
-      </footer>
-
-      {/* SIDE MENU OVERLAY */}
-      {isMenuOpen && (
-        <div className="side-menu-overlay">
-          <SideMenu
-            language={language}
-            onClose={() => setIsMenuOpen(false)}
-          />
-        </div>
-      )}
+      <Footer />
     </div>
   );
 }

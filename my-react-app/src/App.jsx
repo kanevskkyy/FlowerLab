@@ -1,43 +1,62 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import AuthProvider from "./context/AuthProvider";
+import { CartProvider } from "./context/CartProvider";
+
+import ProtectedRoute from "./routes/ProtectedRoute";
+
+import HomePage from "./pages/HomePage/HomePage";
 import Catalog from "./pages/Catalog/Catalog";
 import ProductCard from "./pages/ProductCard/ProductCard";
 import AboutUs from "./pages/AboutUs/AboutUs";
-import OrderRouter from "./pages/OrderRouter/OrderRouter";
+
 import OrderPlacementPickUp from "./pages/OrderPlacementPickUp/OrderPlacementPickUp";
-import HomePage from "./pages/HomePage/HomePage";
+import OrderPlacementRegistered from "./pages/OrderPlacementRegistered/OrderPlacementRegistered";
+import CheckOut from "./pages/CheckOut/CheckOut";
+import OrderRouter from "./pages/OrderRouter/OrderRouter"; // якщо реально використовується — розкоментуй
+
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
 import Cabinet from "./pages/Cabinet/Cabinet";
-import { CartProvider } from "./context/CartProvider";
 
 function App() {
   return (
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          <Routes>
+            {/* MAIN */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/product/:id" element={<ProductCard />} />
+            <Route path="/about" element={<AboutUs />} />
 
-    <CartProvider>
-      <BrowserRouter>
-      <Routes>
+            {/* ORDER / CHECKOUT */}
+            <Route path="/order" element={<OrderPlacementPickUp />} />
+            <Route path="/order-registered" element={<OrderPlacementRegistered />} />
+            <Route path="/checkout" element={<CheckOut />} />
+            <Route path="/order-router" element={<OrderRouter />} /> 
 
-        {/* Головна сторінка */}
-        <Route path="/" element={<HomePage />} />
+            {/* AUTH */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-        {/* Каталог */}
-        <Route path="/catalog" element={<Catalog />} />
+            {/* CABINET (PROTECTED) */}
+            <Route
+              path="/cabinet"
+              element={
+                <ProtectedRoute>
+                  <Cabinet />
+                </ProtectedRoute>
+              }
+            />
 
-        {/* Сторінка товару */}
-        <Route path="/product/:id" element={<ProductCard />} />
-
-        {/* About */}
-        <Route path="/about" element={<AboutUs />} />
-
-        {/* Order */}
-        <Route path="/order" element={<OrderPlacementPickUp />} />
-
-        {/* Fallback (все інше → HomePage або Catalog, як хочеш) */}
-        <Route path="*" element={<HomePage />} />
-        {/* Cabinet */}
-        <Route path="/cabinet" element={<Cabinet />} />
-
-      </Routes>
+            {/* FALLBACK */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
-    </CartProvider>
   );
 }
 
