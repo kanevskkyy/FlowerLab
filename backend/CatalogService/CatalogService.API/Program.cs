@@ -20,6 +20,7 @@ using FlowerLab.Shared.Events;
 using FluentValidation.AspNetCore;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -109,7 +110,19 @@ namespace CatalogService.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IImageService, CloudinaryImageService>();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .ConfigureApplicationPartManager(manager =>
+                {
+                    var assembliesToRemove = manager.ApplicationParts
+                        .OfType<AssemblyPart>()
+                        .Where(part => !part.Name.StartsWith("CatalogService"))
+                        .ToList();
+
+                    foreach (var assembly in assembliesToRemove)
+                    {
+                        manager.ApplicationParts.Remove(assembly);
+                    }
+                });
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddSwaggerGen(options =>
