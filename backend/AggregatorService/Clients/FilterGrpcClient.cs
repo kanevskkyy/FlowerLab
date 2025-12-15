@@ -1,36 +1,52 @@
 ﻿using Grpc.Core;
+using shared.cache;
 
 namespace AggregatorService.Clients
 {
     public class FilterGrpcClient : IFilterGrpcClient
     {
-        public FilterService.FilterServiceClient filterServiceClient;
-        private ILogger<FilterGrpcClient> logger;
+        private FilterService.FilterServiceClient _filterServiceClient;
+        private ILogger<FilterGrpcClient> _logger;
+        private IEntityCacheService _cache;
+        private IEntityCacheInvalidationService<FilterResponse> _cacheInvalidation;
 
-        public FilterGrpcClient(FilterService.FilterServiceClient filterServiceClient, ILogger<FilterGrpcClient> logger)
+        private const string CACHE_KEY = "filters:all";
+
+        public FilterGrpcClient(
+            FilterService.FilterServiceClient filterServiceClient,
+            ILogger<FilterGrpcClient> logger,
+            IEntityCacheService cache,
+            IEntityCacheInvalidationService<FilterResponse> cacheInvalidation)
         {
-            this.filterServiceClient = filterServiceClient;
-            this.logger = logger;
+            _filterServiceClient = filterServiceClient;
+            _logger = logger;
+            _cache = cache;
+            _cacheInvalidation = cacheInvalidation;
         }
 
-        public async Task<FilterResponse> GetAllFiltersAsync()
+        public async Task<FilterResponse?> GetAllFiltersAsync()
         {
-            try
+            return await _cache.GetOrSetAsync(CACHE_KEY, async () =>
             {
-                var call = filterServiceClient.GetAllFiltersAsync(new FilterEmptyRequest());
-                FilterResponse filterResponse = await call.ResponseAsync;
-                return filterResponse;
-            }
-            catch (RpcException ex)
-            {
-                logger.LogError(ex, "Помилка gRPC під час отримання фільтрів з CatalogService");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Несподівана помилка під час отримання фільтрів з CatalogService");
-                return null;
-            }
+                try
+                {
+                    var call = _filterServiceClient.GetAllFiltersAsync(new FilterEmptyRequest());
+                    FilterResponse filterResponse = await call.ResponseAsync;
+
+                    _logger.LogInformation("Фільтри отримано з CatalogService через gRPC.");
+                    return filterResponse;
+                }
+                catch (RpcException ex)
+                {
+                    _logger.LogError(ex, "Помилка gRPC при отриманні фільтрів з CatalogService");
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Несподівана помилка при отриманні фільтрів з CatalogService");
+                    return null;
+                }
+            }, memoryExpiration: TimeSpan.FromSeconds(30), redisExpiration: TimeSpan.FromMinutes(5));
         }
     }
 }

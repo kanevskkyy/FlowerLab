@@ -111,6 +111,11 @@ builder.Services.AddMassTransit(x =>
             });
         }
 
+        cfg.Message<TelegramOrderCreatedEvent>(m =>
+        {
+            m.SetEntityName("telegram-order-created-exchange");
+        });
+
         cfg.Message<OrderCreatedEvent>(m =>
         {
             m.SetEntityName("order-created-exchange"); 

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using Projects;
 using StackExchange.Redis;
 
@@ -19,16 +20,25 @@ var mongo = builder.AddMongoDB("flower-lab-mongo")
     .WithImage("mongo:7")
     .WithDataVolume("flowerlab-mongodata");
 
+var redis = builder.AddRedis("flowerlab-redis")
+    .WithDataVolume("flowerlab-redisdata");
+
 var mongoReviews = mongo.AddDatabase("FlowerLabReviews");
 
 var rabbitmq = builder.AddRabbitMQ("rabbitmq")
     .WithManagementPlugin()
     .WithDataVolume("FlowerLabRabbitMQ");
 
+var notificationService = builder.AddProject<Notify>("notification-bot")
+    .WithReference(rabbitmq)
+    .WaitFor(rabbitmq);
+
 var catalogService = builder.AddProject<CatalogService_API>("catalog")
     .WithReference(postgresCatalog)
     .WithReference(rabbitmq)
+    .WithReference(redis)
     .WaitFor(postgresCatalog)
+    .WaitFor(redis)
     .WaitFor(rabbitmq); 
 
 var orderService = builder.AddProject<OrderService_API>("orders")
@@ -67,7 +77,9 @@ var gateway = builder.AddProject<Gateway>("gateway")
 var aggregator = builder.AddProject<AggregatorService>("aggregator")
     .WithReference(catalogService)
     .WithReference(reviewsService)
+    .WithReference(redis)
     .WaitFor(catalogService)
+    .WaitFor(redis)
     .WaitFor(reviewsService);
 
 builder.Build().Run();

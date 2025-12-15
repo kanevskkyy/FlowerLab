@@ -6,13 +6,14 @@ using CatalogService.DAL.Helpers;
 using CatalogService.DAL.UnitOfWork;
 using CatalogService.Domain.Entities;
 using CatalogService.Domain.QueryParametrs;
+using FlowerLab.Shared.Events;
+using MassTransit; 
+using shared.cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MassTransit; 
-using FlowerLab.Shared.Events;
 
 namespace CatalogService.BLL.Services.Implementations
 {
@@ -22,36 +23,55 @@ namespace CatalogService.BLL.Services.Implementations
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
         private readonly IPublishEndpoint _publishEndpoint;
-        
-        public BouquetService(IUnitOfWork uow, IMapper mapper, IImageService imageService, IPublishEndpoint publishEndpoint)
+
+        private readonly IEntityCacheService _cache;
+        private readonly IEntityCacheInvalidationService<Bouquet> _cacheInvalidation;
+
+        public BouquetService(
+            IUnitOfWork uow,
+            IMapper mapper,
+            IImageService imageService,
+            IPublishEndpoint publishEndpoint,
+            IEntityCacheService cache,
+            IEntityCacheInvalidationService<Bouquet> cacheInvalidation)
         {
             _uow = uow;
             _mapper = mapper;
             _imageService = imageService;
             _publishEndpoint = publishEndpoint;
+
+            _cache = cache;
+            _cacheInvalidation = cacheInvalidation;
         }
 
-        public async Task<PagedList<BouquetSummaryDto>> GetAllAsync(BouquetQueryParameters parameters)
+        public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters)
         {
-            var pagedBouquets = await _uow.Bouquets.GetBySpecificationPagedAsync(parameters);
+            string cacheKey = $"bouquets:page{parameters.Page}-size{parameters.PageSize}";
 
-            var mapped = pagedBouquets.Items
-                .Select(b => _mapper.Map<BouquetSummaryDto>(b))
-                .ToList();
+            return await _cache.GetOrSetAsync(cacheKey, async () =>
+            {
+                var pagedBouquets = await _uow.Bouquets.GetBySpecificationPagedAsync(parameters);
+                var mapped = pagedBouquets.Items.Select(b => _mapper.Map<BouquetSummaryDto>(b)).ToList();
 
-            return new PagedList<BouquetSummaryDto>(
-                mapped,
-                pagedBouquets.TotalCount,
-                pagedBouquets.CurrentPage,
-                pagedBouquets.PageSize
-            );
+                return new PagedList<BouquetSummaryDto>(
+                    mapped,
+                    pagedBouquets.TotalCount,
+                    pagedBouquets.CurrentPage,
+                    pagedBouquets.PageSize
+                );
+            }, memoryExpiration: TimeSpan.FromSeconds(30), redisExpiration: TimeSpan.FromMinutes(5));
         }
 
-        public async Task<BouquetDto> GetByIdAsync(Guid id)
+        public async Task<BouquetDto?> GetByIdAsync(Guid id)
         {
-            var bouquet = await _uow.Bouquets.GetWithDetailsAsync(id);
-            if (bouquet == null) throw new NotFoundException($"Букет {id} не знайдено.");
-            return _mapper.Map<BouquetDto>(bouquet);
+            string cacheKey = $"bouquet:{id}";
+
+            return await _cache.GetOrSetAsync(cacheKey, async () =>
+            {
+                var bouquet = await _uow.Bouquets.GetWithDetailsAsync(id);
+                if (bouquet == null) throw new NotFoundException($"Букет {id} не знайдено.");
+                return _mapper.Map<BouquetDto>(bouquet);
+            }, memoryExpiration: TimeSpan.FromSeconds(30), redisExpiration: TimeSpan.FromMinutes(5));
         }
 
         public async Task<BouquetDto> CreateAsync(BouquetCreateDto dto)
@@ -190,6 +210,8 @@ namespace CatalogService.BLL.Services.Implementations
 
             await _uow.Bouquets.AddAsync(bouquet);
             await _uow.SaveChangesAsync();
+
+            await _cacheInvalidation.InvalidateAllAsync();
 
             var savedBouquet = await _uow.Bouquets.GetWithDetailsAsync(bouquet.Id);
             return _mapper.Map<BouquetDto>(savedBouquet);
@@ -332,6 +354,8 @@ namespace CatalogService.BLL.Services.Implementations
             _uow.Bouquets.Update(bouquet);
             await _uow.SaveChangesAsync();
 
+            await _cacheInvalidation.InvalidateAllAsync();
+
             var updatedBouquet = await _uow.Bouquets.GetWithDetailsAsync(bouquet.Id);
             return _mapper.Map<BouquetDto>(updatedBouquet);
         }
@@ -344,6 +368,8 @@ namespace CatalogService.BLL.Services.Implementations
             flower.Quantity = quantity;
             _uow.Flowers.Update(flower);
             await _uow.SaveChangesAsync();
+
+            await _cacheInvalidation.InvalidateAllAsync();
         }
 
         public async Task DeleteAsync(Guid id)
@@ -355,20 +381,21 @@ namespace CatalogService.BLL.Services.Implementations
             _uow.Bouquets.Delete(bouquet);
             await _uow.SaveChangesAsync();
 
+            await _cacheInvalidation.InvalidateAllAsync();
+
             Console.WriteLine($"[CATALOG] Букет {id} видалено з БД");
             Console.WriteLine($"[CATALOG] Публікую BouquetDeletedEvent для ID: {id}");
 
             try
             {
                 await _publishEndpoint.Publish(new BouquetDeletedEvent(id));
-                Console.WriteLine($"[CATALOG] ✓ Event успішно опубліковано для ID: {id}");
+                Console.WriteLine($"[CATALOG] Event успішно опубліковано для ID: {id}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CATALOG] ✗ Помилка публікації event: {ex.Message}");
+                Console.WriteLine($"[CATALOG] Помилка публікації event: {ex.Message}");
                 throw;
             }
         }
     }
-
 }

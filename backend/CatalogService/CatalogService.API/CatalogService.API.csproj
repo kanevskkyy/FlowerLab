@@ -14,15 +14,17 @@
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
 	  <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
 	  <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+	  <PackageReference Include="Aspire.StackExchange.Redis" Version="9.5.2" />
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
 		  <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\AggregatorService\AggregatorService.csproj" />
     <ProjectReference Include="..\..\shared\shared.csproj" />
     <ProjectReference Include="..\CatalogService.BLL\CatalogService.BLL.csproj" />
   </ItemGroup>

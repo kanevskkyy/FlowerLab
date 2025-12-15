@@ -4,6 +4,7 @@ using CatalogService.BLL.Exceptions;
 using CatalogService.BLL.Services.Interfaces;
 using CatalogService.DAL.UnitOfWork;
 using CatalogService.Domain.Entities;
+using shared.cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +17,12 @@ namespace CatalogService.BLL.Services.Implementations
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+        private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
-        public EventService(IUnitOfWork uow, IMapper mapper)
+        public EventService(IUnitOfWork uow, IMapper mapper, IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
             _uow = uow;
+            this.entityCacheInvalidationService = entityCacheInvalidationService;
             _mapper = mapper;
         }
 
@@ -45,6 +48,8 @@ namespace CatalogService.BLL.Services.Implementations
             await _uow.Events.AddAsync(entity);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<EventDto>(entity);
         }
 
@@ -60,6 +65,8 @@ namespace CatalogService.BLL.Services.Implementations
             _uow.Events.Update(ev);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<EventDto>(ev);
         }
 
@@ -70,6 +77,8 @@ namespace CatalogService.BLL.Services.Implementations
 
             _uow.Events.Delete(ev);
             await _uow.SaveChangesAsync();
+
+            await entityCacheInvalidationService.InvalidateAllAsync();
         }
     }
 

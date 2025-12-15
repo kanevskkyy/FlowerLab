@@ -4,6 +4,7 @@ using CatalogService.BLL.Exceptions;
 using CatalogService.BLL.Services.Interfaces;
 using CatalogService.DAL.UnitOfWork;
 using CatalogService.Domain.Entities;
+using shared.cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,13 @@ namespace CatalogService.BLL.Services.Implementations
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+        private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
-        public RecipientService(IUnitOfWork uow, IMapper mapper)
+        public RecipientService(IUnitOfWork uow, IMapper mapper, IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
             _uow = uow;
             _mapper = mapper;
+            this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
         public async Task<IEnumerable<RecipientDto>> GetAllAsync()
@@ -45,6 +48,8 @@ namespace CatalogService.BLL.Services.Implementations
             await _uow.Recipients.AddAsync(entity);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<RecipientDto>(entity);
         }
 
@@ -60,6 +65,8 @@ namespace CatalogService.BLL.Services.Implementations
             _uow.Recipients.Update(rec);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<RecipientDto>(rec);
         }
 
@@ -70,6 +77,8 @@ namespace CatalogService.BLL.Services.Implementations
 
             _uow.Recipients.Delete(rec);
             await _uow.SaveChangesAsync();
+
+            await entityCacheInvalidationService.InvalidateAllAsync();
         }
     }
 

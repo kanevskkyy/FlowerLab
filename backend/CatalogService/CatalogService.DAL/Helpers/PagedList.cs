@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Helpers
@@ -17,13 +18,17 @@ namespace CatalogService.DAL.Helpers
         public bool HasPrevious => CurrentPage > 1;
         public bool HasNext => CurrentPage < TotalPages;
 
-        public PagedList(IEnumerable<T> items, int count, int page, int pageSize)
+        public PagedList() { }
+
+        [JsonConstructor]
+        public PagedList(IEnumerable<T> items, int totalCount, int currentPage, int pageSize)
         {
             Items = items.ToList();
-            TotalCount = count;
+            TotalCount = totalCount;
             PageSize = pageSize;
-            CurrentPage = page;
-            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            CurrentPage = currentPage;
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
         }
+
     }
 }

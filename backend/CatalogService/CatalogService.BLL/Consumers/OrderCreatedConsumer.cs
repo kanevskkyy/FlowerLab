@@ -1,6 +1,8 @@
 ﻿using CatalogService.DAL.UnitOfWork;
+using CatalogService.Domain.Entities;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using shared.cache;
 using shared.events;
 
 namespace CatalogService.BLL.Consumers
@@ -10,9 +12,16 @@ namespace CatalogService.BLL.Consumers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<OrderCreatedConsumer> _logger;
         private readonly IEventLogService _eventLogService;
+        private readonly IEntityCacheInvalidationService<Bouquet> _cacheInvalidation;
 
-        public OrderCreatedConsumer(IUnitOfWork unitOfWork, ILogger<OrderCreatedConsumer> logger, IEventLogService eventLogService)
+
+        public OrderCreatedConsumer(
+            IUnitOfWork unitOfWork, 
+            ILogger<OrderCreatedConsumer> logger, 
+            IEventLogService eventLogService,
+            IEntityCacheInvalidationService<Bouquet> cacheInvalidation)
         {
+            _cacheInvalidation = cacheInvalidation;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _eventLogService = eventLogService;
@@ -66,6 +75,8 @@ namespace CatalogService.BLL.Consumers
             await _unitOfWork.SaveChangesAsync();
 
             await _eventLogService.MarkEventAsProcessedAsync(eventId);
+
+            await _cacheInvalidation.InvalidateAllAsync();
 
             _logger.LogInformation("Замовлення {OrderId} успішно оброблено", orderEvent.OrderId);
         }

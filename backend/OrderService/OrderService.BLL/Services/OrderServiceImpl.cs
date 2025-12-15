@@ -302,6 +302,14 @@ namespace OrderService.BLL.Services
                     }).ToList()
                 };
                 await _publishEndpoint.Publish(orderCreatedEvent, cancellationToken);
+
+                TelegramOrderCreatedEvent telegramOrderCreatedEvent = new TelegramOrderCreatedEvent
+                {
+                    CustomerName = $"{order.UserFirstName} {order.UserLastName}",
+                    OrderId = order.Id,
+                    TotalPrice = order.TotalPrice,
+                };
+                await _publishEndpoint.Publish(telegramOrderCreatedEvent, cancellationToken);
             }
             else if (response.Status == LiqPayResponseStatus.Failure || response.Status == LiqPayResponseStatus.Error)
             {

@@ -51,7 +51,7 @@ namespace UsersService.API.Helpers
                     FirstName = "Ivan",
                     LastName = "Petrov",
                     PhoneNumber = "+380501112233",
-                    PhotoUrl = "https://res.cloudinary.com/dg9clyn4k/image/upload/v1763712578/order-service/gifts/default-user.jpg",
+                    PhotoUrl = "https://res.cloudinary.com/dg9clyn4k/image/upload/v1763712578/order-service/gifts/mpfiss97mfebcqwm6elb.jpg",
                     EmailConfirmed = true,
                 };
 

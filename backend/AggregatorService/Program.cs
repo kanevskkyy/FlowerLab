@@ -1,4 +1,6 @@
 using AggregatorService.Clients;
+using AggregatorService.Redis;
+using shared.cache;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +21,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -37,6 +38,19 @@ if (string.IsNullOrEmpty(reviewsAddress))
 {
     throw new InvalidOperationException("Address for reviews service not found!");
 }
+
+//REDIS
+builder.AddRedisClient("flowerlab-redis");
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = 1024;
+
+    options.CompactionPercentage = 0.2;
+});
+builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
+builder.Services.AddScoped<IEntityCacheInvalidationService<FilterResponse>, FilterCacheInvalidationService>();
+//
+
 
 builder.Services.AddGrpcClient<FilterService.FilterServiceClient>(options =>
 {

@@ -4,6 +4,7 @@ using CatalogService.BLL.Exceptions;
 using CatalogService.BLL.Services.Interfaces;
 using CatalogService.DAL.UnitOfWork;
 using CatalogService.Domain.Entities;
+using shared.cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,13 @@ namespace CatalogService.BLL.Services.Implementations
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+        private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
-        public FlowerService(IUnitOfWork uow, IMapper mapper)
+        public FlowerService(IUnitOfWork uow, IMapper mapper, IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
             _uow = uow;
             _mapper = mapper;
+            this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
         public async Task<IEnumerable<FlowerDto>> GetAllAsync()
@@ -57,6 +60,8 @@ namespace CatalogService.BLL.Services.Implementations
             await _uow.Flowers.AddAsync(flower);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<FlowerDto>(flower);
         }
 
@@ -80,6 +85,8 @@ namespace CatalogService.BLL.Services.Implementations
             _uow.Flowers.Update(flower);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<FlowerDto>(flower);
         }
 
@@ -91,6 +98,8 @@ namespace CatalogService.BLL.Services.Implementations
 
             _uow.Flowers.Delete(flower);
             await _uow.SaveChangesAsync();
+
+            await entityCacheInvalidationService.InvalidateAllAsync();
         }
 
         public async Task<FlowerDto> UpdateStockAsync(Guid id, int quantity)
@@ -105,6 +114,8 @@ namespace CatalogService.BLL.Services.Implementations
             flower.Quantity = quantity;
             _uow.Flowers.Update(flower);
             await _uow.SaveChangesAsync();
+
+            await entityCacheInvalidationService.InvalidateAllAsync();
 
             return _mapper.Map<FlowerDto>(flower);
         }

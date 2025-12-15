@@ -4,6 +4,7 @@ using CatalogService.BLL.Exceptions;
 using CatalogService.BLL.Services.Interfaces;
 using CatalogService.DAL.UnitOfWork;
 using CatalogService.Domain.Entities;
+using shared.cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,13 @@ namespace CatalogService.BLL.Services.Implementations
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+        private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
-        public SizeService(IUnitOfWork uow, IMapper mapper)
+        public SizeService(IUnitOfWork uow, IMapper mapper, IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
             _uow = uow;
             _mapper = mapper;
+            this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
         public async Task<IEnumerable<SizeDto>> GetAllAsync()
@@ -45,6 +48,8 @@ namespace CatalogService.BLL.Services.Implementations
             await _uow.Sizes.AddAsync(entity);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<SizeDto>(entity);
         }
 
@@ -60,6 +65,8 @@ namespace CatalogService.BLL.Services.Implementations
             _uow.Sizes.Update(size);
             await _uow.SaveChangesAsync();
 
+            await entityCacheInvalidationService.InvalidateAllAsync();
+
             return _mapper.Map<SizeDto>(size);
         }
 
@@ -70,6 +77,8 @@ namespace CatalogService.BLL.Services.Implementations
 
             _uow.Sizes.Delete(size);
             await _uow.SaveChangesAsync();
+
+            await entityCacheInvalidationService.InvalidateAllAsync();
         }
     }
 }

@@ -1,6 +1,10 @@
+using AggregatorService.Redis;
 using CatalogService.API.Middleware;
 using CatalogService.BLL.Automapper;
+using CatalogService.BLL.Cache;
+using CatalogService.BLL.Consumers;
 using CatalogService.BLL.DTO;
+using CatalogService.BLL.EventLogService;
 using CatalogService.BLL.GrpcServer;
 using CatalogService.BLL.Services.Implementations;
 using CatalogService.BLL.Services.Interfaces;
@@ -9,20 +13,22 @@ using CatalogService.DAL.Context;
 using CatalogService.DAL.Repositories.Implementations;
 using CatalogService.DAL.Repositories.Interfaces;
 using CatalogService.DAL.UnitOfWork;
+using CatalogService.Domain.Entities;
 using CloudinaryDotNet;
 using DotNetEnv;
+using FlowerLab.Shared.Events;
 using FluentValidation.AspNetCore;
+using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
-using MassTransit;
-using FlowerLab.Shared.Events;
-using CatalogService.BLL.Consumers;
+using shared.cache;
 using shared.events;
-using CatalogService.BLL.EventLogService;
+using StackExchange.Redis;
+using System.Text;
 
 namespace CatalogService.API
 {
@@ -52,6 +58,20 @@ namespace CatalogService.API
             });
 
             builder.AddNpgsqlDbContext<CatalogDbContext>("FlowerLabCatalog");
+
+            // REDIS
+            builder.AddRedisClient("flowerlab-redis");
+            builder.Services.AddMemoryCache(options =>
+            {
+                options.SizeLimit = 1024;
+
+                options.CompactionPercentage = 0.2;
+            });
+            builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
+
+            builder.Services.AddScoped<IEntityCacheInvalidationService<Bouquet>, BouquetCacheInvalidationService>();
+            builder.Services.AddScoped<IEntityCacheInvalidationService<FilterResponse>, FilterCacheInvalidationService>();
+            //
 
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
             var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
@@ -91,7 +111,7 @@ namespace CatalogService.API
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            
+
             builder.Services.AddSwaggerGen(options =>
             {
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
