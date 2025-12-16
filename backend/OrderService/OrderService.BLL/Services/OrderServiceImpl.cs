@@ -215,6 +215,7 @@ namespace OrderService.BLL.Services
                 UserId = userId,
                 UserFirstName = finalFirstName,
                 UserLastName = finalLastName,
+                PickupStoreAddress = dto.PickupStoreAddress,
                 Notes = dto.Notes,
                 PhoneNumber = finalPhoneNumber,
                 GiftMessage = dto.GiftMessage,

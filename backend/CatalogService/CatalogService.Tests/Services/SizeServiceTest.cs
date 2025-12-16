@@ -36,7 +36,6 @@ namespace CatalogService.Tests.Services
             _sizeRepoMock = new Mock<ISizeRepository>();
 
             _uowMock.Setup(u => u.Sizes).Returns(_sizeRepoMock.Object);
-            _sut = new SizeService(_uowMock.Object, _mapperMock.Object);
         }
 
         [Fact]

@@ -10,6 +10,7 @@ using UsersService.BLL.Services;
 using UsersService.Domain.Entities;
 using Xunit;
 using Microsoft.Extensions.Options;
+using UsersService.BLL.Models.Auth;
 
 namespace UsersService.Tests.Services
 {

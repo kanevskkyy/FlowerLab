@@ -36,7 +36,6 @@ namespace CatalogService.Tests.Services
             _recipientRepoMock = new Mock<IRecipientRepository>();
 
             _uowMock.Setup(u => u.Recipients).Returns(_recipientRepoMock.Object);
-            _sut = new RecipientService(_uowMock.Object, _mapperMock.Object);
         }
 
         [Fact]

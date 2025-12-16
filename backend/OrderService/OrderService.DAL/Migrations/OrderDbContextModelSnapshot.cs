@@ -107,8 +107,8 @@ namespace OrderService.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<string>("PickupStoreAddress")
-                        .HasColumnType("text");
+                    b.Property<int?>("PickupStoreAddress")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("StatusId")
                         .HasColumnType("uuid");

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OrderService.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class RefeactorPickupStoreAddress : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,11 @@ namespace OrderService.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    ImageUrl = table.Column<string>(type: "text", nullable: false)
+                    ImageUrl = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    AvailableCount = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -44,11 +48,17 @@ namespace OrderService.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     StatusId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserFirstName = table.Column<string>(type: "text", nullable: false),
-                    UserLastName = table.Column<string>(type: "text", nullable: false),
-                    Notes = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    UserFirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    UserLastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsDelivery = table.Column<bool>(type: "boolean", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    GiftMessage = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
+                    PickupStoreAddress = table.Column<int>(type: "integer", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     DeliveryInformationId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
@@ -59,7 +69,7 @@ namespace OrderService.DAL.Migrations
                         column: x => x.StatusId,
                         principalTable: "OrderStatuses",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -86,7 +96,8 @@ namespace OrderService.DAL.Migrations
                 columns: table => new
                 {
                     OrderId = table.Column<Guid>(type: "uuid", nullable: false),
-                    GiftId = table.Column<Guid>(type: "uuid", nullable: false)
+                    GiftId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Count = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -110,19 +121,45 @@ namespace OrderService.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BouquetId = table.Column<Guid>(type: "uuid", nullable: false),
                     BouquetName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    BouquetImage = table.Column<string>(type: "text", nullable: false),
+                    BouquetImage = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    SizeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SizeName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    Count = table.Column<int>(type: "integer", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Count = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrderItems", x => x.Id);
+                    table.CheckConstraint("CK_OrderItem_Count_Positive", "\"Count\" > 0");
                     table.ForeignKey(
                         name: "FK_OrderItems_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderItemFlowers",
+                columns: table => new
+                {
+                    OrderItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FlowerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FlowerName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    FlowerColor = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItemFlowers", x => new { x.OrderItemId, x.FlowerId });
+                    table.CheckConstraint("CK_OrderItemFlower_Quantity_Positive", "\"Quantity\" > 0");
+                    table.ForeignKey(
+                        name: "FK_OrderItemFlowers_OrderItems_OrderItemId",
+                        column: x => x.OrderItemId,
+                        principalTable: "OrderItems",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -171,10 +208,13 @@ namespace OrderService.DAL.Migrations
                 name: "OrderGifts");
 
             migrationBuilder.DropTable(
-                name: "OrderItems");
+                name: "OrderItemFlowers");
 
             migrationBuilder.DropTable(
                 name: "Gifts");
+
+            migrationBuilder.DropTable(
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "Orders");

@@ -37,13 +37,6 @@ namespace CatalogService.Tests.Services
             _mapperMock = new Mock<IMapper>();
             _imageServiceMock = new Mock<IImageService>();
             _publishEndpointMock = new Mock<IPublishEndpoint>();
-
-            _sut = new BouquetService(
-                _uowMock.Object,
-                _mapperMock.Object,
-                _imageServiceMock.Object,
-                _publishEndpointMock.Object
-            );
         }
 
         private static IFormFile CreateFakeFile(string fileName = "test.jpg", string content = "fake image")

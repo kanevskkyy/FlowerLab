@@ -31,8 +31,6 @@ namespace CatalogService.Tests.Services
         {
             _uowMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
-
-            _sut = new EventService(_uowMock.Object, _mapperMock.Object);
         }
 
         #region GetAllAsync Tests

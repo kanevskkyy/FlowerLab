@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using UsersService.API.Helpers;
+using UsersService.API.Middleware;
 using UsersService.BLL;
 using UsersService.BLL.EmailService;
 using UsersService.BLL.FluentValidation;

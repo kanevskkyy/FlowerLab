@@ -18,6 +18,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public string? GiftMessage { get; set; }
         public string? PhoneNumber { get; set; }
 
+        public string? PickupStoreAddress { get; set; }
         public bool IsDelivery { get; set; }
         public OrderStatusReadDto Status { get; set; } = null!;
         public DeliveryInformationReadDto? DeliveryInformation { get; set; }

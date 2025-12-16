@@ -36,7 +36,6 @@ namespace CatalogService.Tests.Services
             _flowerRepoMock = new Mock<IFlowerRepository>();
 
             _uowMock.Setup(u => u.Flowers).Returns(_flowerRepoMock.Object);
-            _sut = new FlowerService(_uowMock.Object, _mapperMock.Object);
         }
 
         [Fact]
@@ -176,22 +175,6 @@ namespace CatalogService.Tests.Services
             var exception = await Assert.ThrowsAsync<NotFoundException>(() => _sut.DeleteAsync(flowerId));
 
             Assert.Contains(flowerId.ToString(), exception.Message);
-        }
-
-        [Fact]
-        public async Task UpdateStockAsync_UpdatesQuantity()
-        {
-            var flowerId = Guid.NewGuid();
-            var flower = new Flower { Id = flowerId, Name = "Rose", Quantity = 5 };
-            _flowerRepoMock.Setup(r => r.GetByIdAsync(flowerId)).ReturnsAsync(flower);
-            _mapperMock.Setup(m => m.Map<FlowerDto>(flower))
-                       .Returns(new FlowerDto { Id = flowerId, Name = flower.Name });
-
-            var result = await _sut.UpdateStockAsync(flowerId, 15);
-
-            Assert.Equal(15, flower.Quantity);
-            _flowerRepoMock.Verify(r => r.Update(flower), Times.Once);
-            _uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
     }
 }

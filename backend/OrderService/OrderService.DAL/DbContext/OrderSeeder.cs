@@ -75,7 +75,7 @@ namespace OrderService.DAL.DbContext
                         UserLastName = "Johnson",
                         IsDelivery = false,
                         TotalPrice = 15.99m,
-                        PickupStoreAddress = "Lviv, Freedom St. 5",
+                        PickupStoreAddress = PickupStore.Hertsena2A,
                         OrderGifts = new List<OrderGift>
                         {
                             new OrderGift { GiftId = balloons.Id, Count = 2 }

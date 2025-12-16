@@ -12,8 +12,8 @@ using OrderService.Domain.Database;
 namespace OrderService.DAL.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20251121075654_UpdateDbConfig")]
-    partial class UpdateDbConfig
+    [Migration("20251216100518_RefeactorPickupStoreAddress")]
+    partial class RefeactorPickupStoreAddress
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,6 +69,9 @@ namespace OrderService.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -102,6 +105,13 @@ namespace OrderService.DAL.Migrations
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int?>("PickupStoreAddress")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("StatusId")
                         .HasColumnType("uuid");
@@ -161,8 +171,8 @@ namespace OrderService.DAL.Migrations
 
                     b.Property<string>("BouquetImage")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("BouquetName")
                         .IsRequired()
@@ -178,11 +188,51 @@ namespace OrderService.DAL.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<Guid>("SizeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SizeName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_OrderItem_Count_Positive", "\"Count\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("OrderService.Domain.Entities.OrderItemFlower", b =>
+                {
+                    b.Property<Guid>("OrderItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FlowerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FlowerColor")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("FlowerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("OrderItemId", "FlowerId");
+
+                    b.ToTable("OrderItemFlowers", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_OrderItemFlower_Quantity_Positive", "\"Quantity\" > 0");
+                        });
                 });
 
             modelBuilder.Entity("OrderService.Domain.Entities.OrderStatus", b =>
@@ -266,6 +316,17 @@ namespace OrderService.DAL.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("OrderService.Domain.Entities.OrderItemFlower", b =>
+                {
+                    b.HasOne("OrderService.Domain.Entities.OrderItem", "OrderItem")
+                        .WithMany("Flowers")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OrderItem");
+                });
+
             modelBuilder.Entity("OrderService.Domain.Entities.Gift", b =>
                 {
                     b.Navigation("OrderGifts");
@@ -278,6 +339,11 @@ namespace OrderService.DAL.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("OrderGifts");
+                });
+
+            modelBuilder.Entity("OrderService.Domain.Entities.OrderItem", b =>
+                {
+                    b.Navigation("Flowers");
                 });
 
             modelBuilder.Entity("OrderService.Domain.Entities.OrderStatus", b =>

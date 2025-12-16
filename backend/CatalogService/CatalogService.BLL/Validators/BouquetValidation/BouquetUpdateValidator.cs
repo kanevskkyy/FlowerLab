@@ -1,4 +1,5 @@
 ﻿using CatalogService.BLL.DTO;
+using CatalogService.BLL.Validators.BouquetValidation;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using System;

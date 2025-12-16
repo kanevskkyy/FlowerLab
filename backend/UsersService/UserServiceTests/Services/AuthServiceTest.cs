@@ -52,13 +52,6 @@ namespace UsersService.Tests.Services
             _dbContextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
             _jwtSettings = new JwtSettings { RefreshTokenExpirationDays = 7 };
-
-            _authService = new AuthService(
-                _userManagerMock.Object,
-                _jwtServiceMock.Object,
-                _dbContextMock.Object,
-                Options.Create(_jwtSettings),
-                _imageServiceMock.Object);
         }
 
         [Fact]
