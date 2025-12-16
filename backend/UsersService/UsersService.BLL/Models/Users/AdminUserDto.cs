@@ -1,5 +1,7 @@
 ﻿// UsersService.BLL/Models/AdminUserDto.cs
 
+using UsersService.BLL.Models.Adresess;
+
 namespace UsersService.BLL.Models.Users
 {
     public class AdminUserDto
@@ -10,6 +12,7 @@ namespace UsersService.BLL.Models.Users
         public string? LastName { get; set; }
         public string? PhotoUrl { get; set; }
         public int PersonalDiscountPercentage { get; set; }
-        public string? Role { get; set; } 
+        public string? Role { get; set; }
+        public List<AddressDto> Addresses { get; set; } = new List<AddressDto>();
     }
 }
