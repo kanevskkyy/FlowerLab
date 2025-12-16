@@ -26,28 +26,24 @@ namespace UsersService.BLL.Services
 
         public async Task<IEnumerable<AdminUserDto>> GetAllUsersAsync(UsersFilterDto filter)
         {
-            var query = userManager.Users.AsQueryable();
+            var query = userManager.Users.Include(u => u.Addresses).AsQueryable(); // ⚡ Include addresses
 
             if (!string.IsNullOrWhiteSpace(filter.Email))
-            {
                 query = query.Where(u => u.Email.ToLower().Contains(filter.Email.ToLower()));
-            }
 
             if (!string.IsNullOrWhiteSpace(filter.PhoneNumber))
-            {
-                query = query.Where(u => u.PhoneNumber.ToLower() != null && u.PhoneNumber.ToLower().Contains(filter.PhoneNumber.ToLower()));
-            }
+                query = query.Where(u => u.PhoneNumber != null && u.PhoneNumber.ToLower().Contains(filter.PhoneNumber.ToLower()));
 
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
                 var term = filter.SearchTerm.ToLower();
-                query = query.Where(u => 
-                    (u.FirstName != null && u.FirstName.ToLower().Contains(term)) || 
+                query = query.Where(u =>
+                    (u.FirstName != null && u.FirstName.ToLower().Contains(term)) ||
                     (u.LastName != null && u.LastName.ToLower().Contains(term)));
             }
 
             var users = await query.ToListAsync();
-    
+
             var userDtos = mapper.Map<IEnumerable<AdminUserDto>>(users).ToList();
 
             foreach (var dto in userDtos)
@@ -58,17 +54,15 @@ namespace UsersService.BLL.Services
 
             return userDtos;
         }
+
         public async Task<AdminUserDto?> GetUserByIdAsync(string userId)
         {
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await userManager.Users.Include(u => u.Addresses)
+                                             .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (user == null)
-            {
-                return null; 
-            }
+            if (user == null) return null;
 
             var userDto = mapper.Map<AdminUserDto>(user);
-
             userDto.Role = await GetUserPrimaryRoleAsync(user);
 
             return userDto;

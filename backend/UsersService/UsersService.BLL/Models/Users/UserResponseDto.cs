@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UsersService.BLL.Models.Adresess;
 
 namespace UsersService.BLL.Models.Users
 {
@@ -14,6 +15,7 @@ namespace UsersService.BLL.Models.Users
         public string LastName { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string? PhotoUrl { get; set; }
+        public List<AddressDto> Addresses { get; set; } = new List<AddressDto>();
     }
 
 }
