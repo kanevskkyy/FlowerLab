@@ -21,11 +21,11 @@ namespace OrderService.BLL.Services
 {
     public class OrderServiceImpl : IOrderService
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly CheckOrder.CheckOrderClient _catalogClient;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly ILiqPayService _liqPayService;
+        private IUnitOfWork unitOfWork;
+        private IMapper mapper;
+        private CheckOrder.CheckOrderClient catalogClient;
+        private IPublishEndpoint publishEndpoint;
+        private ILiqPayService liqPayService;
 
         public OrderServiceImpl(
             IUnitOfWork unitOfWork,
@@ -34,22 +34,22 @@ namespace OrderService.BLL.Services
             IPublishEndpoint publishEndpoint,
             ILiqPayService liqPayService)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _catalogClient = catalogClient;
-            _publishEndpoint = publishEndpoint;
-            _liqPayService = liqPayService;
+            this.unitOfWork = unitOfWork;
+            this.mapper = mapper;
+            this.catalogClient = catalogClient;
+            this.publishEndpoint = publishEndpoint;
+            this.liqPayService = liqPayService;
         }
 
         public async Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
         {
-            var pagedOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
+            var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
             var dtoList = pagedOrders.Items.Select(o =>
             {
-                var dto = _mapper.Map<OrderSummaryDto>(o);
+                var dto = mapper.Map<OrderSummaryDto>(o);
                 if (o.Status?.Name == "AwaitingPayment")
                 {
-                    dto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
+                    dto.PaymentUrl = liqPayService.GeneratePaymentUrl(
                         o.Id,
                         o.TotalPrice,
                         $"Оплата замовлення #{o.Id}");
@@ -63,15 +63,15 @@ namespace OrderService.BLL.Services
 
         public async Task<OrderDetailDto> GetByIdAsync(Guid orderId, CancellationToken cancellationToken = default)
         {
-            var order = await _unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken);
+            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken);
             if (order == null)
                 throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
 
-            var resultDto = _mapper.Map<OrderDetailDto>(order);
+            var resultDto = mapper.Map<OrderDetailDto>(order);
 
             if (order.Status?.Name == "AwaitingPayment")
             {
-                resultDto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
+                resultDto.PaymentUrl = liqPayService.GeneratePaymentUrl(
                     order.Id,
                     order.TotalPrice,
                     $"Оплата замовлення #{order.Id}");
@@ -107,7 +107,7 @@ namespace OrderService.BLL.Services
             OrderedResponseList catalogResponse;
             try
             {
-                catalogResponse = await _catalogClient.CheckOrderItemsAsync(
+                catalogResponse = await catalogClient.CheckOrderItemsAsync(
                     grpcRequest, cancellationToken: cancellationToken);
             }
             catch (RpcException ex)
@@ -126,7 +126,7 @@ namespace OrderService.BLL.Services
                 throw new ValidationException($"Помилка перевірки букетів: {errors}");
             }
 
-            var awaitingPaymentStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("AwaitingPayment");
+            var awaitingPaymentStatus = await unitOfWork.OrderStatuses.GetByNameAsync("AwaitingPayment");
             if (awaitingPaymentStatus == null)
             {
                 awaitingPaymentStatus = new OrderStatus
@@ -135,10 +135,10 @@ namespace OrderService.BLL.Services
                     CreatedAt = DateTime.UtcNow.ToUniversalTime(),
                     UpdatedAt = DateTime.UtcNow.ToUniversalTime()
                 };
-                await _unitOfWork.OrderStatuses.AddAsync(awaitingPaymentStatus);
+                await unitOfWork.OrderStatuses.AddAsync(awaitingPaymentStatus);
             }
 
-            var existingOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(
+            var existingOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
                 new OrderSpecificationParameters { UserId = userId },
                 cancellationToken);
 
@@ -152,7 +152,7 @@ namespace OrderService.BLL.Services
             {
                 foreach (var giftDto in dto.Gifts)
                 {
-                    var gift = await _unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId)
+                    var gift = await unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId)
                         ?? throw new NotFoundException($"Подарунок з ID {giftDto.GiftId} не знайдено");
 
                     if (gift.AvailableCount < giftDto.Count)
@@ -222,7 +222,7 @@ namespace OrderService.BLL.Services
                 IsDelivery = dto.IsDelivery,
                 Items = orderItems,
                 DeliveryInformation = dto.DeliveryInformation != null
-                    ? _mapper.Map<DeliveryInformation>(dto.DeliveryInformation)
+                    ? mapper.Map<DeliveryInformation>(dto.DeliveryInformation)
                     : null,
                 OrderGifts = orderGifts
             };
@@ -243,11 +243,11 @@ namespace OrderService.BLL.Services
 
             order.TotalPrice = itemsTotal;
 
-            await _unitOfWork.Orders.AddAsync(order);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.Orders.AddAsync(order);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var resultDto = _mapper.Map<OrderDetailDto>(order);
-            resultDto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
+            var resultDto = mapper.Map<OrderDetailDto>(order);
+            resultDto.PaymentUrl = liqPayService.GeneratePaymentUrl(
                 order.Id,
                 order.TotalPrice,
                 $"Оплата замовлення #{order.Id}");
@@ -258,18 +258,18 @@ namespace OrderService.BLL.Services
 
         public async Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default)
         {
-            if (!_liqPayService.ValidateCallback(data, signature))
+            if (!liqPayService.ValidateCallback(data, signature))
                 throw new ValidationException("Невалідний підпис LiqPay");
 
-            var response = _liqPayService.ParseCallback(data);
+            var response = liqPayService.ParseCallback(data);
             var orderId = Guid.Parse(response.OrderId);
 
-            var order = await _unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
+            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
                 ?? throw new NotFoundException($"Замовлення {orderId} не знайдено");
 
             if (response.Status == LiqPayResponseStatus.Success || response.Status == LiqPayResponseStatus.Sandbox)
             {
-                var paidStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("Pending")
+                var paidStatus = await unitOfWork.OrderStatuses.GetByNameAsync("Pending")
                     ?? throw new NotFoundException("Статус 'Pending' не знайдено");
 
                 order.StatusId = paidStatus.Id;
@@ -277,7 +277,7 @@ namespace OrderService.BLL.Services
 
                 foreach (var orderGift in order.OrderGifts)
                 {
-                    var gift = await _unitOfWork.Gifts.GetByIdAsync(orderGift.GiftId);
+                    var gift = await unitOfWork.Gifts.GetByIdAsync(orderGift.GiftId);
                     if (gift != null)
                     {
                         if (gift.AvailableCount < orderGift.Count)
@@ -285,12 +285,12 @@ namespace OrderService.BLL.Services
 
                         gift.AvailableCount -= orderGift.Count;
                         gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-                        _unitOfWork.Gifts.Update(gift);
+                        unitOfWork.Gifts.Update(gift);
                     }
                 }
 
-                _unitOfWork.Orders.Update(order);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                unitOfWork.Orders.Update(order);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
 
                 var orderCreatedEvent = new OrderCreatedEvent
                 {
@@ -301,7 +301,7 @@ namespace OrderService.BLL.Services
                         Count = i.Count
                     }).ToList()
                 };
-                await _publishEndpoint.Publish(orderCreatedEvent, cancellationToken);
+                await publishEndpoint.Publish(orderCreatedEvent, cancellationToken);
 
                 TelegramOrderCreatedEvent telegramOrderCreatedEvent = new TelegramOrderCreatedEvent
                 {
@@ -309,11 +309,11 @@ namespace OrderService.BLL.Services
                     OrderId = order.Id,
                     TotalPrice = order.TotalPrice,
                 };
-                await _publishEndpoint.Publish(telegramOrderCreatedEvent, cancellationToken);
+                await publishEndpoint.Publish(telegramOrderCreatedEvent, cancellationToken);
             }
             else if (response.Status == LiqPayResponseStatus.Failure || response.Status == LiqPayResponseStatus.Error)
             {
-                var failedStatus = await _unitOfWork.OrderStatuses.GetByNameAsync("PaymentFailed");
+                var failedStatus = await unitOfWork.OrderStatuses.GetByNameAsync("PaymentFailed");
                 if (failedStatus == null)
                 {
                     failedStatus = new OrderStatus
@@ -322,27 +322,27 @@ namespace OrderService.BLL.Services
                         CreatedAt = DateTime.UtcNow.ToUniversalTime(),
                         UpdatedAt = DateTime.UtcNow.ToUniversalTime()
                     };
-                    await _unitOfWork.OrderStatuses.AddAsync(failedStatus);
+                    await unitOfWork.OrderStatuses.AddAsync(failedStatus);
                 }
 
                 order.StatusId = failedStatus.Id;
                 order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-                _unitOfWork.Orders.Update(order);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                unitOfWork.Orders.Update(order);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
             }
         }
 
         public async Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid userId, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
         {
             parameters.UserId = userId;
-            var pagedOrders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
+            var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
             var dtoList = pagedOrders.Items.Select(o =>
             {
-                var dto = _mapper.Map<OrderSummaryDto>(o);
+                var dto = mapper.Map<OrderSummaryDto>(o);
 
                 if (o.Status?.Name == "AwaitingPayment")
                 {
-                    dto.PaymentUrl = _liqPayService.GeneratePaymentUrl(
+                    dto.PaymentUrl = liqPayService.GeneratePaymentUrl(
                         o.Id,
                         o.TotalPrice,
                         $"Оплата замовлення #{o.Id}");
@@ -362,7 +362,7 @@ namespace OrderService.BLL.Services
                 BouquetId = bouquetId
             };
 
-            var orders = await _unitOfWork.Orders.GetPagedOrdersAsync(parameters);
+            var orders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters);
             var hasActiveOrders = orders.Items.Any(o => o.Status.Name == "Completed");
 
             return hasActiveOrders;
@@ -371,19 +371,19 @@ namespace OrderService.BLL.Services
 
         public async Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            var order = await _unitOfWork.Orders.GetByIdWithIncludesAsync(orderId);
+            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId);
             if (order == null)
                 throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
 
-            var status = await _unitOfWork.OrderStatuses.GetByIdAsync(dto.StatusId);
+            var status = await unitOfWork.OrderStatuses.GetByIdAsync(dto.StatusId);
             if (status == null)
                 throw new NotFoundException($"Статус замовлення з ID {dto.StatusId} не знайдено");
 
             order.StatusId = dto.StatusId;
-            _unitOfWork.Orders.Update(order);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            unitOfWork.Orders.Update(order);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var dtoResult = _mapper.Map<OrderDetailDto>(order);
+            var dtoResult = mapper.Map<OrderDetailDto>(order);
             dtoResult.TotalPrice = order.Items.Sum(i => i.Price * i.Count);
 
             return dtoResult;

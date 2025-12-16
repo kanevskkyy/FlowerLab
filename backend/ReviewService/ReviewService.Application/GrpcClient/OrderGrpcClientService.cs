@@ -8,11 +8,11 @@ namespace ReviewService.Application.GrpcClient
 {
     public class OrderGrpcClientService
     {
-        private readonly CheckOrderServiceGRPC.CheckOrderServiceGRPCClient _client;
+        private CheckOrderServiceGRPC.CheckOrderServiceGRPCClient client;
 
         public OrderGrpcClientService(CheckOrderServiceGRPC.CheckOrderServiceGRPCClient client)
         {
-            _client = client;
+            this.client = client;
         }
 
         public async Task<bool> HasUserOrderedBouquetAsync(Guid userId, Guid bouquetId)
@@ -23,7 +23,7 @@ namespace ReviewService.Application.GrpcClient
                 BouquetId = bouquetId.ToString()
             };
 
-            var response = await _client.HasUserOrderedBouquetAsync(request);
+            var response = await client.HasUserOrderedBouquetAsync(request);
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
                 throw new InvalidOperationException(response.ErrorMessage);

@@ -12,18 +12,18 @@ namespace CatalogService.BLL.GrpcServer
 {
     public class CheckIdInReviewsService : CheckIdInReviews.CheckIdInReviewsBase
     {
-        private IUnitOfWork _unitOfWork;
-        private ILogger<CheckIdInReviewsService> _logger;
+        private IUnitOfWork unitOfWork;
+        private ILogger<CheckIdInReviewsService> logger;
 
         public CheckIdInReviewsService(IUnitOfWork unitOfWork, ILogger<CheckIdInReviewsService> logger)
         {
-            _unitOfWork = unitOfWork;
-            _logger = logger;
+            this.unitOfWork = unitOfWork;
+            this.logger = logger;
         }
 
         public override async Task<ReviewCheckIdResponse> CheckId(ReviewCheckIdRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Перевірка букета з ID: {Id}", request.Id);
+            logger.LogInformation("Checking bouquet with ID: {Id}", request.Id);
 
             if (string.IsNullOrWhiteSpace(request.Id))
             {
@@ -34,7 +34,7 @@ namespace CatalogService.BLL.GrpcServer
                 };
             }
 
-            if (!Guid.TryParse(request.Id, out Guid boueuetId))
+            if (!Guid.TryParse(request.Id, out Guid bouquetId))
             {
                 return new ReviewCheckIdResponse
                 {
@@ -45,7 +45,7 @@ namespace CatalogService.BLL.GrpcServer
 
             try
             {
-                Bouquet? bouquet = await _unitOfWork.Bouquets.GetByIdAsync(boueuetId);
+                Bouquet? bouquet = await unitOfWork.Bouquets.GetByIdAsync(bouquetId);
 
                 return new ReviewCheckIdResponse
                 {
@@ -55,7 +55,7 @@ namespace CatalogService.BLL.GrpcServer
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, "Помилка при перевірці букета з ID {Id}", request.Id);
+                logger.LogError(ex, "Error occurred while checking bouquet with ID {Id}", request.Id);
                 throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
             }
         }

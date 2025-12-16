@@ -1,4 +1,5 @@
 using AggregatorService.Clients;
+using AggregatorService.Clients.Interfaces;
 using AggregatorService.Redis;
 using shared.cache;
 

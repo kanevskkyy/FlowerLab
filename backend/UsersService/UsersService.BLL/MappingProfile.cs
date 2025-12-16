@@ -1,7 +1,7 @@
 ﻿// UsersService.BLL/MappingProfile.cs
 
 using AutoMapper;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Users;
 using UsersService.Domain.Entities;
 
 namespace UsersService.BLL

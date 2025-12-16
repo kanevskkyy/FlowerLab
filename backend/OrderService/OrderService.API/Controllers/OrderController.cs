@@ -11,18 +11,18 @@ namespace OrderService.API.Controllers
     [Route("api/orders")]
     public class OrderController : ControllerBase
     {
-        private readonly IOrderService _orderService;
+        private IOrderService orderService;
 
         public OrderController(IOrderService orderService)
         {
-            _orderService = orderService;
+            this.orderService = orderService;
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPagedOrders([FromQuery] OrderSpecificationParameters parameters, CancellationToken cancellationToken)
         {
-            var pagedOrders = await _orderService.GetPagedOrdersAsync(parameters, cancellationToken);
+            var pagedOrders = await orderService.GetPagedOrdersAsync(parameters, cancellationToken);
             return Ok(pagedOrders);
         }
 
@@ -30,7 +30,7 @@ namespace OrderService.API.Controllers
         [HttpGet("{id:guid}", Name = "GetOrderById")]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var order = await _orderService.GetByIdAsync(id, cancellationToken);
+            var order = await orderService.GetByIdAsync(id, cancellationToken);
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
@@ -55,7 +55,7 @@ namespace OrderService.API.Controllers
             dto.LastName ??= lastName;
             dto.PhoneNumber ??= phoneNumber; 
 
-            var result = await _orderService.CreateAsync(
+            var result = await orderService.CreateAsync(
                 userId,
                 firstName,
                 lastName,
@@ -75,7 +75,7 @@ namespace OrderService.API.Controllers
             if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
 
             var userId = Guid.Parse(userIdString);
-            var pagedOrders = await _orderService.GetMyOrdersAsync(userId, parameters, cancellationToken);
+            var pagedOrders = await orderService.GetMyOrdersAsync(userId, parameters, cancellationToken);
             return Ok(pagedOrders);
         }
 
@@ -84,7 +84,7 @@ namespace OrderService.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LiqPayCallback([FromForm] string data, [FromForm] string signature, CancellationToken cancellationToken)
         {
-            await _orderService.ProcessPaymentCallbackAsync(data, signature, cancellationToken);
+            await orderService.ProcessPaymentCallbackAsync(data, signature, cancellationToken);
             return Ok();
         }
 
@@ -92,7 +92,7 @@ namespace OrderService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] OrderUpdateDto dto, CancellationToken cancellationToken)
         {
-            var updatedOrder = await _orderService.UpdateStatusAsync(id, dto, cancellationToken);
+            var updatedOrder = await orderService.UpdateStatusAsync(id, dto, cancellationToken);
             return Ok(updatedOrder);
         }
     }

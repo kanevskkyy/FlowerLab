@@ -19,7 +19,7 @@ namespace CatalogService.DAL.Repositories.Implementations
 
         public override async Task<IEnumerable<Bouquet>> GetAllAsync()
         {
-            return await _dbSet
+            return await dbSet
                 .Include(b => b.BouquetFlowers).ThenInclude(f => f.Flower)
                 .Include(b => b.BouquetSizes).ThenInclude(s => s.Size)
                 .Include(b => b.BouquetEvents).ThenInclude(e => e.Event)
@@ -30,7 +30,7 @@ namespace CatalogService.DAL.Repositories.Implementations
 
         public async Task<Bouquet?> GetWithDetailsAsync(Guid id)
         {
-            return await _context.Bouquets
+            return await context.Bouquets
                 .Include(b => b.BouquetSizes)
                     .ThenInclude(bs => bs.Size)
                 .Include(b => b.BouquetSizes)
@@ -48,7 +48,7 @@ namespace CatalogService.DAL.Repositories.Implementations
         public async Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters)
         {
             var spec = new BouquetSpecification(parameters);
-            var query = SpecificationEvaluator<Bouquet>.GetQuery(_dbSet.AsQueryable(), spec);
+            var query = SpecificationEvaluator<Bouquet>.GetQuery(dbSet.AsQueryable(), spec);
 
             query = query
                 .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CatalogService.DAL.Context;
 using Microsoft.EntityFrameworkCore;
-using shared.events;
+using shared.events.EventService;
 
 namespace CatalogService.BLL.EventLogService
 {

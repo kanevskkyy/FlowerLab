@@ -13,8 +13,10 @@ namespace OrderService.BLL.FluentValidation
         public OrderStatusCreateDtoValidator()
         {
             RuleFor(s => s.Name)
-                .NotEmpty().WithMessage("Назва статусу є обов’язковою")
-                .MaximumLength(50);
+                .NotEmpty()
+                .WithMessage("Назва статусу є обов’язковою")
+                .MaximumLength(50)
+                .WithMessage("Назва статусу не може перевищувати 50 символів");
         }
     }
 }

@@ -9,20 +9,20 @@ namespace CatalogService.BLL.GrpcServer
 {
     public class CheckOrderService : CheckOrder.CheckOrderBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<CheckOrderService> _logger;
+        private IUnitOfWork unitOfWork;
+        private ILogger<CheckOrderService> logger;
 
         public CheckOrderService(IUnitOfWork unitOfWork, ILogger<CheckOrderService> logger)
         {
-            _unitOfWork = unitOfWork;
-            _logger = logger;
+            this.unitOfWork = unitOfWork;
+            this.logger = logger;
         }
 
         public override async Task<OrderedResponseList> CheckOrderItems(OrderedBouquetsIdList request, ServerCallContext context)
         {
             if (request == null)
             {
-                _logger.LogWarning("Отримано порожній запит");
+                logger.LogWarning("Received empty request");
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Запит не може бути порожнім"));
             }
 
@@ -34,7 +34,7 @@ namespace CatalogService.BLL.GrpcServer
                 {
                     if (!Guid.TryParse(item.Id, out Guid bouquetId))
                     {
-                        _logger.LogWarning("Недійсний формат GUID для букета: {BouquetId}", item.Id);
+                        logger.LogWarning("Invalid GUID format for bouquet: {BouquetId}", item.Id);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
@@ -49,7 +49,7 @@ namespace CatalogService.BLL.GrpcServer
 
                     if (!Guid.TryParse(item.SizeId, out Guid sizeId))
                     {
-                        _logger.LogWarning("Недійсний формат GUID для розміру: {SizeId}", item.SizeId);
+                        logger.LogWarning("Invalid GUID format for size: {SizeId}", item.SizeId);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
@@ -62,14 +62,14 @@ namespace CatalogService.BLL.GrpcServer
                         continue;
                     }
 
-                    _logger.LogInformation("Перевірка букета ID: {BouquetId}, розмір: {SizeId}, кількість: {Count}",
+                    logger.LogInformation("Checking bouquet ID: {BouquetId}, size: {SizeId}, count: {Count}",
                         bouquetId, sizeId, item.Count);
 
-                    var bouquet = await _unitOfWork.Bouquets.GetWithDetailsAsync(bouquetId);
+                    var bouquet = await unitOfWork.Bouquets.GetWithDetailsAsync(bouquetId);
 
                     if (bouquet == null)
                     {
-                        _logger.LogWarning("Букет не знайдено: {BouquetId}", bouquetId);
+                        logger.LogWarning("Bouquet not found: {BouquetId}", bouquetId);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
@@ -86,14 +86,14 @@ namespace CatalogService.BLL.GrpcServer
 
                     if (bouquetSize == null)
                     {
-                        _logger.LogWarning("Розмір {SizeId} не знайдено для букета {BouquetId}", sizeId, bouquetId);
+                        logger.LogWarning("Size {SizeId} not found for bouquet {BouquetId}", sizeId, bouquetId);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
                             IsValid = false,
                             ErrorMessage = "Вказаний розмір недоступний для цього букета",
                             BouquetName = bouquet.Name,
                             BouquetImage = bouquet.MainPhotoUrl,
-                            Price = "0", 
+                            Price = "0",
                             SizeName = ""
                         });
                         continue;
@@ -101,7 +101,7 @@ namespace CatalogService.BLL.GrpcServer
 
                     if (bouquetSize.BouquetSizeFlowers == null || !bouquetSize.BouquetSizeFlowers.Any())
                     {
-                        _logger.LogWarning("Розмір {SizeId} букета {BouquetId} не має налаштованих квітів",
+                        logger.LogWarning("Size {SizeId} of bouquet {BouquetId} has no configured flowers",
                             sizeId, bouquetId);
                         responseList.OrderedResponseList_.Add(new OrderedRequest
                         {
@@ -123,7 +123,7 @@ namespace CatalogService.BLL.GrpcServer
                     {
                         if (bsf.Flower == null)
                         {
-                            _logger.LogWarning("У BouquetSizeFlower порожнє посилання на квітку в букеті {BouquetId}",
+                            logger.LogWarning("BouquetSizeFlower has null reference to flower in bouquet {BouquetId}",
                                 bouquetId);
                             enoughStock = false;
                             stockError = "Недійсна конфігурація букета";
@@ -133,7 +133,7 @@ namespace CatalogService.BLL.GrpcServer
                         int requiredQuantity = bsf.Quantity * item.Count;
                         int availableQuantity = bsf.Flower.Quantity;
 
-                        _logger.LogInformation("Квітка {FlowerName}: потрібно {Required}, доступно {Available}",
+                        logger.LogInformation("Flower {FlowerName}: required {Required}, available {Available}",
                             bsf.Flower.Name, requiredQuantity, availableQuantity);
 
                         flowerInfoList.Add(new FlowerInfo
@@ -149,7 +149,7 @@ namespace CatalogService.BLL.GrpcServer
                             enoughStock = false;
                             stockError = $"Недостатньо квіток '{bsf.Flower.Name}' на складі. " +
                                        $"Потрібно: {requiredQuantity}, доступно: {availableQuantity}";
-                            _logger.LogWarning("Недостатньо квіток: {Error}", stockError);
+                            logger.LogWarning("Not enough flowers: {Error}", stockError);
                             break;
                         }
                     }
@@ -160,7 +160,7 @@ namespace CatalogService.BLL.GrpcServer
                         ErrorMessage = enoughStock ? "" : stockError,
                         BouquetName = bouquet.Name,
                         BouquetImage = bouquet.MainPhotoUrl,
-                        Price = bouquetSize.Price.ToString("F2"), 
+                        Price = bouquetSize.Price.ToString("F2"),
                         SizeName = bouquetSize.Size?.Name ?? ""
                     };
 
@@ -169,17 +169,17 @@ namespace CatalogService.BLL.GrpcServer
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogWarning("Запит був скасований для букета {BouquetId}", item.Id);
+                    logger.LogWarning("Request was cancelled for bouquet {BouquetId}", item.Id);
                     throw new RpcException(new Status(StatusCode.Cancelled, "Запит був скасований"));
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Несподівана помилка при перевірці букета {BouquetId}", item.Id);
+                    logger.LogError(ex, "Unexpected error while checking bouquet {BouquetId}", item.Id);
                     throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
                 }
             }
 
-            _logger.LogInformation("Завершено перевірку {Count} букетів", request.OrderedBouquets.Count);
+            logger.LogInformation("Completed checking {Count} bouquets", request.OrderedBouquets.Count);
             return responseList;
         }
     }

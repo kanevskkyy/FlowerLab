@@ -3,8 +3,6 @@ using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -12,16 +10,15 @@ namespace shared.cache
 {
     public class EntityCacheService : IEntityCacheService, IDisposable
     {
-        private IMemoryCache memoryCache;
-        private IDatabase redisDb;
-        private ISubscriber subscriber;
-        private ILogger<EntityCacheService> logger;
-
+        private readonly IMemoryCache memoryCache;
+        private readonly IDatabase redisDb;
+        private readonly ISubscriber subscriber;
+        private readonly ILogger<EntityCacheService> logger;
         private const string INVALIDATION_CHANNEL = "entity-cache-invalidation";
         private const string CLEAR_ALL_MESSAGES = "__CLEAR_ALL__";
         private bool disposed;
 
-        private static JsonSerializerOptions JsonOptions = new()
+        private static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNamingPolicy = null,
             WriteIndented = false,
@@ -72,14 +69,14 @@ namespace shared.cache
                 }
                 _memoryKeys.Clear();
             }
-            logger.LogInformation("Пам'ять у кеші очищена успішна.");
+            logger.LogInformation("In-memory cache cleared successfully.");
         }
 
         public async Task<T?> GetOrSetAsync<T>(string key, Func<Task<T?>> factory, TimeSpan? memoryExpiration = null, TimeSpan? redisExpiration = null)
         {
             if (memoryCache.TryGetValue<T>(key, out var memoryData))
             {
-                logger.LogInformation("Кеш є: Пам'ять | Ключ: {Key}", key);
+                logger.LogInformation("Cache hit: Memory | Key: {Key}", key);
                 return memoryData;
             }
 
@@ -96,50 +93,51 @@ namespace shared.cache
                     };
                     memoryCache.Set(key, redisData, memoryOptions);
                     TrackMemoryKey(key);
+                    logger.LogInformation("Cache hit: Redis | Key: {Key}", key);
                     return redisData;
                 }
             }
             catch (RedisConnectionException ex)
             {
-                logger.LogWarning(ex, "Редіс недоступна. Йдемо до БД | Ключ: {Key}", key);
+                logger.LogWarning(ex, "Redis unavailable, fetching from database | Key: {Key}", key);
             }
 
-            logger.LogInformation("Кеш відсутній | Ключ: {Key} — достаємо з БД", key);
+            logger.LogInformation("Cache miss | Key: {Key} — fetching from database", key);
             var dbData = await factory();
             if (dbData != null)
             {
-                MemoryCacheEntryOptions options = new MemoryCacheEntryOptions
+                var memoryOptions = new MemoryCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = memoryExpiration ?? TimeSpan.FromMinutes(1),
                     Size = 1
                 };
-                memoryCache.Set(key, dbData, options);
+                memoryCache.Set(key, dbData, memoryOptions);
                 TrackMemoryKey(key);
                 try
                 {
-                    await redisDb.StringSetAsync(key, JsonSerializer.Serialize(dbData), redisExpiration ?? TimeSpan.FromMinutes(5));
+                    await redisDb.StringSetAsync(key, JsonSerializer.Serialize(dbData, JsonOptions), redisExpiration ?? TimeSpan.FromMinutes(5));
                 }
                 catch (RedisConnectionException ex)
                 {
-                    logger.LogWarning(ex, "Редіс недоступна. Йдемо до БД | Ключ: {Key}", key);
+                    logger.LogWarning(ex, "Redis unavailable, skipping Redis cache | Key: {Key}", key);
                 }
             }
 
             return dbData;
         }
 
-
         public async Task SetAsync<T>(string key, T value, TimeSpan? memoryExpiration = null, TimeSpan? redisExpiration = null)
         {
-            MemoryCacheEntryOptions options = new MemoryCacheEntryOptions
+            var memoryOptions = new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = memoryExpiration ?? TimeSpan.FromMinutes(1),
                 Size = 1
             };
-            memoryCache.Set(key, value, options);
+            memoryCache.Set(key, value, memoryOptions);
             TrackMemoryKey(key);
             await redisDb.StringSetAsync(key, JsonSerializer.Serialize(value, JsonOptions), redisExpiration ?? TimeSpan.FromMinutes(5));
             await subscriber.PublishAsync(INVALIDATION_CHANNEL, key);
+            logger.LogInformation("Cache set for key: {Key}", key);
         }
 
         public async Task RemoveAsync(string key)
@@ -147,6 +145,7 @@ namespace shared.cache
             RemoveFromMemory(key);
             await redisDb.KeyDeleteAsync(key);
             await subscriber.PublishAsync(INVALIDATION_CHANNEL, key);
+            logger.LogInformation("Cache removed for key: {Key}", key);
         }
 
         public async Task RemoveByPatternAsync(string pattern)
@@ -156,8 +155,8 @@ namespace shared.cache
             {
                 await redisDb.KeyDeleteAsync(key);
             }
-
             await subscriber.PublishAsync(INVALIDATION_CHANNEL, CLEAR_ALL_MESSAGES);
+            logger.LogInformation("Cache removed by pattern: {Pattern}", pattern);
         }
 
         public void Dispose()
@@ -166,6 +165,7 @@ namespace shared.cache
             {
                 subscriber?.Unsubscribe(INVALIDATION_CHANNEL);
                 disposed = true;
+                logger.LogInformation("EntityCacheService disposed.");
             }
         }
     }

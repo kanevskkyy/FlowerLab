@@ -1,32 +1,32 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using UsersService.BLL.Interfaces;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Users;
+using UsersService.BLL.Services.Interfaces;
 using UsersService.Domain.Entities;
 
 namespace UsersService.BLL.Services
 {
     public class AdminUserService : IAdminUserService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IMapper _mapper;
+        private UserManager<ApplicationUser> userManager;
+        private IMapper mapper;
 
         public AdminUserService(UserManager<ApplicationUser> userManager, IMapper mapper)
         {
-            _userManager = userManager;
-            _mapper = mapper;
+            this.userManager = userManager;
+            this.mapper = mapper;
         }
 
         private async Task<string> GetUserPrimaryRoleAsync(ApplicationUser user)
         {
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await userManager.GetRolesAsync(user);
             return roles.FirstOrDefault() ?? "Client"; 
         }
 
         public async Task<IEnumerable<AdminUserDto>> GetAllUsersAsync(UsersFilterDto filter)
         {
-            var query = _userManager.Users.AsQueryable();
+            var query = userManager.Users.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filter.Email))
             {
@@ -48,7 +48,7 @@ namespace UsersService.BLL.Services
 
             var users = await query.ToListAsync();
     
-            var userDtos = _mapper.Map<IEnumerable<AdminUserDto>>(users).ToList();
+            var userDtos = mapper.Map<IEnumerable<AdminUserDto>>(users).ToList();
 
             foreach (var dto in userDtos)
             {
@@ -60,14 +60,14 @@ namespace UsersService.BLL.Services
         }
         public async Task<AdminUserDto?> GetUserByIdAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
 
             if (user == null)
             {
                 return null; 
             }
 
-            var userDto = _mapper.Map<AdminUserDto>(user);
+            var userDto = mapper.Map<AdminUserDto>(user);
 
             userDto.Role = await GetUserPrimaryRoleAsync(user);
 
@@ -78,11 +78,11 @@ namespace UsersService.BLL.Services
         {
             if (discount < 0 || discount > 100) return false;
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null) return false;
 
             user.PersonalDiscountPercentage = discount;
-            var result = await _userManager.UpdateAsync(user);
+            var result = await userManager.UpdateAsync(user);
             
             return result.Succeeded;
         }

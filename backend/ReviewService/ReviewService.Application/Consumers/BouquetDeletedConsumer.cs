@@ -2,7 +2,7 @@
 using FlowerLab.Shared.Events;
 using ReviewService.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
-using shared.events;
+using shared.events.EventService;
 
 namespace ReviewService.Application.Consumers
 {

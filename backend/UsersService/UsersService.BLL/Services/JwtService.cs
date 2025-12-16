@@ -4,19 +4,19 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using UsersService.BLL.Interfaces;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Auth;
+using UsersService.BLL.Services.Interfaces;
 using UsersService.Domain.Entities;
 
 namespace UsersService.BLL.Services
 {
     public class JwtService : IJwtService
     {
-        private readonly JwtSettings _jwtSettings;
+        private JwtSettings jwtSettings;
 
         public JwtService(IOptions<JwtSettings> jwtSettings)
         {
-            _jwtSettings = jwtSettings.Value;
+            this.jwtSettings = jwtSettings.Value;
         }
 
         public TokenResponseDto CreateTokens(ApplicationUser user, IList<string> roles)
@@ -38,14 +38,14 @@ namespace UsersService.BLL.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             
-            var expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
+            var expiration = DateTime.UtcNow.AddMinutes(jwtSettings.AccessTokenExpirationMinutes);
 
             var token = new JwtSecurityToken(
-                _jwtSettings.Issuer,
-                _jwtSettings.Audience,
+                jwtSettings.Issuer,
+                jwtSettings.Audience,
                 claims,
                 expires: expiration,
                 signingCredentials: credentials);

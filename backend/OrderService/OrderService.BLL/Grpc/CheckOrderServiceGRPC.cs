@@ -10,11 +10,11 @@ namespace OrderService.BLL.Grpc
 {
     public class CheckOrderServiceGRPCImpl : CheckOrderServiceGRPC.CheckOrderServiceGRPCBase
     {
-        private readonly IOrderService _orderService;
+        private IOrderService orderService;
 
         public CheckOrderServiceGRPCImpl(IOrderService orderService)
         {
-            _orderService = orderService;
+            this.orderService = orderService;
         }
 
         public override async Task<UserOrderCheckResponseMessage> HasUserOrderedBouquet(
@@ -31,7 +31,7 @@ namespace OrderService.BLL.Grpc
 
             try
             {
-                bool hasOrdered = await _orderService.HasUserOrderedBouquetAsync(
+                bool hasOrdered = await orderService.HasUserOrderedBouquetAsync(
                     Guid.Parse(request.UserId), Guid.Parse(request.BouquetId));
 
                 response.HasOrdered = hasOrdered;

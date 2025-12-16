@@ -1,17 +1,19 @@
 ﻿using Telegram.Bot;
+using System;
+using System.Threading.Tasks;
 
 namespace Notify
 {
     public class TelegramBotService : ITelegramBotService
     {
-        private readonly TelegramBotClient botClient;
-        private readonly long adminChatId;
+        private TelegramBotClient botClient;
+        private long adminChatId;
 
         public TelegramBotService(string botToken, long adminChatId)
         {
             if (string.IsNullOrWhiteSpace(botToken))
             {
-                throw new ArgumentNullException(nameof(botToken));
+                throw new ArgumentNullException(nameof(botToken), "Bot token cannot be null or empty");
             }
 
             botClient = new TelegramBotClient(botToken);
@@ -29,7 +31,7 @@ namespace Notify
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Помилка відправки в Telegram: {ex.Message}");
+                Console.WriteLine($"Failed to send Telegram message: {ex.Message}");
                 throw;
             }
         }

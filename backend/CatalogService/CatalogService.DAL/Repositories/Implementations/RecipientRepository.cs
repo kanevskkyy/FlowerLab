@@ -16,7 +16,7 @@ namespace CatalogService.DAL.Repositories.Implementations
 
         public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null)
         {
-            return await _dbSet.AnyAsync(r => r.Name == name && (!excludeId.HasValue || r.Id != excludeId.Value));
+            return await dbSet.AnyAsync(r => r.Name == name && (!excludeId.HasValue || r.Id != excludeId.Value));
         }
     }
 }

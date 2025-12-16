@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using ReviewService.Domain.Entities;
-using shared.events;
+using shared.events.EventService;
 
 namespace ReviewService.Application.Consumers.EventLog
 {

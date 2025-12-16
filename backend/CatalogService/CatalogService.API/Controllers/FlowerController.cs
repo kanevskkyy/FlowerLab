@@ -10,18 +10,18 @@ namespace CatalogService.API.Controllers
     [Route("api/flowers")]
     public class FlowersController : ControllerBase
     {
-        private readonly IFlowerService _flowerService;
+        private IFlowerService flowerService;
 
         public FlowersController(IFlowerService flowerService)
         {
-            _flowerService = flowerService;
+            this.flowerService = flowerService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
-            var flowers = await _flowerService.GetAllAsync();
+            var flowers = await flowerService.GetAllAsync();
             return Ok(flowers);
         }
 
@@ -29,7 +29,7 @@ namespace CatalogService.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var flower = await _flowerService.GetByIdAsync(id);
+            var flower = await flowerService.GetByIdAsync(id);
             return Ok(flower);
         }
 
@@ -37,7 +37,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] FlowerCreateUpdateDto dto)
         {
-            var created = await _flowerService.CreateAsync(dto);
+            var created = await flowerService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
@@ -45,7 +45,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] FlowerCreateUpdateDto dto)
         {
-            var updated = await _flowerService.UpdateAsync(id, dto);
+            var updated = await flowerService.UpdateAsync(id, dto);
             return Ok(updated);
         }
 
@@ -53,16 +53,8 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _flowerService.DeleteAsync(id);
+            await flowerService.DeleteAsync(id);
             return NoContent();
-        }
-
-        [HttpPatch("{id}/stock")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateStock(Guid id, [FromBody] UpdateStockDto dto)
-        {
-            var updated = await _flowerService.UpdateStockAsync(id, dto.Quantity);
-            return Ok(updated);
         }
     }
 }

@@ -15,68 +15,69 @@ namespace CatalogService.BLL.Services.Implementations
 {
     public class RecipientService : IRecipientService
     {
-        private readonly IUnitOfWork _uow;
-        private readonly IMapper _mapper;
+        private IUnitOfWork uow;
+        private IMapper mapper;
         private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
         public RecipientService(IUnitOfWork uow, IMapper mapper, IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
-            _uow = uow;
-            _mapper = mapper;
+            this.uow = uow;
+            this.mapper = mapper;
             this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
         public async Task<IEnumerable<RecipientDto>> GetAllAsync()
         {
-            var recs = await _uow.Recipients.GetAllAsync();
-            return _mapper.Map<IEnumerable<RecipientDto>>(recs);
+            IEnumerable<Recipient> recipients = await uow.Recipients.GetAllAsync();
+            return mapper.Map<IEnumerable<RecipientDto>>(recipients);
         }
 
         public async Task<RecipientDto> GetByIdAsync(Guid id)
         {
-            var rec = await _uow.Recipients.GetByIdAsync(id);
-            if (rec == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
-            return _mapper.Map<RecipientDto>(rec);
+            Recipient recipient = await uow.Recipients.GetByIdAsync(id);
+            if (recipient == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
+            
+            return mapper.Map<RecipientDto>(recipient);
         }
 
         public async Task<RecipientDto> CreateAsync(string name)
         {
-            if (await _uow.Recipients.ExistsWithNameAsync(name))
+            if (await uow.Recipients.ExistsWithNameAsync(name))
                 throw new AlreadyExistsException($"Отримувач '{name}' уже існує.");
 
-            var entity = new Recipient { Name = name };
-            await _uow.Recipients.AddAsync(entity);
-            await _uow.SaveChangesAsync();
+            Recipient entity = new Recipient { Name = name };
+            await uow.Recipients.AddAsync(entity);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
-            return _mapper.Map<RecipientDto>(entity);
+            return mapper.Map<RecipientDto>(entity);
         }
 
         public async Task<RecipientDto> UpdateAsync(Guid id, string name)
         {
-            var rec = await _uow.Recipients.GetByIdAsync(id);
-            if (rec == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
+            Recipient recipient = await uow.Recipients.GetByIdAsync(id);
+            if (recipient == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
 
-            if (await _uow.Recipients.ExistsWithNameAsync(name, id))
+            if (await uow.Recipients.ExistsWithNameAsync(name, id))
                 throw new AlreadyExistsException($"Отримувач '{name}' уже існує.");
 
-            rec.Name = name;
-            _uow.Recipients.Update(rec);
-            await _uow.SaveChangesAsync();
+            recipient.Name = name;
+            uow.Recipients.Update(recipient);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
-            return _mapper.Map<RecipientDto>(rec);
+            return mapper.Map<RecipientDto>(recipient);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var rec = await _uow.Recipients.GetByIdAsync(id);
-            if (rec == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
+            Recipient recipient = await uow.Recipients.GetByIdAsync(id);
+            if (recipient == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
 
-            _uow.Recipients.Delete(rec);
-            await _uow.SaveChangesAsync();
+            uow.Recipients.Delete(recipient);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }

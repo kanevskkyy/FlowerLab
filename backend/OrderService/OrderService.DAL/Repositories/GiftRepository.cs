@@ -19,7 +19,7 @@ namespace OrderService.DAL.Repositories
 
         public async Task<bool> IsNameDuplicatedAsync(string name, Guid? ignoreId = null, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.AsQueryable();
+            var query = dbSet.AsQueryable();
 
             if (ignoreId.HasValue)
                 query = query.Where(g => g.Id != ignoreId.Value);

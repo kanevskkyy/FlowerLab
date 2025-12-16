@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CatalogService.DAL.UnitOfWork;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 
 namespace CatalogService.BLL.GrpcServer
 {
@@ -23,66 +20,57 @@ namespace CatalogService.BLL.GrpcServer
 
         public override async Task<FilterResponse> GetAllFilters(FilterEmptyRequest request, ServerCallContext context)
         {
-            logger.LogInformation("Отримання всіх фільтрів");
+            logger.LogInformation("Fetching all filters");
 
             try
             {
                 var sizes = await unitOfWork.Sizes.GetAllAsync();
                 var events = await unitOfWork.Events.GetAllAsync();
-                var receivments = await unitOfWork.Recipients.GetAllAsync();
+                var recipients = await unitOfWork.Recipients.GetAllAsync();
                 var flowers = await unitOfWork.Flowers.GetAllAsync();
 
-                var sizeResponse = new SizeResponseList
+                var sizeResponse = new SizeResponseList();
+                sizeResponse.Sizes.AddRange(sizes.Select(s => new SizeResponse
                 {
-                    Sizes = { sizes.Select(s => new SizeResponse {
                     Id = s.Id.ToString(),
-                    Name = s.Name })
-                }
-                };
+                    Name = s.Name
+                }));
 
-                var eventResponse = new EventResponseList
+                var eventResponse = new EventResponseList();
+                eventResponse.Events.AddRange(events.Select(e => new EventResponse
                 {
-                    Events = {
-                    events.Select(e => new EventResponse {
-                        Id = e.Id.ToString(),
-                        Name = e.Name
-                    })
-                }
-                };
+                    Id = e.Id.ToString(),
+                    Name = e.Name
+                }));
 
-                var receivmentResponse = new ReceivmentResponseList
+                var recipientResponse = new ReceivmentResponseList();
+                recipientResponse.Receivments.AddRange(recipients.Select(r => new ReceivmentResponse
                 {
-                    Receivments = {
-                    receivments.Select(r => new ReceivmentResponse {
-                        Id = r.Id.ToString(),
-                        Name = r.Name
-                    })
-                }
-                };
+                    Id = r.Id.ToString(),
+                    Name = r.Name
+                }));
 
-                var flowerResponse = new FlowerResponseList
+                var flowerResponse = new FlowerResponseList();
+                flowerResponse.Flowers.AddRange(flowers.Select(f => new FlowerResponse
                 {
-                    Flowers = { flowers.Select(f => new FlowerResponse
-            {
-                Id = f.Id.ToString(),
-                Name = f.Name,
-                Color = f.Color,
-                Description = f.Description,
-                Quantity = f.Quantity
-            }) }
-                };
+                    Id = f.Id.ToString(),
+                    Name = f.Name,
+                    Color = f.Color,
+                    Description = f.Description,
+                    Quantity = f.Quantity
+                }));
 
                 return new FilterResponse
                 {
                     SizeResponseList = sizeResponse,
                     EventResponseList = eventResponse,
-                    ReceivmentResponseList = receivmentResponse,
+                    ReceivmentResponseList = recipientResponse,
                     FlowerResponseList = flowerResponse
                 };
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Не вдалося отримати фільтри");
+                logger.LogError(ex, "Failed to fetch filters");
                 throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
             }
         }

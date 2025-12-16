@@ -14,19 +14,19 @@ namespace CatalogService.BLL.Services.Implementations
 {
     public class CloudinaryImageService : IImageService
     {
-        private readonly Cloudinary _cloudinary;
+        private Cloudinary cloudinary;
 
         public CloudinaryImageService(IOptions<CloudSettings> options)
         {
             var settings = options.Value;
-            var account = new Account(settings.CloudName, settings.ApiKey, settings.ApiSecret);
-            _cloudinary = new Cloudinary(account);
-            _cloudinary.Api.Secure = true;
+            Account account = new Account(settings.CloudName, settings.ApiKey, settings.ApiSecret);
+            cloudinary = new Cloudinary(account);
+            cloudinary.Api.Secure = true;
         }
 
         public async Task<string> UploadAsync(byte[] fileBytes, string fileName, string folder)
         {
-            var uploadParams = new ImageUploadParams()
+            ImageUploadParams uploadParams = new ImageUploadParams()
             {
                 File = new FileDescription(fileName, new MemoryStream(fileBytes)),
                 Folder = folder,
@@ -35,7 +35,7 @@ namespace CatalogService.BLL.Services.Implementations
                 Overwrite = false
             };
 
-            var result = await _cloudinary.UploadAsync(uploadParams);
+            var result = await cloudinary.UploadAsync(uploadParams);
 
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
                 return result.SecureUrl.ToString();
@@ -46,7 +46,7 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<bool> DeleteAsync(string publicId)
         {
             var deletionParams = new DeletionParams(publicId);
-            var result = await _cloudinary.DestroyAsync(deletionParams);
+            var result = await cloudinary.DestroyAsync(deletionParams);
             return result.Result == "ok" || result.Result == "not found";
         }
     }

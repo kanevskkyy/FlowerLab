@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Auth;
 
 namespace UsersService.BLL.FluentValidation 
 {
@@ -21,7 +21,7 @@ namespace UsersService.BLL.FluentValidation
 
             RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("Пароль є обов'язковим.")
-                .MinimumLength(8).WithMessage("Пароль має містити мінімум 8 символів."); // 👍
+                .MinimumLength(8).WithMessage("Пароль має містити мінімум 8 символів."); 
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty().WithMessage("Номер телефону є обов'язковим.")

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UsersService.BLL;
-using UsersService.BLL.Interfaces;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Auth;
+using UsersService.BLL.Models.Email;
+using UsersService.BLL.Services.Interfaces;
 
 namespace UsersService.API.Controllers
 {
@@ -9,40 +9,49 @@ namespace UsersService.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private IAuthService authService;
 
         public AuthController(IAuthService authService)
         {
-            _authService = authService;
+            this.authService = authService;
         }
 
-        /// <summary>
-        /// Реєстрація нового клієнта (Sign Up Page)
-        /// </summary>
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenResponseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegistrationDto model)
         {
-            var result = await _authService.RegisterAsync(model);
+            await authService.RegisterAsync(model);
 
-            if (result == null)
+            return Ok(new
             {
-                return BadRequest(new { Message = "Реєстрація не вдалася. Користувач вже існує або пароль некоректний." });
-            }
+                Message = "Користувача створено ✅. Перевірте email для підтвердження 📧"
+            });
 
-            return Ok(result);
         }
 
-        /// <summary>
-        /// Логін користувача (Sign In Page)
-        /// </summary>
+        [HttpGet("confirm-email")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+        {
+            try
+            {
+                await authService.ConfirmEmailAsync(userId, token);
+                return Ok(new { Message = "Email підтверджено 🎉. Тепер можете увійти." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenResponseDto))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
-            var result = await _authService.LoginAsync(model);
+            var result = await authService.LoginAsync(model);
 
             if (result == null)
             {
@@ -57,7 +66,7 @@ namespace UsersService.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto model)
         {
-            var result = await _authService.RefreshTokenAsync(model.RefreshToken);
+            var result = await authService.RefreshTokenAsync(model.RefreshToken);
 
             if (result == null)
             {
@@ -65,13 +74,63 @@ namespace UsersService.API.Controllers
             }
 
             return Ok(result);
+
         }
+
+        [HttpPost("resend-confirm-email")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResendConfirmEmail([FromBody] ResendConfirmEmailDto model)
+        {
+            try
+            {
+                await authService.ResendConfirmationEmailAsync(model.Email);
+                return Ok(new { Message = "Новий лист з підтвердженням надіслано 📧" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
+        {
+            try
+            {
+                await authService.SendResetPasswordLinkAsync(model.Email);
+                return Ok(new { Message = "Лист для скидання пароля надіслано 📧" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("reset-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
+        {
+            try
+            {
+                await authService.ResetPasswordAsync(model);
+                return Ok(new { Message = "Пароль успішно змінено! 🎉" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
 
         [HttpPost("logout")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto model)
         {
-            await _authService.LogoutAsync(model.RefreshToken);
+            await authService.LogoutAsync(model.RefreshToken);
             return NoContent();
         }
     }

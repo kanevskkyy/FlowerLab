@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Grpc.Core;
 using ReviewService.Domain.Entities.QueryParameters;
@@ -11,32 +10,32 @@ namespace ReviewService.Application.GrpcServer
 {
     public class ReviewsByBouquetServiceImpl : ReviewsByBouquetId.ReviewsByBouquetIdBase
     {
-        private readonly IReviewRepository _reviewRepository;
-        private readonly ILogger<ReviewsByBouquetServiceImpl> _logger;
+        private IReviewRepository reviewRepository;
+        private ILogger<ReviewsByBouquetServiceImpl> logger;
 
         public ReviewsByBouquetServiceImpl(
             IReviewRepository reviewRepository,
             ILogger<ReviewsByBouquetServiceImpl> logger)
         {
-            _reviewRepository = reviewRepository;
-            _logger = logger;
+            this.reviewRepository = reviewRepository;
+            this.logger = logger;
         }
 
         public override async Task<ReviewsListGrpcResponse> GetReviewsByBouquetId(
             ReviewBouquetIdGrpcRequest request,
             ServerCallContext context)
         {
-            _logger.LogInformation($"Отримано gRPC запит для BouquetId: {request.Id}");
+            logger.LogInformation("Received gRPC request for BouquetId: {BouquetId}", request.Id);
 
             Guid bouquetId;
             try
             {
                 bouquetId = Guid.Parse(request.Id);
-                _logger.LogInformation($"Преобразовано BouquetId у Guid: {bouquetId}");
+                logger.LogInformation("Parsed BouquetId to Guid: {BouquetId}", bouquetId);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Не вдалося перетворити BouquetId: {ex.Message}");
+                logger.LogError(ex, "Failed to parse BouquetId: {BouquetId}", request.Id);
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Невірний формат BouquetId"));
             }
 
@@ -46,17 +45,18 @@ namespace ReviewService.Application.GrpcServer
                 Status = ReviewStatus.Confirmed
             };
 
-            _logger.LogInformation($"Виклик репозиторію з BouquetId: {queryParams.BouquetId}");
+            logger.LogInformation("Calling repository with BouquetId: {BouquetId}", queryParams.BouquetId);
 
-            var reviews = await _reviewRepository.GetReviewsAsync(queryParams);
+            var reviews = await reviewRepository.GetReviewsAsync(queryParams);
 
-            _logger.LogInformation($"Репозиторій повернув {reviews.Items.Count} відгуків, Загалом: {reviews.TotalCount}");
+            logger.LogInformation("Repository returned {Count} reviews, Total: {TotalCount}", reviews.Items.Count, reviews.TotalCount);
 
             var grpcResponse = new ReviewsListGrpcResponse();
 
             foreach (var review in reviews.Items)
             {
-                _logger.LogInformation($"Обробка відгуку ID: {review.Id}, BouquetId: {review.BouquetId}, Статус: {review.Status}");
+                logger.LogInformation("Processing review ID: {ReviewId}, BouquetId: {BouquetId}, Status: {Status}",
+                    review.Id, review.BouquetId, review.Status);
 
                 var reviewGrpcResponse = new ReviewGrpcResponse
                 {
@@ -76,7 +76,7 @@ namespace ReviewService.Application.GrpcServer
                 grpcResponse.Reviews.Add(reviewGrpcResponse);
             }
 
-            _logger.LogInformation($"Повертається {grpcResponse.Reviews.Count} відгуків у gRPC відповіді");
+            logger.LogInformation("Returning {Count} reviews in gRPC response", grpcResponse.Reviews.Count);
 
             return grpcResponse;
         }

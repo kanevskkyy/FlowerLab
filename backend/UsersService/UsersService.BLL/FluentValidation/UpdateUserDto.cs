@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Users;
 
 namespace UsersService.BLL.FluentValidation
 {
@@ -25,7 +25,8 @@ namespace UsersService.BLL.FluentValidation
                 .MaximumLength(50).WithMessage("Прізвище не може перевищувати 50 символів");
 
             RuleFor(x => x.PhoneNumber)
-                .Matches(@"^\+?\d{10,15}$").WithMessage("Номер телефону має бути валідним")
+                .Matches(@"^\+380\d{9}$")
+                .WithMessage("Номер телефону має бути у форматі +380XXXXXXXXX")
                 .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
 
             RuleFor(x => x.Photo)

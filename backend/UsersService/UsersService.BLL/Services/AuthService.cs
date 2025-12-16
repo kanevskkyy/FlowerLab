@@ -1,40 +1,57 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using UsersService.BLL.Interfaces;
-using UsersService.BLL.Models;
+using SendGrid.Helpers.Errors.Model;
+using System.Linq;
+using System.Threading.Tasks;
+using UsersService.BLL.EmailService;
+using UsersService.BLL.EmailService.DTO;
+using UsersService.BLL.Helpers;
+using UsersService.BLL.Models.Auth;
+using UsersService.BLL.Models.Users;
+using UsersService.BLL.Services.Interfaces;
 using UsersService.DAL.DbContext;
 using UsersService.Domain.Entities;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UsersService.BLL.Helpers;
 
 namespace UsersService.BLL.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IJwtService _jwtService;
-        private readonly ApplicationDbContext _dbContext;
-        private readonly JwtSettings _jwtSettings;
-        private readonly IUserImageService _imageService;
+        private UserManager<ApplicationUser> userManager;
+        private IJwtService jwtService;
+        private ApplicationDbContext dbContext;
+        private JwtSettings jwtSettings;
+        private IUserImageService imageService;
+        private IEmailService emailService;
+        private IConfiguration configuration;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IJwtService jwtService, ApplicationDbContext dbContext, IOptions<JwtSettings> jwtSettings, IUserImageService userImageService)
+        public AuthService(
+            UserManager<ApplicationUser> userManager, 
+            IJwtService jwtService,
+            ApplicationDbContext dbContext,
+            IOptions<JwtSettings> jwtSettings,
+            IUserImageService userImageService,
+            IEmailService emailService,
+            IConfiguration configuration)
         {
-            _imageService = userImageService;
-            _userManager = userManager;
-            _jwtService = jwtService;
-            _dbContext = dbContext;
-            _jwtSettings = jwtSettings.Value;
+            imageService = userImageService;
+            this.userManager = userManager;
+            this.jwtService = jwtService;
+            this.dbContext = dbContext;
+            this.jwtSettings = jwtSettings.Value;
+            this.emailService = emailService;
+            this.configuration = configuration;
         }
+
 
         public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new InvalidOperationException($"Користувача з ID '{userId}' не знайдено.");
 
-            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+            var result = await userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
 
             if (!result.Succeeded)
             {
@@ -47,13 +64,13 @@ namespace UsersService.BLL.Services
 
         public async Task<TokenResponseDto?> RegisterAsync(RegistrationDto model)
         {
-            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            var existingUser = await userManager.FindByEmailAsync(model.Email);
             if (existingUser != null)
             {
                 throw new InvalidOperationException($"Користувач з email '{model.Email}' вже існує.");
             }
 
-            var phoneExists = await _userManager.Users.AnyAsync(u => u.PhoneNumber == model.PhoneNumber);
+            var phoneExists = await userManager.Users.AnyAsync(u => u.PhoneNumber == model.PhoneNumber);
             if (phoneExists)
             {
                 throw new InvalidOperationException($"Користувач з номером '{model.PhoneNumber}' вже існує.");
@@ -68,46 +85,87 @@ namespace UsersService.BLL.Services
                 PhoneNumber = model.PhoneNumber
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new InvalidOperationException($"Створення користувача не вдалося: {errors}");
             }
 
-            await _userManager.AddToRoleAsync(user, "Client");
+            await userManager.AddToRoleAsync(user, "Client");
 
-            return await GenerateAndSaveTokens(user);
+
+            string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            string encodedToken = Uri.EscapeDataString(token);
+
+            string confirmUrl =
+                $"{configuration["Frontend:ConfirmEmailUrl"]}?userId={user.Id}&token={encodedToken}";
+
+            await emailService.SendEmailAsync(new EmailMessageDTO
+            {
+                To = user.Email,
+                Subject = "Підтвердження email 📧",
+                HtmlBody = $"""
+                    <h2>Підтвердження email</h2>
+                    <p>Привіт, {user.FirstName} 👋</p>
+                    <p>Натисни кнопку, щоб підтвердити email:</p>
+                    <a href="{confirmUrl}">
+                        Підтвердити email
+                    </a>
+                """
+            });
+
+            return null;
+
         }
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
                 throw new InvalidOperationException($"Користувач з email '{model.Email}' не існує.");
 
-            if (await _userManager.IsLockedOutAsync(user))
+            if (await userManager.IsLockedOutAsync(user))
                 throw new UnauthorizedAccessException("Акаунт тимчасово заблоковано через велику кількість невдалих входів.");
 
-            var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
+            var passwordValid = await userManager.CheckPasswordAsync(user, model.Password);
 
             if (!passwordValid)
             {
-                await _userManager.AccessFailedAsync(user);
+                await userManager.AccessFailedAsync(user);
 
                 throw new UnauthorizedAccessException("Невірний пароль або email.");
             }
 
-            await _userManager.ResetAccessFailedCountAsync(user);
+            await userManager.ResetAccessFailedCountAsync(user);
+
+            if (!user.EmailConfirmed)
+                throw new UnauthorizedAccessException("Підтвердіть email!");
 
             return await GenerateAndSaveTokens(user);
+        }
+
+        public async Task ConfirmEmailAsync(string userId, string token)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new NotFoundException("Користувача не знайдено!");
+
+            var decodedToken = Uri.UnescapeDataString(token);
+            var result = await userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Не вдалося підтвердити email: {errors}");
+            }
         }
 
 
         public async Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken)
         {
-            var storedToken = await _dbContext.RefreshTokens
+            var storedToken = await dbContext.RefreshTokens
                 .Include(t => t.User)
                 .SingleOrDefaultAsync(t => t.Token == refreshToken);
 
@@ -124,7 +182,7 @@ namespace UsersService.BLL.Services
 
         public async Task<bool> LogoutAsync(string refreshToken)
         {
-            var storedToken = await _dbContext.RefreshTokens
+            var storedToken = await dbContext.RefreshTokens
                 .SingleOrDefaultAsync(t => t.Token == refreshToken);
 
             if (storedToken == null)
@@ -133,14 +191,14 @@ namespace UsersService.BLL.Services
             }
 
             storedToken.IsRevoked = true;
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
 
             return true;
         }
 
         public async Task<TokenResponseDto> UpdateUserAsync(string userId, UpdateUserDto dto)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new InvalidOperationException($"Користувач з ID '{userId}' не існує.");
 
@@ -160,7 +218,7 @@ namespace UsersService.BLL.Services
 
             if (!string.IsNullOrEmpty(dto.PhoneNumber) && dto.PhoneNumber != user.PhoneNumber)
             {
-                var phoneExists = await _userManager.Users
+                var phoneExists = await userManager.Users
                     .AnyAsync(u => u.PhoneNumber == dto.PhoneNumber && u.Id != user.Id);
 
                 if (phoneExists)
@@ -177,12 +235,12 @@ namespace UsersService.BLL.Services
                     try
                     {
                         var publicId = GetPublicIdFromUrl(user.PhotoUrl);
-                        await _imageService.DeleteAsync(publicId);
+                        await imageService.DeleteAsync(publicId);
                     }
                     catch { }
                 }
 
-                var url = await _imageService.UploadAsync(dto.Photo, "users/photos");
+                var url = await imageService.UploadAsync(dto.Photo, "users/photos");
                 user.PhotoUrl = url;
                 isUpdated = true;
             }
@@ -192,7 +250,7 @@ namespace UsersService.BLL.Services
                 return await GenerateAndSaveTokens(user);
             }
 
-            var result = await _userManager.UpdateAsync(user);
+            var result = await userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
@@ -208,24 +266,96 @@ namespace UsersService.BLL.Services
             return fileName.Split('.').First();
         }
 
+        public async Task ResendConfirmationEmailAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+            if (user == null)
+                throw new NotFoundException("Користувача не знайдено!");
+
+            if (user.EmailConfirmed)
+                throw new InvalidOperationException("Email вже підтверджений ✅");
+
+            string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            string encodedToken = Uri.EscapeDataString(token);
+
+            string confirmUrl =
+                $"{configuration["Frontend:ConfirmEmailUrl"]}?userId={user.Id}&token={encodedToken}";
+
+            await emailService.SendEmailAsync(new EmailMessageDTO
+            {
+                To = user.Email,
+                Subject = "Підтвердження email",
+                HtmlBody = $"""
+                    <h2>Підтвердження email</h2>
+                    <p>Привіт, {user.FirstName} 👋</p>
+                    <p>Натисни кнопку, щоб підтвердити email:</p>
+                    <a href="{confirmUrl}">
+                        Підтвердити email
+                    </a>
+                """
+            });
+        }
+
+        public async Task SendResetPasswordLinkAsync(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+            if (user == null)
+                throw new NotFoundException("Користувача з таким email не знайдено!");
+
+            string token = await userManager.GeneratePasswordResetTokenAsync(user);
+            string encodedToken = Uri.EscapeDataString(token);
+
+            string resetUrl = $"{configuration["Frontend:ResetPasswordUrl"]}?userId={user.Id}&token={encodedToken}";
+
+            await emailService.SendEmailAsync(new EmailMessageDTO
+            {
+                To = user.Email,
+                Subject = "Скидання пароля",
+                HtmlBody = $"""
+                    <h2>Скидання пароля</h2>
+                    <p>Привіт, {user.FirstName} 👋</p>
+                    <p>Натисни кнопку, щоб змінити пароль:</p>
+                    <a href="{resetUrl}">
+                        Змінити пароль
+                    </a>
+                """
+            });
+        }
+
+        public async Task ResetPasswordAsync(ResetPasswordDto model)
+        {
+            var user = await userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+                throw new NotFoundException("Користувача не знайдено!");
+
+            var decodedToken = Uri.UnescapeDataString(model.Token);
+            var result = await userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Не вдалося скинути пароль: {errors}");
+            }
+        }
+
         private async Task<TokenResponseDto> GenerateAndSaveTokens(ApplicationUser user)
         {
-            var roles = await _userManager.GetRolesAsync(user);
-            var tokenData = _jwtService.CreateTokens(user, roles);
+            var roles = await userManager.GetRolesAsync(user);
+            var tokenData = jwtService.CreateTokens(user, roles);
 
-            var oldTokens = _dbContext.RefreshTokens.Where(t => t.UserId == user.Id && !t.IsRevoked);
-            _dbContext.RefreshTokens.RemoveRange(oldTokens);
+            var oldTokens = dbContext.RefreshTokens.Where(t => t.UserId == user.Id && !t.IsRevoked);
+            dbContext.RefreshTokens.RemoveRange(oldTokens);
 
             var refreshTokenEntity = new RefreshToken
             {
                 Token = tokenData.RefreshToken,
-                ExpiryDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                ExpiryDate = DateTime.UtcNow.AddDays(jwtSettings.RefreshTokenExpirationDays),
                 UserId = user.Id,
                 IsRevoked = false
             };
 
-            await _dbContext.RefreshTokens.AddAsync(refreshTokenEntity);
-            await _dbContext.SaveChangesAsync();
+            await dbContext.RefreshTokens.AddAsync(refreshTokenEntity);
+            await dbContext.SaveChangesAsync();
 
             return tokenData;
         }

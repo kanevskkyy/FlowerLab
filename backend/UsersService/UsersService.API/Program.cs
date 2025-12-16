@@ -9,11 +9,12 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using UsersService.API.Helpers;
 using UsersService.BLL;
+using UsersService.BLL.EmailService;
 using UsersService.BLL.FluentValidation;
 using UsersService.BLL.Helpers;
-using UsersService.BLL.Interfaces;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Auth;
 using UsersService.BLL.Services;
+using UsersService.BLL.Services.Interfaces;
 using UsersService.DAL.DbContext;
 using UsersService.Domain.Entities;
 
@@ -22,15 +23,29 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 Env.Load();
 
-var jwtSecret = Env.GetString("JWT_SECRET") ?? throw new Exception("JWT_SECRET missing!");
-var jwtIssuer = Env.GetString("JWT_ISSUER") ?? throw new Exception("JWT_ISSUER missing!");
-var jwtAudience = Env.GetString("JWT_AUDIENCE") ?? throw new Exception("JWT_AUDIENCE missing!");
-var accessTokenExpiration = int.Parse(Env.GetString("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES") ?? "15");
-var refreshTokenExpiration = int.Parse(Env.GetString("JWT_REFRESH_TOKEN_EXPIRATION_DAYS") ?? "7");
+string jwtSecret = Env.GetString("JWT_SECRET") ?? throw new Exception("JWT_SECRET missing!");
+string jwtIssuer = Env.GetString("JWT_ISSUER") ?? throw new Exception("JWT_ISSUER missing!");
+string jwtAudience = Env.GetString("JWT_AUDIENCE") ?? throw new Exception("JWT_AUDIENCE missing!");
+int accessTokenExpiration = int.Parse(Env.GetString("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES") ?? "15");
+int refreshTokenExpiration = int.Parse(Env.GetString("JWT_REFRESH_TOKEN_EXPIRATION_DAYS") ?? "7");
 
-var cloudName = Env.GetString("CLOUDINARY_CLOUDNAME") ?? throw new Exception("CLOUDINARY_CLOUDNAME missing!");
-var cloudApiKey = Env.GetString("CLOUDINARY_API_KEY") ?? throw new Exception("CLOUDINARY_API_KEY missing!");
-var cloudApiSecret = Env.GetString("CLOUDINARY_API_SECRET") ?? throw new Exception("CLOUDINARY_API_SECRET missing!");
+string cloudName = Env.GetString("CLOUDINARY_CLOUDNAME") ?? throw new Exception("CLOUDINARY_CLOUDNAME missing!");
+string cloudApiKey = Env.GetString("CLOUDINARY_API_KEY") ?? throw new Exception("CLOUDINARY_API_KEY missing!");
+string cloudApiSecret = Env.GetString("CLOUDINARY_API_SECRET") ?? throw new Exception("CLOUDINARY_API_SECRET missing!");
+
+builder.Services.Configure<EmailProviderOptions>(options =>
+{
+    options.ApiKey = Environment.GetEnvironmentVariable("SENDGRID__KEY");
+    options.FromEmail = Environment.GetEnvironmentVariable("SENDGRID__FROM_EMAIL");
+    options.FromName = Environment.GetEnvironmentVariable("SENDGRID__FROM_NAME");
+});
+
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(48); 
+});
 
 // CORS
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();

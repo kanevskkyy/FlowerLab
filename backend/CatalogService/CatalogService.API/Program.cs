@@ -27,7 +27,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using shared.cache;
-using shared.events;
+using shared.events.EventService;
 using StackExchange.Redis;
 using System.Text;
 

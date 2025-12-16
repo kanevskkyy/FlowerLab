@@ -1,11 +1,14 @@
 ﻿using shared.cache;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace AggregatorService.Redis
 {
     public class FilterCacheInvalidationService : IEntityCacheInvalidationService<FilterResponse>
     {
-        private readonly IEntityCacheService _cache;
-        private readonly ILogger<FilterCacheInvalidationService> _logger;
+        private IEntityCacheService _cache;
+        private ILogger<FilterCacheInvalidationService> _logger;
 
         private const string CACHE_KEY = "filters:all";
 
@@ -20,11 +23,11 @@ namespace AggregatorService.Redis
             try
             {
                 await _cache.RemoveAsync(CACHE_KEY);
-                _logger.LogInformation("Кеш для фільтрів очищено по конкретному об’єкту.");
+                _logger.LogInformation("Cache for filters cleared for specific entity.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Не вдалося очистити кеш для фільтрів по об’єкту");
+                _logger.LogError(ex, "Failed to clear cache for filters by entity");
                 throw;
             }
         }
@@ -34,11 +37,11 @@ namespace AggregatorService.Redis
             try
             {
                 await _cache.RemoveByPatternAsync(CACHE_KEY + "*");
-                _logger.LogInformation("Кеш для всіх фільтрів очищено.");
+                _logger.LogInformation("Cache for all filters cleared.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Не вдалося очистити кеш для всіх фільтрів");
+                _logger.LogError(ex, "Failed to clear cache for all filters");
                 throw;
             }
         }

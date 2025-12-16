@@ -1,4 +1,4 @@
-﻿using AggregatorService.Clients;
+﻿using AggregatorService.Clients.Interfaces;
 using AggregatorService.DTOs;
 using Microsoft.AspNetCore.Mvc;
 

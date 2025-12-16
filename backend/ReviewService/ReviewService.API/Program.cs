@@ -22,8 +22,8 @@ using MassTransit;
 using ReviewService.Application.Consumers;
 using ReviewService.Application.Validation.Reviews;
 using DotNetEnv;
-using shared.events;
 using ReviewService.Application.Consumers.EventLog;
+using shared.events.EventService;
 
 var builder = WebApplication.CreateBuilder(args);
 

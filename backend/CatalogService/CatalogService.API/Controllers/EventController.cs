@@ -8,18 +8,18 @@ namespace CatalogService.API.Controllers
     [Route("api/events")]
     public class EventsController : ControllerBase
     {
-        private readonly IEventService _eventService;
+        private IEventService eventService;
 
         public EventsController(IEventService eventService)
         {
-            _eventService = eventService;
+            this.eventService = eventService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
-            var events = await _eventService.GetAllAsync();
+            var events = await eventService.GetAllAsync();
             return Ok(events);
         }
 
@@ -27,7 +27,7 @@ namespace CatalogService.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var ev = await _eventService.GetByIdAsync(id);
+            var ev = await eventService.GetByIdAsync(id);
             return Ok(ev);
         }
 
@@ -35,7 +35,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] EventCreateDto dto)
         {
-            var created = await _eventService.CreateAsync(dto.Name);
+            var created = await eventService.CreateAsync(dto.Name);
 
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
@@ -44,7 +44,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] EventUpdateDto dto)
         {
-            var updated = await _eventService.UpdateAsync(id, dto.Name);
+            var updated = await eventService.UpdateAsync(id, dto.Name);
 
             return Ok(updated);
         }
@@ -53,7 +53,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _eventService.DeleteAsync(id);
+            await eventService.DeleteAsync(id);
             return NoContent();
         }
     }

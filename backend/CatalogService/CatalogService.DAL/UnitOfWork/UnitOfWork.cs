@@ -10,7 +10,7 @@ namespace CatalogService.DAL.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly CatalogDbContext _context;
+        private CatalogDbContext context;
 
         public UnitOfWork(
             CatalogDbContext context,
@@ -21,7 +21,7 @@ namespace CatalogService.DAL.UnitOfWork
             IRecipientRepository recipientRepository
             )
         {
-            _context = context;
+            this.context = context;
             Bouquets = bouquetRepository;
             Flowers = flowerRepository;
             Events = eventRepository;
@@ -38,12 +38,12 @@ namespace CatalogService.DAL.UnitOfWork
 
         public async Task<int> SaveChangesAsync()
         {
-            return await _context.SaveChangesAsync();
+            return await context.SaveChangesAsync();
         }
 
         public void Dispose()
         {
-            _context.Dispose();
+            context.Dispose();
         }
     }
 }

@@ -8,28 +8,28 @@ namespace CatalogService.API.Controllers
     [Route("api/sizes")]
     public class SizesController : ControllerBase
     {
-        private readonly ISizeService _sizeService;
+        private ISizeService sizeService;
 
         public SizesController(ISizeService sizeService)
         {
-            _sizeService = sizeService;
+            this.sizeService = sizeService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll() =>
-            Ok(await _sizeService.GetAllAsync());
+            Ok(await sizeService.GetAllAsync());
 
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id) =>
-            Ok(await _sizeService.GetByIdAsync(id));
+            Ok(await sizeService.GetByIdAsync(id));
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] SizeCreateDto dto)
         {
-            var created = await _sizeService.CreateAsync(dto.Name);
+            var created = await sizeService.CreateAsync(dto.Name);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
@@ -37,7 +37,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] SizeUpdateDto dto)
         {
-            var updated = await _sizeService.UpdateAsync(id, dto.Name);
+            var updated = await sizeService.UpdateAsync(id, dto.Name);
             return Ok(updated);
         }
 
@@ -45,7 +45,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _sizeService.DeleteAsync(id);
+            await sizeService.DeleteAsync(id);
             return NoContent();
         }
     }

@@ -15,68 +15,69 @@ namespace CatalogService.BLL.Services.Implementations
 {
     public class SizeService : ISizeService
     {
-        private readonly IUnitOfWork _uow;
-        private readonly IMapper _mapper;
+        private IUnitOfWork uow;
+        private IMapper mapper;
         private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
         public SizeService(IUnitOfWork uow, IMapper mapper, IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
-            _uow = uow;
-            _mapper = mapper;
+            this.uow = uow;
+            this.mapper = mapper;
             this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
         public async Task<IEnumerable<SizeDto>> GetAllAsync()
         {
-            var sizes = await _uow.Sizes.GetAllAsync();
-            return _mapper.Map<IEnumerable<SizeDto>>(sizes);
+            IEnumerable<Size> sizes = await uow.Sizes.GetAllAsync();
+            return mapper.Map<IEnumerable<SizeDto>>(sizes);
         }
 
         public async Task<SizeDto> GetByIdAsync(Guid id)
         {
-            var size = await _uow.Sizes.GetByIdAsync(id);
+            Size? size = await uow.Sizes.GetByIdAsync(id);
             if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
-            return _mapper.Map<SizeDto>(size);
+
+            return mapper.Map<SizeDto>(size);
         }
 
         public async Task<SizeDto> CreateAsync(string name)
         {
-            if (await _uow.Sizes.ExistsWithNameAsync(name))
+            if (await uow.Sizes.ExistsWithNameAsync(name))
                 throw new AlreadyExistsException($"Розмір '{name}' уже існує.");
 
-            var entity = new Size { Name = name };
-            await _uow.Sizes.AddAsync(entity);
-            await _uow.SaveChangesAsync();
+            Size entity = new Size { Name = name };
+            await uow.Sizes.AddAsync(entity);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
-            return _mapper.Map<SizeDto>(entity);
+            return mapper.Map<SizeDto>(entity);
         }
 
         public async Task<SizeDto> UpdateAsync(Guid id, string name)
         {
-            var size = await _uow.Sizes.GetByIdAsync(id);
+            Size size = await uow.Sizes.GetByIdAsync(id);
             if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
 
-            if (await _uow.Sizes.ExistsWithNameAsync(name, id))
+            if (await uow.Sizes.ExistsWithNameAsync(name, id))
                 throw new AlreadyExistsException($"Розмір '{name}' уже існує.");
 
             size.Name = name;
-            _uow.Sizes.Update(size);
-            await _uow.SaveChangesAsync();
+            uow.Sizes.Update(size);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
-            return _mapper.Map<SizeDto>(size);
+            return mapper.Map<SizeDto>(size);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var size = await _uow.Sizes.GetByIdAsync(id);
+            Size size = await uow.Sizes.GetByIdAsync(id);
             if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
 
-            _uow.Sizes.Delete(size);
-            await _uow.SaveChangesAsync();
+            uow.Sizes.Delete(size);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }

@@ -1,5 +1,9 @@
-﻿using Grpc.Core;
+﻿using AggregatorService.Clients.Interfaces;
+using Grpc.Core;
+using Microsoft.Extensions.Logging;
 using shared.cache;
+using System;
+using System.Threading.Tasks;
 
 namespace AggregatorService.Clients
 {
@@ -26,27 +30,32 @@ namespace AggregatorService.Clients
 
         public async Task<FilterResponse?> GetAllFiltersAsync()
         {
-            return await _cache.GetOrSetAsync(CACHE_KEY, async () =>
-            {
-                try
+            return await _cache.GetOrSetAsync(
+                CACHE_KEY,
+                async () =>
                 {
-                    var call = _filterServiceClient.GetAllFiltersAsync(new FilterEmptyRequest());
-                    FilterResponse filterResponse = await call.ResponseAsync;
+                    try
+                    {
+                        var call = _filterServiceClient.GetAllFiltersAsync(new FilterEmptyRequest());
+                        FilterResponse filterResponse = await call.ResponseAsync;
 
-                    _logger.LogInformation("Фільтри отримано з CatalogService через gRPC.");
-                    return filterResponse;
-                }
-                catch (RpcException ex)
-                {
-                    _logger.LogError(ex, "Помилка gRPC при отриманні фільтрів з CatalogService");
-                    return null;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Несподівана помилка при отриманні фільтрів з CatalogService");
-                    return null;
-                }
-            }, memoryExpiration: TimeSpan.FromSeconds(30), redisExpiration: TimeSpan.FromMinutes(5));
+                        _logger.LogInformation("Filters fetched from CatalogService via gRPC.");
+                        return filterResponse;
+                    }
+                    catch (RpcException ex)
+                    {
+                        _logger.LogError(ex, "gRPC error while fetching filters from CatalogService");
+                        return null;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Unexpected error while fetching filters from CatalogService");
+                        return null;
+                    }
+                },
+                memoryExpiration: TimeSpan.FromSeconds(30),
+                redisExpiration: TimeSpan.FromMinutes(5)
+            );
         }
     }
 }

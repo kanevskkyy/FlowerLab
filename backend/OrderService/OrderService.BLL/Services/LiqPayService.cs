@@ -11,37 +11,37 @@ namespace OrderService.BLL.Services
 {
     public class LiqPayService : ILiqPayService
     {
-        private readonly LiqPaySettings _settings;
-        private readonly LiqPayClient _liqPayClient;
+        private LiqPaySettings settings;
+        private LiqPayClient liqPayClient;
 
         public LiqPayService(IOptions<LiqPaySettings> options)
         {
-            _settings = options.Value;
-            _liqPayClient = new LiqPayClient(_settings.PublicKey, _settings.PrivateKey);
-            _liqPayClient.IsCnbSandbox = true;
+            settings = options.Value;
+            liqPayClient = new LiqPayClient(settings.PublicKey, settings.PrivateKey);
+            liqPayClient.IsCnbSandbox = true;
         }
 
         public string GeneratePaymentUrl(Guid orderId, decimal amount, string description)
         {
-            var request = new LiqPayRequest
+            LiqPayRequest request = new LiqPayRequest
             {
                 Action = LiqPayRequestAction.Pay,
                 Amount = (double)amount,
                 Currency = "UAH",
                 Description = description,
                 OrderId = orderId.ToString(),
-                ServerUrl = _settings.ServerUrl,
+                ServerUrl = settings.ServerUrl,
                 Language = LiqPayRequestLanguage.UK
             };
 
-            var result = _liqPayClient.GenerateDataAndSignature(request);
+            var result = liqPayClient.GenerateDataAndSignature(request);
 
             return $"https://www.liqpay.ua/api/3/checkout?data={result.Key}&signature={result.Value}";
         }
 
         public bool ValidateCallback(string data, string signature)
         {
-            var expectedSignature = _liqPayClient.CreateSignature(data);
+            var expectedSignature = liqPayClient.CreateSignature(data);
             return expectedSignature == signature;
         }
 

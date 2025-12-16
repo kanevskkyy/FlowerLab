@@ -10,18 +10,18 @@ namespace OrderService.API.Controllers
     [Route("api/order-statuses")]
     public class OrderStatusController : ControllerBase
     {
-        private readonly IOrderStatusService _orderStatusService;
+        private IOrderStatusService orderStatusService;
 
         public OrderStatusController(IOrderStatusService orderStatusService)
         {
-            _orderStatusService = orderStatusService;
+            this.orderStatusService = orderStatusService;
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
-            var statuses = await _orderStatusService.GetAllAsync();
+            var statuses = await orderStatusService.GetAllAsync();
             return Ok(statuses);
         }
 
@@ -29,7 +29,7 @@ namespace OrderService.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
-            var status = await _orderStatusService.GetByIdAsync(id);
+            var status = await orderStatusService.GetByIdAsync(id);
             return Ok(status);
         }
 
@@ -37,7 +37,7 @@ namespace OrderService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync([FromBody] OrderStatusCreateDto dto)
         {
-            var createdStatus = await _orderStatusService.CreateAsync(dto);
+            var createdStatus = await orderStatusService.CreateAsync(dto);
             return CreatedAtRoute("GetOrderStatusById", new { id = createdStatus.Id }, createdStatus);
         }
 
@@ -45,7 +45,7 @@ namespace OrderService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] OrderStatusUpdateDto dto)
         {
-            var updatedStatus = await _orderStatusService.UpdateAsync(id, dto);
+            var updatedStatus = await orderStatusService.UpdateAsync(id, dto);
             return Ok(updatedStatus);
         }
 
@@ -53,7 +53,7 @@ namespace OrderService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
-            await _orderStatusService.DeleteAsync(id);
+            await orderStatusService.DeleteAsync(id);
             return NoContent();
         }
     }

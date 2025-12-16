@@ -9,16 +9,16 @@ namespace CatalogService.BLL.GrpcServer
 {
     public class BouquetServiceGrpc : BouquetGrpcService.BouquetGrpcServiceBase
     {
-        private readonly IBouquetService _bouquetService;
+        private IBouquetService bouquetService;
 
         public BouquetServiceGrpc(IBouquetService bouquetService)
         {
-            _bouquetService = bouquetService;
+            this.bouquetService = bouquetService;
         }
 
         public override async Task<BouquetResponse> GetBouquetById(GetBouquetRequest request, ServerCallContext context)
         {
-            var bouquet = await _bouquetService.GetByIdAsync(Guid.Parse(request.Id));
+            BouquetDto bouquet = await bouquetService.GetByIdAsync(Guid.Parse(request.Id));
             if (bouquet == null)
                 throw new RpcException(new Status(StatusCode.NotFound, "Букет не знайдено."));
 
@@ -27,7 +27,7 @@ namespace CatalogService.BLL.GrpcServer
 
         private BouquetResponse Map(BouquetDto dto)
         {
-            var response = new BouquetResponse
+            BouquetResponse response = new BouquetResponse
             {
                 Id = dto.Id.ToString(),
                 Name = dto.Name,

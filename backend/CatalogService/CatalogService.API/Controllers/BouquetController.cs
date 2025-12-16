@@ -10,18 +10,18 @@ namespace CatalogService.API.Controllers
     [Route("api/bouquets")]
     public class BouquetsController : ControllerBase
     {
-        private readonly IBouquetService _bouquetService;
+        private IBouquetService bouquetService;
 
         public BouquetsController(IBouquetService bouquetService)
         {
-            _bouquetService = bouquetService;
+            this.bouquetService = bouquetService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery] BouquetQueryParameters query)
         {
-            var result = await _bouquetService.GetAllAsync(query);
+            var result = await bouquetService.GetAllAsync(query);
             return Ok(result);
         }
 
@@ -29,7 +29,7 @@ namespace CatalogService.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var bouquet = await _bouquetService.GetByIdAsync(id);
+            var bouquet = await bouquetService.GetByIdAsync(id);
             return Ok(bouquet);
         }
 
@@ -38,7 +38,7 @@ namespace CatalogService.API.Controllers
         public async Task<IActionResult> Create([FromForm] BouquetCreateDto dto)
         {
             
-            var created = await _bouquetService.CreateAsync(dto);
+            var created = await bouquetService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
@@ -46,7 +46,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromForm] BouquetUpdateDto dto)
         {
-            var updated = await _bouquetService.UpdateAsync(id, dto);
+            var updated = await bouquetService.UpdateAsync(id, dto);
             return Ok(updated);
         }
 
@@ -54,7 +54,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _bouquetService.DeleteAsync(id);
+            await bouquetService.DeleteAsync(id);
             return NoContent();
         }
     }

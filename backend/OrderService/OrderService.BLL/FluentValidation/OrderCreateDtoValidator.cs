@@ -7,17 +7,23 @@ public class OrderCreateDtoValidator : AbstractValidator<OrderCreateDto>
     public OrderCreateDtoValidator()
     {
         RuleFor(o => o.FirstName)
+            .NotEmpty()
+            .WithMessage("Ім'я є обовʼязковим")
             .MaximumLength(100)
             .WithMessage("Ім'я не може перевищувати 100 символів");
 
         RuleFor(o => o.LastName)
+            .NotEmpty()
+            .WithMessage("Прізвище є обовʼязковим")
             .MaximumLength(100)
             .WithMessage("Прізвище не може перевищувати 100 символів");
 
         RuleFor(x => x.PhoneNumber)
-            .Matches(@"^\+?\d{10,15}$")
-            .WithMessage("Номер телефону має бути валідним")
-            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+            .NotEmpty()
+            .WithMessage("Номер телефону є обовʼязковим")
+            .Matches(@"^\+380\d{9}$")
+            .WithMessage("Номер телефону має бути у форматі +380XXXXXXXXX");
+
 
         RuleFor(o => o.Notes)
             .MaximumLength(500)

@@ -8,24 +8,24 @@ namespace OrderService.API.Controllers
     [Route("api/gifts")]
     public class GiftController : ControllerBase
     {
-        private readonly IGiftService _giftService;
+        private IGiftService giftService;
 
         public GiftController(IGiftService giftService)
         {
-            _giftService = giftService;
+            this.giftService = giftService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            var gifts = await _giftService.GetAllAsync();
+            var gifts = await giftService.GetAllAsync();
             return Ok(gifts);
         }
 
         [HttpGet("{id:guid}", Name = "GetGiftById")]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
-            var gift = await _giftService.GetByIdAsync(id);
+            var gift = await giftService.GetByIdAsync(id);
             return Ok(gift);
         }
 
@@ -34,7 +34,7 @@ namespace OrderService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync([FromForm] GiftCreateDto dto)
         {
-            var createdGift = await _giftService.CreateAsync(dto);
+            var createdGift = await giftService.CreateAsync(dto);
             return CreatedAtRoute("GetGiftById", new { id = createdGift.Id }, createdGift);
         }
 
@@ -43,7 +43,7 @@ namespace OrderService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromForm] GiftUpdateDto dto)
         {
-            var updatedGift = await _giftService.UpdateAsync(id, dto);
+            var updatedGift = await giftService.UpdateAsync(id, dto);
             return Ok(updatedGift);
         }
 
@@ -51,7 +51,7 @@ namespace OrderService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
-            await _giftService.DeleteAsync(id);
+            await giftService.DeleteAsync(id);
             return NoContent();
         }
     }

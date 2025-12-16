@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using UsersService.BLL.Models.Auth;
 
 namespace UsersService.BLL.FluentValidation
 {

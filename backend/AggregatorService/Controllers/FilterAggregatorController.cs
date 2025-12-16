@@ -1,4 +1,4 @@
-﻿using AggregatorService.Clients;
+﻿using AggregatorService.Clients.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AggregatorService.Controllers

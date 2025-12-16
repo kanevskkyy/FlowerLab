@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using UsersService.BLL.Interfaces;
 using UsersService.BLL.Models;
+using UsersService.BLL.Models.Auth;
+using UsersService.BLL.Models.Users;
+using UsersService.BLL.Services.Interfaces;
 using UsersService.Domain.Entities;
 
 namespace UsersService.API.Controllers
@@ -13,25 +15,22 @@ namespace UsersService.API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IAuthService _authService;
+        private UserManager<ApplicationUser> userManager;
+        private IAuthService authService;
 
         public UsersController(UserManager<ApplicationUser> userManager, IAuthService authService)
         {
-            _userManager = userManager;
-            _authService = authService;
+            this.userManager = userManager;
+            this.authService = authService;
         }
 
-        /// <summary>
-        /// Отримати дані поточного користувача (Personal Information)
-        /// </summary>
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
 
             return Ok(new UserResponseDto
@@ -45,9 +44,6 @@ namespace UsersService.API.Controllers
             });
         }
 
-        /// <summary>
-        /// Оновити персональні дані (Personal Information)
-        /// </summary>
         [HttpPut("me")]
         public async Task<IActionResult> UpdateCurrentUser([FromForm] UpdateUserDto updateModel)
         {
@@ -56,7 +52,7 @@ namespace UsersService.API.Controllers
 
             try
             {
-                var tokenResponse = await _authService.UpdateUserAsync(userId, updateModel);
+                var tokenResponse = await authService.UpdateUserAsync(userId, updateModel);
                 return Ok(tokenResponse);
             }
             catch (InvalidOperationException ex)
@@ -73,7 +69,7 @@ namespace UsersService.API.Controllers
 
             try
             {
-                var result = await _authService.ChangePasswordAsync(userId, dto);
+                var result = await authService.ChangePasswordAsync(userId, dto);
                 return Ok(new { Message = "Пароль успішно змінено." });
             }
             catch (InvalidOperationException ex)
@@ -82,19 +78,17 @@ namespace UsersService.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Ендпоїнт для видалення облікового запису
-        /// </summary>
+
         [HttpDelete("me")]
         public async Task<IActionResult> DeleteAccount()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
 
-            var result = await _userManager.DeleteAsync(user);
+            var result = await userManager.DeleteAsync(user);
             if (!result.Succeeded) return BadRequest(new { Message = "Не вдалося видалити обліковий запис." });
 
             return NoContent();

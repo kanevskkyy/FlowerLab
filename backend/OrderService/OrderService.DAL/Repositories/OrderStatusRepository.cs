@@ -18,13 +18,13 @@ namespace OrderService.DAL.Repositories
 
         public async Task<OrderStatus?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.AsQueryable();
+            var query = dbSet.AsQueryable();
             return await query.FirstOrDefaultAsync(s => s.Name.ToLower() == name.ToLower(), cancellationToken);
         }
 
         public async Task<bool> IsNameDuplicatedAsync(string name, Guid? ignoreId = null, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.AsQueryable();
+            var query = dbSet.AsQueryable();
 
             if (ignoreId.HasValue)
                 query = query.Where(s => s.Id != ignoreId.Value);

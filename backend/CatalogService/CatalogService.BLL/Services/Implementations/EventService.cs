@@ -15,68 +15,72 @@ namespace CatalogService.BLL.Services.Implementations
 {
     public class EventService : IEventService
     {
-        private readonly IUnitOfWork _uow;
-        private readonly IMapper _mapper;
+        private IUnitOfWork uow;
+        private IMapper mapper;
         private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
         public EventService(IUnitOfWork uow, IMapper mapper, IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
-            _uow = uow;
+            this.uow = uow;
             this.entityCacheInvalidationService = entityCacheInvalidationService;
-            _mapper = mapper;
+            this.mapper = mapper;
         }
 
         public async Task<IEnumerable<EventDto>> GetAllAsync()
         {
-            var events = await _uow.Events.GetAllAsync();
-            return _mapper.Map<IEnumerable<EventDto>>(events);
+            IEnumerable<Event> events = await uow.Events.GetAllAsync();
+            return mapper.Map<IEnumerable<EventDto>>(events);
         }
 
         public async Task<EventDto> GetByIdAsync(Guid id)
         {
-            var ev = await _uow.Events.GetByIdAsync(id);
-            if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
-            return _mapper.Map<EventDto>(ev);
+            Event? targetEvent = await uow.Events.GetByIdAsync(id);
+            if (targetEvent == null) throw new NotFoundException($"Подія {id} не знайдена");
+            
+            return mapper.Map<EventDto>(targetEvent);
         }
 
         public async Task<EventDto> CreateAsync(string name)
         {
-            if (await _uow.Events.ExistsWithNameAsync(name))
+            if (await uow.Events.ExistsWithNameAsync(name))
                 throw new AlreadyExistsException($"Подія '{name}' уже існує.");
 
-            var entity = new Event { Name = name };
-            await _uow.Events.AddAsync(entity);
-            await _uow.SaveChangesAsync();
+            Event entity = new Event 
+            { 
+                Name = name 
+            };
+            await uow.Events.AddAsync(entity);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
-            return _mapper.Map<EventDto>(entity);
+            return mapper.Map<EventDto>(entity);
         }
 
         public async Task<EventDto> UpdateAsync(Guid id, string name)
         {
-            var ev = await _uow.Events.GetByIdAsync(id);
+            Event ev = await uow.Events.GetByIdAsync(id);
             if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
 
-            if (await _uow.Events.ExistsWithNameAsync(name, id))
+            if (await uow.Events.ExistsWithNameAsync(name, id))
                 throw new AlreadyExistsException($"Подія '{name}' уже існує.");
 
             ev.Name = name;
-            _uow.Events.Update(ev);
-            await _uow.SaveChangesAsync();
+            uow.Events.Update(ev);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
-            return _mapper.Map<EventDto>(ev);
+            return mapper.Map<EventDto>(ev);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var ev = await _uow.Events.GetByIdAsync(id);
+            Event? ev = await uow.Events.GetByIdAsync(id);
             if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
 
-            _uow.Events.Delete(ev);
-            await _uow.SaveChangesAsync();
+            uow.Events.Delete(ev);
+            await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }

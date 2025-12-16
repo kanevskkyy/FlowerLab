@@ -1,4 +1,5 @@
-﻿using AggregatorService.DTOs;
+﻿using AggregatorService.Clients.Interfaces;
+using AggregatorService.DTOs;
 using static BouquetGrpcService;
 using static ReviewsByBouquetId;
 

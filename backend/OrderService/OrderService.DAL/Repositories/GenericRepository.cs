@@ -13,38 +13,38 @@ namespace OrderService.DAL.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected OrderDbContext _context;
-        protected DbSet<T> _dbSet;
+        protected OrderDbContext context;
+        protected DbSet<T> dbSet;
 
         public GenericRepository(OrderDbContext context)
         {
-            _context = context;
-            _dbSet = _context.Set<T>();
+            this.context = context;
+            dbSet = this.context.Set<T>();
         }
 
         public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbSet.ToListAsync(cancellationToken);
+            return await dbSet.ToListAsync(cancellationToken);
         }
 
         public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+            return await dbSet.FindAsync(new object[] { id }, cancellationToken);
         }
 
         public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _dbSet.AddAsync(entity, cancellationToken);
+            await dbSet.AddAsync(entity, cancellationToken);
         }
 
         public void Update(T entity)
         {
-            _dbSet.Update(entity);
+            dbSet.Update(entity);
         }
 
         public void Delete(T entity)
         {
-            _dbSet.Remove(entity);
+            dbSet.Remove(entity);
         }
 
         public IQueryable<T> ApplySpecification(ISpecification<T> spec, CancellationToken cancellationToken = default)
@@ -52,7 +52,7 @@ namespace OrderService.DAL.Repositories
             if (spec == null) throw new ArgumentNullException(nameof(spec));
 
             var evaluator = new SpecificationEvaluator();
-            return evaluator.GetQuery(_dbSet.AsQueryable(), spec).AsSplitQuery();
+            return evaluator.GetQuery(dbSet.AsQueryable(), spec).AsSplitQuery();
         }
     }
 }

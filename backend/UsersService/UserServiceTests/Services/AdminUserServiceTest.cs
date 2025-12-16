@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UsersService.BLL.Models;
+using UsersService.BLL.Models.Users;
 using UsersService.BLL.Services;
 using UsersService.Domain.Entities;
 using Xunit;

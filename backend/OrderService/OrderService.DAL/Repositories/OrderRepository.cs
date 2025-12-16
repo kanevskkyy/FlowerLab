@@ -21,7 +21,7 @@ namespace OrderService.DAL.Repositories
 
         public async Task<Order?> GetByIdWithIncludesAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _dbSet
+            return await dbSet
                 .Include(o => o.Status)
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Flowers) 

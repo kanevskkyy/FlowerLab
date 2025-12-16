@@ -9,28 +9,28 @@ namespace CatalogService.API.Controllers
     [Route("api/recipients")]
     public class RecipientsController : ControllerBase
     {
-        private readonly IRecipientService _recipientService;
+        private IRecipientService recipientService;
 
         public RecipientsController(IRecipientService recipientService)
         {
-            _recipientService = recipientService;
+            this.recipientService = recipientService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll() =>
-            Ok(await _recipientService.GetAllAsync());
+            Ok(await recipientService.GetAllAsync());
 
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id) =>
-            Ok(await _recipientService.GetByIdAsync(id));
+            Ok(await recipientService.GetByIdAsync(id));
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] RecipientCreateDto dto)
         {
-            var created = await _recipientService.CreateAsync(dto.Name);
+            var created = await recipientService.CreateAsync(dto.Name);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
@@ -38,7 +38,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] RecipientUpdateDto dto)
         {
-            var updated = await _recipientService.UpdateAsync(id, dto.Name);
+            var updated = await recipientService.UpdateAsync(id, dto.Name);
             return Ok(updated);
         }
 
@@ -46,7 +46,7 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _recipientService.DeleteAsync(id);
+            await recipientService.DeleteAsync(id);
             return NoContent();
         }
     }

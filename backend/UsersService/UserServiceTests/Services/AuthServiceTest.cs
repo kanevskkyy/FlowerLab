@@ -13,11 +13,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using UsersService.BLL.Helpers;
-using UsersService.BLL.Interfaces;
 using UsersService.BLL.Models;
 using UsersService.BLL.Services;
 using UsersService.DAL.DbContext;
 using UsersService.Domain.Entities;
+using UsersService.BLL.Models.Auth;
+using UsersService.BLL.Services.Interfaces;
 
 namespace UsersService.Tests.Services
 {

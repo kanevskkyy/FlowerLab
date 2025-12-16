@@ -15,6 +15,5 @@ namespace CatalogService.BLL.Services.Interfaces
         Task<FlowerDto> CreateAsync(FlowerCreateUpdateDto dto);
         Task<FlowerDto> UpdateAsync(Guid id, FlowerCreateUpdateDto dto);
         Task DeleteAsync(Guid id);
-        Task<FlowerDto> UpdateStockAsync(Guid id, int quantity);
     }
 }
