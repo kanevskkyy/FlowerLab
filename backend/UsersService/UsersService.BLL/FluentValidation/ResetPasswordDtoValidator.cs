@@ -14,11 +14,16 @@ namespace UsersService.BLL.FluentValidation
         {
             RuleFor(x => x.UserId)
                 .NotEmpty().WithMessage("UserId є обов'язковим");
+            
             RuleFor(x => x.Token)
                 .NotEmpty().WithMessage("Token є обов'язковим");
+            
             RuleFor(x => x.NewPassword)
                 .NotEmpty().WithMessage("Новий пароль є обов'язковим")
                 .MinimumLength(8).WithMessage("Пароль має бути не менше 8 символів");
+
+            RuleFor(x => x.ConfirmPassword)
+                .Equal(x => x.NewPassword).WithMessage("Паролі не співпадають.");
         }
     }
 }
