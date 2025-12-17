@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
+using Grpc.Core;
+using LiqPay.SDK.Dto.Enums;
+using MassTransit;
 using OrderService.BLL.DTOs.OrderDTOs;
 using OrderService.BLL.Exceptions;
 using OrderService.BLL.Services.Interfaces;
@@ -12,10 +9,14 @@ using OrderService.DAL.Helpers;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
 using OrderService.Domain.QueryParams;
-using Grpc.Core;
 using shared.events;
-using MassTransit;
-using LiqPay.SDK.Dto.Enums;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OrderService.BLL.Services
 {
@@ -311,6 +312,17 @@ namespace OrderService.BLL.Services
                     TotalPrice = order.TotalPrice,
                 };
                 await publishEndpoint.Publish(telegramOrderCreatedEvent, cancellationToken);
+
+                if (order.IsDelivery)
+                {
+                    OrderAddressEvent orderAddressEvent = new OrderAddressEvent()
+                    {
+                        Address = order.DeliveryInformation.Address,
+                        UserId = order.UserId.ToString()
+                    };
+                    await publishEndpoint.Publish(orderAddressEvent, cancellationToken);
+                }
+
             }
             else if (response.Status == LiqPayResponseStatus.Failure || response.Status == LiqPayResponseStatus.Error)
             {

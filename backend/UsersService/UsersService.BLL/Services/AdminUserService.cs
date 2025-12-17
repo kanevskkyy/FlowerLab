@@ -26,7 +26,7 @@ namespace UsersService.BLL.Services
 
         public async Task<IEnumerable<AdminUserDto>> GetAllUsersAsync(UsersFilterDto filter)
         {
-            var query = userManager.Users.Include(u => u.Addresses).AsQueryable(); // ⚡ Include addresses
+            var query = userManager.Users.Include(u => u.Addresses).AsQueryable(); 
 
             if (!string.IsNullOrWhiteSpace(filter.Email))
                 query = query.Where(u => u.Email.ToLower().Contains(filter.Email.ToLower()));

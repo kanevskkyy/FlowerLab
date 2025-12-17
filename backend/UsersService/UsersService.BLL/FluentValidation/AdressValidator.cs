@@ -12,20 +12,9 @@ namespace UsersService.BLL.FluentValidation
     {
         public AddressValidator()
         {
-            RuleFor(x => x.Country)
-                .NotEmpty().WithMessage("Країна є обов'язковою")
-                .MaximumLength(100).WithMessage("Країна не може бути довшою за 100 символів");
-
-            RuleFor(x => x.City)
-                .NotEmpty().WithMessage("Місто є обов'язковим")
-                .MaximumLength(100);
-
-            RuleFor(x => x.Street)
-                .NotEmpty().WithMessage("Вулиця є обов'язковою")
-                .MaximumLength(200);
-
-            RuleFor(x => x.PostalCode)
-                .NotEmpty().WithMessage("Поштовий індекс є обов'язковим");
+            RuleFor(x => x.Address)
+                .NotEmpty().WithMessage("Адрсе є обов'язкова")
+                .MaximumLength(200).WithMessage("Максимальна довжина адреси 200 символів");
 
             RuleFor(x => x.IsDefault)
                 .NotNull().WithMessage("Необхідно вказати, чи адреса за замовчуванням");

@@ -1,5 +1,6 @@
 ﻿using DotNetEnv;
 using FluentValidation.AspNetCore;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using System.Text;
 using UsersService.API.Helpers;
 using UsersService.API.Middleware;
 using UsersService.BLL;
+using UsersService.BLL.Consumers;
 using UsersService.BLL.EmailService;
 using UsersService.BLL.FluentValidation;
 using UsersService.BLL.Helpers;
@@ -111,12 +113,46 @@ builder.Services.Configure<CloudinarySettings>(options =>
     options.ApiSecret = cloudApiSecret;
 });
 
+
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<OrderCreatedConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var rabbitMqConnection = builder.Configuration.GetConnectionString("rabbitmq");
+        if (!string.IsNullOrEmpty(rabbitMqConnection))
+        {
+            cfg.Host(rabbitMqConnection);
+        }
+        else
+        {
+            cfg.Host("localhost", "/", h =>
+            {
+                h.Username("guest");
+                h.Password("guest");
+            });
+        }
+
+        cfg.ReceiveEndpoint("users-addreses-queue", e =>
+        {
+            e.ConfigureConsumer<OrderCreatedConsumer>(context);
+            e.Bind("order-address-exchange", s =>
+            {
+                s.ExchangeType = "fanout";
+            });
+        });
+    });
+});
+
+
 // DI
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserImageService, UserImageService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);

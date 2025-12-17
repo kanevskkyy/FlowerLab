@@ -48,10 +48,16 @@ namespace UsersService.API.Middleware
                     logger.LogWarning("Validation error: {Errors}", errors);
                     break;
 
-                case EntityNotFoundException notFoundEx:
+                case NotFoundException notFoundEx:
                     statusCode = HttpStatusCode.NotFound;
                     message = notFoundEx.Message;
                     logger.LogWarning("Entity not found: {Message}", notFoundEx.Message);
+                    break;
+
+                case AlreadyExistsException alreadyExistException:
+                    statusCode = HttpStatusCode.BadRequest;
+                    message = alreadyExistException.Message;
+                    logger.LogWarning("Already exists exception: {Message}", alreadyExistException.Message);
                     break;
 
                 case InvalidOperationException invalidOpEx:
@@ -74,9 +80,8 @@ namespace UsersService.API.Middleware
 
             var response = new
             {
-                Status = (int)statusCode,
-                Message = message,
-                Errors = errors
+                error = message,
+                type = exception.GetType().Name
             };
 
             context.Response.StatusCode = (int)statusCode;

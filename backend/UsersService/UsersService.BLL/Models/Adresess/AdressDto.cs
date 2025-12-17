@@ -9,10 +9,7 @@ namespace UsersService.BLL.Models.Adresess
     public class AddressDto
     {
         public Guid Id { get; set; }
-        public string Country { get; set; } = null!;
-        public string City { get; set; } = null!;
-        public string Street { get; set; } = null!;
-        public string PostalCode { get; set; } = null!;
+        public string Address { get; set; } = null!;
         public bool IsDefault { get; set; }
     }
 }
