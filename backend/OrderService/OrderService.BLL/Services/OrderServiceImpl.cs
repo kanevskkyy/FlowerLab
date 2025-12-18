@@ -229,9 +229,9 @@ namespace OrderService.BLL.Services
                 OrderGifts = orderGifts
             };
 
-            if (userId == null)  
+            if (userId == null)
             {
-                order.GuestToken = Guid.NewGuid();
+                order.GuestToken = dto.GuestToken ?? Guid.NewGuid();
             }
 
             decimal itemsTotal = order.Items.Sum(i => i.Price * i.Count);
