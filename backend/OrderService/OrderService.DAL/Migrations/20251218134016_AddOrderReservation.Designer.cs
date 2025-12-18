@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OrderService.Domain.Database;
@@ -11,9 +12,11 @@ using OrderService.Domain.Database;
 namespace OrderService.DAL.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    partial class OrderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251218134016_AddOrderReservation")]
+    partial class AddOrderReservation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,39 +83,6 @@ namespace OrderService.DAL.Migrations
                     b.ToTable("Gifts");
                 });
 
-            modelBuilder.Entity("OrderService.Domain.Entities.GiftReservation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("GiftId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("ReservedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GiftId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("GiftReservation");
-                });
-
             modelBuilder.Entity("OrderService.Domain.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -128,9 +98,6 @@ namespace OrderService.DAL.Migrations
                     b.Property<string>("GiftMessage")
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
-
-                    b.Property<Guid?>("GuestToken")
-                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsDelivery")
                         .HasColumnType("boolean");
@@ -273,16 +240,16 @@ namespace OrderService.DAL.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("BouquetId")
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FlowerId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("BouquetName")
+                    b.Property<string>("FlowerName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -298,21 +265,13 @@ namespace OrderService.DAL.Migrations
                     b.Property<DateTime>("ReservedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("SizeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SizeName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ExpiresAt");
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("BouquetId", "SizeId", "IsActive");
+                    b.HasIndex("FlowerId", "IsActive");
 
                     b.ToTable("OrderReservations");
                 });
@@ -353,25 +312,6 @@ namespace OrderService.DAL.Migrations
                         .HasForeignKey("OrderService.Domain.Entities.DeliveryInformation", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("OrderService.Domain.Entities.GiftReservation", b =>
-                {
-                    b.HasOne("OrderService.Domain.Entities.Gift", "Gift")
-                        .WithMany()
-                        .HasForeignKey("GiftId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OrderService.Domain.Entities.Order", "Order")
-                        .WithMany("GiftReservations")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Gift");
 
                     b.Navigation("Order");
                 });
@@ -447,8 +387,6 @@ namespace OrderService.DAL.Migrations
             modelBuilder.Entity("OrderService.Domain.Entities.Order", b =>
                 {
                     b.Navigation("DeliveryInformation");
-
-                    b.Navigation("GiftReservations");
 
                     b.Navigation("Items");
 

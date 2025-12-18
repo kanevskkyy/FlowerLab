@@ -26,16 +26,16 @@ namespace OrderService.API.Controllers
             return Ok(pagedOrders);
         }
 
-        [Authorize]
         [HttpGet("{id:guid}", Name = "GetOrderById")]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetById(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
-            var order = await orderService.GetByIdAsync(id, cancellationToken);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
+            var role = User.FindFirstValue(ClaimTypes.Role);
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var order = await orderService.GetByIdAsync(id, guestToken, cancellationToken);
 
-            if (role != "Admin" && order.UserId?.ToString() != userId)
+            if (role != "Admin" && order.UserId != userId && order.GuestToken != guestToken)
                 return Forbid();
 
             return Ok(order);
@@ -68,15 +68,22 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("my")]
-        [Authorize]
-        public async Task<IActionResult> GetMyOrders([FromQuery] OrderSpecificationParameters parameters, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetMyOrders([FromQuery] OrderSpecificationParameters parameters, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+            Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
 
-            var userId = Guid.Parse(userIdString);
-            var pagedOrders = await orderService.GetMyOrdersAsync(userId, parameters, cancellationToken);
+            var pagedOrders = await orderService.GetMyOrdersAsync(userId, guestToken, parameters, cancellationToken);
             return Ok(pagedOrders);
+        }
+
+
+        [HttpPost("{id:guid}/pay")]
+        public async Task<IActionResult> Pay(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
+        {
+            var paymentUrl = await orderService.GeneratePaymentUrlAsync(id, guestToken, cancellationToken);
+
+            return Ok(new { PaymentUrl = paymentUrl });
         }
 
 

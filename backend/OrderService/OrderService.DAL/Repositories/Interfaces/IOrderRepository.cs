@@ -11,6 +11,8 @@ namespace OrderService.DAL.Repositories.Interfaces
 {
     public interface IOrderRepository : IGenericRepository<Order>
     {
+        Task<bool> HasUserOrderedBouquetAsync(Guid userId, Guid bouquetId, CancellationToken cancellationToken = default);
+        Task<List<Order>> GetExpiredAwaitingPaymentOrdersAsync(DateTime now, CancellationToken cancellationToken = default);
         Task<PagedList<Order>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
         Task<Order?> GetByIdWithIncludesAsync(Guid id, CancellationToken cancellationToken = default);
     }

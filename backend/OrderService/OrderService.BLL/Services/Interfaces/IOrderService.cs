@@ -11,10 +11,11 @@ namespace OrderService.BLL.Services.Interfaces
 {
     public interface IOrderService
     {
+        Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid? userId, Guid? guestToken, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
+        Task<string> GeneratePaymentUrlAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default);
         Task<bool> HasUserOrderedBouquetAsync(Guid userId, Guid bouquetId);
-        Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid userId, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
         Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default);
-        Task<OrderDetailDto> GetByIdAsync(Guid orderId, CancellationToken cancellationToken = default);
+        Task<OrderDetailDto> GetByIdAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default);
         Task<OrderDetailDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default);
         Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default);
         Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default);

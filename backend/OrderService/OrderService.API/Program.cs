@@ -60,9 +60,13 @@ builder.AddNpgsqlDbContext<OrderDbContext>("FlowerLabOrder");
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
 builder.Services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
+builder.Services.AddScoped<IOrderReservationRepository, OrderReservationRepository>();
+builder.Services.AddScoped<IGiftReservationRepository, GiftReservationRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddHostedService<ExpiredOrdersCleanupService>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<GiftCreateDtoValidator>();

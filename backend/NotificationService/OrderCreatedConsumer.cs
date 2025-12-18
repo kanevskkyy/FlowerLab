@@ -21,7 +21,7 @@ namespace Notify
         {
             var order = context.Message;
 
-            string message = $"📦 *Нове замовлення!* \n" +
+            string message = $"📦 Нове замовлення! \n" +
                              $"🆔 Замовлення: #{order.OrderId}\n" +
                              $"👤 Від: {order.CustomerName}\n" +
                              $"💰 Сума: {order.TotalPrice} грн";

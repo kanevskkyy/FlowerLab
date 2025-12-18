@@ -112,9 +112,6 @@ namespace OrderService.Tests.Services
 
             Assert.Equal(2, result.Items.Count());
             var awaitingPaymentDto = result.Items.First(d => d.Id == orders[0].Id);
-            Assert.Equal("payment-url", awaitingPaymentDto.PaymentUrl);
-            var completedDto = result.Items.First(d => d.Id == orders[1].Id);
-            Assert.Null(completedDto.PaymentUrl);
         }
 
         #endregion

@@ -15,7 +15,6 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public Guid? UserId { get; set; }
         public string? UserFirstName { get; set; } 
         public string? UserLastName { get; set; }
-        public string? PaymentUrl { get; set; }
         public decimal TotalPrice { get; set; }
         public OrderStatusReadDto Status { get; set; } = null!;
     }

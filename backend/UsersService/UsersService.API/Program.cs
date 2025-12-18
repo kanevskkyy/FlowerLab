@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using shared.events.EventService;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using UsersService.API.Helpers;
@@ -17,6 +18,7 @@ using UsersService.BLL.FluentValidation;
 using UsersService.BLL.Helpers;
 using UsersService.BLL.Models.Auth;
 using UsersService.BLL.Services;
+using UsersService.BLL.Services.Events;
 using UsersService.BLL.Services.Interfaces;
 using UsersService.DAL.DbContext;
 using UsersService.Domain.Entities;
@@ -63,6 +65,8 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
+builder.Services.AddScoped<IEventLogService, EventLogService>();
 
 // DbContext
 builder.AddNpgsqlDbContext<ApplicationDbContext>("FlowerLabUsers");

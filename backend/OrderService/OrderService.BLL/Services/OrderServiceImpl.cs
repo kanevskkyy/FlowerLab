@@ -42,66 +42,62 @@ namespace OrderService.BLL.Services
             this.liqPayService = liqPayService;
         }
 
+        public async Task<string> GeneratePaymentUrlAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
+        {
+            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
+                ?? throw new NotFoundException($"Замовлення {orderId} не знайдено");
+
+            if (order.UserId == null && guestToken != order.GuestToken)
+                throw new ValidationException("Невірний токен для гостьового замовлення.");
+
+            if (order.Status.Name != "AwaitingPayment")
+                throw new ValidationException("Замовлення вже оплачено або недоступне для оплати.");
+
+            return liqPayService.GeneratePaymentUrl(
+                order.Id,
+                order.TotalPrice,
+                $"Оплата замовлення #{order.Id}");
+        }
+
+
         public async Task<PagedList<OrderSummaryDto>> GetPagedOrdersAsync(OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
         {
             var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
-            var dtoList = pagedOrders.Items.Select(o =>
-            {
-                var dto = mapper.Map<OrderSummaryDto>(o);
-                if (o.Status?.Name == "AwaitingPayment")
-                {
-                    dto.PaymentUrl = liqPayService.GeneratePaymentUrl(
-                        o.Id,
-                        o.TotalPrice,
-                        $"Оплата замовлення #{o.Id}");
-                }
-
-                return dto;
-            }).ToList();
+            var dtoList = mapper.Map<List<OrderSummaryDto>>(pagedOrders.Items);
 
             return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 
-        public async Task<OrderDetailDto> GetByIdAsync(Guid orderId, CancellationToken cancellationToken = default)
+        public async Task<OrderDetailDto> GetByIdAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
         {
-            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken);
-            if (order == null)
-                throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
+            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken) ?? throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
 
-            var resultDto = mapper.Map<OrderDetailDto>(order);
+            if (order.UserId == null && guestToken != order.GuestToken) throw new ValidationException("Невірний токен для гостьового замовлення.");
 
-            if (order.Status?.Name == "AwaitingPayment")
-            {
-                resultDto.PaymentUrl = liqPayService.GeneratePaymentUrl(
-                    order.Id,
-                    order.TotalPrice,
-                    $"Оплата замовлення #{order.Id}");
-            }
-
-            return resultDto;
+            return mapper.Map<OrderDetailDto>(order);
         }
 
-        public async Task<OrderDetailDto> CreateAsync(
-            Guid? userId,
-            string? userFirstName,
-            string? userLastName,
-            string? userPhoneNumber,
-            OrderCreateDto dto,
-            decimal personalDiscount,
-            CancellationToken cancellationToken = default)
+        public async Task<OrderDetailDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
         {
-            var finalFirstName = userFirstName ?? dto.FirstName;
-            var finalLastName = userLastName ?? dto.LastName;
-            var finalPhoneNumber = userPhoneNumber ?? dto.PhoneNumber;
+            string? finalFirstName = userFirstName ?? dto.FirstName;
+            string? finalLastName = userLastName ?? dto.LastName;
+            string? finalPhoneNumber = userPhoneNumber ?? dto.PhoneNumber;
+
+            var now = DateTime.UtcNow;
+            var activeReservations = await unitOfWork.OrderReservations.GetActiveAsync(now, cancellationToken);
 
             var grpcRequest = new OrderedBouquetsIdList();
             foreach (var item in dto.Items)
             {
+                var reservedCount = activeReservations
+                                    .Where(r => r.BouquetId == item.BouquetId && r.SizeId == item.SizeId)
+                                    .Sum(r => r.Quantity);
+
                 grpcRequest.OrderedBouquets.Add(new OrderedBouquetsId
                 {
                     Id = item.BouquetId.ToString(),
-                    SizeId = item.SizeId.ToString(), 
-                    Count = item.Count
+                    SizeId = item.SizeId.ToString(),
+                    Count = item.Count + reservedCount 
                 });
             }
 
@@ -139,11 +135,15 @@ namespace OrderService.BLL.Services
                 await unitOfWork.OrderStatuses.AddAsync(awaitingPaymentStatus);
             }
 
-            var existingOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
+            bool isFirstOrder = false;
+            if (dto.UserId.HasValue)
+            {
+                var existingOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
                 new OrderSpecificationParameters { UserId = userId },
                 cancellationToken);
 
-            bool isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
+                isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
+            }
 
             if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
                 throw new ValidationException("У замовленні не дозволяється дублювати подарунки.");
@@ -229,6 +229,11 @@ namespace OrderService.BLL.Services
                 OrderGifts = orderGifts
             };
 
+            if (userId == null)  
+            {
+                order.GuestToken = Guid.NewGuid();
+            }
+
             decimal itemsTotal = order.Items.Sum(i => i.Price * i.Count);
 
             if (order.OrderGifts.Any())
@@ -245,17 +250,44 @@ namespace OrderService.BLL.Services
 
             order.TotalPrice = itemsTotal;
 
+            now = DateTime.UtcNow;
+            var expiresAt = now.AddMinutes(5);
+
+            foreach (var item in order.Items)
+            {
+                order.Reservations.Add(new OrderReservation
+                {
+                    Id = Guid.NewGuid(),
+                    OrderId = order.Id,
+                    BouquetId = item.BouquetId,
+                    BouquetName = item.BouquetName,
+                    SizeId = item.SizeId,
+                    SizeName = item.SizeName,
+                    Quantity = item.Count, 
+                    ReservedAt = now,
+                    ExpiresAt = expiresAt,
+                    IsActive = true
+                });
+            }
+
+            foreach (var orderGift in order.OrderGifts)
+            {
+                order.GiftReservations.Add(new GiftReservation
+                {
+                    Id = Guid.NewGuid(),
+                    OrderId = order.Id,
+                    GiftId = orderGift.GiftId,
+                    Quantity = orderGift.Count,
+                    ReservedAt = now,
+                    ExpiresAt = expiresAt,
+                    IsActive = true
+                });
+            }
+
             await unitOfWork.Orders.AddAsync(order);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var resultDto = mapper.Map<OrderDetailDto>(order);
-            resultDto.PaymentUrl = liqPayService.GeneratePaymentUrl(
-                order.Id,
-                order.TotalPrice,
-                $"Оплата замовлення #{order.Id}");
-            resultDto.TotalPrice = order.TotalPrice;
-
-            return resultDto;
+            return mapper.Map<OrderDetailDto>(order);
         }
 
         public async Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default)
@@ -291,6 +323,18 @@ namespace OrderService.BLL.Services
                     }
                 }
 
+                foreach (var reservation in order.Reservations)
+                {
+                    reservation.IsActive = false;
+                    unitOfWork.OrderReservations.Update(reservation);
+                }
+
+                foreach (var giftReservation in order.GiftReservations)
+                {
+                    giftReservation.IsActive = false;
+                    unitOfWork.GiftReservations.Update(giftReservation);
+                }
+
                 unitOfWork.Orders.Update(order);
                 await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -324,61 +368,22 @@ namespace OrderService.BLL.Services
                 }
 
             }
-            else if (response.Status == LiqPayResponseStatus.Failure || response.Status == LiqPayResponseStatus.Error)
-            {
-                var failedStatus = await unitOfWork.OrderStatuses.GetByNameAsync("PaymentFailed");
-                if (failedStatus == null)
-                {
-                    failedStatus = new OrderStatus
-                    {
-                        Name = "PaymentFailed",
-                        CreatedAt = DateTime.UtcNow.ToUniversalTime(),
-                        UpdatedAt = DateTime.UtcNow.ToUniversalTime()
-                    };
-                    await unitOfWork.OrderStatuses.AddAsync(failedStatus);
-                }
-
-                order.StatusId = failedStatus.Id;
-                order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-                unitOfWork.Orders.Update(order);
-                await unitOfWork.SaveChangesAsync(cancellationToken);
-            }
         }
 
-        public async Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid userId, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
+        public async Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid? userId, Guid? guestToken, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
         {
             parameters.UserId = userId;
+            parameters.GuestToken = guestToken;
+
             var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
-            var dtoList = pagedOrders.Items.Select(o =>
-            {
-                var dto = mapper.Map<OrderSummaryDto>(o);
 
-                if (o.Status?.Name == "AwaitingPayment")
-                {
-                    dto.PaymentUrl = liqPayService.GeneratePaymentUrl(
-                        o.Id,
-                        o.TotalPrice,
-                        $"Оплата замовлення #{o.Id}");
-                }
-
-                return dto;
-            }).ToList();
-
+            var dtoList = mapper.Map<List<OrderSummaryDto>>(pagedOrders.Items);
             return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 
         public async Task<bool> HasUserOrderedBouquetAsync(Guid userId, Guid bouquetId)
         {
-            var parameters = new OrderSpecificationParameters
-            {
-                UserId = userId,
-                BouquetId = bouquetId
-            };
-
-            var orders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters);
-            var hasActiveOrders = orders.Items.Any(o => o.Status.Name == "Completed");
-
-            return hasActiveOrders;
+            return await unitOfWork.Orders.HasUserOrderedBouquetAsync(userId, bouquetId);
         }
 
 

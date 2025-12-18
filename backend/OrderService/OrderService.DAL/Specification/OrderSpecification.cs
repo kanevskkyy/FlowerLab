@@ -25,6 +25,9 @@ namespace OrderService.DAL.Specification
             if (parameters.StatusId.HasValue)
                 Query.Where(o => o.StatusId == parameters.StatusId.Value);
 
+            if (parameters.GuestToken.HasValue)
+                Query.Where(o => o.GuestToken == parameters.GuestToken.Value);
+
             if (parameters.BouquetId.HasValue)
             {
                 Query.Where(o => o.Items.Any(i => i.BouquetId == parameters.BouquetId.Value));

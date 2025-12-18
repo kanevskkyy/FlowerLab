@@ -25,9 +25,14 @@ namespace OrderService.Domain.Entities
         public PickupStore? PickupStoreAddress { get; set; }
         public string? PhoneNumber { get; set; }
         public Guid? DeliveryInformationId { get; set; }
+
+        public Guid? GuestToken { get; set; }
+
         public DeliveryInformation? DeliveryInformation { get; set; }
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
         public ICollection<OrderGift> OrderGifts { get; set; } = new List<OrderGift>();
+        public ICollection<GiftReservation> GiftReservations { get; set; } = new List<GiftReservation>();
+        public ICollection<OrderReservation> Reservations { get; set; } = new List<OrderReservation>();
     }
 
 }

@@ -14,6 +14,7 @@ namespace OrderService.Domain.Database
     {
         public OrderDbContext(DbContextOptions<OrderDbContext> options) : base(options)
         {
+
         }
 
         public DbSet<Order> Orders => Set<Order>();
@@ -23,6 +24,7 @@ namespace OrderService.Domain.Database
         public DbSet<OrderItemFlower> OrderItemFlowers => Set<OrderItemFlower>();
         public DbSet<OrderGift> OrderGifts => Set<OrderGift>();
         public DbSet<DeliveryInformation> DeliveryInformations => Set<DeliveryInformation>();
+        public DbSet<OrderReservation> OrderReservations => Set<OrderReservation>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +37,8 @@ namespace OrderService.Domain.Database
             modelBuilder.ApplyConfiguration(new DeliveryInformationConfiguration());
             modelBuilder.ApplyConfiguration(new OrderGiftConfiguration());
             modelBuilder.ApplyConfiguration(new OrderItemFlowerConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderReservationConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderGiftConfiguration());
         }
     }
 }

@@ -17,12 +17,43 @@ namespace OrderService.DAL.Repositories
     {
         public OrderRepository(OrderDbContext context) : base(context)
         {
+
+        }
+
+        public async Task<bool> HasUserOrderedBouquetAsync(Guid userId, Guid bouquetId, CancellationToken cancellationToken = default)
+        {
+            return await dbSet
+                .Include(o => o.Status)
+                .Include(o => o.Items)
+                .Where(o => o.UserId == userId && o.Status.Name == "Completed"
+                            && o.Items.Any(i => i.BouquetId == bouquetId))
+                .AnyAsync(cancellationToken);
+        }
+
+
+        public async Task<List<Order>> GetExpiredAwaitingPaymentOrdersAsync(DateTime now, CancellationToken cancellationToken = default)
+        {
+            return await dbSet
+                .Include(o => o.Status)
+                .Include(o => o.Reservations)
+                .Include(o => o.GiftReservations)  
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Flowers)
+                .Include(o => o.OrderGifts)
+                    .ThenInclude(og => og.Gift)
+                .Include(o => o.DeliveryInformation)
+                .Where(o => o.Status.Name == "AwaitingPayment"
+                    && (o.Reservations.Any(r => r.ExpiresAt <= now && r.IsActive)
+                        || o.GiftReservations.Any(gr => gr.ExpiresAt <= now && gr.IsActive))) 
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<Order?> GetByIdWithIncludesAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await dbSet
                 .Include(o => o.Status)
+                .Include(o => o.Reservations)
+                .Include(o => o.GiftReservations)
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Flowers) 
                 .Include(o => o.OrderGifts)

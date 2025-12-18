@@ -11,7 +11,9 @@ namespace OrderService.DAL.UOW
     {
         IOrderRepository Orders { get; }
         IGiftRepository Gifts { get; }
+        IOrderReservationRepository OrderReservations { get; }
         IOrderStatusRepository OrderStatuses { get; }
+        IGiftReservationRepository GiftReservations { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

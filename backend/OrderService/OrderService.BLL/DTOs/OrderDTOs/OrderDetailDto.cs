@@ -12,6 +12,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
     {
         public Guid Id { get; set; }
         public Guid? UserId { get; set; }
+        public Guid? GuestToken { get; set; }
         public string UserFirstName { get; set; } = null!;
         public string UserLastName { get; set; } = null!;
         public string? Notes { get; set; }
@@ -25,8 +26,6 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public IEnumerable<OrderItemReadDto> Items { get; set; } = new List<OrderItemReadDto>();
         public IEnumerable<OrderGiftReadDto> Gifts { get; set; } = new List<OrderGiftReadDto>();
         public decimal TotalPrice { get; set; }
-
-        public string? PaymentUrl { get; set; }
     }
 
 }
