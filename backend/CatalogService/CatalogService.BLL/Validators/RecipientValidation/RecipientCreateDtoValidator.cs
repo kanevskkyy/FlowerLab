@@ -19,5 +19,3 @@ namespace CatalogService.BLL.Validators.RecipientValidation
 
     }
 }
-
-}

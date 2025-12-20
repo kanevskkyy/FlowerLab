@@ -252,7 +252,7 @@ namespace OrderService.BLL.Services
             order.TotalPrice = itemsTotal;
 
             now = DateTime.UtcNow;
-            var expiresAt = now.AddMinutes(5);
+            var expiresAt = now.AddMinutes(10);
 
             foreach (var item in order.Items)
             {
