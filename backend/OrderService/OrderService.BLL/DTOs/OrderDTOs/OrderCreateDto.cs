@@ -9,7 +9,6 @@ namespace OrderService.BLL.DTOs.OrderDTOs
 {
     public class OrderCreateDto
     {
-        public Guid? UserId { get; set; }
         public Guid? GuestToken { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

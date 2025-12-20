@@ -136,7 +136,7 @@ namespace OrderService.BLL.Services
             }
 
             bool isFirstOrder = false;
-            if (dto.UserId.HasValue)
+            if (userId.HasValue)
             {
                 var existingOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
                 new OrderSpecificationParameters { UserId = userId },

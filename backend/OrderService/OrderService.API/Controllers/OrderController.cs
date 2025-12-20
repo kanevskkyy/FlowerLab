@@ -50,7 +50,6 @@ namespace OrderService.API.Controllers
             var lastName = User.FindFirstValue(ClaimTypes.Surname);
             var phoneNumber = User.FindFirstValue(ClaimTypes.MobilePhone); 
 
-            dto.UserId = userId;
             dto.FirstName ??= firstName;
             dto.LastName ??= lastName;
             dto.PhoneNumber ??= phoneNumber; 
