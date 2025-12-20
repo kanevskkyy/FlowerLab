@@ -45,18 +45,18 @@ namespace OrderService.BLL.Services
         public async Task<string> GeneratePaymentUrlAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
         {
             var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
-                ?? throw new NotFoundException($"Замовлення {orderId} не знайдено");
+                ?? throw new NotFoundException($"Order {orderId} was not found");
 
             if (order.UserId == null && guestToken != order.GuestToken)
-                throw new ValidationException("Невірний токен для гостьового замовлення.");
+                throw new ValidationException("Invalid token for guest order.");
 
             if (order.Status.Name != "AwaitingPayment")
-                throw new ValidationException("Замовлення вже оплачено або недоступне для оплати.");
+                throw new ValidationException("Order is already paid or not available for payment.");
 
             return liqPayService.GeneratePaymentUrl(
                 order.Id,
                 order.TotalPrice,
-                $"Оплата замовлення #{order.Id}");
+                $"Оплата за замовлення #{order.Id}");
         }
 
 
@@ -70,9 +70,11 @@ namespace OrderService.BLL.Services
 
         public async Task<OrderDetailDto> GetByIdAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
         {
-            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken) ?? throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
+            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
+                ?? throw new NotFoundException($"Order with ID {orderId} was not found");
 
-            if (order.UserId == null && guestToken != order.GuestToken) throw new ValidationException("Невірний токен для гостьового замовлення.");
+            if (order.UserId == null && guestToken != order.GuestToken)
+                throw new ValidationException("Invalid token for guest order.");
 
             return mapper.Map<OrderDetailDto>(order);
         }
@@ -97,7 +99,7 @@ namespace OrderService.BLL.Services
                 {
                     Id = item.BouquetId.ToString(),
                     SizeId = item.SizeId.ToString(),
-                    Count = item.Count + reservedCount 
+                    Count = item.Count + reservedCount
                 });
             }
 
@@ -109,7 +111,7 @@ namespace OrderService.BLL.Services
             }
             catch (RpcException ex)
             {
-                throw new ValidationException($"Помилка перевірки букетів: {ex.Status.Detail}");
+                throw new ValidationException($"Error checking bouquets: {ex.Status.Detail}");
             }
 
             var invalidItems = catalogResponse.OrderedResponseList_
@@ -119,8 +121,8 @@ namespace OrderService.BLL.Services
             if (invalidItems.Any())
             {
                 var errors = string.Join("; ", invalidItems.Select(i =>
-                    $"Букет '{i.BouquetName}' (розмір {i.SizeName}): {i.ErrorMessage}"));
-                throw new ValidationException($"Помилка перевірки букетів: {errors}");
+                    $"Bouquet '{i.BouquetName}' (size {i.SizeName}): {i.ErrorMessage}"));
+                throw new ValidationException($"Error checking bouquets: {errors}");
             }
 
             var awaitingPaymentStatus = await unitOfWork.OrderStatuses.GetByNameAsync("AwaitingPayment");
@@ -146,7 +148,7 @@ namespace OrderService.BLL.Services
             }
 
             if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
-                throw new ValidationException("У замовленні не дозволяється дублювати подарунки.");
+                throw new ValidationException("Duplicate gifts are not allowed in the order.");
 
             List<OrderGift> orderGifts = new();
             if (dto.Gifts != null)
@@ -154,11 +156,10 @@ namespace OrderService.BLL.Services
                 foreach (var giftDto in dto.Gifts)
                 {
                     var gift = await unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId)
-                        ?? throw new NotFoundException($"Подарунок з ID {giftDto.GiftId} не знайдено");
+                        ?? throw new NotFoundException($"Gift with ID {giftDto.GiftId} was not found");
 
                     if (gift.AvailableCount < giftDto.Count)
-                        throw new ValidationException($"Недостатньо подарунків '{gift.Name}'. " +
-                            $"Запитано {giftDto.Count}, доступно {gift.AvailableCount}.");
+                        throw new ValidationException($"Not enough gifts '{gift.Name}'. Requested {giftDto.Count}, available {gift.AvailableCount}.");
 
                     orderGifts.Add(new OrderGift
                     {
@@ -178,7 +179,7 @@ namespace OrderService.BLL.Services
                 var catalogItem = catalogResponse.OrderedResponseList_[i];
 
                 if (!decimal.TryParse(catalogItem.Price, out decimal price))
-                    throw new ValidationException($"Некоректна ціна для букета {catalogItem.BouquetName}");
+                    throw new ValidationException($"Invalid price for bouquet {catalogItem.BouquetName}");
 
                 var orderItem = new OrderItem
                 {
@@ -263,7 +264,7 @@ namespace OrderService.BLL.Services
                     BouquetName = item.BouquetName,
                     SizeId = item.SizeId,
                     SizeName = item.SizeName,
-                    Quantity = item.Count, 
+                    Quantity = item.Count,
                     ReservedAt = now,
                     ExpiresAt = expiresAt,
                     IsActive = true
@@ -292,19 +293,18 @@ namespace OrderService.BLL.Services
 
         public async Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default)
         {
-            if (!liqPayService.ValidateCallback(data, signature))
-                throw new ValidationException("Невалідний підпис LiqPay");
+            if (!liqPayService.ValidateCallback(data, signature)) return;
 
             var response = liqPayService.ParseCallback(data);
             var orderId = Guid.Parse(response.OrderId);
 
             var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
-                ?? throw new NotFoundException($"Замовлення {orderId} не знайдено");
+                ?? throw new NotFoundException($"Order {orderId} was not found");
 
             if (response.Status == LiqPayResponseStatus.Success || response.Status == LiqPayResponseStatus.Sandbox)
             {
                 var paidStatus = await unitOfWork.OrderStatuses.GetByNameAsync("Pending")
-                    ?? throw new NotFoundException("Статус 'Pending' не знайдено");
+                    ?? throw new NotFoundException("Status 'Pending' was not found");
 
                 order.StatusId = paidStatus.Id;
                 order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
@@ -315,7 +315,7 @@ namespace OrderService.BLL.Services
                     if (gift != null)
                     {
                         if (gift.AvailableCount < orderGift.Count)
-                            throw new ValidationException($"Недостатньо подарунків '{gift.Name}' для завершення замовлення.");
+                            throw new ValidationException($"Not enough gifts '{gift.Name}' to complete the order.");
 
                         gift.AvailableCount -= orderGift.Count;
                         gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
@@ -366,7 +366,6 @@ namespace OrderService.BLL.Services
                     };
                     await publishEndpoint.Publish(orderAddressEvent, cancellationToken);
                 }
-
             }
         }
 
@@ -391,11 +390,11 @@ namespace OrderService.BLL.Services
         {
             var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId);
             if (order == null)
-                throw new NotFoundException($"Замовлення з ID {orderId} не знайдено");
+                throw new NotFoundException($"Order with ID {orderId} was not found");
 
             var status = await unitOfWork.OrderStatuses.GetByIdAsync(dto.StatusId);
             if (status == null)
-                throw new NotFoundException($"Статус замовлення з ID {dto.StatusId} не знайдено");
+                throw new NotFoundException($"Order status with ID {dto.StatusId} was not found");
 
             order.StatusId = dto.StatusId;
             unitOfWork.Orders.Update(order);
@@ -406,5 +405,6 @@ namespace OrderService.BLL.Services
 
             return dtoResult;
         }
+
     }
 }

@@ -13,8 +13,8 @@ namespace OrderService.BLL.FluentValidation
         public DeliveryInformationCreateDtoValidator()
         {
             RuleFor(d => d.Address)
-                .NotEmpty().WithMessage("Адреса є обов’язковою")
-                .MaximumLength(200).WithMessage("Адреса не може перевищувати 200 символів");
+                .NotEmpty().WithMessage("Address is required")
+                .MaximumLength(200).WithMessage("Address cannot exceed 200 characters");
         }
     }
 }

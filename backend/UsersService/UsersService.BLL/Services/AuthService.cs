@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UsersService.BLL.EmailService;
 using UsersService.BLL.EmailService.DTO;
+using UsersService.BLL.EmailService.Interfaces;
 using UsersService.BLL.Helpers;
 using UsersService.BLL.Models.Auth;
 using UsersService.BLL.Models.Users;
@@ -24,6 +25,7 @@ namespace UsersService.BLL.Services
         private JwtSettings jwtSettings;
         private IUserImageService imageService;
         private IEmailService emailService;
+        private IEmailTemplateService emailTemplate;
         private IConfiguration configuration;
 
         public AuthService(
@@ -33,7 +35,8 @@ namespace UsersService.BLL.Services
             IOptions<JwtSettings> jwtSettings,
             IUserImageService userImageService,
             IEmailService emailService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailTemplateService emailTemplate)
         {
             imageService = userImageService;
             this.userManager = userManager;
@@ -42,6 +45,7 @@ namespace UsersService.BLL.Services
             this.jwtSettings = jwtSettings.Value;
             this.emailService = emailService;
             this.configuration = configuration;
+            this.emailTemplate = emailTemplate;
         }
 
 
@@ -49,14 +53,14 @@ namespace UsersService.BLL.Services
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new InvalidOperationException($"Користувача з ID '{userId}' не знайдено.");
+                throw new InvalidOperationException($"User with ID '{userId}' not found.");
 
             var result = await userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
 
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Не вдалося змінити пароль: {errors}");
+                throw new InvalidOperationException($"Failed to change password: {errors}");
             }
 
             return true;
@@ -67,13 +71,13 @@ namespace UsersService.BLL.Services
             var existingUser = await userManager.FindByEmailAsync(model.Email);
             if (existingUser != null)
             {
-                throw new InvalidOperationException($"Користувач з email '{model.Email}' вже існує.");
+                throw new InvalidOperationException($"User with email '{model.Email}' already exists.");
             }
 
             var phoneExists = await userManager.Users.AnyAsync(u => u.PhoneNumber == model.PhoneNumber);
             if (phoneExists)
             {
-                throw new InvalidOperationException($"Користувач з номером '{model.PhoneNumber}' вже існує.");
+                throw new InvalidOperationException($"User with phone number '{model.PhoneNumber}' already exists.");
             }
 
             var user = new ApplicationUser
@@ -89,7 +93,7 @@ namespace UsersService.BLL.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Створення користувача не вдалося: {errors}");
+                throw new InvalidOperationException($"User creation failed: {errors}");
             }
 
             await userManager.AddToRoleAsync(user, "Client");
@@ -104,30 +108,24 @@ namespace UsersService.BLL.Services
             await emailService.SendEmailAsync(new EmailMessageDTO
             {
                 To = user.Email,
-                Subject = "Підтвердження email 📧",
-                HtmlBody = $"""
-                    <h2>Підтвердження email</h2>
-                    <p>Привіт, {user.FirstName} 👋</p>
-                    <p>Натисни кнопку, щоб підтвердити email:</p>
-                    <a href="{confirmUrl}">
-                        Підтвердити email
-                    </a>
-                """
+                Subject = "Email Confirmation 📧",
+                HtmlBody = emailTemplate.GetEmailConfirmationTemplate(user.FirstName, confirmUrl)
             });
 
             return null;
 
         }
 
+
         public async Task<TokenResponseDto> LoginAsync(LoginDto model)
         {
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
-                throw new InvalidOperationException($"Користувач з email '{model.Email}' не існує.");
+                throw new InvalidOperationException($"User with email '{model.Email}' does not exist.");
 
             if (await userManager.IsLockedOutAsync(user))
-                throw new UnauthorizedAccessException("Акаунт тимчасово заблоковано через велику кількість невдалих входів.");
+                throw new UnauthorizedAccessException("Account is temporarily locked due to too many failed login attempts.");
 
             var passwordValid = await userManager.CheckPasswordAsync(user, model.Password);
 
@@ -135,13 +133,13 @@ namespace UsersService.BLL.Services
             {
                 await userManager.AccessFailedAsync(user);
 
-                throw new UnauthorizedAccessException("Невірний пароль або email.");
+                throw new UnauthorizedAccessException("Invalid password or email.");
             }
 
             await userManager.ResetAccessFailedCountAsync(user);
 
             if (!user.EmailConfirmed)
-                throw new UnauthorizedAccessException("Підтвердіть email!");
+                throw new UnauthorizedAccessException("Please confirm your email!");
 
             return await GenerateAndSaveTokens(user);
         }
@@ -150,7 +148,7 @@ namespace UsersService.BLL.Services
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new NotFoundException("Користувача не знайдено!");
+                throw new NotFoundException("User not found!");
 
             var decodedToken = Uri.UnescapeDataString(token);
             var result = await userManager.ConfirmEmailAsync(user, decodedToken);
@@ -158,7 +156,7 @@ namespace UsersService.BLL.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Не вдалося підтвердити email: {errors}");
+                throw new InvalidOperationException($"Failed to confirm email: {errors}");
             }
         }
 
@@ -187,7 +185,7 @@ namespace UsersService.BLL.Services
 
             if (storedToken == null)
             {
-                throw new InvalidOperationException("Токен оновлення не знайдено.");
+                throw new InvalidOperationException("Refresh token not found.");
             }
 
             storedToken.IsRevoked = true;
@@ -200,7 +198,7 @@ namespace UsersService.BLL.Services
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new InvalidOperationException($"Користувач з ID '{userId}' не існує.");
+                throw new InvalidOperationException($"User with ID '{userId}' does not exist.");
 
             bool isUpdated = false;
 
@@ -222,7 +220,7 @@ namespace UsersService.BLL.Services
                     .AnyAsync(u => u.PhoneNumber == dto.PhoneNumber && u.Id != user.Id);
 
                 if (phoneExists)
-                    throw new InvalidOperationException($"Номер телефону '{dto.PhoneNumber}' вже використовується іншим користувачем.");
+                    throw new InvalidOperationException($"Phone number '{dto.PhoneNumber}' is already used by another user.");
 
                 user.PhoneNumber = dto.PhoneNumber;
                 isUpdated = true;
@@ -254,7 +252,7 @@ namespace UsersService.BLL.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Не вдалося оновити користувача: {errors}");
+                throw new InvalidOperationException($"Failed to update user: {errors}");
             }
 
             return await GenerateAndSaveTokens(user);
@@ -270,10 +268,10 @@ namespace UsersService.BLL.Services
         {
             var user = await userManager.FindByEmailAsync(email);
             if (user == null)
-                throw new NotFoundException("Користувача не знайдено!");
+                throw new NotFoundException("User not found!");
 
             if (user.EmailConfirmed)
-                throw new InvalidOperationException("Email вже підтверджений ✅");
+                throw new InvalidOperationException("Email is already confirmed ✅");
 
             string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             string encodedToken = Uri.EscapeDataString(token);
@@ -284,15 +282,8 @@ namespace UsersService.BLL.Services
             await emailService.SendEmailAsync(new EmailMessageDTO
             {
                 To = user.Email,
-                Subject = "Підтвердження email",
-                HtmlBody = $"""
-                    <h2>Підтвердження email</h2>
-                    <p>Привіт, {user.FirstName} 👋</p>
-                    <p>Натисни кнопку, щоб підтвердити email:</p>
-                    <a href="{confirmUrl}">
-                        Підтвердити email
-                    </a>
-                """
+                Subject = "Email Confirmation 📧",
+                HtmlBody = emailTemplate.GetEmailConfirmationTemplate(user.FirstName, confirmUrl)
             });
         }
 
@@ -300,25 +291,19 @@ namespace UsersService.BLL.Services
         {
             var user = await userManager.FindByEmailAsync(email);
             if (user == null)
-                throw new NotFoundException("Користувача з таким email не знайдено!");
+                throw new NotFoundException("User with this email not found!");
 
             string token = await userManager.GeneratePasswordResetTokenAsync(user);
             string encodedToken = Uri.EscapeDataString(token);
 
             string resetUrl = $"{configuration["Frontend:ResetPasswordUrl"]}?userId={user.Id}&token={encodedToken}";
 
+
             await emailService.SendEmailAsync(new EmailMessageDTO
             {
                 To = user.Email,
-                Subject = "Скидання пароля",
-                HtmlBody = $"""
-                    <h2>Скидання пароля</h2>
-                    <p>Привіт, {user.FirstName} 👋</p>
-                    <p>Натисни кнопку, щоб змінити пароль:</p>
-                    <a href="{resetUrl}">
-                        Змінити пароль
-                    </a>
-                """
+                Subject = "Password Reset",
+                HtmlBody = emailTemplate.GetPasswordResetTemplate(user.FirstName, resetUrl)
             });
         }
 
@@ -326,7 +311,7 @@ namespace UsersService.BLL.Services
         {
             var user = await userManager.FindByIdAsync(model.UserId);
             if (user == null)
-                throw new NotFoundException("Користувача не знайдено!");
+                throw new NotFoundException("User not found!");
 
             var decodedToken = Uri.UnescapeDataString(model.Token);
             var result = await userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword);
@@ -334,9 +319,10 @@ namespace UsersService.BLL.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Не вдалося скинути пароль: {errors}");
+                throw new InvalidOperationException($"Failed to reset password: {errors}");
             }
         }
+
 
         private async Task<TokenResponseDto> GenerateAndSaveTokens(ApplicationUser user)
         {

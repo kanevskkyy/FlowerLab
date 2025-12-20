@@ -32,7 +32,7 @@ namespace UsersService.BLL.Services
             var user = await userManager.Users
                 .Include(u => u.Addresses)
                 .FirstOrDefaultAsync(u => u.Id == userId)
-                ?? throw new NotFoundException("Користувача не знайдено");
+                ?? throw new NotFoundException("User not found");
 
             return new UserResponseDto
             {
@@ -51,6 +51,7 @@ namespace UsersService.BLL.Services
             };
         }
 
+
         public async Task<TokenResponseDto> UpdateAsync(string userId, UpdateUserDto dto)
         {
             return await authService.UpdateUserAsync(userId, dto);
@@ -64,10 +65,11 @@ namespace UsersService.BLL.Services
         public async Task DeleteAsync(string userId)
         {
             var user = await userManager.FindByIdAsync(userId)
-                ?? throw new NotFoundException("Користувача не знайдено");
+                ?? throw new NotFoundException("User not found");
 
             var result = await userManager.DeleteAsync(user);
-            if (!result.Succeeded) throw new Exception("Не вдалося видалити акаунт");
+            if (!result.Succeeded) throw new Exception("Failed to delete account");
         }
+
     }
 }

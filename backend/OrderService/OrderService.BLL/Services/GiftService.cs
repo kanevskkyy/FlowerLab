@@ -36,7 +36,7 @@ namespace OrderService.BLL.Services
         {
             var gift = await unitOfWork.Gifts.GetByIdAsync(id);
             if (gift == null)
-                throw new NotFoundException($"Подарунок з ID {id} не знайдено");
+                throw new NotFoundException($"Gift with ID {id} was not found");
 
             return mapper.Map<GiftReadDto>(gift);
         }
@@ -45,7 +45,7 @@ namespace OrderService.BLL.Services
         {
             var isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name);
             if (isDuplicate)
-                throw new AlreadyExistsException($"Подарунок '{dto.Name}' вже існує");
+                throw new AlreadyExistsException($"Gift '{dto.Name}' already exists");
 
             string imageUrl = await imageService.UploadAsync(dto.Image, "order-service/gifts");
 
@@ -63,11 +63,11 @@ namespace OrderService.BLL.Services
         {
             var gift = await unitOfWork.Gifts.GetByIdAsync(id);
             if (gift == null)
-                throw new NotFoundException($"Подарунок з ID {id} не знайдено");
+                throw new NotFoundException($"Gift with ID {id} was not found");
 
             var isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name, id);
             if (isDuplicate)
-                throw new AlreadyExistsException($"Подарунок '{dto.Name}' вже існує");
+                throw new AlreadyExistsException($"Gift '{dto.Name}' already exists");
 
             if (dto.Image != null)
             {
@@ -87,12 +87,13 @@ namespace OrderService.BLL.Services
         {
             var gift = await unitOfWork.Gifts.GetByIdAsync(id);
             if (gift == null)
-                throw new NotFoundException($"Подарунок з ID {id} не знайдено");
+                throw new NotFoundException($"Gift with ID {id} was not found");
 
             await imageService.DeleteImageAsync(gift.ImageUrl);
 
             unitOfWork.Gifts.Delete(gift);
             await unitOfWork.SaveChangesAsync();
         }
+
     }
 }

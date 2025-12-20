@@ -36,7 +36,7 @@ namespace CatalogService.BLL.Services.Implementations
         {
             Flower? flower = await uow.Flowers.GetByIdAsync(id);
             if (flower == null)
-                throw new NotFoundException($"Квітка з ID {id} не знайдена.");
+                throw new NotFoundException($"Flower with ID {id} not found.");
 
             return mapper.Map<FlowerDto>(flower);
         }
@@ -44,10 +44,10 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<FlowerDto> CreateAsync(FlowerCreateUpdateDto dto)
         {
             if (await uow.Flowers.ExistsWithNameAsync(dto.Name))
-                throw new AlreadyExistsException($"Квітка '{dto.Name}' уже існує.");
+                throw new AlreadyExistsException($"Flower '{dto.Name}' already exists.");
 
             if (dto.Quantity < 0)
-                throw new ArgumentException("Кількість повинна бути невід’ємною.");
+                throw new ArgumentException("Quantity must be non-negative.");
 
             Flower flower = new Flower
             {
@@ -69,13 +69,13 @@ namespace CatalogService.BLL.Services.Implementations
         {
             Flower? flower = await uow.Flowers.GetByIdAsync(id);
             if (flower == null)
-                throw new NotFoundException($"Квітка з ID {id} не знайдена.");
+                throw new NotFoundException($"Flower with ID {id} not found.");
 
             if (await uow.Flowers.ExistsWithNameAsync(dto.Name, id))
-                throw new AlreadyExistsException($"Квітка '{dto.Name}' уже існує.");
+                throw new AlreadyExistsException($"Flower '{dto.Name}' already exists.");
 
             if (dto.Quantity < 0)
-                throw new ArgumentException("Кількість повинна бути невід’ємною.");
+                throw new ArgumentException("Quantity must be non-negative.");
 
             flower.Name = dto.Name;
             flower.Color = dto.Color;
@@ -94,13 +94,14 @@ namespace CatalogService.BLL.Services.Implementations
         {
             Flower? flower = await uow.Flowers.GetByIdAsync(id);
             if (flower == null)
-                throw new NotFoundException($"Квітка з ID {id} не знайдена.");
+                throw new NotFoundException($"Flower with ID {id} not found.");
 
             uow.Flowers.Delete(flower);
             await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
+
     }
 
 }

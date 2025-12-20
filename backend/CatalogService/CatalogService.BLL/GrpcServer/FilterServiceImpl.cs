@@ -71,8 +71,9 @@ namespace CatalogService.BLL.GrpcServer
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to fetch filters");
-                throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
+                throw new RpcException(new Status(StatusCode.Internal, "Internal server error"));
             }
+
         }
     }
 }

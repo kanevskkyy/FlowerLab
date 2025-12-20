@@ -13,11 +13,11 @@ namespace ReviewService.Application.Validation.Reviews
         public UpdateReviewCommandValidator()
         {
             RuleFor(x => x.Rating)
-                .InclusiveBetween(1, 5).WithMessage("Рейтинг має бути між 1 та 5.");
+                .InclusiveBetween(1, 5).WithMessage("Rating must be between 1 and 5.");
 
             RuleFor(x => x.Comment)
-                .NotEmpty().WithMessage("Коментар не може бути порожнім.")
-                .MaximumLength(500).WithMessage("Коментар не може перевищувати 500 символів.");
+                .NotEmpty().WithMessage("Comment cannot be empty.")
+                .MaximumLength(500).WithMessage("Comment cannot exceed 500 characters.");
         }
     }
 }

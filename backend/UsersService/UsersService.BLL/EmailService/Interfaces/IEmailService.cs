@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UsersService.BLL.EmailService.DTO;
 
-namespace UsersService.BLL.EmailService
+namespace UsersService.BLL.EmailService.Interfaces
 {
     public interface IEmailService
     {

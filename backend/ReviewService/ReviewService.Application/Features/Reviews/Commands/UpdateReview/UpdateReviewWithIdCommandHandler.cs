@@ -22,7 +22,7 @@ namespace ReviewService.Application.Features.Reviews.Commands.UpdateReview
         {
             Review? review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
             if (review == null)
-                throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
+                throw new NotFoundException($"Review with ID {request.ReviewId} was not found!");
 
             if (review.User.UserId != request.RequesterId)
             {
@@ -34,5 +34,5 @@ namespace ReviewService.Application.Features.Reviews.Commands.UpdateReview
 
             return Unit.Value;
         }
-    } 
+    }
 }

@@ -20,10 +20,11 @@ namespace CatalogService.BLL.GrpcServer
         {
             BouquetDto bouquet = await bouquetService.GetByIdAsync(Guid.Parse(request.Id));
             if (bouquet == null)
-                throw new RpcException(new Status(StatusCode.NotFound, "Букет не знайдено."));
+                throw new RpcException(new Status(StatusCode.NotFound, "Bouquet not found."));
 
             return Map(bouquet);
         }
+
 
         private BouquetResponse Map(BouquetDto dto)
         {

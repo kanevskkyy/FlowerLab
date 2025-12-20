@@ -14,7 +14,7 @@ namespace UsersService.BLL.FluentValidation
         {
             RuleFor(x => x.PersonalDiscountPercentage)
                 .InclusiveBetween(0, 100)
-                .WithMessage("Знижка повинна бути від 0 до 100.");
+                .WithMessage("Discount must be between 0 and 100.");
         }
     }
 }

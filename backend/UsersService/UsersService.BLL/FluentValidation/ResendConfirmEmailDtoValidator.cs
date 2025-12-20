@@ -13,8 +13,8 @@ namespace UsersService.BLL.FluentValidation
         public ResendConfirmEmailDtoValidator()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email є обов'язковим")
-                .EmailAddress().WithMessage("Некоректний формат email");
+                .NotEmpty().WithMessage("Email is required")
+                .EmailAddress().WithMessage("Invalid email format");
         }
     }
 }

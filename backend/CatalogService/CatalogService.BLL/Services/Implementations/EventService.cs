@@ -35,19 +35,19 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<EventDto> GetByIdAsync(Guid id)
         {
             Event? targetEvent = await uow.Events.GetByIdAsync(id);
-            if (targetEvent == null) throw new NotFoundException($"Подія {id} не знайдена");
-            
+            if (targetEvent == null) throw new NotFoundException($"Event {id} not found");
+
             return mapper.Map<EventDto>(targetEvent);
         }
 
         public async Task<EventDto> CreateAsync(string name)
         {
             if (await uow.Events.ExistsWithNameAsync(name))
-                throw new AlreadyExistsException($"Подія '{name}' уже існує.");
+                throw new AlreadyExistsException($"Event '{name}' already exists.");
 
-            Event entity = new Event 
-            { 
-                Name = name 
+            Event entity = new Event
+            {
+                Name = name
             };
             await uow.Events.AddAsync(entity);
             await uow.SaveChangesAsync();
@@ -60,10 +60,10 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<EventDto> UpdateAsync(Guid id, string name)
         {
             Event ev = await uow.Events.GetByIdAsync(id);
-            if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
+            if (ev == null) throw new NotFoundException($"Event {id} not found");
 
             if (await uow.Events.ExistsWithNameAsync(name, id))
-                throw new AlreadyExistsException($"Подія '{name}' уже існує.");
+                throw new AlreadyExistsException($"Event '{name}' already exists.");
 
             ev.Name = name;
             uow.Events.Update(ev);
@@ -77,13 +77,14 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task DeleteAsync(Guid id)
         {
             Event? ev = await uow.Events.GetByIdAsync(id);
-            if (ev == null) throw new NotFoundException($"Подія {id} не знайдена");
+            if (ev == null) throw new NotFoundException($"Event {id} not found");
 
             uow.Events.Delete(ev);
             await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
+
     }
 
 }

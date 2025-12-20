@@ -8,30 +8,29 @@ public class OrderCreateDtoValidator : AbstractValidator<OrderCreateDto>
     {
         RuleFor(o => o.FirstName)
             .NotEmpty()
-            .WithMessage("Ім'я є обовʼязковим")
+            .WithMessage("First name is required")
             .MaximumLength(100)
-            .WithMessage("Ім'я не може перевищувати 100 символів");
+            .WithMessage("First name cannot exceed 100 characters");
 
         RuleFor(o => o.LastName)
             .NotEmpty()
-            .WithMessage("Прізвище є обовʼязковим")
+            .WithMessage("Last name is required")
             .MaximumLength(100)
-            .WithMessage("Прізвище не може перевищувати 100 символів");
+            .WithMessage("Last name cannot exceed 100 characters");
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .WithMessage("Номер телефону є обовʼязковим")
+            .WithMessage("Phone number is required")
             .Matches(@"^\+380\d{9}$")
-            .WithMessage("Номер телефону має бути у форматі +380XXXXXXXXX");
-
+            .WithMessage("Phone number must be in the format +380XXXXXXXXX");
 
         RuleFor(o => o.Notes)
             .MaximumLength(500)
-            .WithMessage("Примітки не можуть перевищувати 500 символів");
+            .WithMessage("Notes cannot exceed 500 characters");
 
         RuleFor(o => o.GiftMessage)
             .MaximumLength(300)
-            .WithMessage("Поздоровлення не може перевищувати 300 символів");
+            .WithMessage("Gift message cannot exceed 300 characters");
 
         RuleForEach(o => o.Items)
             .SetValidator(new OrderItemCreateDtoValidator());
@@ -43,7 +42,7 @@ public class OrderCreateDtoValidator : AbstractValidator<OrderCreateDto>
         {
             RuleFor(o => o.DeliveryInformation)
                 .NotNull()
-                .WithMessage("Інформація про доставку є обов’язковою, якщо доставка увімкнена")
+                .WithMessage("Delivery information is required if delivery is enabled")
                 .SetValidator(new DeliveryInformationCreateDtoValidator());
         });
 
@@ -51,7 +50,7 @@ public class OrderCreateDtoValidator : AbstractValidator<OrderCreateDto>
         {
             RuleFor(o => o.PickupStoreAddress)
                 .NotEmpty()
-                .WithMessage("Адреса магазину обов’язкова при самовивозі");
+                .WithMessage("Store address is required for pickup");
         });
     }
 }

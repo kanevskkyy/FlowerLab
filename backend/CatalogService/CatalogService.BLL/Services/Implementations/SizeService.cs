@@ -35,7 +35,8 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<SizeDto> GetByIdAsync(Guid id)
         {
             Size? size = await uow.Sizes.GetByIdAsync(id);
-            if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
+            if (size == null)
+                throw new NotFoundException($"Size with ID {id} not found.");
 
             return mapper.Map<SizeDto>(size);
         }
@@ -43,7 +44,7 @@ namespace CatalogService.BLL.Services.Implementations
         public async Task<SizeDto> CreateAsync(string name)
         {
             if (await uow.Sizes.ExistsWithNameAsync(name))
-                throw new AlreadyExistsException($"Розмір '{name}' уже існує.");
+                throw new AlreadyExistsException($"Size '{name}' already exists.");
 
             Size entity = new Size { Name = name };
             await uow.Sizes.AddAsync(entity);
@@ -56,11 +57,12 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<SizeDto> UpdateAsync(Guid id, string name)
         {
-            Size size = await uow.Sizes.GetByIdAsync(id);
-            if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
+            Size? size = await uow.Sizes.GetByIdAsync(id);
+            if (size == null)
+                throw new NotFoundException($"Size with ID {id} not found.");
 
             if (await uow.Sizes.ExistsWithNameAsync(name, id))
-                throw new AlreadyExistsException($"Розмір '{name}' уже існує.");
+                throw new AlreadyExistsException($"Size '{name}' already exists.");
 
             size.Name = name;
             uow.Sizes.Update(size);
@@ -73,13 +75,15 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            Size size = await uow.Sizes.GetByIdAsync(id);
-            if (size == null) throw new NotFoundException($"Розмір з ID {id} не знайдений");
+            Size? size = await uow.Sizes.GetByIdAsync(id);
+            if (size == null)
+                throw new NotFoundException($"Size with ID {id} not found.");
 
             uow.Sizes.Delete(size);
             await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
+
     }
 }

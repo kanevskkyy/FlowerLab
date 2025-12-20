@@ -23,7 +23,7 @@ namespace ReviewService.API.Middleware
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Неперехоплена помилка перехоплена middleware.");
+                logger.LogError(ex, "Unhandled exception caught by middleware.");
 
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = ex switch
@@ -36,7 +36,7 @@ namespace ReviewService.API.Middleware
                     _ => (int)HttpStatusCode.InternalServerError
                 };
 
-                var response = new
+                object response = new
                 {
                     type = ex.GetType().Name,
                     message = ex.Message

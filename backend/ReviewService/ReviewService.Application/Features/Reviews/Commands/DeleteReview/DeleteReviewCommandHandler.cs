@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using ReviewService.Application.Interfaces.Commands;
 using ReviewService.Domain.Entities;
-using ReviewService.Domain.Helpers; // Для NotFoundException
+using ReviewService.Domain.Helpers; 
 using ReviewService.Domain.Interfaces;
 
 namespace ReviewService.Application.Features.Reviews.Commands.DeleteReview
@@ -22,7 +22,7 @@ namespace ReviewService.Application.Features.Reviews.Commands.DeleteReview
         {
             Review? review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
             if (review == null)
-                throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
+                throw new NotFoundException($"Review with ID {request.ReviewId} was not found!");
 
             bool isAdmin = request.RequesterRole == "Admin";
             bool isOwner = review.User.UserId == request.RequesterId;

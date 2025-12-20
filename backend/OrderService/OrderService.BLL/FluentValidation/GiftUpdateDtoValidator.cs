@@ -16,20 +16,20 @@ namespace OrderService.BLL.FluentValidation
         public GiftUpdateDtoValidator()
         {
             RuleFor(g => g.Name)
-                .NotEmpty().WithMessage("Назва подарунка є обов’язковою")
-                .MaximumLength(100).WithMessage("Назва подарунка не може перевищувати 100 символів");
+                .NotEmpty().WithMessage("Gift name is required")
+                .MaximumLength(100).WithMessage("Gift name cannot exceed 100 characters");
 
             RuleFor(g => g.AvailableCount)
-                .GreaterThanOrEqualTo(0).WithMessage("Кількість подарунків не може бути від’ємною");
+                .GreaterThanOrEqualTo(0).WithMessage("Gift count cannot be negative");
 
             When(g => g.Image != null, () =>
             {
                 RuleFor(g => g.Image)
-                    .Must(IsValidFileType).WithMessage("Недійсний формат зображення (дозволені: .jpg, .jpeg, .png, .webp)");
+                    .Must(IsValidFileType).WithMessage("Invalid image format (allowed: .jpg, .jpeg, .png, .webp)");
             });
 
             RuleFor(g => g.Price)
-               .GreaterThan(0).WithMessage("Ціна має бути більшою за 0");
+                .GreaterThan(0).WithMessage("Price must be greater than 0");
         }
 
         private bool IsValidFileType(IFormFile? file)

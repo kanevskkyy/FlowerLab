@@ -30,7 +30,7 @@ namespace CatalogService.BLL.GrpcServer
                 return new ReviewCheckIdResponse
                 {
                     IsValid = false,
-                    ErrorMessage = "ID не може бути порожнім"
+                    ErrorMessage = "ID cannot be empty"
                 };
             }
 
@@ -39,7 +39,7 @@ namespace CatalogService.BLL.GrpcServer
                 return new ReviewCheckIdResponse
                 {
                     IsValid = false,
-                    ErrorMessage = "ID не є дійсним GUID"
+                    ErrorMessage = "ID is not a valid GUID"
                 };
             }
 
@@ -50,13 +50,13 @@ namespace CatalogService.BLL.GrpcServer
                 return new ReviewCheckIdResponse
                 {
                     IsValid = bouquet != null,
-                    ErrorMessage = bouquet != null ? "" : "Букет з цим ID не існує"
+                    ErrorMessage = bouquet != null ? "" : "Bouquet with this ID does not exist"
                 };
             }
             catch (System.Exception ex)
             {
                 logger.LogError(ex, "Error occurred while checking bouquet with ID {Id}", request.Id);
-                throw new RpcException(new Status(StatusCode.Internal, "Внутрішня помилка сервера"));
+                throw new RpcException(new Status(StatusCode.Internal, "Internal server error"));
             }
         }
     }

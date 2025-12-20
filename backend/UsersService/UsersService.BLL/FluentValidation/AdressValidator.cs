@@ -13,11 +13,11 @@ namespace UsersService.BLL.FluentValidation
         public AddressValidator()
         {
             RuleFor(x => x.Address)
-                .NotEmpty().WithMessage("Адрсе є обов'язкова")
-                .MaximumLength(200).WithMessage("Максимальна довжина адреси 200 символів");
+                .NotEmpty().WithMessage("Address is required")
+                .MaximumLength(200).WithMessage("Maximum address length is 200 characters");
 
             RuleFor(x => x.IsDefault)
-                .NotNull().WithMessage("Необхідно вказати, чи адреса за замовчуванням");
+                .NotNull().WithMessage("You must specify whether the address is default");
         }
     }
 }

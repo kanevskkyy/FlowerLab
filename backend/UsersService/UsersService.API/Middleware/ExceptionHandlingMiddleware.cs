@@ -36,14 +36,14 @@ namespace UsersService.API.Middleware
             context.Response.ContentType = "application/json";
 
             HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
-            string message = "Сталася непередбачена помилка.";
+            string message = "An unexpected error occurred.";
             object? errors = null;
 
             switch (exception)
             {
                 case ValidationException validationEx:
                     statusCode = HttpStatusCode.BadRequest;
-                    message = "Помилка валідації.";
+                    message = "Validation error.";
                     errors = validationEx.Errors.Select(e => new { Field = e.PropertyName, Error = e.ErrorMessage });
                     logger.LogWarning("Validation error: {Errors}", errors);
                     break;
@@ -74,7 +74,7 @@ namespace UsersService.API.Middleware
 
                 default:
                     logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
-                    message = exception.Message; 
+                    message = exception.Message;
                     break;
             }
 

@@ -13,8 +13,8 @@ namespace CatalogService.BLL.Validators.SizeValidation
         public SizeCreateDtoValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Назва є обов'язковою")
-                .MaximumLength(50).WithMessage("Назва повинна містити максимум 50 символів");
+                .NotEmpty().WithMessage("Name is required")
+                .MaximumLength(50).WithMessage("Name must be at most 50 characters long");
         }
 
     }

@@ -1,14 +1,15 @@
-﻿using System;
+﻿using MediatR;
+using ReviewService.Application.Features.Reviews.Query.GerReviewById;
+using ReviewService.Domain.Entities;
+using ReviewService.Domain.Helpers;
+using ReviewService.Domain.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
-using ReviewService.Domain.Entities;
-using ReviewService.Domain.Helpers;
-using ReviewService.Domain.Interfaces;
 
-namespace ReviewService.Application.Features.Reviews.Query.GerReviewById
+namespace ReviewService.Application.Features.Reviews.Query.GetReviewById
 {
     public class GetReviewByIdQueryHandler : IRequestHandler<GetReviewByIdQuery, Review?>
     {
@@ -22,7 +23,7 @@ namespace ReviewService.Application.Features.Reviews.Query.GerReviewById
         public async Task<Review?> Handle(GetReviewByIdQuery request, CancellationToken cancellationToken)
         {
             Review? review = await reviewRepository.GetByIdAsync(request.ReviewId, cancellationToken);
-            if (review == null) throw new NotFoundException($"Відгук з ID {request.ReviewId} не знайдено!");
+            if (review == null) throw new NotFoundException($"Review with ID {request.ReviewId} was not found!");
 
             return review;
         }

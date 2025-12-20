@@ -33,7 +33,7 @@ namespace OrderService.BLL.Services
         {
             var status = await unitOfWork.OrderStatuses.GetByIdAsync(id);
             if (status == null)
-                throw new NotFoundException($"Статус замовлення з ID {id} не знайдено");
+                throw new NotFoundException($"Order status with ID {id} was not found");
 
             return mapper.Map<OrderStatusReadDto>(status);
         }
@@ -42,7 +42,7 @@ namespace OrderService.BLL.Services
         {
             var isDuplicate = await unitOfWork.OrderStatuses.IsNameDuplicatedAsync(dto.Name);
             if (isDuplicate)
-                throw new AlreadyExistsException($"Статус замовлення '{dto.Name}' вже існує");
+                throw new AlreadyExistsException($"Order status '{dto.Name}' already exists");
 
             var entity = mapper.Map<OrderStatus>(dto);
 
@@ -56,11 +56,11 @@ namespace OrderService.BLL.Services
         {
             var status = await unitOfWork.OrderStatuses.GetByIdAsync(id);
             if (status == null)
-                throw new NotFoundException($"Статус замовлення з ID {id} не знайдено");
+                throw new NotFoundException($"Order status with ID {id} was not found");
 
             var isDuplicate = await unitOfWork.OrderStatuses.IsNameDuplicatedAsync(dto.Name, id);
             if (isDuplicate)
-                throw new AlreadyExistsException($"Статус замовлення '{dto.Name}' вже існує");
+                throw new AlreadyExistsException($"Order status '{dto.Name}' already exists");
 
             mapper.Map(dto, status);
 
@@ -74,10 +74,11 @@ namespace OrderService.BLL.Services
         {
             var status = await unitOfWork.OrderStatuses.GetByIdAsync(id);
             if (status == null)
-                throw new NotFoundException($"Статус замовлення з ID {id} не знайдено");
+                throw new NotFoundException($"Order status with ID {id} was not found");
 
             unitOfWork.OrderStatuses.Delete(status);
             await unitOfWork.SaveChangesAsync();
         }
+
     }
 }

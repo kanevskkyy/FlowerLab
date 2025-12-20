@@ -13,7 +13,7 @@ namespace ReviewService.Application.Consumers
         private readonly ILogger<BouquetDeletedConsumer> _logger;
 
         public BouquetDeletedConsumer(
-            IReviewRepository reviewRepository, IEventLogService eventLogService,ILogger<BouquetDeletedConsumer> logger)
+            IReviewRepository reviewRepository, IEventLogService eventLogService, ILogger<BouquetDeletedConsumer> logger)
         {
             _reviewRepository = reviewRepository;
             _eventLogService = eventLogService;
@@ -26,23 +26,23 @@ namespace ReviewService.Application.Consumers
 
             if (await _eventLogService.HasEventProcessedAsync(eventId, context.CancellationToken))
             {
-                _logger.LogWarning("[REVIEWS] Подія {EventId} вже оброблена. Пропуск…", eventId);
+                _logger.LogWarning("[REVIEWS] Event {EventId} has already been processed. Skipping…", eventId);
                 return;
             }
 
             var bouquetId = context.Message.BouquetId;
-            _logger.LogInformation($"[REVIEWS] Отримано BouquetDeletedEvent для букету: {bouquetId}");
+            _logger.LogInformation($"[REVIEWS] Received BouquetDeletedEvent for bouquet: {bouquetId}");
 
             try
             {
                 await _reviewRepository.DeleteByBouquetIdAsync(bouquetId, context.CancellationToken);
                 await _eventLogService.MarkEventAsProcessedAsync(eventId, context.CancellationToken);
 
-                _logger.LogInformation($"[REVIEWS] Видалено відгуки для букету: {bouquetId}");
+                _logger.LogInformation($"[REVIEWS] Deleted reviews for bouquet: {bouquetId}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[REVIEWS] Помилка видалення відгуків");
+                _logger.LogError(ex, "[REVIEWS] Error deleting reviews");
                 throw;
             }
         }

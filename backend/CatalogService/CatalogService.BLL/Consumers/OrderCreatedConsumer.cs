@@ -57,8 +57,8 @@ namespace CatalogService.BLL.Consumers
 
                     if (bf.Flower.Quantity < required)
                     {
-                        var msg = $"Недостатньо квітів '{bf.Flower.Name}'. " +
-                                  $"Запитано {required}, доступно {bf.Flower.Quantity}.";
+                        var msg = $"Not enough flowers '{bf.Flower.Name}'. " +
+                                  $"Requested {required}, available {bf.Flower.Quantity}.";
                         logger.LogError("Not enough flowers: {Msg}", msg);
                         throw new InvalidOperationException(msg);
                     }
@@ -68,10 +68,9 @@ namespace CatalogService.BLL.Consumers
 
                     unitOfWork.Flowers.Update(bf.Flower);
 
-                    logger.LogInformation(
-                        "{Count} flowers '{FlowerName}' (ID: {FlowerId}) deducted",
-                        required, bf.Flower.Name, bf.Flower.Id);
+                    logger.LogInformation("{Count} flowers '{FlowerName}' (ID: {FlowerId}) deducted", required, bf.Flower.Name, bf.Flower.Id);
                 }
+                await cacheInvalidation.InvalidateByIdAsync(bouquet.Id);
             }
 
             await unitOfWork.SaveChangesAsync();

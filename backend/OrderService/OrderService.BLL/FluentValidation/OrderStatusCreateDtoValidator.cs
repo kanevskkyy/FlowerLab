@@ -14,9 +14,9 @@ namespace OrderService.BLL.FluentValidation
         {
             RuleFor(s => s.Name)
                 .NotEmpty()
-                .WithMessage("Назва статусу є обов’язковою")
+                .WithMessage("Status name is required")
                 .MaximumLength(50)
-                .WithMessage("Назва статусу не може перевищувати 50 символів");
+                .WithMessage("Status name cannot exceed 50 characters");
         }
     }
 }

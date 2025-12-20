@@ -8,6 +8,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using UsersService.BLL.EmailService.DTO;
+using UsersService.BLL.EmailService.Interfaces;
 
 namespace UsersService.BLL.EmailService
 {

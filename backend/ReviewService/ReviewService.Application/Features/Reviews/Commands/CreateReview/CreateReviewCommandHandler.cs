@@ -34,7 +34,7 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
                 new ReviewCheckIdRequest { Id = request.BouquetId.ToString() });
 
             if (!checkIdResponse.IsValid)
-                throw new InvalidOperationException($"ID букета недійсний: {checkIdResponse.ErrorMessage}");
+                throw new InvalidOperationException($"Bouquet ID is invalid: {checkIdResponse.ErrorMessage}");
 
             var orderCheckResponse = await _checkOrderGrpcClient.HasUserOrderedBouquetAsync(
                 new UserOrderCheckRequestMessage
@@ -44,13 +44,13 @@ namespace ReviewService.Application.Features.Reviews.Commands.CreateReview
                 });
 
             if (!orderCheckResponse.HasOrdered)
-                throw new InvalidOperationException("Користувач не замовляв цей букет, відгук заборонено.");
+                throw new InvalidOperationException("User has not ordered this bouquet; review is forbidden.");
 
             bool alreadyReviewed = await _reviewRepository.HasUserReviewedBouquetAsync(
                 request.User.UserId, request.BouquetId, cancellationToken);
 
             if (alreadyReviewed)
-                throw new AlreadyExistsException("Користувач вже залишив відгук для цього букету!");
+                throw new AlreadyExistsException("User has already left a review for this bouquet!");
 
             var review = new Review(request.BouquetId, request.User, request.Rating, request.Comment);
 

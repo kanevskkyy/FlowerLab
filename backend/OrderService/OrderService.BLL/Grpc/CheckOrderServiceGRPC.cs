@@ -25,7 +25,7 @@ namespace OrderService.BLL.Grpc
             if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.BouquetId))
             {
                 response.HasOrdered = false;
-                response.ErrorMessage = "UserId або BouquetId не передані.";
+                response.ErrorMessage = "UserId or BouquetId was not provided.";
                 return response;
             }
 

@@ -34,16 +34,17 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<RecipientDto> GetByIdAsync(Guid id)
         {
-            Recipient recipient = await uow.Recipients.GetByIdAsync(id);
-            if (recipient == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
-            
+            Recipient? recipient = await uow.Recipients.GetByIdAsync(id);
+            if (recipient == null)
+                throw new NotFoundException($"Recipient with ID {id} not found.");
+
             return mapper.Map<RecipientDto>(recipient);
         }
 
         public async Task<RecipientDto> CreateAsync(string name)
         {
             if (await uow.Recipients.ExistsWithNameAsync(name))
-                throw new AlreadyExistsException($"Отримувач '{name}' уже існує.");
+                throw new AlreadyExistsException($"Recipient '{name}' already exists.");
 
             Recipient entity = new Recipient { Name = name };
             await uow.Recipients.AddAsync(entity);
@@ -56,11 +57,12 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<RecipientDto> UpdateAsync(Guid id, string name)
         {
-            Recipient recipient = await uow.Recipients.GetByIdAsync(id);
-            if (recipient == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
+            Recipient? recipient = await uow.Recipients.GetByIdAsync(id);
+            if (recipient == null)
+                throw new NotFoundException($"Recipient with ID {id} not found.");
 
             if (await uow.Recipients.ExistsWithNameAsync(name, id))
-                throw new AlreadyExistsException($"Отримувач '{name}' уже існує.");
+                throw new AlreadyExistsException($"Recipient '{name}' already exists.");
 
             recipient.Name = name;
             uow.Recipients.Update(recipient);
@@ -73,14 +75,16 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            Recipient recipient = await uow.Recipients.GetByIdAsync(id);
-            if (recipient == null) throw new NotFoundException($"Отримувач з ID {id} не знайдений");
+            Recipient? recipient = await uow.Recipients.GetByIdAsync(id);
+            if (recipient == null)
+                throw new NotFoundException($"Recipient with ID {id} not found.");
 
             uow.Recipients.Delete(recipient);
             await uow.SaveChangesAsync();
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
+
     }
 
 }

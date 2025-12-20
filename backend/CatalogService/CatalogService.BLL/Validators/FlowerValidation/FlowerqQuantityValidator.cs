@@ -12,8 +12,13 @@ namespace CatalogService.BLL.Validators.FlowerValidation
     {
         public FlowerQuantityValidator()
         {
-            RuleFor(x => x.FlowerId).NotEmpty();
-            RuleFor(x => x.Quantity).GreaterThan(0);
+            RuleFor(x => x.FlowerId)
+                .NotEmpty()
+                .WithMessage("Flower ID is required.");
+
+            RuleFor(x => x.Quantity)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Quantity must be greater than 0.");
         }
     }
 }

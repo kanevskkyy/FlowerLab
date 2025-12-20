@@ -14,6 +14,7 @@ using UsersService.API.Middleware;
 using UsersService.BLL;
 using UsersService.BLL.Consumers;
 using UsersService.BLL.EmailService;
+using UsersService.BLL.EmailService.Interfaces;
 using UsersService.BLL.FluentValidation;
 using UsersService.BLL.Helpers;
 using UsersService.BLL.Models.Auth;
@@ -157,6 +158,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);

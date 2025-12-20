@@ -13,17 +13,17 @@ namespace UsersService.BLL.FluentValidation
         public ResetPasswordDtoValidator()
         {
             RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("UserId є обов'язковим");
-            
+                .NotEmpty().WithMessage("UserId is required");
+
             RuleFor(x => x.Token)
-                .NotEmpty().WithMessage("Token є обов'язковим");
-            
+                .NotEmpty().WithMessage("Token is required");
+
             RuleFor(x => x.NewPassword)
-                .NotEmpty().WithMessage("Новий пароль є обов'язковим")
-                .MinimumLength(8).WithMessage("Пароль має бути не менше 8 символів");
+                .NotEmpty().WithMessage("New password is required")
+                .MinimumLength(8).WithMessage("Password must be at least 8 characters long");
 
             RuleFor(x => x.ConfirmPassword)
-                .Equal(x => x.NewPassword).WithMessage("Паролі не співпадають.");
+                .Equal(x => x.NewPassword).WithMessage("Passwords do not match.");
         }
     }
 }

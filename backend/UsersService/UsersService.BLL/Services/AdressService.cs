@@ -41,7 +41,7 @@ namespace UsersService.BLL.Services
                 a.Address.ToLower() == dto.Address.ToLower());
 
             if (exists)
-                throw new AlreadyExistsException("Така адреса вже існує!");
+                throw new AlreadyExistsException("This address already exists!");
 
             var address = mapper.Map<UserAddresses>(dto);
             address.UserId = userId;
@@ -72,7 +72,7 @@ namespace UsersService.BLL.Services
         {
             var address = await context.Addresses
                 .FirstOrDefaultAsync(a => a.Id == addressId && a.UserId == userId)
-                ?? throw new NotFoundException("Адресу не знайдено!");
+                ?? throw new NotFoundException("Address not found!");
 
             var exists = await context.Addresses.AnyAsync(a =>
                 a.UserId == userId &&
@@ -80,7 +80,7 @@ namespace UsersService.BLL.Services
                 && a.Id != addressId);
 
             if (exists)
-                throw new AlreadyExistsException("Така адреса вже існує!");
+                throw new AlreadyExistsException("This address already exists!");
 
             mapper.Map(dto, address);
 
@@ -99,7 +99,7 @@ namespace UsersService.BLL.Services
             {
                 bool hasOtherDefault = await context.Addresses.AnyAsync(a => a.UserId == userId && a.Id != addressId && a.IsDefault);
                 if (!hasOtherDefault)
-                    address.IsDefault = true; 
+                    address.IsDefault = true;
             }
 
             await context.SaveChangesAsync();
@@ -110,10 +110,11 @@ namespace UsersService.BLL.Services
         {
             var address = await context.Addresses
                 .FirstOrDefaultAsync(a => a.Id == addressId && a.UserId == userId)
-                ?? throw new NotFoundException("Адресу не знайдено");
+                ?? throw new NotFoundException("Address not found");
 
             context.Addresses.Remove(address);
             await context.SaveChangesAsync();
         }
+
     }
 }

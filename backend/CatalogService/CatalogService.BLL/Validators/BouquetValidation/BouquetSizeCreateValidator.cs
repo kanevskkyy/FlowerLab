@@ -14,29 +14,29 @@ namespace CatalogService.BLL.Validators.BouquetValidation
         {
             RuleFor(x => x.SizeId)
                 .NotEmpty()
-                .WithMessage("ID розміру обов'язковий.");
+                .WithMessage("Size ID is required.");
 
             RuleFor(x => x.Price)
                 .GreaterThan(0)
-                .WithMessage("Ціна повинна бути більше 0.");
+                .WithMessage("Price must be greater than 0.");
 
             RuleFor(x => x.FlowerIds)
                 .NotEmpty()
-                .WithMessage("Кожен розмір повинен містити принаймні одну квітку.");
+                .WithMessage("Each size must contain at least one flower.");
 
             RuleFor(x => x.FlowerQuantities)
                 .NotEmpty()
-                .WithMessage("Кожен розмір повинен містити кількість для квіток.")
+                .WithMessage("Each size must contain quantities for the flowers.")
                 .Must((dto, quantities) => quantities != null && quantities.Count == dto.FlowerIds.Count)
-                .WithMessage("Кожна квітка повинна мати відповідну кількість.");
+                .WithMessage("Each flower must have a corresponding quantity.");
 
             RuleForEach(x => x.FlowerQuantities)
                 .GreaterThan(0)
-                .WithMessage("Кількість квітки повинна бути більше 0.");
+                .WithMessage("Flower quantity must be greater than 0.");
 
             RuleFor(x => x.FlowerIds)
                 .Must(HaveUniqueFlowers)
-                .WithMessage("Квіти в одному розмірі не повинні повторюватися.");
+                .WithMessage("Flowers in one size must be unique.");
         }
 
         private bool HaveUniqueFlowers(List<Guid> flowerIds)

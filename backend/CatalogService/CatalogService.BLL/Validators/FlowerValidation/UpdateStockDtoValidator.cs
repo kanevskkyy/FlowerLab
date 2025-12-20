@@ -14,7 +14,7 @@ namespace CatalogService.BLL.Validators.FlowerValidation
         {
             RuleFor(x => x.Quantity)
                 .GreaterThanOrEqualTo(0)
-                .WithMessage("Кількість повинна бути більшою або рівною 0");
+                .WithMessage("Quantity must be greater than or equal to 0");
         }
     }
 }

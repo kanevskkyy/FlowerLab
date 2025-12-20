@@ -18,35 +18,35 @@ namespace CatalogService.BLL.Validators
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .WithMessage("Назва букета обов'язкова.")
+                .WithMessage("Bouquet name is required.")
                 .MaximumLength(100)
-                .WithMessage("Назва букета не може перевищувати 100 символів.");
+                .WithMessage("Bouquet name cannot exceed 100 characters.");
 
             RuleFor(x => x.Sizes)
                 .NotEmpty()
-                .WithMessage("Букет повинен мати принаймні один розмір.");
+                .WithMessage("The bouquet must have at least one size.");
 
             RuleForEach(x => x.Sizes)
                 .SetValidator(new BouquetSizeCreateValidator());
 
             RuleFor(x => x.Sizes)
                 .Must(HaveUniqueSize)
-                .WithMessage("Розміри не повинні повторюватися.");
+                .WithMessage("Sizes must be unique.");
 
             When(x => x.MainPhoto != null, () =>
             {
                 RuleFor(x => x.MainPhoto)
                     .Must(BeAValidImage)
-                    .WithMessage("Головне фото має бути зображенням формату jpg, png, gif або webp.");
+                    .WithMessage("Main photo must be an image of type jpg, png, gif, or webp.");
             });
 
             RuleForEach(x => x.NewImages)
                 .Must(BeAValidImage)
-                .WithMessage("Додаткові фото мають бути зображеннями формату jpg, png, gif або webp.");
+                .WithMessage("Additional photos must be images of type jpg, png, gif, or webp.");
 
             RuleFor(x => x.NewImages)
                 .Must(images => images == null || images.Count <= 3)
-                .WithMessage("Можна завантажити максимум 3 додаткових зображення.");
+                .WithMessage("You can upload a maximum of 3 additional images.");
         }
 
         private bool BeAValidImage(IFormFile? file)

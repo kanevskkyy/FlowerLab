@@ -13,14 +13,14 @@ namespace UsersService.BLL.FluentValidation
         public ChangePasswordDtoValidator()
         {
             RuleFor(x => x.OldPassword)
-                .NotEmpty().WithMessage("Старий пароль є обов'язковим.");
+                .NotEmpty().WithMessage("Old password is required.");
 
             RuleFor(x => x.NewPassword)
-                .NotEmpty().WithMessage("Новий пароль є обов'язковим.")
-                .MinimumLength(8).WithMessage("Пароль має містити мінімум 8 символів.");
+                .NotEmpty().WithMessage("New password is required.")
+                .MinimumLength(8).WithMessage("Password must be at least 8 characters long.");
 
             RuleFor(x => x.ConfirmPassword)
-                .Equal(x => x.NewPassword).WithMessage("Паролі не співпадають.");
+                .Equal(x => x.NewPassword).WithMessage("Passwords do not match.");
         }
     }
 }

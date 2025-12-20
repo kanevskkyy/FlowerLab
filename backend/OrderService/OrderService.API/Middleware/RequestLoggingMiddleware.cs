@@ -19,7 +19,7 @@ namespace CatalogService.API.Middleware
         {
             var stopwatch = Stopwatch.StartNew();
 
-            _logger.LogInformation("Вхідний запит: {Method} {Path}", context.Request.Method, context.Request.Path);
+            _logger.LogInformation("Incoming request: {Method} {Path}", context.Request.Method, context.Request.Path);
 
             try
             {
@@ -27,7 +27,7 @@ namespace CatalogService.API.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Непередбачена помилка під час обробки запиту.");
+                _logger.LogError(ex, "Unhandled exception while processing request.");
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = ex switch
                 {
@@ -47,8 +47,11 @@ namespace CatalogService.API.Middleware
             finally
             {
                 stopwatch.Stop();
-                _logger.LogInformation("Запит завершено за {ElapsedMilliseconds} мс зі статусом {StatusCode}",
-                    stopwatch.ElapsedMilliseconds, context.Response.StatusCode);
+                _logger.LogInformation(
+                    "Request completed in {ElapsedMilliseconds} ms with status code {StatusCode}",
+                    stopwatch.ElapsedMilliseconds,
+                    context.Response.StatusCode
+                );
             }
         }
     }
