@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Services.Implementations
@@ -43,40 +44,44 @@ namespace CatalogService.BLL.Services.Implementations
             this.cacheInvalidation = cacheInvalidation;
         }
 
-        public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters)
+        public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
         {
-            string cacheKey = $"bouquets:page{parameters.Page}-size{parameters.PageSize}";
-
-            return await cache.GetOrSetAsync(cacheKey, async () =>
-            {
-                PagedList<Bouquet> pagedBouquets = await uow.Bouquets.GetBySpecificationPagedAsync(parameters);
-                List<BouquetSummaryDto> mapped = pagedBouquets.Items.Select(b => mapper.Map<BouquetSummaryDto>(b)).ToList();
-
-                return new PagedList<BouquetSummaryDto>(
-                    mapped,
-                    pagedBouquets.TotalCount,
-                    pagedBouquets.CurrentPage,
-                    pagedBouquets.PageSize
-                );
-            }, memoryExpiration: TimeSpan.FromSeconds(30), redisExpiration: TimeSpan.FromMinutes(5));
+            return await cache.GetOrSetAsync(
+                parameters.ToCacheKey(),
+                async () => await FetchBouquetsAsync(parameters),
+                memoryExpiration: TimeSpan.FromSeconds(30),
+                redisExpiration: TimeSpan.FromMinutes(5)
+            );
         }
 
-        public async Task<BouquetDto?> GetByIdAsync(Guid id)
+        private async Task<PagedList<BouquetSummaryDto>> FetchBouquetsAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
+        {
+            PagedList<Bouquet> pagedBouquets = await uow.Bouquets.GetBySpecificationPagedAsync(parameters, cancellationToken);
+            List<BouquetSummaryDto> mapped = pagedBouquets.Items.Select(b => mapper.Map<BouquetSummaryDto>(b)).ToList();
+            return new PagedList<BouquetSummaryDto>(
+                mapped,
+                pagedBouquets.TotalCount,
+                pagedBouquets.CurrentPage,
+                pagedBouquets.PageSize
+            );
+        }
+
+        public async Task<BouquetDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             string cacheKey = $"bouquet:{id}";
 
             return await cache.GetOrSetAsync(cacheKey, async () =>
             {
-                Bouquet? bouquet = await uow.Bouquets.GetWithDetailsAsync(id);
+                Bouquet? bouquet = await uow.Bouquets.GetWithDetailsAsync(id, cancellationToken);
                 if (bouquet == null) throw new NotFoundException($"Bouquet {id} not found.");
 
                 return mapper.Map<BouquetDto>(bouquet);
             }, memoryExpiration: TimeSpan.FromSeconds(30), redisExpiration: TimeSpan.FromMinutes(5));
         }
 
-        public async Task<BouquetDto> CreateAsync(BouquetCreateDto dto)
+        public async Task<BouquetDto> CreateAsync(BouquetCreateDto dto, CancellationToken cancellationToken = default)
         {
-            if (await uow.Bouquets.ExistsAsync(b => b.Name == dto.Name))
+            if (await uow.Bouquets.ExistsAsync(b => b.Name == dto.Name, cancellationToken))
             {
                 throw new AlreadyExistsException($"Bouquet with name '{dto.Name}' already exists.");
             }
@@ -93,7 +98,7 @@ namespace CatalogService.BLL.Services.Implementations
 
             foreach (var sizeDto in dto.Sizes)
             {
-                Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
                 if (size == null)
                 {
                     throw new NotFoundException($"Size {sizeDto.SizeId} not found.");
@@ -112,25 +117,25 @@ namespace CatalogService.BLL.Services.Implementations
 
             foreach (var evId in dto.EventIds)
             {
-                if (!await uow.Events.ExistsAsync(e => e.Id == evId)) throw new NotFoundException($"Event {evId} not found.");
+                if (!await uow.Events.ExistsAsync(e => e.Id == evId, cancellationToken)) throw new NotFoundException($"Event {evId} not found.");
             }
 
             foreach (var rId in dto.RecipientIds)
             {
-                if (!await uow.Recipients.ExistsAsync(r => r.Id == rId)) throw new NotFoundException($"Recipient {rId} not found.");
+                if (!await uow.Recipients.ExistsAsync(r => r.Id == rId, cancellationToken)) throw new NotFoundException($"Recipient {rId} not found.");
             }
 
             foreach (var sizeDto in dto.Sizes)
             {
                 for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
                 {
-                    Flower? flower = await uow.Flowers.GetByIdAsync(sizeDto.FlowerIds[i]);
+                    Flower? flower = await uow.Flowers.GetByIdAsync(sizeDto.FlowerIds[i], cancellationToken);
                     if (flower == null)
                         throw new NotFoundException($"Flower {sizeDto.FlowerIds[i]} not found.");
 
                     if (flower.Quantity < sizeDto.FlowerQuantities[i])
                     {
-                        Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                        Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
                         throw new Exception($"Not enough '{flower.Name}' flowers for size {size.Name}. " +
                             $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
                     }
@@ -219,22 +224,22 @@ namespace CatalogService.BLL.Services.Implementations
                 pos++;
             }
 
-            await uow.Bouquets.AddAsync(bouquet);
-            await uow.SaveChangesAsync();
+            await uow.Bouquets.AddAsync(bouquet, cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
 
-            var savedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id);
+            var savedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id, cancellationToken);
             return mapper.Map<BouquetDto>(savedBouquet);
         }
 
-        public async Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto)
+        public async Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            Bouquet? bouquet = await uow.Bouquets.GetWithDetailsAsync(id);
+            Bouquet? bouquet = await uow.Bouquets.GetWithDetailsAsync(id, cancellationToken);
             if (bouquet == null)
                 throw new NotFoundException($"Bouquet {id} not found.");
 
-            if (bouquet.Name != dto.Name && await uow.Bouquets.ExistsAsync(b => b.Name == dto.Name))
+            if (bouquet.Name != dto.Name && await uow.Bouquets.ExistsAsync(b => b.Name == dto.Name, cancellationToken))
                 throw new AlreadyExistsException($"Bouquet with name '{dto.Name}' already exists.");
 
             if (!dto.Sizes.Any())
@@ -245,7 +250,7 @@ namespace CatalogService.BLL.Services.Implementations
 
             foreach (var sizeDto in dto.Sizes)
             {
-                Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
                 if (size == null)
                     throw new NotFoundException($"Size {sizeDto.SizeId} not found.");
 
@@ -258,13 +263,13 @@ namespace CatalogService.BLL.Services.Implementations
 
             foreach (var evId in dto.EventIds)
             {
-                if (!await uow.Events.ExistsAsync(e => e.Id == evId))
+                if (!await uow.Events.ExistsAsync(e => e.Id == evId, cancellationToken))
                     throw new NotFoundException($"Event {evId} not found.");
             }
 
             foreach (var rId in dto.RecipientIds)
             {
-                if (!await uow.Recipients.ExistsAsync(r => r.Id == rId))
+                if (!await uow.Recipients.ExistsAsync(r => r.Id == rId, cancellationToken))
                     throw new NotFoundException($"Recipient {rId} not found.");
             }
 
@@ -272,13 +277,13 @@ namespace CatalogService.BLL.Services.Implementations
             {
                 for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
                 {
-                    var flower = await uow.Flowers.GetByIdAsync(sizeDto.FlowerIds[i]);
+                    var flower = await uow.Flowers.GetByIdAsync(sizeDto.FlowerIds[i], cancellationToken);
                     if (flower == null)
                         throw new NotFoundException($"Flower {sizeDto.FlowerIds[i]} not found.");
 
                     if (flower.Quantity < sizeDto.FlowerQuantities[i])
                     {
-                        var size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId);
+                        var size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
                         throw new Exception($"Not enough '{flower.Name}' flowers for size {size.Name}. " +
                             $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
                     }
@@ -363,35 +368,22 @@ namespace CatalogService.BLL.Services.Implementations
             }
 
             uow.Bouquets.Update(bouquet);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
 
-            var updatedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id);
+            var updatedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id, cancellationToken);
             return mapper.Map<BouquetDto>(updatedBouquet);
         }
 
-        public async Task UpdateFlowerQuantityAsync(Guid flowerId, int quantity)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Flower? flower = await uow.Flowers.GetByIdAsync(flowerId);
-            if (flower == null) throw new NotFoundException($"Flower {flowerId} not found.");
-            if (quantity < 0) throw new ArgumentException("Quantity must be non-negative.", nameof(quantity));
-
-            flower.Quantity = quantity;
-            uow.Flowers.Update(flower);
-            await uow.SaveChangesAsync();
-
-            await cacheInvalidation.InvalidateAllAsync();
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            Bouquet? bouquet = await uow.Bouquets.GetWithDetailsAsync(id);
+            Bouquet? bouquet = await uow.Bouquets.GetWithDetailsAsync(id, cancellationToken);
             if (bouquet == null)
                 throw new NotFoundException($"Bouquet with ID {id} not found.");
 
             uow.Bouquets.Delete(bouquet);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
 

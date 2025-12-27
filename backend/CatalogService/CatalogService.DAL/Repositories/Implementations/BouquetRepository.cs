@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CatalogService.DAL.Helpers;
 
@@ -17,7 +17,7 @@ namespace CatalogService.DAL.Repositories.Implementations
     {
         public BouquetRepository(CatalogDbContext context) : base(context) { }
 
-        public override async Task<IEnumerable<Bouquet>> GetAllAsync()
+        public override async Task<IEnumerable<Bouquet>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await dbSet
                 .Include(b => b.BouquetFlowers).ThenInclude(f => f.Flower)
@@ -25,10 +25,10 @@ namespace CatalogService.DAL.Repositories.Implementations
                 .Include(b => b.BouquetEvents).ThenInclude(e => e.Event)
                 .Include(b => b.BouquetRecipients).ThenInclude(r => r.Recipient)
                 .OrderByDescending(b => b.CreatedAt)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<Bouquet?> GetWithDetailsAsync(Guid id)
+        public async Task<Bouquet?> GetWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await context.Bouquets
                 .Include(b => b.BouquetSizes)
@@ -42,10 +42,10 @@ namespace CatalogService.DAL.Repositories.Implementations
                     .ThenInclude(br => br.Recipient)
                 .Include(b => b.BouquetImages)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
 
-        public async Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters)
+        public async Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
         {
             var spec = new BouquetSpecification(parameters);
             var query = SpecificationEvaluator<Bouquet>.GetQuery(dbSet.AsQueryable(), spec);
@@ -62,15 +62,14 @@ namespace CatalogService.DAL.Repositories.Implementations
                 _ => query.OrderByDescending(b => b.CreatedAt)
             };
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
             var items = await query
                 .Skip((parameters.Page - 1) * parameters.PageSize)
                 .Take(parameters.PageSize)
                 .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new PagedList<Bouquet>(items, totalCount, parameters.Page, parameters.PageSize);
         }
-
     }
 }

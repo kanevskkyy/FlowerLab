@@ -7,8 +7,7 @@ using CatalogService.Domain.Entities;
 using shared.cache;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Services.Implementations
@@ -26,65 +25,60 @@ namespace CatalogService.BLL.Services.Implementations
             this.mapper = mapper;
         }
 
-        public async Task<IEnumerable<EventDto>> GetAllAsync()
+        public async Task<IEnumerable<EventDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            IEnumerable<Event> events = await uow.Events.GetAllAsync();
+            IEnumerable<Event> events = await uow.Events.GetAllAsync(cancellationToken);
             return mapper.Map<IEnumerable<EventDto>>(events);
         }
 
-        public async Task<EventDto> GetByIdAsync(Guid id)
+        public async Task<EventDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Event? targetEvent = await uow.Events.GetByIdAsync(id);
+            Event? targetEvent = await uow.Events.GetByIdAsync(id, cancellationToken);
             if (targetEvent == null) throw new NotFoundException($"Event {id} not found");
 
             return mapper.Map<EventDto>(targetEvent);
         }
 
-        public async Task<EventDto> CreateAsync(string name)
+        public async Task<EventDto> CreateAsync(string name, CancellationToken cancellationToken = default)
         {
-            if (await uow.Events.ExistsWithNameAsync(name))
+            if (await uow.Events.ExistsWithNameAsync(name, cancellationToken: cancellationToken))
                 throw new AlreadyExistsException($"Event '{name}' already exists.");
 
-            Event entity = new Event
-            {
-                Name = name
-            };
-            await uow.Events.AddAsync(entity);
-            await uow.SaveChangesAsync();
+            Event entity = new Event { Name = name };
+            await uow.Events.AddAsync(entity, cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<EventDto>(entity);
         }
 
-        public async Task<EventDto> UpdateAsync(Guid id, string name)
+        public async Task<EventDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default)
         {
-            Event ev = await uow.Events.GetByIdAsync(id);
+            Event? ev = await uow.Events.GetByIdAsync(id, cancellationToken);
             if (ev == null) throw new NotFoundException($"Event {id} not found");
 
-            if (await uow.Events.ExistsWithNameAsync(name, id))
+            if (await uow.Events.ExistsWithNameAsync(name, id, cancellationToken))
                 throw new AlreadyExistsException($"Event '{name}' already exists.");
 
             ev.Name = name;
             uow.Events.Update(ev);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<EventDto>(ev);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Event? ev = await uow.Events.GetByIdAsync(id);
+            Event? ev = await uow.Events.GetByIdAsync(id, cancellationToken);
             if (ev == null) throw new NotFoundException($"Event {id} not found");
 
             uow.Events.Delete(ev);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
-
     }
-
 }

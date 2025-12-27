@@ -1,18 +1,17 @@
 ﻿using CatalogService.BLL.DTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Services.Interfaces
 {
     public interface IEventService
     {
-        Task<IEnumerable<EventDto>> GetAllAsync();
-        Task<EventDto> GetByIdAsync(Guid id);
-        Task<EventDto> CreateAsync(string name);
-        Task<EventDto> UpdateAsync(Guid id, string name);
-        Task DeleteAsync(Guid id);
+        Task<IEnumerable<EventDto>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<EventDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<EventDto> CreateAsync(string name, CancellationToken cancellationToken = default);
+        Task<EventDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default);
+        Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

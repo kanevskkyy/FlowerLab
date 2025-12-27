@@ -1,8 +1,11 @@
 ﻿using CatalogService.BLL.DTO;
 using CatalogService.BLL.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace CatalogService.API.Controllers
 {
     [ApiController]
@@ -18,35 +21,35 @@ namespace CatalogService.API.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll() =>
-            Ok(await recipientService.GetAllAsync());
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken) =>
+            Ok(await recipientService.GetAllAsync(cancellationToken));
 
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetById(Guid id) =>
-            Ok(await recipientService.GetByIdAsync(id));
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken) =>
+            Ok(await recipientService.GetByIdAsync(id, cancellationToken));
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([FromBody] RecipientCreateDto dto)
+        public async Task<IActionResult> Create([FromBody] RecipientCreateDto dto, CancellationToken cancellationToken)
         {
-            var created = await recipientService.CreateAsync(dto.Name);
+            var created = await recipientService.CreateAsync(dto.Name, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] RecipientUpdateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] RecipientUpdateDto dto, CancellationToken cancellationToken)
         {
-            var updated = await recipientService.UpdateAsync(id, dto.Name);
+            var updated = await recipientService.UpdateAsync(id, dto.Name, cancellationToken);
             return Ok(updated);
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            await recipientService.DeleteAsync(id);
+            await recipientService.DeleteAsync(id, cancellationToken);
             return NoContent();
         }
     }

@@ -3,9 +3,7 @@ using CatalogService.DAL.Repositories.Interfaces;
 using CatalogService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Repositories.Implementations
@@ -14,9 +12,9 @@ namespace CatalogService.DAL.Repositories.Implementations
     {
         public RecipientRepository(CatalogDbContext context) : base(context) { }
 
-        public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null)
+        public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default)
         {
-            return await dbSet.AnyAsync(r => r.Name == name && (!excludeId.HasValue || r.Id != excludeId.Value));
+            return await dbSet.AnyAsync(r => r.Name == name && (!excludeId.HasValue || r.Id != excludeId.Value), cancellationToken);
         }
     }
 }

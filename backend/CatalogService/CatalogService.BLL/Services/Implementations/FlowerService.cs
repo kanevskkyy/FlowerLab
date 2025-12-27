@@ -7,8 +7,7 @@ using CatalogService.Domain.Entities;
 using shared.cache;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Services.Implementations
@@ -26,24 +25,24 @@ namespace CatalogService.BLL.Services.Implementations
             this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
-        public async Task<IEnumerable<FlowerDto>> GetAllAsync()
+        public async Task<IEnumerable<FlowerDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            IEnumerable<Flower> flowers = await uow.Flowers.GetAllAsync();
+            IEnumerable<Flower> flowers = await uow.Flowers.GetAllAsync(cancellationToken);
             return mapper.Map<IEnumerable<FlowerDto>>(flowers);
         }
 
-        public async Task<FlowerDto> GetByIdAsync(Guid id)
+        public async Task<FlowerDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Flower? flower = await uow.Flowers.GetByIdAsync(id);
+            Flower? flower = await uow.Flowers.GetByIdAsync(id, cancellationToken);
             if (flower == null)
                 throw new NotFoundException($"Flower with ID {id} not found.");
 
             return mapper.Map<FlowerDto>(flower);
         }
 
-        public async Task<FlowerDto> CreateAsync(FlowerCreateUpdateDto dto)
+        public async Task<FlowerDto> CreateAsync(FlowerCreateUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            if (await uow.Flowers.ExistsWithNameAsync(dto.Name))
+            if (await uow.Flowers.ExistsWithNameAsync(dto.Name, cancellationToken: cancellationToken))
                 throw new AlreadyExistsException($"Flower '{dto.Name}' already exists.");
 
             if (dto.Quantity < 0)
@@ -57,21 +56,21 @@ namespace CatalogService.BLL.Services.Implementations
                 Quantity = dto.Quantity
             };
 
-            await uow.Flowers.AddAsync(flower);
-            await uow.SaveChangesAsync();
+            await uow.Flowers.AddAsync(flower, cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<FlowerDto>(flower);
         }
 
-        public async Task<FlowerDto> UpdateAsync(Guid id, FlowerCreateUpdateDto dto)
+        public async Task<FlowerDto> UpdateAsync(Guid id, FlowerCreateUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            Flower? flower = await uow.Flowers.GetByIdAsync(id);
+            Flower? flower = await uow.Flowers.GetByIdAsync(id, cancellationToken);
             if (flower == null)
                 throw new NotFoundException($"Flower with ID {id} not found.");
 
-            if (await uow.Flowers.ExistsWithNameAsync(dto.Name, id))
+            if (await uow.Flowers.ExistsWithNameAsync(dto.Name, id, cancellationToken))
                 throw new AlreadyExistsException($"Flower '{dto.Name}' already exists.");
 
             if (dto.Quantity < 0)
@@ -83,25 +82,23 @@ namespace CatalogService.BLL.Services.Implementations
             flower.Quantity = dto.Quantity;
 
             uow.Flowers.Update(flower);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<FlowerDto>(flower);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Flower? flower = await uow.Flowers.GetByIdAsync(id);
+            Flower? flower = await uow.Flowers.GetByIdAsync(id, cancellationToken);
             if (flower == null)
                 throw new NotFoundException($"Flower with ID {id} not found.");
 
             uow.Flowers.Delete(flower);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
-
     }
-
 }

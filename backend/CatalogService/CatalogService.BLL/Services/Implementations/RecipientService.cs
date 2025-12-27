@@ -7,8 +7,7 @@ using CatalogService.Domain.Entities;
 using shared.cache;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Services.Implementations
@@ -26,65 +25,63 @@ namespace CatalogService.BLL.Services.Implementations
             this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
-        public async Task<IEnumerable<RecipientDto>> GetAllAsync()
+        public async Task<IEnumerable<RecipientDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            IEnumerable<Recipient> recipients = await uow.Recipients.GetAllAsync();
+            IEnumerable<Recipient> recipients = await uow.Recipients.GetAllAsync(cancellationToken);
             return mapper.Map<IEnumerable<RecipientDto>>(recipients);
         }
 
-        public async Task<RecipientDto> GetByIdAsync(Guid id)
+        public async Task<RecipientDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Recipient? recipient = await uow.Recipients.GetByIdAsync(id);
+            Recipient? recipient = await uow.Recipients.GetByIdAsync(id, cancellationToken);
             if (recipient == null)
                 throw new NotFoundException($"Recipient with ID {id} not found.");
 
             return mapper.Map<RecipientDto>(recipient);
         }
 
-        public async Task<RecipientDto> CreateAsync(string name)
+        public async Task<RecipientDto> CreateAsync(string name, CancellationToken cancellationToken = default)
         {
-            if (await uow.Recipients.ExistsWithNameAsync(name))
+            if (await uow.Recipients.ExistsWithNameAsync(name, cancellationToken: cancellationToken))
                 throw new AlreadyExistsException($"Recipient '{name}' already exists.");
 
             Recipient entity = new Recipient { Name = name };
-            await uow.Recipients.AddAsync(entity);
-            await uow.SaveChangesAsync();
+            await uow.Recipients.AddAsync(entity, cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<RecipientDto>(entity);
         }
 
-        public async Task<RecipientDto> UpdateAsync(Guid id, string name)
+        public async Task<RecipientDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default)
         {
-            Recipient? recipient = await uow.Recipients.GetByIdAsync(id);
+            Recipient? recipient = await uow.Recipients.GetByIdAsync(id, cancellationToken);
             if (recipient == null)
                 throw new NotFoundException($"Recipient with ID {id} not found.");
 
-            if (await uow.Recipients.ExistsWithNameAsync(name, id))
+            if (await uow.Recipients.ExistsWithNameAsync(name, id, cancellationToken))
                 throw new AlreadyExistsException($"Recipient '{name}' already exists.");
 
             recipient.Name = name;
             uow.Recipients.Update(recipient);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<RecipientDto>(recipient);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Recipient? recipient = await uow.Recipients.GetByIdAsync(id);
+            Recipient? recipient = await uow.Recipients.GetByIdAsync(id, cancellationToken);
             if (recipient == null)
                 throw new NotFoundException($"Recipient with ID {id} not found.");
 
             uow.Recipients.Delete(recipient);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
-
     }
-
 }

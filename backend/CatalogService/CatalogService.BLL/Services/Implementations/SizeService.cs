@@ -7,8 +7,7 @@ using CatalogService.Domain.Entities;
 using shared.cache;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.BLL.Services.Implementations
@@ -26,64 +25,63 @@ namespace CatalogService.BLL.Services.Implementations
             this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
-        public async Task<IEnumerable<SizeDto>> GetAllAsync()
+        public async Task<IEnumerable<SizeDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            IEnumerable<Size> sizes = await uow.Sizes.GetAllAsync();
+            IEnumerable<Size> sizes = await uow.Sizes.GetAllAsync(cancellationToken);
             return mapper.Map<IEnumerable<SizeDto>>(sizes);
         }
 
-        public async Task<SizeDto> GetByIdAsync(Guid id)
+        public async Task<SizeDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Size? size = await uow.Sizes.GetByIdAsync(id);
+            Size? size = await uow.Sizes.GetByIdAsync(id, cancellationToken);
             if (size == null)
                 throw new NotFoundException($"Size with ID {id} not found.");
 
             return mapper.Map<SizeDto>(size);
         }
 
-        public async Task<SizeDto> CreateAsync(string name)
+        public async Task<SizeDto> CreateAsync(string name, CancellationToken cancellationToken = default)
         {
-            if (await uow.Sizes.ExistsWithNameAsync(name))
+            if (await uow.Sizes.ExistsWithNameAsync(name, cancellationToken: cancellationToken))
                 throw new AlreadyExistsException($"Size '{name}' already exists.");
 
             Size entity = new Size { Name = name };
-            await uow.Sizes.AddAsync(entity);
-            await uow.SaveChangesAsync();
+            await uow.Sizes.AddAsync(entity, cancellationToken);
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<SizeDto>(entity);
         }
 
-        public async Task<SizeDto> UpdateAsync(Guid id, string name)
+        public async Task<SizeDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default)
         {
-            Size? size = await uow.Sizes.GetByIdAsync(id);
+            Size? size = await uow.Sizes.GetByIdAsync(id, cancellationToken);
             if (size == null)
                 throw new NotFoundException($"Size with ID {id} not found.");
 
-            if (await uow.Sizes.ExistsWithNameAsync(name, id))
+            if (await uow.Sizes.ExistsWithNameAsync(name, id, cancellationToken))
                 throw new AlreadyExistsException($"Size '{name}' already exists.");
 
             size.Name = name;
             uow.Sizes.Update(size);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
 
             return mapper.Map<SizeDto>(size);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            Size? size = await uow.Sizes.GetByIdAsync(id);
+            Size? size = await uow.Sizes.GetByIdAsync(id, cancellationToken);
             if (size == null)
                 throw new NotFoundException($"Size with ID {id} not found.");
 
             uow.Sizes.Delete(size);
-            await uow.SaveChangesAsync();
+            await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();
         }
-
     }
 }

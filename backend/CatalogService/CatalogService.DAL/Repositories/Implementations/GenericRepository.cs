@@ -4,9 +4,8 @@ using CatalogService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Repositories.Implementations
@@ -22,19 +21,19 @@ namespace CatalogService.DAL.Repositories.Implementations
             dbSet = context.Set<T>();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await dbSet.AsNoTracking().ToListAsync();
+            return await dbSet.AsNoTracking().ToListAsync(cancellationToken);
         }
 
-        public virtual async Task<T> GetByIdAsync(Guid id)
+        public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
-        public async Task AddAsync(T entity)
+        public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await dbSet.AddAsync(entity);
+            await dbSet.AddAsync(entity, cancellationToken);
         }
 
         public void Update(T entity)
@@ -47,9 +46,9 @@ namespace CatalogService.DAL.Repositories.Implementations
             dbSet.Remove(entity);
         }
 
-        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await dbSet.AnyAsync(predicate);
+            return await dbSet.AnyAsync(predicate, cancellationToken);
         }
     }
 }

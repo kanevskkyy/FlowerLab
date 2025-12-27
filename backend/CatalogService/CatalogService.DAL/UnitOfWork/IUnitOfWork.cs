@@ -15,6 +15,6 @@ namespace CatalogService.DAL.UnitOfWork
         ISizeRepository Sizes { get; }
         IRecipientRepository Recipients { get; }
 
-        Task<int> SaveChangesAsync();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
