@@ -12,17 +12,16 @@ message SizeModel {
 message FlowerInBouquetModel {
     string id = 1;
     string name = 2;
-    string color = 3;
-    int32 quantity = 4;
+    int32 quantity = 3;
 }
 
 message BouquetSizeModel {
     string sizeId = 1;
     string sizeName = 2;
-    double price = 3; // ⬅️ ДОДАЛИ ЦІНУ ТУТ!
-    repeated FlowerInBouquetModel flowers = 4; // ⬅️ Змінили номер
-    int32 maxAssemblableCount = 5; // ⬅️ Змінили номер
-    bool isAvailable = 6; // ⬅️ Змінили номер
+    double price = 3;
+    repeated FlowerInBouquetModel flowers = 4; 
+    int32 maxAssemblableCount = 5; 
+    bool isAvailable = 6; 
 }
 
 message EventModel {

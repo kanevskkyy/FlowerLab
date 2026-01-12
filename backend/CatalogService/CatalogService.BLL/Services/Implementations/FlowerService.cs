@@ -51,8 +51,6 @@ namespace CatalogService.BLL.Services.Implementations
             Flower flower = new Flower
             {
                 Name = dto.Name,
-                Color = dto.Color,
-                Description = dto.Description,
                 Quantity = dto.Quantity
             };
 
@@ -77,8 +75,6 @@ namespace CatalogService.BLL.Services.Implementations
                 throw new ArgumentException("Quantity must be non-negative.");
 
             flower.Name = dto.Name;
-            flower.Color = dto.Color;
-            flower.Description = dto.Description;
             flower.Quantity = dto.Quantity;
 
             uow.Flowers.Update(flower);

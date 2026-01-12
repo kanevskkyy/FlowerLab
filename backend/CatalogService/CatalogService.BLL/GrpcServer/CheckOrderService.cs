@@ -140,7 +140,6 @@ namespace CatalogService.BLL.GrpcServer
                         {
                             FlowerId = bsf.Flower.Id.ToString(),
                             FlowerName = bsf.Flower.Name,
-                            FlowerColor = bsf.Flower.Color,
                             Quantity = bsf.Quantity
                         });
 

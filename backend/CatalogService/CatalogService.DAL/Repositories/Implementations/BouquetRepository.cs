@@ -71,5 +71,21 @@ namespace CatalogService.DAL.Repositories.Implementations
 
             return new PagedList<Bouquet>(items, totalCount, parameters.Page, parameters.PageSize);
         }
+
+        public async Task<(decimal minPrice, decimal maxPrice)> GetMinAndMaxPriceAsync(CancellationToken cancellationToken = default)
+        {
+            var bouquetMinPrices = await context.BouquetSizes
+                .AsNoTracking()
+                .GroupBy(bs => bs.BouquetId)
+                .Select(g => g.Min(bs => bs.Price)) 
+                .ToListAsync(cancellationToken);
+
+            if (!bouquetMinPrices.Any()) return (0m, 0m); 
+
+            decimal minPrice = bouquetMinPrices.Min(); 
+            decimal maxPrice = bouquetMinPrices.Max(); 
+
+            return (minPrice, maxPrice);
+        }
     }
 }

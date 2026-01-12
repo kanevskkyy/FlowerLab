@@ -18,6 +18,11 @@ message EventResponse {
 	string name = 2;
 }
 
+message PriceRangeResponse {
+	double minPrice = 1;
+	double maxPrice = 2;
+}
+
 message EventResponseList {
 	repeated EventResponse events = 1;
 }
@@ -48,6 +53,7 @@ message FilterResponse {
 	EventResponseList eventResponseList = 2;
 	ReceivmentResponseList receivmentResponseList = 3;
 	FlowerResponseList flowerResponseList = 4;
+	PriceRangeResponse priceRange = 5;
 }
 
 service FilterService{

@@ -10,6 +10,7 @@ namespace CatalogService.DAL.Repositories.Interfaces
 {
     public interface IBouquetRepository : IGenericRepository<Bouquet>
     {
+        Task<(decimal minPrice, decimal maxPrice)> GetMinAndMaxPriceAsync(CancellationToken cancellationToken = default);
         Task<Bouquet?> GetWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
         Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default);
     }

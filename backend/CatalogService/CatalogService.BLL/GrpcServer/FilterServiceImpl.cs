@@ -24,10 +24,11 @@ namespace CatalogService.BLL.GrpcServer
 
             try
             {
-                var sizes = await unitOfWork.Sizes.GetAllAsync();
-                var events = await unitOfWork.Events.GetAllAsync();
-                var recipients = await unitOfWork.Recipients.GetAllAsync();
-                var flowers = await unitOfWork.Flowers.GetAllAsync();
+                var sizes = await unitOfWork.Sizes.GetAllAsync(context.CancellationToken);
+                var events = await unitOfWork.Events.GetAllAsync(context.CancellationToken);
+                var recipients = await unitOfWork.Recipients.GetAllAsync(context.CancellationToken);
+                var flowers = await unitOfWork.Flowers.GetAllAsync(context.CancellationToken);
+                (decimal minPrice, decimal maxPrice) = await unitOfWork.Bouquets.GetMinAndMaxPriceAsync(context.CancellationToken);
 
                 var sizeResponse = new SizeResponseList();
                 sizeResponse.Sizes.AddRange(sizes.Select(s => new SizeResponse
@@ -55,17 +56,22 @@ namespace CatalogService.BLL.GrpcServer
                 {
                     Id = f.Id.ToString(),
                     Name = f.Name,
-                    Color = f.Color,
-                    Description = f.Description,
                     Quantity = f.Quantity
                 }));
+
+                var priceRangeResponse = new PriceRangeResponse()
+                {
+                    MinPrice = double.Parse(minPrice.ToString("0.##")),
+                    MaxPrice = double.Parse(maxPrice.ToString("0.##"))
+                };
 
                 return new FilterResponse
                 {
                     SizeResponseList = sizeResponse,
                     EventResponseList = eventResponse,
                     ReceivmentResponseList = recipientResponse,
-                    FlowerResponseList = flowerResponse
+                    FlowerResponseList = flowerResponse,
+                    PriceRange = priceRangeResponse
                 };
             }
             catch (Exception ex)

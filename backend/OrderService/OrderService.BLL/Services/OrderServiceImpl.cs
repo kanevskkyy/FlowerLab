@@ -203,7 +203,6 @@ namespace OrderService.BLL.Services
                             OrderItemId = orderItem.Id,
                             FlowerId = flowerId,
                             FlowerName = flowerInfo.FlowerName,
-                            FlowerColor = flowerInfo.FlowerColor,
                             Quantity = flowerInfo.Quantity
                         });
                     }

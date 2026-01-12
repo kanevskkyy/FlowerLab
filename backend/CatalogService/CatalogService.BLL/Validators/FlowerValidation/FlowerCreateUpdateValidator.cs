@@ -16,10 +16,6 @@ namespace CatalogService.BLL.Validators.FlowerValidation
                 .NotEmpty().WithMessage("Name is required.")
                 .MaximumLength(100);
 
-            RuleFor(x => x.Color)
-                .NotEmpty().WithMessage("Color is required.")
-                .MaximumLength(50);
-
             RuleFor(x => x.Quantity)
                 .GreaterThanOrEqualTo(0).WithMessage("Quantity cannot be negative.");
         }

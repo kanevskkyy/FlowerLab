@@ -13,6 +13,7 @@ using OrderService.BLL.FluentValidation;
 using OrderService.BLL.Grpc;
 using OrderService.BLL.Helpers;
 using OrderService.BLL.Profiles;
+using OrderService.BLL.RedisCache;
 using OrderService.BLL.Services;
 using OrderService.BLL.Services.Interfaces;
 using OrderService.DAL.DbContext;
@@ -20,6 +21,8 @@ using OrderService.DAL.Repositories;
 using OrderService.DAL.Repositories.Interfaces;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Database;
+using OrderService.Domain.Entities;
+using shared.cache;
 using shared.events;
 using System.Text;
 
@@ -54,6 +57,7 @@ var apiSecret = Env.GetString("CLOUDINARY_API_SECRET") ?? throw new Exception("C
 var liqPayPublic = Env.GetString("LIQPAY_PUBLIC_KEY") ?? throw new Exception("LIQPAY_PUBLIC_KEY missing!");
 var liqPayPrivate = Env.GetString("LIQPAY_PRIVATE_KEY") ?? throw new Exception("LIQPAY_PRIVATE_KEY missing!");
 var liqPayServerUrl = Env.GetString("LIQPAY_SERVER_URL") ?? throw new Exception("LIQPAY_SERVER_URL missing!");
+var liqPaySuccessUrl = Env.GetString("LIQPAY_SUCCESS_URL") ?? throw new Exception("LIQPAY_SUCCESS_URL missing!");
 
 builder.AddNpgsqlDbContext<OrderDbContext>("FlowerLabOrder");
 
@@ -83,6 +87,7 @@ builder.Services.Configure<LiqPaySettings>(options =>
     options.PublicKey = liqPayPublic;
     options.PrivateKey = liqPayPrivate;
     options.ServerUrl = liqPayServerUrl;
+    options.SuccessUrl = liqPaySuccessUrl;
 });
 
 builder.Services.AddScoped<ILiqPayService, LiqPayService>();
@@ -96,6 +101,17 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddScoped<IOrderStatusService, OrderStatusService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IOrderService, OrderServiceImpl>();
+
+builder.AddRedisClient("flowerlab-redis");
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = 1024;
+
+    options.CompactionPercentage = 0.2;
+});
+builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
+builder.Services.AddScoped<IEntityCacheInvalidationService<Gift>, GiftCacheInvalidationService>();
+builder.Services.AddScoped<IEntityCacheInvalidationService<OrderStatus>, OrderStatusCacheInvalidationService>();
 
 builder.Services.AddMassTransit(x =>
 {

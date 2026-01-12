@@ -26,6 +26,7 @@ namespace CatalogService.BLL.Services.Implementations
         private IPublishEndpoint publishEndpoint;
         private IEntityCacheService cache;
         private IEntityCacheInvalidationService<Bouquet> cacheInvalidation;
+        private IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService;
 
         public BouquetService(
             IUnitOfWork uow,
@@ -33,7 +34,8 @@ namespace CatalogService.BLL.Services.Implementations
             IImageService imageService,
             IPublishEndpoint publishEndpoint,
             IEntityCacheService cache,
-            IEntityCacheInvalidationService<Bouquet> cacheInvalidation)
+            IEntityCacheInvalidationService<Bouquet> cacheInvalidation,
+            IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
             this.uow = uow;
             this.mapper = mapper;
@@ -42,6 +44,7 @@ namespace CatalogService.BLL.Services.Implementations
 
             this.cache = cache;
             this.cacheInvalidation = cacheInvalidation;
+            this.entityCacheInvalidationService = entityCacheInvalidationService;
         }
 
         public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
@@ -228,6 +231,7 @@ namespace CatalogService.BLL.Services.Implementations
             await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
+            await entityCacheInvalidationService.InvalidateAllAsync();
 
             var savedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id, cancellationToken);
             return mapper.Map<BouquetDto>(savedBouquet);
@@ -371,6 +375,7 @@ namespace CatalogService.BLL.Services.Implementations
             await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
+            await entityCacheInvalidationService.InvalidateAllAsync();
 
             var updatedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id, cancellationToken);
             return mapper.Map<BouquetDto>(updatedBouquet);
@@ -386,21 +391,9 @@ namespace CatalogService.BLL.Services.Implementations
             await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
+            await entityCacheInvalidationService.InvalidateAllAsync();
 
-            Console.WriteLine($"[CATALOG] Bouquet {id} deleted from DB");
-            Console.WriteLine($"[CATALOG] Publishing BouquetDeletedEvent for ID: {id}");
-
-            try
-            {
-                await publishEndpoint.Publish(new BouquetDeletedEvent(id));
-                Console.WriteLine($"[CATALOG] Event successfully published for ID: {id}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[CATALOG] Error publishing event: {ex.Message}");
-                throw;
-            }
+            await publishEndpoint.Publish(new BouquetDeletedEvent(id));
         }
-
     }
 }

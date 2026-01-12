@@ -11,5 +11,6 @@ namespace OrderService.BLL.DTOs
         public string PublicKey { get; set; } = null!;
         public string PrivateKey { get; set; } = null!;
         public string ServerUrl { get; set; } = string.Empty;
+        public string SuccessUrl { get; set; } = string.Empty;
     }
 }

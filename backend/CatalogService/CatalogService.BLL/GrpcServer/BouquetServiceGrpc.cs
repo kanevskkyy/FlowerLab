@@ -48,7 +48,6 @@ namespace CatalogService.BLL.GrpcServer
                 {
                     Id = f.Id.ToString(),
                     Name = f.Name,
-                    Color = f.Color,
                     Quantity = f.Quantity
                 })}
             }));

@@ -1,49 +1,85 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using OrderService.BLL.DTOs.GiftsDTOs;
 using OrderService.BLL.Exceptions;
 using OrderService.BLL.Helpers;
 using OrderService.BLL.Services.Interfaces;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
+using shared.cache;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OrderService.BLL.Services
 {
     public class GiftService : IGiftService
     {
-        private IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork unitOfWork;
         private IMapper mapper;
-        private IImageService imageService;
+        private readonly IImageService imageService;
+        private readonly IEntityCacheService cacheService;
+        private readonly IEntityCacheInvalidationService<Gift> cacheInvalidationService;
 
-        public GiftService(IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
+        private const string ALL_GIFTS_KEY = "gifts:all";
+        private static readonly TimeSpan MEMORY_TTL_GIFT = TimeSpan.FromHours(1);
+        private static readonly TimeSpan REDIS_TTL_GIFT = TimeSpan.FromDays(7);
+
+        public GiftService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IImageService imageService,
+            IEntityCacheService cacheService,
+            IEntityCacheInvalidationService<Gift> cacheInvalidationService)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
             this.imageService = imageService;
+            this.cacheService = cacheService;
+            this.cacheInvalidationService = cacheInvalidationService;
         }
 
-        public async Task<IEnumerable<GiftReadDto>> GetAllAsync()
+        public async Task<IEnumerable<GiftReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            var gifts = await unitOfWork.Gifts.GetAllAsync();
-            return mapper.Map<IEnumerable<GiftReadDto>>(gifts);
+            var cached = await cacheService.GetOrSetAsync(
+                ALL_GIFTS_KEY,
+                async () =>
+                {
+                    var gifts = await unitOfWork.Gifts.GetAllAsync(cancellationToken);
+                    return mapper.Map<List<GiftReadDto>>(gifts.ToList());
+                },
+                MEMORY_TTL_GIFT,
+                REDIS_TTL_GIFT
+            );
+
+            return cached!;
         }
 
-        public async Task<GiftReadDto> GetByIdAsync(Guid id)
+        public async Task<GiftReadDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var gift = await unitOfWork.Gifts.GetByIdAsync(id);
-            if (gift == null)
-                throw new NotFoundException($"Gift with ID {id} was not found");
+            string cacheKey = $"gifts:{id}";
 
-            return mapper.Map<GiftReadDto>(gift);
+            var cached = await cacheService.GetOrSetAsync(
+                cacheKey,
+                async () =>
+                {
+                    var gift = await unitOfWork.Gifts.GetByIdAsync(id, cancellationToken);
+                    if (gift == null)
+                        throw new NotFoundException($"Gift with ID {id} was not found");
+
+                    return mapper.Map<GiftReadDto>(gift);
+                },
+                MEMORY_TTL_GIFT,
+                REDIS_TTL_GIFT
+            );
+
+            return cached!;
         }
 
-        public async Task<GiftReadDto> CreateAsync(GiftCreateDto dto)
+        public async Task<GiftReadDto> CreateAsync(GiftCreateDto dto, CancellationToken cancellationToken = default)
         {
-            var isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name);
+            bool isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name);
             if (isDuplicate)
                 throw new AlreadyExistsException($"Gift '{dto.Name}' already exists");
 
@@ -51,41 +87,45 @@ namespace OrderService.BLL.Services
 
             var entity = mapper.Map<Gift>(dto);
             entity.ImageUrl = imageUrl;
-            entity.CreatedAt = DateTime.UtcNow.ToUniversalTime();
+            entity.CreatedAt = DateTime.UtcNow;
 
             await unitOfWork.Gifts.AddAsync(entity);
             await unitOfWork.SaveChangesAsync();
 
+            await cacheInvalidationService.InvalidateAllAsync();
+
             return mapper.Map<GiftReadDto>(entity);
         }
 
-        public async Task<GiftReadDto> UpdateAsync(Guid id, GiftUpdateDto dto)
+        public async Task<GiftReadDto> UpdateAsync(Guid id, GiftUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            var gift = await unitOfWork.Gifts.GetByIdAsync(id);
+            var gift = await unitOfWork.Gifts.GetByIdAsync(id, cancellationToken);
             if (gift == null)
                 throw new NotFoundException($"Gift with ID {id} was not found");
 
-            var isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name, id);
+            bool isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name, id);
             if (isDuplicate)
                 throw new AlreadyExistsException($"Gift '{dto.Name}' already exists");
 
             if (dto.Image != null)
             {
                 await imageService.DeleteImageAsync(gift.ImageUrl);
-                string newImageUrl = await imageService.UploadAsync(dto.Image, "order-service/gifts");
-                gift.ImageUrl = newImageUrl;
+                gift.ImageUrl = await imageService.UploadAsync(dto.Image, "order-service/gifts");
             }
 
             mapper.Map(dto, gift);
             unitOfWork.Gifts.Update(gift);
             await unitOfWork.SaveChangesAsync();
 
+            await cacheInvalidationService.InvalidateByIdAsync(id);
+            await cacheInvalidationService.InvalidateAllAsync();
+
             return mapper.Map<GiftReadDto>(gift);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var gift = await unitOfWork.Gifts.GetByIdAsync(id);
+            var gift = await unitOfWork.Gifts.GetByIdAsync(id, cancellationToken);
             if (gift == null)
                 throw new NotFoundException($"Gift with ID {id} was not found");
 
@@ -93,7 +133,10 @@ namespace OrderService.BLL.Services
 
             unitOfWork.Gifts.Delete(gift);
             await unitOfWork.SaveChangesAsync();
-        }
 
+            await cacheInvalidationService.InvalidateByIdAsync(id);
+            await cacheInvalidationService.InvalidateAllAsync();
+        }
     }
+
 }

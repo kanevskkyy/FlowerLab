@@ -13,8 +13,7 @@ message OrderedBouquetsIdList {
 message FlowerInfo {
     string flowerId = 1;
     string flowerName = 2;
-    string flowerColor = 3;
-    int32 quantity = 4;
+    int32 quantity = 3;
 }
 
 message OrderedRequest {

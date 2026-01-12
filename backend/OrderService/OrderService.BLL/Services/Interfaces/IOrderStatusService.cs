@@ -9,10 +9,10 @@ namespace OrderService.BLL.Services.Interfaces
 {
     public interface IOrderStatusService
     {
-        Task<IEnumerable<OrderStatusReadDto>> GetAllAsync();
-        Task<OrderStatusReadDto> GetByIdAsync(Guid id);
-        Task<OrderStatusReadDto> CreateAsync(OrderStatusCreateDto dto);
-        Task<OrderStatusReadDto> UpdateAsync(Guid id, OrderStatusUpdateDto dto);
-        Task DeleteAsync(Guid id);
+        Task<IEnumerable<OrderStatusReadDto>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<OrderStatusReadDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<OrderStatusReadDto> CreateAsync(OrderStatusCreateDto dto, CancellationToken cancellationToken = default);
+        Task<OrderStatusReadDto> UpdateAsync(Guid id, OrderStatusUpdateDto dto, CancellationToken cancellationToken = default);
+        Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

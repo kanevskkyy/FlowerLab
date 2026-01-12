@@ -13,7 +13,6 @@ namespace OrderService.Domain.Entities
 
         public Guid FlowerId { get; set; }
         public string FlowerName { get; set; } = null!;
-        public string FlowerColor { get; set; } = null!;
         public int Quantity { get; set; }
     }
 }

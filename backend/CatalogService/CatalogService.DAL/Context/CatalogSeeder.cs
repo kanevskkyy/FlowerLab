@@ -55,18 +55,18 @@ namespace CatalogService.DAL.Context
             {
                 var flowers = new List<Flower>
                 {
-                    new Flower { Name = "Red Rose", Color = "Red", Description = "Classic red rose ❤️", Quantity = 100 },
-                    new Flower { Name = "White Rose", Color = "White", Description = "Pure white rose 🤍", Quantity = 80 },
-                    new Flower { Name = "Pink Rose", Color = "Pink", Description = "Soft pink rose 💗", Quantity = 75 },
-                    new Flower { Name = "Yellow Tulip", Color = "Yellow", Description = "Bright yellow tulip 🌼", Quantity = 60 },
-                    new Flower { Name = "Red Tulip", Color = "Red", Description = "Red tulip 🔥", Quantity = 50 },
-                    new Flower { Name = "Pink Peony", Color = "Pink", Description = "Luxurious peony 🌸", Quantity = 45 },
-                    new Flower { Name = "White Chrysanthemum", Color = "White", Description = "Elegant chrysanthemum ❄️", Quantity = 70 },
-                    new Flower { Name = "Blue Hydrangea", Color = "Blue", Description = "Full hydrangea 💙", Quantity = 40 },
-                    new Flower { Name = "Red Carnation", Color = "Red", Description = "Bright carnation ❤️", Quantity = 90 },
-                    new Flower { Name = "White Calla Lily", Color = "White", Description = "Elegant calla lily 🤍", Quantity = 30 },
-                    new Flower { Name = "Purple Orchid", Color = "Purple", Description = "Exotic orchid 💜", Quantity = 25 },
-                    new Flower { Name = "Black Rose", Color = "Black", Description = "Unique black rose 🖤", Quantity = 20 }
+                    new Flower { Name = "Red Rose", Quantity = 100 },
+                    new Flower { Name = "White Rose", Quantity = 80 },
+                    new Flower {Name = "Pink Rose", Quantity = 75},
+                    new Flower {Name = "Yellow Tulip", Quantity = 60},
+                    new Flower {Name = "Red Tulip", Quantity = 50},
+                    new Flower {Name = "Pink Peony", Quantity = 45},
+                    new Flower {Name = "White Chrysanthemum", Quantity = 70},
+                    new Flower {Name = "Blue Hydrangea", Quantity = 40},
+                    new Flower {Name = "Red Carnation", Quantity = 90},
+                    new Flower {Name = "White Calla Lily", Quantity = 30},
+                    new Flower {Name = "Purple Orchid", Quantity = 25},
+                    new Flower {Name = "Black Rose", Quantity = 20}
                 };
                 await context.Flowers.AddRangeAsync(flowers);
                 await context.SaveChangesAsync();
