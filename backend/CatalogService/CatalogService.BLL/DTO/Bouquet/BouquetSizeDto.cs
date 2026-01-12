@@ -10,8 +10,9 @@ namespace CatalogService.BLL.DTO
     {
         public Guid SizeId { get; set; }
         public string SizeName { get; set; } = null!;
-        public decimal Price { get; set; } 
+        public decimal Price { get; set; }
         public List<FlowerInBouquetDto> Flowers { get; set; } = new();
+        public List<BouquetImageDto> Images { get; set; } = new();
         public int MaxAssemblableCount { get; set; }
         public bool IsAvailable { get; set; }
     }

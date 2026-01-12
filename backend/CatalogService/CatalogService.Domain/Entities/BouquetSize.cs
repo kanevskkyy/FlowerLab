@@ -14,8 +14,9 @@ namespace CatalogService.Domain.Entities
         public Guid SizeId { get; set; }
         public Size Size { get; set; } = null!;
 
-        public decimal Price { get; set; } 
+        public decimal Price { get; set; }
 
         public ICollection<BouquetSizeFlower> BouquetSizeFlowers { get; set; } = new List<BouquetSizeFlower>();
+        public ICollection<BouquetImage> BouquetImages { get; set; } = new List<BouquetImage>();
     }
 }

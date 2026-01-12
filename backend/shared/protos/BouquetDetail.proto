@@ -15,13 +15,21 @@ message FlowerInBouquetModel {
     int32 quantity = 3;
 }
 
+message BouquetImageModel {
+    string id = 1;
+    string imageUrl = 2;
+    int32 position = 3;
+    bool isMain = 4; 
+}
+
 message BouquetSizeModel {
     string sizeId = 1;
     string sizeName = 2;
     double price = 3;
     repeated FlowerInBouquetModel flowers = 4; 
-    int32 maxAssemblableCount = 5; 
-    bool isAvailable = 6; 
+    repeated BouquetImageModel images = 5; 
+    int32 maxAssemblableCount = 6; 
+    bool isAvailable = 7; 
 }
 
 message EventModel {
@@ -34,12 +42,6 @@ message RecipientModel {
     string name = 2;
 }
 
-message BouquetImageModel {
-    string id = 1;
-    string imageUrl = 2;
-    int32 position = 3;
-}
-
 message BouquetResponse {
     string id = 1;
     string name = 2;
@@ -48,8 +50,7 @@ message BouquetResponse {
     repeated BouquetSizeModel sizes = 5; 
     repeated EventModel events = 6; 
     repeated RecipientModel recipients = 7; 
-    repeated BouquetImageModel images = 8; 
-    string createdAt = 9; 
+    string createdAt = 8; 
 }
 
 service BouquetGrpcService {

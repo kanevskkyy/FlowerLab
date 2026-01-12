@@ -44,12 +44,25 @@ namespace CatalogService.BLL.GrpcServer
                 Price = (double)s.Price,
                 MaxAssemblableCount = s.MaxAssemblableCount,
                 IsAvailable = s.IsAvailable,
-                Flowers = { s.Flowers.Select(f => new FlowerInBouquetModel
+                Flowers =
                 {
-                    Id = f.Id.ToString(),
-                    Name = f.Name,
-                    Quantity = f.Quantity
-                })}
+                    s.Flowers.Select(f => new FlowerInBouquetModel
+                    {
+                        Id = f.Id.ToString(),
+                        Name = f.Name,
+                        Quantity = f.Quantity
+                    })
+                },
+                Images =
+                {
+                    s.Images.Select(i => new BouquetImageModel
+                    {
+                        Id = i.Id.ToString(),
+                        ImageUrl = i.ImageUrl,
+                        Position = i.Position,
+                        IsMain = i.IsMain
+                    })
+                }
             }));
 
             response.Events.AddRange(dto.Events.Select(e => new EventModel
@@ -62,13 +75,6 @@ namespace CatalogService.BLL.GrpcServer
             {
                 Id = r.Id.ToString(),
                 Name = r.Name
-            }));
-
-            response.Images.AddRange(dto.Images.Select(i => new BouquetImageModel
-            {
-                Id = i.Id.ToString(),
-                ImageUrl = i.ImageUrl,
-                Position = i.Position
             }));
 
             return response;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Moq;
 using OrderService.BLL.DTOs.OrderStatusDTOs;
 using OrderService.BLL.Exceptions;
@@ -11,6 +6,12 @@ using OrderService.BLL.Services;
 using OrderService.BLL.Services.Interfaces;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
+using shared.cache;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace OrderService.Tests.Services
@@ -19,14 +20,25 @@ namespace OrderService.Tests.Services
     {
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IEntityCacheService> _cacheServiceMock;
+        private readonly Mock<IEntityCacheInvalidationService<OrderStatus>> _cacheInvalidationMock;
         private readonly IOrderStatusService _sut;
 
         public OrderStatusServiceTests()
         {
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
-            _sut = new OrderStatusService(_unitOfWorkMock.Object, _mapperMock.Object);
+            _cacheServiceMock = new Mock<IEntityCacheService>();
+            _cacheInvalidationMock = new Mock<IEntityCacheInvalidationService<OrderStatus>>();
+
+            _sut = new OrderStatusService(
+                _unitOfWorkMock.Object,
+                _mapperMock.Object,
+                _cacheServiceMock.Object,
+                _cacheInvalidationMock.Object
+            );
         }
+
 
         #region GetAllAsync Tests
 

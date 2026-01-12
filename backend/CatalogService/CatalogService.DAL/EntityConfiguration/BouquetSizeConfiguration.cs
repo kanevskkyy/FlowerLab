@@ -14,7 +14,6 @@ namespace CatalogService.DAL.EntityConfiguration
         public void Configure(EntityTypeBuilder<BouquetSize> builder)
         {
             builder.ToTable("BouquetSizes");
-
             builder.HasKey(bs => new { bs.BouquetId, bs.SizeId });
 
             builder.Property(b => b.Price)

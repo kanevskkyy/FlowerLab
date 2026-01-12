@@ -10,7 +10,6 @@ namespace CatalogService.DAL.Context
     {
         public static async Task SeedAsync(CatalogDbContext context)
         {
-            // ================= Sizes =================
             if (!await context.Sizes.AnyAsync())
             {
                 var sizes = new List<Size>
@@ -24,7 +23,6 @@ namespace CatalogService.DAL.Context
                 await context.SaveChangesAsync();
             }
 
-            // ================= Recipients =================
             if (!await context.Recipients.AnyAsync())
             {
                 var recipients = new List<Recipient>
@@ -50,7 +48,6 @@ namespace CatalogService.DAL.Context
                 await context.SaveChangesAsync();
             }
 
-            // ================= Flowers =================
             if (!await context.Flowers.AnyAsync())
             {
                 var flowers = new List<Flower>
@@ -72,7 +69,6 @@ namespace CatalogService.DAL.Context
                 await context.SaveChangesAsync();
             }
 
-            // ================= Events =================
             if (!await context.Events.AnyAsync())
             {
                 var events = new List<Event>
@@ -95,7 +91,6 @@ namespace CatalogService.DAL.Context
                 await context.SaveChangesAsync();
             }
 
-            // ================= Bouquets =================
             if (!await context.Bouquets.AnyAsync())
             {
                 var sSize = await context.Sizes.FirstAsync(s => s.Name == "S");
@@ -113,8 +108,8 @@ namespace CatalogService.DAL.Context
                 var birthday = await context.Events.FirstAsync(e => e.Name == "Birthday");
                 var anniversary = await context.Events.FirstAsync(e => e.Name == "Anniversary");
 
-                var bouquets = new List<Bouquet>
-                {
+                var bouquets = new List<Bouquet> 
+                { 
                     new Bouquet
                     {
                         Name = "Romantic Bouquet",
@@ -122,9 +117,35 @@ namespace CatalogService.DAL.Context
                         MainPhotoUrl = "https://example.com/romantic.jpg",
                         BouquetSizes = new List<BouquetSize>
                         {
-                            new BouquetSize { Size = sSize, Price = 29.99m },
-                            new BouquetSize { Size = mSize, Price = 39.99m },
-                            new BouquetSize { Size = lSize, Price = 49.99m }
+                            new BouquetSize
+                            {
+                                Size = sSize,
+                                Price = 29.99m,
+                                BouquetImages = new List<BouquetImage>
+                                {
+                                    new BouquetImage { ImageUrl = "https://example.com/romantic_s1.jpg", Position = 1, IsMain = true },
+                                    new BouquetImage { ImageUrl = "https://example.com/romantic_s2.jpg", Position = 2, IsMain = false }
+                                }
+                            },
+                            new BouquetSize
+                            {
+                                Size = mSize,
+                                Price = 39.99m,
+                                BouquetImages = new List<BouquetImage>
+                                {
+                                    new BouquetImage { ImageUrl = "https://example.com/romantic_m1.jpg", Position = 1, IsMain = true },
+                                    new BouquetImage { ImageUrl = "https://example.com/romantic_m2.jpg", Position = 2, IsMain = false }
+                                }
+                            },
+                            new BouquetSize
+                            {
+                                Size = lSize,
+                                Price = 49.99m,
+                                BouquetImages = new List<BouquetImage>
+                                {
+                                    new BouquetImage { ImageUrl = "https://example.com/romantic_l1.jpg", Position = 1, IsMain = true }
+                                }
+                            }
                         },
                         BouquetFlowers = new List<BouquetFlower>
                         {
@@ -140,13 +161,9 @@ namespace CatalogService.DAL.Context
                         {
                             new BouquetEvent { Event = birthday },
                             new BouquetEvent { Event = anniversary }
-                        },
-                        BouquetImages = new List<BouquetImage>
-                        {
-                            new BouquetImage { ImageUrl = "https://example.com/romantic1.jpg", Position = 1 },
-                            new BouquetImage { ImageUrl = "https://example.com/romantic2.jpg", Position = 2 }
                         }
                     },
+
                     new Bouquet
                     {
                         Name = "Spring Delight",
@@ -154,8 +171,25 @@ namespace CatalogService.DAL.Context
                         MainPhotoUrl = "https://example.com/spring.jpg",
                         BouquetSizes = new List<BouquetSize>
                         {
-                            new BouquetSize { Size = sSize, Price = 19.99m },
-                            new BouquetSize { Size = mSize, Price = 29.99m }
+                            new BouquetSize
+                            {
+                                Size = sSize,
+                                Price = 19.99m,
+                                BouquetImages = new List<BouquetImage>
+                                {
+                                    new BouquetImage { ImageUrl = "https://example.com/spring_s1.jpg", Position = 1, IsMain = true }
+                                }
+                            },
+                            new BouquetSize
+                            {
+                                Size = mSize,
+                                Price = 29.99m,
+                                BouquetImages = new List<BouquetImage>
+                                {
+                                    new BouquetImage { ImageUrl = "https://example.com/spring_m1.jpg", Position = 1, IsMain = true },
+                                    new BouquetImage { ImageUrl = "https://example.com/spring_m2.jpg", Position = 2, IsMain = false }
+                                }
+                            }
                         },
                         BouquetFlowers = new List<BouquetFlower>
                         {
@@ -169,13 +203,9 @@ namespace CatalogService.DAL.Context
                         BouquetEvents = new List<BouquetEvent>
                         {
                             new BouquetEvent { Event = birthday }
-                        },
-                        BouquetImages = new List<BouquetImage>
-                        {
-                            new BouquetImage { ImageUrl = "https://example.com/spring1.jpg", Position = 1 },
-                            new BouquetImage { ImageUrl = "https://example.com/spring2.jpg", Position = 2 }
                         }
                     },
+
                     new Bouquet
                     {
                         Name = "Elegant Mix",
@@ -183,8 +213,25 @@ namespace CatalogService.DAL.Context
                         MainPhotoUrl = "https://example.com/elegant.jpg",
                         BouquetSizes = new List<BouquetSize>
                         {
-                            new BouquetSize { Size = mSize, Price = 34.99m },
-                            new BouquetSize { Size = lSize, Price = 44.99m }
+                            new BouquetSize
+                            {
+                                Size = mSize,
+                                Price = 34.99m,
+                                BouquetImages = new List<BouquetImage>
+                                {
+                                    new BouquetImage { ImageUrl = "https://example.com/elegant_m1.jpg", Position = 1, IsMain = true },
+                                    new BouquetImage { ImageUrl = "https://example.com/elegant_m2.jpg", Position = 2, IsMain = false }
+                                }
+                            },
+                            new BouquetSize
+                            {
+                                Size = lSize,
+                                Price = 44.99m,
+                                BouquetImages = new List<BouquetImage>
+                                {
+                                    new BouquetImage { ImageUrl = "https://example.com/elegant_l1.jpg", Position = 1, IsMain = true }
+                                }
+                            }
                         },
                         BouquetFlowers = new List<BouquetFlower>
                         {
@@ -199,17 +246,13 @@ namespace CatalogService.DAL.Context
                         BouquetEvents = new List<BouquetEvent>
                         {
                             new BouquetEvent { Event = birthday }
-                        },
-                        BouquetImages = new List<BouquetImage>
-                        {
-                            new BouquetImage { ImageUrl = "https://example.com/elegant1.jpg", Position = 1 },
-                            new BouquetImage { ImageUrl = "https://example.com/elegant2.jpg", Position = 2 }
                         }
                     }
                 };
 
                 await context.Bouquets.AddRangeAsync(bouquets);
                 await context.SaveChangesAsync();
+
             }
 
             if (!await context.BouquetSizeFlowers.AnyAsync())
@@ -228,7 +271,6 @@ namespace CatalogService.DAL.Context
 
                 var bouquetSizeFlowers = new List<BouquetSizeFlower>
                 {
-                    // Romantic Bouquet
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = sSize.Id, FlowerId = redRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = sSize.Id, FlowerId = pinkPeony.Id, Quantity = 2 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = mSize.Id, FlowerId = redRose.Id, Quantity = 5 },
@@ -236,13 +278,11 @@ namespace CatalogService.DAL.Context
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = lSize.Id, FlowerId = redRose.Id, Quantity = 7 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = lSize.Id, FlowerId = pinkPeony.Id, Quantity = 5 },
 
-                    // Spring Delight
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = sSize.Id, FlowerId = whiteRose.Id, Quantity = 2 },
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = sSize.Id, FlowerId = pinkPeony.Id, Quantity = 1 },
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = mSize.Id, FlowerId = whiteRose.Id, Quantity = 4 },
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = mSize.Id, FlowerId = pinkPeony.Id, Quantity = 2 },
 
-                    // Elegant Mix
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = mSize.Id, FlowerId = redRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = mSize.Id, FlowerId = whiteRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = mSize.Id, FlowerId = pinkPeony.Id, Quantity = 2 },

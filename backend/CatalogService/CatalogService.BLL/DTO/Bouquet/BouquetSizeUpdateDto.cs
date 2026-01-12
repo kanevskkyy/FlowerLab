@@ -5,15 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CatalogService.BLL.DTO
+namespace CatalogService.BLL.DTO.Bouquet
 {
-    public class BouquetSizeCreateDto
+    public class BouquetSizeUpdateDto
     {
         public Guid SizeId { get; set; }
         public decimal Price { get; set; }
         public List<Guid> FlowerIds { get; set; } = new();
         public List<int> FlowerQuantities { get; set; } = new();
         public IFormFile? MainImage { get; set; }
-        public List<IFormFile> AdditionalImages { get; set; } = new();
+        public List<IFormFile> NewImages { get; set; } = new();
     }
+
 }

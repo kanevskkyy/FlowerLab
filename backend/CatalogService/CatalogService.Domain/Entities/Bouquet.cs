@@ -13,7 +13,6 @@ namespace CatalogService.Domain.Entities
         public string MainPhotoUrl { get; set; } = null!;
 
         public ICollection<BouquetFlower> BouquetFlowers { get; set; } = new List<BouquetFlower>();
-        public ICollection<BouquetImage> BouquetImages { get; set; } = new List<BouquetImage>();
         public ICollection<BouquetSize> BouquetSizes { get; set; } = new List<BouquetSize>();
         public ICollection<BouquetEvent> BouquetEvents { get; set; } = new List<BouquetEvent>();
         public ICollection<BouquetRecipient> BouquetRecipients { get; set; } = new List<BouquetRecipient>();
