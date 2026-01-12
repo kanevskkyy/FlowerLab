@@ -16,8 +16,8 @@ const CheckOut = () => {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [sendReceipt, setSendReceipt] = useState(false);
+  const [orderNumber] = useState(() => `3663092/${Math.floor(Math.random() * 900000) + 100000}`);
 
-  const orderNumber = `3663092/${Math.floor(Math.random() * 900000) + 100000}`;
   const total = orderData.total || 1000;
 
   const handleCardNumberChange = (e) => {
@@ -58,7 +58,6 @@ const CheckOut = () => {
       }
     }
 
-    // Тут буде логіка оплати
     console.log("Payment completed:", {
       orderNumber,
       paymentMethod,

@@ -3,174 +3,181 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #ffffff; /* як в about */
-  font-family: "Inter", sans-serif;
+  background: #ffffff;
+  font-family: var(--font-body, sans-serif);
+  overflow-x: hidden;
 }
 
 /* ===== MAIN ===== */
 .home-main {
   flex: 1;
-  padding: 40px 0 60px;
-}
-
-/* ===== HERO / SLIDER ===== */
-.hero-section {
-  max-width: 1200px;
-  margin: 0 auto 40px;
-}
-
-.hero-banner {
-  position: relative;
-  width: 90%;
-  max-width: 1200px;
-  height: 400px;
-  margin: 0 auto;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #FBECF7;
-}
-
-.hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.shopping-bag-icon {
-  display: flex;
-  align-items: center;
-}
-
-.shopping-bag-icon img {
-  width: 18px;      /* піджени під макет */
-  height: 18px;
-  object-fit: contain;
-}
-
-/* arrows */
-.hero-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 42px;
-  color: #ffffff;
-  padding: 0 16px;
-  user-select: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.hero-arrow:hover {
-  opacity: 0.8;
-  transform: translateY(-50%) scale(1.05);
-}
-
-.hero-arrow-left {
-  left: 20px;
-}
-
-.hero-arrow-right {
-  right: 20px;
-}
-
-/* ===== ORDER ===== */
-.order-wrapper {
-  display: flex;
-  justify-content: center;
-  margin: 40px 0 60px;
-}
-
-.order-button {
-  padding: 12px 48px;
-  border-radius: 999px;
-  border: none;
-  background: #FBECF7;
-  color: #000;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  transition: background 0.3s ease, transform 0.25s ease;
-}
-
-.order-button:hover {
-  background: #f5d6ea;
-  transform: translateY(-2px);
+  padding: 20px 0;
 }
 
 /* ===== TITLES ===== */
 .section-title {
-  font-family: "Jomolhari", serif;
+  font-family: var(--font-heading, serif);
   text-align: center;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 400;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   margin-bottom: 40px;
   color: #000;
+  text-transform: uppercase;
+  padding: 0 10px;
+  line-height: 1.2;
 }
 
-/* ===== POPULAR ===== */
+/* ================= INTRO SECTION ================= */
+.intro-section {
+  width: 100%;
+  max-width: 76.875rem;
+  margin: 0 auto 90px;
+  text-align: center;
+  padding: 0 10px;
+}
+
+.intro-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 20px;
+  color: #000;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.intro-desc {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  line-height: 1.6;
+  color: #555;
+  font-weight: 300;
+  margin: 0 auto;
+}
+
+/* ================= POPULAR SECTION ================= */
 .popular-section {
   width: 90%;
   max-width: 1200px;
-  margin: 0 auto 60px;
-  background: #FBECF7;
-  border-radius: 16px;
-  padding: 40px;
+  margin: 0 auto 80px;
 }
 
 .popular-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  gap: 20px;
 }
 
 .popular-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  /* Квадратні картки */
+  aspect-ratio: 1 / 1;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  background: #f0f0f0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .popular-card:hover {
-  transform: translateY(-6px);
-}
-.popular-card:hover .popular-img {
-  transform: scale(1.03);
-  transition: transform 0.3s ease;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .popular-image {
-  height: 220px;
-  background: #f1dbe9;
-  border-radius: 16px;
-  margin-bottom: 10px;
+  width: 100%;
+  height: 100%;
 }
+
+.popular-image::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(0deg, rgba(62, 31, 43, 0.65) 0%, rgba(163, 92, 129, 0.00) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
 .popular-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.6s ease;
 }
 
+.popular-card:hover .popular-img {
+  transform: scale(1.08);
+}
+
+/* Overlay (Градієнт знизу) */
 .popular-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 60px 20px 20px;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
-  font-weight: 500;
+  align-items: flex-end;
+  /* Плавний темний градієнт для читабельності тексту */
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  z-index: 2;
+  pointer-events: none;
 }
 
-/* ===== ABOUT ===== */
+.popular-name {
+  color: #fff;
+  font-family: var(--font-body, sans-serif);
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: lowercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.shopping-bag-icon {
+  pointer-events: auto;
+  cursor: pointer;
+  display: inline-block;
+  z-index: 10;
+}
+
+.shopping-bag-icon img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  transition: transform 0.2s ease, opacity 0.2s;
+}
+
+.popular-card:hover .shopping-bag-icon img {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+/* ================= ABOUT SECTION ================= */
 .about-section {
   width: 90%;
   max-width: 1000px;
-  margin: 0 auto 60px;
+  margin: 0 auto 80px;
 }
 
 .about-content {
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
+  grid-template-columns: 1.2fr 1fr;
   gap: 40px;
+  align-items: center;
 }
 
 .about-text {
@@ -179,14 +186,14 @@
   color: #333;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 40px;
 }
 
 .about-image {
-  background: #FBECF7;
-  border-radius: 16px;
+  background: #fbecf7;
+  border-radius: 20px;
   overflow: hidden;
-   height: 320px
+  height: 30rem;
 }
 
 .about-img {
@@ -196,102 +203,244 @@
   object-fit: cover;
 }
 
-/* ===== REVIEWS ===== */
+/* ================= REVIEWS SECTION (SLIDER style) ================= */
 .home-reviews-section {
   width: 90%;
   max-width: 1200px;
-  margin: 0 auto 80px;
+  margin: 0 auto 100px;
+  background-color: #fcf3f8;
+  border-radius: 24px;
+  padding: 60px 20px;
+  box-sizing: border-box;
 }
 
 .home-reviews-wrapper {
-  display: grid;
-  grid-template-columns: 40px 1fr 40px;
-  gap: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
 }
 
 .home-reviews-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  gap: 20px;
+  flex: 1;
+}
+
+@keyframes smoothFadeIn {
+  0% { 
+    opacity: 0; 
+    /* Починаємо трохи зменшеними і зсунутими вниз на 10px — це додає "ваги" */
+    transform: scale(0.96) translateY(10px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translateY(0);    
+  }
+}
+
+.home-review-card.fade-in {
+
+  animation: smoothFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  
+  will-change: transform, opacity;
+  backface-visibility: hidden; 
 }
 
 .home-review-card {
-  background: #FBECF7;
-  border-radius: 16px;
-  padding: 20px;
-  font-size: 13px;
+  background: #ffffff; /* Білі картки */
+  border-radius: 20px;
+  padding: 24px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
   transition: transform 0.3s ease;
 }
 
-.home-review-card:hover {
-  transform: translateY(-4px);
+.home-review-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
+
+.home-review-avatar {
+  width: 48px;
+  height: 48px;
+  background-color: #e2e2e2;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.home-review-name {
+  font-family: var(--font-body, sans-serif);
+  font-weight: 700;
+  font-size: 15px;
+  color: #000;
+}
+
+.home-review-stars {
+  color: #ebc3de; /* Рожеві зірки */
+  margin-bottom: 12px;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+.home-review-text {
+  font-family: var(--font-body, sans-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
+  font-style: normal;
+}
+
+/* Стрілки слайдера */
 .reviews-arrow {
-  position: static;      /* прибираємо absolute */
-  transform: none;       /* прибираємо translateY */
-  color: #C86AAC;        /* рожевий як дизайн */
-  font-size: 42px;       /* такий самий як hero */
-  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-heading, serif);
+  font-size: 48px;
+  color: #000;
+  cursor: pointer;
+  padding: 0 10px;
+  transition: opacity 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 2;
+  user-select: none;
 }
 
 .reviews-arrow:hover {
-  opacity: 0.8;
-  transform: scale(1.05);
+  opacity: 0.6;
+  transform: scale(1.1);
 }
 
-/* ===== MOBILE ===== */
-@media (max-width: 1199px) {
-  .hero-banner {
-    height: 350px;
+/* ================= RESPONSIVE (MOBILE) ================= */
+
+/* Tablet (max 1024px) */
+@media (max-width: 1024px) {
+  .popular-cards {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .popular-cards,
   .home-reviews-cards {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Ховаємо 3-ю картку на планшеті */
+  .home-review-card:nth-child(3) {
+    display: none;
+  }
 }
 
+/* Mobile (max 768px) */
 @media (max-width: 768px) {
-  .hero-banner {
+  /* Заголовки */
+  .section-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+
+  .intro-title {
+    font-size: 18px;
+  }
+
+  .intro-desc {
+    font-size: 15px;
+  }
+
+  /* === POPULAR SECTION (2 колонки) === */
+  .popular-cards {
+    grid-template-columns: repeat(2, 1fr); /* 2 колонки на мобільному! */
+    gap: 12px; /* Менший відступ */
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Адаптація шрифтів у картках */
+  .popular-name {
+    font-size: 13px;
+  }
+
+  .popular-bottom {
+    padding: 30px 10px 10px;
+  }
+
+  .shopping-bag-icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* === ABOUT SECTION (Вертикально) === */
+  .about-content {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 20px;
+  }
+
+  .about-image {
+    width: 100%;
     height: 250px;
   }
 
-  .popular-cards,
+  /* === REVIEWS SECTION (1 колонка + стрілки) === */
+  .home-reviews-section {
+    padding: 40px 10px;
+    margin-bottom: 60px;
+  }
+
+  .home-reviews-wrapper {
+    gap: 0;
+  }
+
   .home-reviews-cards {
     grid-template-columns: 1fr;
   }
 
-  .about-content {
-    grid-template-columns: 1fr;
+  /* Показуємо тільки першу картку з трьох */
+  .home-review-card:nth-child(2),
+  .home-review-card:nth-child(3) {
+    display: none;
   }
 
-  .section-title {
-    font-size: 24px;
+  .reviews-arrow {
+    display: none;
+  }
+
+  .home-review-card {
+    min-height: 220px;
+  }
+
+  /* Загальні відступи секцій */
+  .popular-section,
+  .about-section,
+  .home-reviews-section {
+    margin-bottom: 50px;
   }
 }
 
+/* Small Mobile (max 480px) */
 @media (max-width: 480px) {
-  .hero-banner {
-    height: 200px;
+  .popular-cards {
+    gap: 8px; /* Ще компактніше на малих екранах */
   }
 
-  .order-button {
-    width: 100%;
-    max-width: 260px;
+  .popular-bottom {
+    padding: 20px 8px 8px;
+  }
+
+  .popular-name {
+    font-size: 12px;
+  }
+
+  .about-text {
+    font-size: 14px;
   }
 }
-/* ==================================================
-   FORCE rounded POPULAR bouquet images
-================================================== */
-/* ==================================================
-   FORCE rounded POPULAR bouquet images
-================================================== */
-.home-page .popular-image {
-  border-radius: 15px !important;
-  overflow: hidden !important;
-}
-
-.home-page .popular-image img {
-  border-radius: 15px !important;
-}
-

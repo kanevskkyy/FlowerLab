@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
 import AuthProvider from "./context/AuthProvider";
 import { CartProvider } from "./context/CartProvider";
-
+import SettingsProvider from "./context/SettingsProvider";
+import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
 
@@ -23,48 +23,125 @@ import CheckOut from "./pages/CheckOut/CheckOut";
 
 // admin (створиш/підключиш)
 import AdminPanel from "./pages/AdminPanel/AdminPanel";
+import AdminBouquetForm from "./pages/AdminBouquetForm/AdminBouquetForm";
+import AdminCatalogEdit from "./pages/AdminCatalogEdit/AdminCatalogEdit";
+import AdminOrderDetails from "./pages/AdminOrderDetails/AdminOrderDetails";
+import NotFound from "./pages/NotFound/NotFound";
+import Gifts from "./pages/Gifts/Gifts";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <Routes>
-            {/* public */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/catalog" element={<Catalog />} />
-            <Route path="/product/:id" element={<ProductCard />} />
-            <Route path="/about" element={<AboutUs />} />
-
-            <Route path="/order" element={<OrderPlacementPickUp />} />
-            <Route path="/order-registered" element={<OrderPlacementRegistered />} />
-            <Route path="/checkout" element={<CheckOut />} />
-
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-
-            {/* user protected */}
-            <Route
-              path="/cabinet"
-              element={
-                <ProtectedRoute>
-                  <Cabinet />
-                </ProtectedRoute>
-              }
+          <SettingsProvider>
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: "#333",
+                  color: "#fff",
+                },
+                success: {
+                  iconTheme: {
+                    primary: "#F4BCE5", // Ваш фірмовий рожевий
+                    secondary: "#fff",
+                  },
+                },
+              }}
             />
+            <Routes>
+              {/* public */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/catalog" element={<Catalog />} />
+              <Route path="/gifts" element={<Gifts />} />
+              <Route path="/product/:id" element={<ProductCard />} />
+              <Route path="/about" element={<AboutUs />} />
 
-            {/* admin protected */}
-            <Route
-              path="/admin"
-              element={
-                <AdminProtectedRoute>
-                  <AdminPanel />
-                </AdminProtectedRoute>
-              }
-            />
+              <Route path="/order" element={<OrderPlacementPickUp />} />
+              <Route
+                path="/order-registered"
+                element={<OrderPlacementRegistered />}
+              />
+              <Route path="/checkout" element={<CheckOut />} />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+
+              {/* user protected */}
+              <Route
+                path="/cabinet"
+                element={
+                  <ProtectedRoute>
+                    <Cabinet />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* admin protected */}
+              <Route
+                path="/admin"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminPanel />
+                  </AdminProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/bouquets/new"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminBouquetForm />
+                  </AdminProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/bouquets/edit/:id"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminBouquetForm />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/gifts/new"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminBouquetForm />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/gifts/edit/:id"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminBouquetForm />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/catalog/edit"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminCatalogEdit />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/orders/:id"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminOrderDetails />
+                  </AdminProtectedRoute>
+                }
+              />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </SettingsProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

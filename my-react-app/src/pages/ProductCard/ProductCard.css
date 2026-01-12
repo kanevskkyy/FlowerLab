@@ -135,7 +135,7 @@
 .section-title {
   font-size: 20px;
   font-weight: 600;
-  margin: 0 0 60px 0 !important;
+  margin: 0 0 60px 0;
   color: #333;
 }
 .size-section h3 {
@@ -183,7 +183,6 @@
 
 .buy-now-btn,
 .add-cart-btn {
-  
   padding: 0px 40px;
   border: 2px solid transparent;
   font-size: 16px;
@@ -284,11 +283,22 @@
   transform: scale(1.05);
 }
 
+/* Нові стилі для тексту рекомендацій */
+.rec-details {
+  text-align: center;
+}
+
 .rec-title {
   font-size: 16px;
   font-weight: 500;
-  text-align: center;
   color: #333;
+  margin: 0 0 5px 0;
+}
+
+.rec-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: #C86AAC;
   margin: 0;
 }
 

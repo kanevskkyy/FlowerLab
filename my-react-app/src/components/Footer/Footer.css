@@ -2,250 +2,89 @@
 .footer {
   width: 100%;
   background: #FBECF7 !important;
-  margin-top: 80px;
-  padding: 20px 60px;
+  margin-top: 60px; /* Трохи менше відступ від контенту */
+  padding: 40px 60px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start; /* Вирівнювання по верху */
   gap: 40px;
   border-top: 1px solid #f0e5ed;
 }
-.footer-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+
 .footer-col {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   flex: 1;
 }
-.footer-item .footer-location{
+
+.footer-item {
   display: flex;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center; 
   gap: 12px;
-  min-height: 28px;
 }
 
-.footer-link {
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  position: relative;
-}
-
-.footer-link:hover {
-  transform: translateY(-2px);
-}
-
-.footer-link .footer-icon {
-  transition: transform 0.3s ease;
-}
-
-.footer-link:hover .footer-icon {
-  transform: scale(1.15);
-}
-
-.footer-link .footer-text p {
-  transition: color 0.3s ease;
-  position: relative;
-}
-
-.footer-link:hover .footer-text p {
-  color: #C86AAC;
-}
-
-/* Підкреслення з'являється тільки при hover */
-.footer-link .footer-text p::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: #C86AAC;
-  transition: width 0.3s ease;
-}
-
-.footer-link:hover .footer-text p::after {
-  width: 100%;
-}
-
-/* Стилі для одиночних посилань (телефон, Instagram) */
-.footer-link-single {
-  text-decoration: none;
-  cursor: pointer;
-  display: inline-block;
-  background: transparent;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.footer-link-single p {
-  margin: 0;
-  font-size: 13px;
-  color: #333;
-  line-height: 1.4;
-  transition: color 0.3s ease;
-  position: relative;
-  background: transparent;
-}
-
-.footer-link-single:hover p {
-  color: #C86AAC;
-}
-
-.footer-link-single p::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: #C86AAC;
-  transition: width 0.3s ease;
-}
-
-.footer-link-single:hover p::after {
-  width: 100%;
-}
-
-/* Анімація іконок телефону та Instagram */
-.footer-phone:has(.footer-link-single:hover) .phone-icon,
-.footer-instagram:has(.footer-link-single:hover) .instagram-icon {
-  transform: scale(1.15);
-}
-
-/* Стилі для окремих текстових посилань (адреси) */
-.footer-link-text {
-  text-decoration: none;
-  cursor: pointer;
-  display: inline-block;
-  background: transparent;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.footer-link-text p {
-  margin: 0;
-  font-size: 13px;
-  color: #333;
-  line-height: 1.4;
-  transition: color 0.3s ease;
-  position: relative;
-  background: transparent ;
-}
-
-.footer-link-text:hover p {
-  color: #C86AAC;
-}
-
-/* Анімація іконки при наведенні на адресу */
-.footer-location:has(.footer-link-text:hover) .location-icon {
-  transform: scale(1.15);
-}
-
-/* Збільшення іконки локації для однакового вигляду */
-.location-icon {
-  width: 32px !important;
-  height: 32px !important;
-  background: clear !important;
-}
-
-.footer-link-text p::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: #C86AAC;
-  transition: width 0.3s ease;
-}
-
-.footer-link-text:hover p::after {
-  width: 100%;
-}
-
-.footer-icon {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
+/* Іконки */
+.footer-icon, .location-icon {
+  width: 24px;
+  height: 24px;
   object-fit: contain;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  pointer-events: none;
+  flex-shrink: 0;
+  margin-top: 2px; /* Вирівнюємо відносно першого рядка тексту */
 }
 
+/* Текст */
 .footer-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .footer-text p {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: #333;
-  line-height: 1.4;
+  line-height: 1.5;
+  transition: color 0.3s;
+}
+
+/* Hover effects */
+.footer-link-text:hover p,
+.footer-link-single:hover p {
+  color: #C86AAC;
 }
 
 /* ================= RESPONSIVE ================= */
+
+/* Tablet */
 @media (max-width: 992px) {
   .footer {
-    flex-direction: column;
-    align-items: flex-start;
     padding: 30px 40px;
-    gap: 20px;
-  }
-  
-  .footer-item {
-    width: 100%;
+    gap: 30px;
+    flex-wrap: wrap; /* Дозволяємо перенос */
   }
 }
 
-@media (max-width: 576px) {
+/* Mobile */
+@media (max-width: 768px) {
   .footer {
-    padding: 25px 20px;
-    gap: 18px;
+    flex-direction: column;
+    padding: 30px 20px;
+    gap: 30px;
   }
   
-  .footer-item {
+  .footer-col {
     width: 100%;
-    gap: 10px;
+    gap: 14px;
   }
-  
-  .footer-icon {
-    width: 26px;
-    height: 26px;
-    min-width: 26px;
-  }
-  
-  .location-icon {
-    width: 30px !important;
-    height: 30px !important;
-  }
-  
+
   .footer-text p {
-    font-size: 12px;
-  }
-}
-@media (max-width: 400px) {
-  .footer {
-    padding: 20px 15px;
-    gap: 15px;
+    font-size: 13px;
   }
   
-  .footer-icon {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-  }
-  
-  .location-icon {
-    width: 28px !important;
-    height: 28px !important;
-  }
-  
-  .footer-text p {
-    font-size: 11px;
+  /* Додатково: останній колонці можна дати відступ знизу 0 */
+  .footer-col:last-child {
+    margin-bottom: 0;
   }
 }

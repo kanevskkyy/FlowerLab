@@ -1,0 +1,236 @@
+/* RESET & PAGE BACKGROUND */
+.abf-page {
+  min-height: 100vh;
+  background-color: #f5f5f5; /* Світло-сірий фон, як у адмінок */
+  font-family: "Inter", sans-serif;
+  padding-bottom: 60px;
+}
+
+.abf-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* HEADER */
+.abf-header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.abf-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.abf-back-btn {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 10px 0;
+}
+
+.abf-back-btn:hover {
+  color: #000;
+}
+
+.abf-save-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.abf-save-btn:hover {
+  background: #333;
+}
+
+/* LAYOUT: 2 COLUMNS (FLEX) */
+.abf-content {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start; /* Щоб колонки не розтягувались */
+}
+
+/* LEFT COLUMN (PHOTO) */
+.abf-left-col {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+/* RIGHT COLUMN (INFO) */
+.abf-right-col {
+  flex: 1; /* Займає всю решту ширини */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* CARD STYLE */
+.abf-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Легка тінь */
+}
+
+.abf-card-title {
+  margin: 0 0 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+/* PHOTO SECTION */
+.abf-photo-preview {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #fafafa;
+  border: 2px dashed #e0e0e0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.abf-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.abf-photo-placeholder {
+  color: #999;
+  font-size: 13px;
+}
+
+.abf-upload-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: #FBECF7;
+  color: #000;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.abf-upload-btn:hover {
+  background: #f3dce9;
+}
+
+/* FIELDS */
+.abf-field {
+  margin-bottom: 18px;
+}
+
+.abf-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.abf-field input,
+.abf-field textarea {
+  width: 100%;
+  box-sizing: border-box; /* ВАЖЛИВО! Щоб padding не ламав ширину */
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.abf-field input:focus,
+.abf-field textarea:focus {
+  border-color: #d46aac;
+  box-shadow: 0 0 0 3px rgba(212, 106, 172, 0.1);
+}
+
+.abf-field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* CATEGORIES */
+.abf-cat-group {
+  margin-bottom: 24px;
+}
+
+.abf-cat-group h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.abf-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Tag / Pill style */
+.abf-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #f5f5f5;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.abf-tag input {
+  display: none; /* Ховаємо стандартний чекбокс */
+}
+
+/* Active State */
+.abf-tag.active {
+  background: #FBECF7;
+  border-color: #e29acb;
+  color: #000;
+  font-weight: 500;
+}
+
+/* RESPONSIVE */
+@media (max-width: 800px) {
+  .abf-content {
+    flex-direction: column; /* Одна колонка на планшетах */
+  }
+
+  .abf-left-col, .abf-right-col {
+    width: 100%;
+  }
+
+  .abf-photo-preview {
+    max-width: 300px; /* Обмежуємо розмір фото на мобільному */
+    margin: 0 auto 16px;
+  }
+}
