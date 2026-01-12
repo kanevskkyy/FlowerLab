@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSettings } from "../../context/useSettings";
 import "./PopupMenu.css";
 
-const PopupMenu = ({ isOpen, onClose }) => {
-  const [catalogOpen, setCatalogOpen] = useState(false);
+export default function PopupMenu({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const { lang, toggleLang, currency, toggleCurrency } = useSettings();
 
-  const goTo = (path) => {
+  // Стан для відкриття/закриття підменю каталогу
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+
+  const handleNav = (path) => {
     navigate(path);
     onClose();
   };
@@ -14,35 +18,77 @@ const PopupMenu = ({ isOpen, onClose }) => {
   return (
     <div
       className={`popup-menu-overlay ${isOpen ? "open" : ""}`}
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div className="popup-menu" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>☰</button>
+        {/* Close Button */}
+        <button className="close-btn" onClick={onClose}>
+          <span style={{ fontSize: "24px", fontWeight: "300" }}>✕</span>
+        </button>
 
+        {/* Menu List */}
         <ul className="menu-list">
-
-          <li className="menu-item" onClick={() => goTo("/")}>HOME PAGE</li>
-
-          <li className="menu-item" onClick={() => goTo("/about")}>ABOUT US</li>
-
-          <li
-            className="menu-item menu-row"
-            onClick={() => setCatalogOpen(!catalogOpen)}
-          >
-            <span>CATALOG</span>
-            <span className="arrow">{catalogOpen ? "∨" : ">"}</span>
+          <li className="menu-item" onClick={() => handleNav("/")}>
+            Home
           </li>
 
-          {catalogOpen && (
-            <ul className="submenu">
-              <li onClick={() => goTo("/catalog")}>Bouquets</li>
-              <li onClick={() => goTo("/catalog")}>Gifts</li>
-            </ul>
-          )}
+          {/* CATALOG ACCORDION */}
+          <li className="menu-item-group">
+            <div
+              className="menu-item-header"
+              onClick={() => setIsCatalogOpen(!isCatalogOpen)}>
+              <span className="menu-item">Catalog</span>
+              <span className={`menu-arrow ${isCatalogOpen ? "open" : ""}`}>
+                ›
+              </span>
+            </div>
+
+            {/* Submenu with animation class */}
+            <div className={`submenu-wrapper ${isCatalogOpen ? "open" : ""}`}>
+              <ul className="submenu-list">
+                <li
+                  className="submenu-item"
+                  onClick={() => handleNav("/catalog")}>
+                  Bouquets
+                </li>
+                {/* Поки що ведемо на каталог, пізніше можна додати ?category=gifts */}
+                <li
+                  className="submenu-item"
+                  onClick={() => handleNav("/gifts")}>
+                  Gifts
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <li className="menu-item" onClick={() => handleNav("/about")}>
+            About Us
+          </li>
         </ul>
+
+        {/* Settings */}
+        <div className="popup-settings">
+          <div className="setting-row">
+            <span className="setting-label">Language:</span>
+            <button className="popup-text-btn" onClick={toggleLang}>
+              <span className={lang === "UA" ? "active-text" : ""}>UA</span>/
+              <span className={lang === "ENG" ? "active-text" : ""}>ENG</span>
+            </button>
+          </div>
+
+          <div className="setting-row">
+            <span className="setting-label">Currency:</span>
+            <button className="popup-text-btn" onClick={toggleCurrency}>
+              <span className={currency === "UAH" ? "active-text" : ""}>
+                UAH
+              </span>
+              /
+              <span className={currency === "USD" ? "active-text" : ""}>
+                USD
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default PopupMenu;
+}

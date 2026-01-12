@@ -1,0 +1,194 @@
+/* PAGE RESET */
+.ace-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: "Inter", sans-serif;
+  padding-bottom: 60px;
+}
+
+.ace-container {
+  max-width: 800px; /* Трохи вужче, ніж форма букета, бо тут менше колонок */
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* HEADER */
+.ace-header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.ace-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.ace-back-btn {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 10px 0;
+}
+
+.ace-back-btn:hover { color: #000; }
+
+.ace-save-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ace-save-btn:hover { background: #333; }
+
+/* CONTENT LAYOUT */
+.ace-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* CARD */
+.ace-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.ace-card-title {
+  margin: 0 0 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+/* TAGS LIST */
+.ace-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ace-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FBECF7; /* Фірмовий рожевий */
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #000;
+  font-weight: 500;
+}
+
+.ace-tag-remove {
+  background: rgba(0,0,0,0.05);
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  color: #000;
+  transition: background 0.2s;
+}
+
+.ace-tag-remove:hover {
+  background: rgba(0,0,0,0.15);
+  color: #d32f2f;
+}
+
+.ace-empty {
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+  padding: 10px 0;
+}
+
+/* ADD ROW */
+.ace-add-row {
+  display: flex;
+  gap: 12px;
+}
+
+.ace-add-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ace-add-row input:focus {
+  border-color: #d46aac;
+  box-shadow: 0 0 0 3px rgba(212, 106, 172, 0.1);
+}
+
+.ace-add-btn {
+  background: #f3b8df; /* Акцентний колір */
+  color: #000;
+  border: none;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.ace-add-btn:hover {
+  filter: brightness(0.95);
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+  .ace-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 15px 0;
+    gap: 10px;
+  }
+
+  .ace-title {
+    order: -1;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .ace-back-btn, .ace-save-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .ace-add-row {
+    flex-direction: column;
+  }
+
+  .ace-add-btn {
+    padding: 12px;
+    width: 100%;
+  }
+}

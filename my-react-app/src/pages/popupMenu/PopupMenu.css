@@ -29,13 +29,15 @@
   left: -320px;
   top: 0;
   transition: left 0.35s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .popup-menu-overlay.open .popup-menu {
   left: 0;
 }
 
-/* CLOSE */
+/* CLOSE BUTTON */
 .popup-menu-overlay .close-btn {
   position: absolute;
   left: 20px;
@@ -58,59 +60,146 @@
 .menu-list {
   list-style: none;
   padding: 0;
-  margin-top: 40px;
+  margin-top: 60px;
   display: flex;
   flex-direction: column;
   gap: 26px;
 }
 
+/* Base style for main items */
 .menu-item {
   font-size: 20px;
   font-weight: 500;
   cursor: pointer;
   transition: 0.25s ease;
+  color: #463641;
+  font-family: 'Manrope', sans-serif;
 }
 
+/* Hover effect */
 .menu-item:hover {
   color: #c05a94;
   transform: translateX(4px);
 }
 
-/* FIX ALIGNMENT for "CATALOG >" */
-.menu-row {
+/* ================= CATALOG ACCORDION STYLES ================= */
+
+/* Обгортка для пункту CATALOG */
+.menu-item-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Рядок з текстом CATALOG і стрілочкою */
+.menu-item-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* При наведенні на хедер, текст теж анімується */
+.menu-item-header:hover .menu-item  {
+  color: #c05a94;
+  transform: translateX(4px);
+}
+
+/* Стрілочка */
+.menu-arrow {
+  font-size: 24px;
+  color: #999;
+  line-height: 1;
+  transition: transform 0.3s ease;
+  font-weight: 300;
+  margin-left: 10px;
+}
+
+/* Поворот стрілочки при відкритті */
+.menu-arrow.open {
+  transform: rotate(90deg);
+}
+
+/* Обгортка для підменю (анімація висоти) */
+.submenu-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+  opacity: 0;
+}
+
+.submenu-wrapper.open {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 15px; 
+}
+
+/* Список підменю */
+.submenu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0 20px; /* Відступ зліва (ієрархія) */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Елементи підменю (Bouquets, Gifts) */
+.submenu-item {
+  font-size: 18px;
+  font-family: 'Manrope', sans-serif;
+  color: #463641;
+  cursor: pointer;
+  transition: 0.2s ease;
+  font-weight: 400;
+}
+
+.submenu-item:hover {
+  color: #c05a94;
+  text-decoration: underline;
+}
+
+/* =========================================
+   НАЛАШТУВАННЯ (МОВА / ВАЛЮТА)
+   ========================================= */
+
+.popup-settings {
+  display: none; 
+}
+
+@media (max-width: 768px) {
+  .popup-settings {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto; 
+    margin-bottom: 20px;
+    border-top: 1px solid rgba(70, 54, 65, 0.1);
+    padding-top: 20px;
+    gap: 15px;
+  }
+}
+
+.setting-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* ARROW */
-.arrow {
-  font-size: 18px;
+.setting-label {
+  font-size: 16px;
+  font-family: 'Manrope', sans-serif;
+  color: #463641;
 }
 
-/* SUBMENU */
-.submenu {
-  list-style: none;
-  padding-left: 20px;
-  margin-top: -10px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  animation: fadeIn 0.3s ease;
-}
-
-.submenu li {
-  font-size: 18px;
+.popup-text-btn {
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: 0.25s ease;
+  font-size: 16px;
+  font-family: 'Manrope', sans-serif;
+  color: #463641;
 }
 
-.submenu li:hover {
-  color: #c05a94;
-  transform: translateX(4px);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-3px); }
-  to { opacity: 1; transform: translateY(0); }
+.active-text {
+  font-weight: 700;
+  color: #000;
 }

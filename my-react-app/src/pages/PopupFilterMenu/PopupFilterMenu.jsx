@@ -17,20 +17,20 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
     );
   };
 
+  // ✅ ВИПРАВЛЕНО: Скидання фільтрів
   const resetFilters = () => {
-    setPrice([1000, 10000]);
-    setSize("S");
-    setQuantity("51");
-    setEvents([]);
+    setPrice(0); // Скидаємо ціну в 0 (щоб повзунок був на початку)
+    setSize(""); // Прибираємо вибір розміру
+    setQuantity(""); // Прибираємо вибір кількості
+    setEvents([]); // Очищаємо масиви
     setForWho([]);
     setFlowerType([]);
   };
 
   const applyFilters = () => {
     onApply({
-      priceMin: price,
-      priceMax: 50000,
-      price,
+      // Якщо ціна 0, передаємо її, щоб Catalog.jsx проігнорував фільтр (0 - falsy)
+      price: price === 0 ? null : price,
       size,
       quantity,
       events,
@@ -43,7 +43,9 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
   return (
     <div className={`filter-overlay ${isOpen ? "open" : ""}`} onClick={onClose}>
       <div className="filter-menu" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>✕</button>
+        <button className="close-btn" onClick={onClose}>
+          ✕
+        </button>
 
         <h3 className="filter-title">Filter by:</h3>
 
@@ -51,28 +53,24 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
         <p className="filter-label">Price</p>
 
         <div className="price-inputs">
-        <input
+          <input
             type="number"
             value={price}
-            onChange={(e) => setPrice(+e.target.value)}
-        />
-        <span>—</span>
-        <input
-            type="number"
-            value={50000}
-            disabled
-            className="max-price"
-        />
+            onChange={(e) => setPrice(Number(e.target.value))}
+          />
+          <span>—</span>
+          <input type="number" value={50000} disabled className="max-price" />
         </div>
 
         <div className="range-wrapper">
-        <input
+          <input
             type="range"
             min="0"
             max="50000"
+            step="100"
             value={price}
-            onChange={(e) => setPrice(+e.target.value)}
-        />
+            onChange={(e) => setPrice(Number(e.target.value))}
+          />
         </div>
 
         {/* SIZE + QUANTITY */}
@@ -154,8 +152,12 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
           </label>
         ))}
 
-        <button className="reset-btn" onClick={resetFilters}>RESET FILTERS</button>
-        <button className="apply-btn" onClick={applyFilters}>APPLY</button>
+        <button className="reset-btn" onClick={resetFilters}>
+          RESET FILTERS
+        </button>
+        <button className="apply-btn" onClick={applyFilters}>
+          APPLY
+        </button>
       </div>
     </div>
   );

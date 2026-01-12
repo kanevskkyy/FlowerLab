@@ -11,25 +11,27 @@ export const CartProvider = ({ children }) => {
   };
 
   const increaseQty = (id) => {
-    setCartItems(prev =>
-      prev.map(item =>
+    setCartItems((prev) =>
+      prev.map((item) =>
         item.id === id ? { ...item, qty: (item.qty || 1) + 1 } : item
       )
     );
   };
 
   const decreaseQty = (id) => {
-    setCartItems(prev =>
+    setCartItems((prev) =>
       prev
-        .map(item =>
-          item.id === id ? { ...item, qty: Math.max(1, (item.qty || 1) - 1) } : item
+        .map((item) =>
+          item.id === id
+            ? { ...item, qty: Math.max(1, (item.qty || 1) - 1) }
+            : item
         )
-        .filter(item => item.qty > 0)
+        .filter((item) => item.qty > 0)
     );
   };
 
   const removeItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
@@ -41,9 +43,8 @@ export const CartProvider = ({ children }) => {
         addToCart,
         increaseQty,
         decreaseQty,
-        removeItem
-      }}
-    >
+        removeItem,
+      }}>
       {children}
     </CartContext.Provider>
   );

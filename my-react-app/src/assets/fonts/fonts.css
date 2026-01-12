@@ -1,0 +1,44 @@
+
+@font-face {
+  font-family: 'Jomolhari';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./jomolhari-v11-latin-regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* Manrope - Regular (400) */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./manrope-v14-latin-400.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* Manrope - Medium (500) */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  src: url('./manrope-v14-latin-500.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* Manrope - SemiBold (600) */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  src: url('./manrope-v14-latin-600.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* Jaldi - Regular */
+@font-face {
+  font-family: 'Jaldi';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./jaldi-v9-latin-regular.woff2') format('woff2');
+  font-display: swap;
+}

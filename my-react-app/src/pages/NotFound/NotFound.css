@@ -1,0 +1,72 @@
+.not-found-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: "Inter", sans-serif;
+}
+
+.not-found-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.not-found-code {
+  font-family: "Jomolhari", serif;
+  font-size: 120px;
+  font-weight: 400;
+  color: #FBECF7; /* Дуже світлий рожевий, як фон хедера */
+  margin: 0;
+  line-height: 1;
+  text-shadow: 2px 2px 0px #C86AAC; /* Контур або тінь кольору бренду */
+}
+
+.not-found-title {
+  font-family: "Jomolhari", serif;
+  font-size: 32px;
+  color: #000;
+  margin: 20px 0;
+  font-weight: 400;
+}
+
+.not-found-text {
+  max-width: 450px;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.not-found-btn {
+  padding: 14px 40px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.not-found-btn:hover {
+  background: #C86AAC; /* Рожевий при наведенні */
+  transform: translateY(-2px);
+}
+
+/* Мобільна адаптація */
+@media (max-width: 600px) {
+  .not-found-code {
+    font-size: 80px;
+  }
+  
+  .not-found-title {
+    font-size: 24px;
+  }
+}

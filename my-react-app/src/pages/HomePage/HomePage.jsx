@@ -1,132 +1,186 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../../context/CartContext"; // Виправив імпорт на правильний
+import toast from "react-hot-toast"; // Додав для сповіщень
 import "./HomePage.css";
 
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import PopupMenu from "../popupMenu/PopupMenu";
+import HeroSection from "../../components/HeroSection/HeroSection";
 
-// ===== HERO IMAGES =====
-import hero1 from "../../assets/images/bouquet1.jpg";
-import hero2 from "../../assets/images/bouquet2L.jpg";
-import hero3 from "../../assets/images/bouquet3L.jpg";
-import ShoppingBagIcon from "../../assets/icons/shopping-bag.svg";
-
-
-// ===== POPULAR IMAGES (як у Catalog) =====
 import bouquet1L from "../../assets/images/bouquet1L.jpg";
 import bouquet2 from "../../assets/images/bouquet2L.jpg";
 import bouquet3 from "../../assets/images/bouquet3L.jpg";
+import bouquet4 from "../../assets/images/about-image.png";
+
+import ShoppingBagIcon from "../../assets/images/ShoppingBagIcon.svg";
 
 export default function HomePage() {
   const navigate = useNavigate();
-
   const [menuOpen, setMenuOpen] = useState(false);
-  const [slide, setSlide] = useState(0);
+  const { addToCart } = useCart(); // Отримуємо функцію кошика
 
-  // HERO SLIDER
-  const heroImages = [hero1, hero2, hero3];
-
-  const prevSlide = () => {
-    setSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-  };
-
-  const nextSlide = () => {
-    setSlide((prev) => (prev + 1) % heroImages.length);
-  };
-
-  // POPULAR (IDs беруться з твого Catalog: 1,2,3)
+  // Додав ціни (price), щоб вони коректно передавалися в кошик
   const popularItems = [
-    { id: 1, title: "bouquet 1", img: bouquet1L },
-    { id: 2, title: "bouquet 2", img: bouquet2 },
-    { id: 3, title: "bouquet 3", img: bouquet3 },
+    { id: 1, title: "bouquet 1", img: bouquet1L, price: "1200 ₴" },
+    { id: 2, title: "bouquet 2", img: bouquet2, price: "950 ₴" },
+    { id: 3, title: "bouquet 3", img: bouquet3, price: "1500 ₴" },
+    { id: 4, title: "bouquet 4", img: bouquet1L, price: "1100 ₴" },
+    { id: 5, title: "bouquet 5", img: bouquet2, price: "1300 ₴" },
+    { id: 6, title: "bouquet 6", img: bouquet3, price: "1400 ₴" },
   ];
+
+  const reviewsData = [
+    {
+      id: 1,
+      name: "Maria S.",
+      text: "I really like the bouquet and recommend this store. Everything was perfect!",
+      stars: 5,
+    },
+    {
+      id: 2,
+      name: "Alex D.",
+      text: "Fresh flowers and fast delivery. Will order again for sure!",
+      stars: 5,
+    },
+    {
+      id: 3,
+      name: "Elena K.",
+      text: "Beautiful packaging and very polite courier. Thank you!",
+      stars: 5,
+    },
+    {
+      id: 4,
+      name: "Ivan P.",
+      text: "The roses stood for 2 weeks! Amazing quality.",
+      stars: 5,
+    },
+    {
+      id: 5,
+      name: "Oksana M.",
+      text: "Best flower shop in Chernivtsi. Highly recommended!",
+      stars: 5,
+    },
+  ];
+
+  const [currentReviewIdx, setCurrentReviewIdx] = useState(0);
+
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const minSwipeDistance = 50;
+
+  const nextReview = () => {
+    setCurrentReviewIdx((prev) => (prev + 1) % reviewsData.length);
+  };
+
+  const prevReview = () => {
+    setCurrentReviewIdx((prev) =>
+      prev === 0 ? reviewsData.length - 1 : prev - 1
+    );
+  };
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      nextReview();
+    }
+    if (isRightSwipe) {
+      prevReview();
+    }
+  };
+
+  const getVisibleReviews = () => {
+    const visible = [];
+    for (let i = 0; i < 3; i++) {
+      const index = (currentReviewIdx + i) % reviewsData.length;
+      visible.push(reviewsData[index]);
+    }
+    return visible;
+  };
 
   return (
     <div className="home-page">
-      {/* HEADER */}
       <Header onMenuOpen={() => setMenuOpen(true)} />
-
-      {/* POPUP MENU */}
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      {/* MAIN */}
       <main className="home-main">
-        {/* ===== HERO SLIDER ===== */}
-        <section className="hero-section">
-          <div className="hero-banner">
-            <img
-              src={heroImages[slide]}
-              alt={`Hero slide ${slide + 1}`}
-              className="hero-image"
-              draggable="false"
-            />
+        <div className="hero-section">
+          <HeroSection />
+        </div>
 
-            <button
-              className="hero-arrow hero-arrow-left"
-              onClick={prevSlide}
-              aria-label="Previous slide"
-              type="button"
-            >
-              ‹
-            </button>
-
-            <button
-              className="hero-arrow hero-arrow-right"
-              onClick={nextSlide}
-              aria-label="Next slide"
-              type="button"
-            >
-              ›
-            </button>
+        <section className="intro-section">
+          <div className="intro-content">
+            <h2 className="intro-title">
+              We are FlowerLab Vlada, a floral studio.
+            </h2>
+            <p className="intro-desc">
+              Our team creates premium bouquets and signature floral
+              arrangements focused on quality, style, and emotion. With daily
+              deliveries of fresh flowers, a wide selection, and attentive
+              service, we&apos;ve become a studio people trust in Chernivtsi.
+            </p>
           </div>
         </section>
 
-        {/* ORDER */}
-        <div className="order-wrapper">
-          <button className="order-button">ORDER</button>
-        </div>
-
-        {/* POPULAR */}
         <section className="popular-section">
           <h2 className="section-title">POPULAR BOUQUETS / SALES</h2>
-
           <div className="popular-cards">
             {popularItems.map((item) => (
               <div
                 key={item.id}
                 className="popular-card"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate(`/product/${item.id}`)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") navigate(`/product/${item.id}`);
-                }}
-              >
+                onClick={() => navigate(`/product/${item.id}`)}>
                 <div className="popular-image">
                   <img
                     src={item.img}
                     alt={item.title}
                     className="popular-img"
-                    draggable="false"
                   />
                 </div>
 
                 <div className="popular-bottom">
                   <span className="popular-name">{item.title}</span>
-                 <span className="shopping-bag-icon">
-  <img src={ShoppingBagIcon} alt="Shopping bag" />
-</span>
+
+                  {/* 👇 ЗМІНИ ТУТ: Залишили span, додали onClick з stopPropagation */}
+                  <span
+                    className="shopping-bag-icon"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Зупиняє перехід на сторінку товару
+                      addToCart({
+                        id: item.id,
+                        title: item.title,
+                        img: item.img,
+                        price: item.price,
+                        qty: 1,
+                      });
+                      toast.success(`${item.title} added to cart!`);
+                    }}>
+                    <img src={ShoppingBagIcon} alt="Cart" />
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ABOUT */}
         <section className="about-section">
           <h2 className="section-title">ABOUT US</h2>
-
           <div className="about-content">
             <div className="about-text">
               <p>
@@ -137,8 +191,8 @@ export default function HomePage() {
               </p>
               <p>
                 Our team carefully selects fresh flowers every day to ensure the
-                highest quality and beauty in every arrangement. Whether it&apos;s
-                a romantic gesture, a celebration, or just a small token of
+                highest quality and beauty in every arrangement. Whether it’s a
+                romantic gesture, a celebration, or just a small token of
                 appreciation, we create bouquets that speak from the heart.
               </p>
               <p>
@@ -147,67 +201,47 @@ export default function HomePage() {
                 tailored to fit your style and occasion.
               </p>
             </div>
-
-            {/* ✅ ABOUT BANNER IMAGE */}
             <div className="about-image">
-              <img
-                src={bouquet3}
-                alt="About banner"
-                className="about-img"
-                draggable="false"
-              />
+              <img src={bouquet4} alt="About banner" className="about-img" />
             </div>
           </div>
         </section>
 
-        {/* REVIEWS */}
-        <section className="home-reviews-section">
+        <section
+          className="home-reviews-section"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}>
           <h2 className="section-title">REVIEWS</h2>
-
           <div className="home-reviews-wrapper">
-           <button
-  className="hero-arrow reviews-arrow"
-  aria-label="Next review"
-  type="button"
->
-  ‹
-</button>
+            <button className="reviews-arrow" onClick={prevReview}>
+              ‹
+            </button>
 
             <div className="home-reviews-cards">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="home-review-card">
+              {getVisibleReviews().map((review, index) => (
+                <div
+                  key={`${review.id}-${index}`}
+                  className="home-review-card fade-in">
                   <div className="home-review-top">
                     <div className="home-review-avatar" />
-                    <span className="home-review-name">[Name Surname]</span>
+                    <span className="home-review-name">{review.name}</span>
                   </div>
-
                   <div className="home-review-stars">
-                    {"★★★★★".split("").map((_, j) => (
-                      <span key={j}>★</span>
-                    ))}
+                    {"★".repeat(review.stars)}
                   </div>
-
-                  <p className="home-review-text">
-                    i really like the bouquet and recommend this store
-                  </p>
+                  <p className="home-review-text">"{review.text}"</p>
                 </div>
               ))}
             </div>
-<button
-  className="hero-arrow reviews-arrow"
-  aria-label="Previous review"
-  type="button"
->
-  ›
-</button>
 
-
-
+            <button className="reviews-arrow" onClick={nextReview}>
+              ›
+            </button>
           </div>
         </section>
       </main>
 
-      {/* FOOTER */}
       <Footer />
     </div>
   );

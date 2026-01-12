@@ -1,0 +1,193 @@
+/* ================= GLOBAL LAYOUT ================= */
+.gifts-page {
+  font-family: var(--font-body);
+  background: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= TITLE ================= */
+.gifts-page .catalog-title {
+  font-family: var(--font-heading, "Jomolhari", serif);
+  font-size: 36px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.2;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 40px;
+  color: #000;
+}
+
+/* ================= MAIN WRAPPER ================= */
+.gifts-page .catalog {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 20px 0;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+/* ================= GRID SYSTEM ================= */
+.gifts-page .catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px; /* Такий же відступ як у каталозі */
+}
+
+/* ================= PRODUCT CARD ================= */
+.gifts-page .catalog-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #fff;
+}
+
+.gifts-page .catalog-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* IMAGE WRAPPER */
+.gifts-page .item-img {
+  width: 100%;
+  /* 👇 ТУТ ЗМІНА: 3/4 робить фото вищим (портретним), як ви просили */
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f4f4f4;
+  cursor: pointer;
+  position: relative;
+}
+
+.gifts-page .item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.gifts-page .catalog-item:hover .item-img img {
+  transform: scale(1.05);
+}
+
+/* BOTTOM INFO */
+.gifts-page .item-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gifts-page .item-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.gifts-page .item-text p:first-child {
+  font-size: 18px;
+  font-weight: 500;
+  color: #000;
+  margin: 0;
+}
+
+.gifts-page .item-text p:last-child {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+}
+
+/* ORDER BUTTON */
+.gifts-page .order-btn {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 50px;
+  border: none;
+  background: #fbecf7;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.gifts-page .order-btn:hover {
+  background: #f4bde5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(244, 189, 229, 0.4);
+}
+
+.gifts-page .order-btn:active {
+  transform: translateY(0);
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* TABLET */
+@media (max-width: 1024px) {
+  .gifts-page .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .gifts-page .catalog-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+
+  .gifts-page .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .gifts-page .catalog-item {
+    padding: 8px;
+    border-radius: 12px;
+    gap: 10px;
+  }
+
+  .gifts-page .item-img {
+    border-radius: 10px;
+  }
+
+  .gifts-page .item-text p:first-child,
+  .gifts-page .item-text p:last-child {
+    font-size: 15px;
+  }
+
+  .gifts-page .item-text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .gifts-page .order-btn {
+    padding: 10px 0;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 480px) {
+  .gifts-page .catalog-grid {
+    gap: 10px;
+  }
+  .gifts-page .item-img {
+    aspect-ratio: 3 / 4;
+  }
+}

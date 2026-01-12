@@ -1,87 +1,13 @@
 /* ROOT LAYOUT */
 .admin-root {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 260px 1fr;
+  display: flex; /* Flex Column: Header зверху, решта знизу */
+  flex-direction: column;
   background: #ffffff;
   font-family: "Inter", sans-serif;
 }
 
-/* SIDEBAR */
-.admin-side {
-  background: #FBECF7;
-  border-right: 1px solid #efe3ea;
-  padding: 18px 0;
-}
-
-.admin-brand {
-  padding: 10px 22px 18px;
-}
-
-.admin-brand-top {
-  font-size: 14px;
-  color: #000;
-  letter-spacing: 0.2px;
-}
-
-.admin-brand-sub {
-  font-size: 14px;
-  color: #000;
-  margin-top: 2px;
-}
-
-.admin-brand-line {
-  height: 1px;
-  width: 70px;
-  background: rgba(0, 0, 0, 0.4);
-  margin-top: 8px;
-}
-
-.admin-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 18px;
-  padding: 0 10px;
-}
-
-.admin-nav-item {
-  width: 100%;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 14px;
-  border-radius: 14px;
-  font-size: 16px;
-  color: #000;
-  text-align: left;
-  transition: background 0.2s ease;
-}
-
-.admin-nav-item:hover {
-  background: rgba(200, 106, 172, 0.10);
-}
-
-.admin-nav-item.active {
-  background: rgba(200, 106, 172, 0.18);
-}
-
-.admin-nav-ico {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-/* RIGHT */
-.admin-main {
-  min-width: 0;
-  background: #ffffff;
-}
-
-/* TOPBAR */
+/* TOPBAR (HEADER) */
 .admin-topbar {
   height: 86px;
   background: #FBECF7;
@@ -89,6 +15,75 @@
   display: flex;
   align-items: center;
   padding: 0 26px;
+  flex-shrink: 0; /* Хедер не стискається */
+  z-index: 10;
+  position: relative;
+}
+
+.admin-submenu {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+/* Кнопки підменю */
+.admin-sub-item {
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  font-weight: 400;
+  font-family: inherit;
+  transition: color 0.2s ease;
+  padding: 0;
+}
+
+.admin-sub-item:hover {
+  color: #000;
+}
+
+.admin-sub-item.active {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Стрілочка в меню */
+.nav-arrow {
+  margin-left: 10px;
+  transition: transform 0.3s ease;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.nav-arrow.open {
+  transform: rotate(90deg);
+}
+
+/* BRAND IN HEADER */
+.admin-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: 40px;
+}
+
+.admin-brand-top {
+  font-size: 14px;
+  color: #000;
+  letter-spacing: 0.2px;
+  font-weight: 700;
+}
+
+.admin-brand-sub {
+  font-size: 14px;
+  color: #000;
+  margin-top: 0px;
 }
 
 .admin-topbar-center {
@@ -96,6 +91,9 @@
   font-size: 22px;
   font-weight: 500;
   color: #000;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .admin-topbar-right {
@@ -142,11 +140,69 @@
   opacity: 0.9;
 }
 
-/* CONTENT */
+/* MAIN BODY CONTAINER (SIDEBAR + CONTENT) */
+.admin-body {
+  display: flex;
+  flex: 1; /* Займає всю доступну висоту */
+  overflow: hidden; /* Щоб уникнути подвійних скролів */
+}
+
+/* SIDEBAR */
+.admin-side {
+  width: 260px;
+  background: #FBECF7;
+  border-right: 1px solid #efe3ea;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+.admin-nav-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  font-size: 16px;
+  color: #000;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.admin-nav-item:hover {
+  background: rgba(200, 106, 172, 0.10);
+}
+
+.admin-nav-item.active {
+  background: rgba(200, 106, 172, 0.18);
+}
+
+.admin-nav-ico {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* CONTENT AREA */
 .admin-content {
+  flex: 1;
   padding: 40px 26px 60px;
   display: flex;
   justify-content: center;
+  overflow-y: auto; /* Скрол тільки всередині контенту */
 }
 
 .admin-section {
@@ -162,13 +218,14 @@
   color: #000;
 }
 
-/* TOOLBAR (Bouquets) */
+/* TOOLBAR */
 .admin-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 18px;
   margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
 .admin-search {
@@ -180,6 +237,7 @@
   padding: 10px 14px;
   border: 1px solid rgba(0, 0, 0, 0.25);
   min-width: 300px;
+  flex: 1;
 }
 
 .admin-search-ico {
@@ -207,6 +265,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
 }
 
 .admin-plus {
@@ -218,10 +277,9 @@
 .admin-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 34px 34px;
+  gap: 34px;
 }
 
-/* CARD + hover zoom */
 .admin-card-img {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -290,44 +348,25 @@
   object-fit: contain;
 }
 
-/* PLACEHOLDER */
-.admin-placeholder {
-  background: #fbecf7;
-  border: 1px dashed #e6cfe0;
-  border-radius: 18px;
-  padding: 18px;
-  font-size: 14px;
-  color: #333;
-}
-
-/* =========================
-   ORDERS TAB (Admin)
-========================= */
-.admin-orders-title {
-  margin-bottom: 0;
-}
-
+/* ORDERS */
+.admin-orders-title { margin-bottom: 0; }
 .admin-orders-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin: 18px 0 18px;
 }
-
 .admin-orders-sort {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
 }
-
 .admin-orders-sort-label {
   font-size: 12px;
   color: #000;
   opacity: 0.85;
-  letter-spacing: 0.2px;
 }
-
 .admin-orders-sort-select {
   border: 1px solid rgba(0, 0, 0, 0.25);
   background: transparent;
@@ -336,32 +375,28 @@
   font-size: 12px;
   outline: none;
 }
-
 .admin-orders-list {
   display: flex;
   flex-direction: column;
   gap: 22px;
 }
-
-/* order pill */
 .admin-order-card {
   background: #f6f0f4;
   border-radius: 24px;
   padding: 18px 20px;
+  cursor: pointer;
   display: grid;
-  grid-template-columns: 1fr 120px 170px;
+  /* Додана колонка для статусу */
+  grid-template-columns: 1fr 80px 150px 120px;
   align-items: center;
   gap: 10px;
 }
-
-/* left block */
 .admin-order-left {
   display: flex;
   align-items: center;
   gap: 16px;
   min-width: 0;
 }
-
 .admin-order-avatar {
   width: 56px;
   height: 56px;
@@ -370,44 +405,33 @@
   background: #fbecf7;
   flex: 0 0 auto;
 }
-
 .admin-order-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
-
-.admin-order-mid {
-  min-width: 0;
-}
-
+.admin-order-mid { min-width: 0; }
 .admin-order-title {
   font-size: 16px;
   font-weight: 500;
   color: #000;
   margin-bottom: 6px;
 }
-
 .admin-order-sub {
   display: flex;
   gap: 18px;
   align-items: baseline;
   flex-wrap: wrap;
 }
-
 .admin-order-name {
   font-size: 13px;
   color: #000;
   opacity: 0.9;
 }
-
 .admin-order-date {
   font-size: 11px;
   color: rgba(0,0,0,0.55);
 }
-
-/* qty */
 .admin-order-qty {
   justify-self: start;
   font-size: 13px;
@@ -415,44 +439,50 @@
   opacity: 0.85;
 }
 
-/* right total */
+/* Статус замовлення */
+.admin-order-status {
+  display: flex;
+  justify-content: center;
+}
+.status-select {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  background-color: #fff;
+  transition: all 0.2s;
+  text-align: center;
+}
+.status-select.status-new { background-color: #e3f2fd; color: #1565c0; }
+.status-select.status-processing { background-color: #fff3e0; color: #ef6c00; }
+.status-select.status-shipped { background-color: #e8f5e9; color: #2e7d32; }
+.status-select.status-delivered { background-color: #f1f8e9; color: #33691e; border-color: #c5e1a5; }
+.status-select.status-cancelled { background-color: #ffebee; color: #c62828; }
+
 .admin-order-right {
   justify-self: end;
   text-align: right;
 }
-
 .admin-order-total-label {
   font-size: 14px;
   color: #000;
   margin-bottom: 4px;
 }
-
 .admin-order-total-value {
   font-size: 13px;
   color: #000;
 }
 
-/* =========================
-   CATALOG TAB (як на скріні)
-========================= */
-.admin-catalog {
-  /* та сама ширина, що й інші вкладки */
-}
-
-.admin-catalog-head {
-  position: relative;
-  margin-bottom: 6px;
-}
-
-/* трохи піджимаємо відступ як на макеті */
-.admin-catalog-title {
-  margin-bottom: 0;
-}
-
+/* CATALOG */
+.admin-catalog-head { position: relative; margin-bottom: 6px; }
+.admin-catalog-title { margin-bottom: 0; }
 .admin-catalog-edit {
   position: absolute;
   right: 0;
-  top: 56px; /* щоб було під заголовком як на скріні */
+  top: 22px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -462,28 +492,14 @@
   padding: 6px 8px;
   color: #000;
   font-size: 14px;
-  opacity: 0.95;
 }
-
-.admin-catalog-edit img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
+.admin-catalog-edit img { width: 18px; height: 18px; }
 .admin-catalog-groups {
   margin-top: 26px;
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
-
-/* група */
-.admin-catalog-group {
-  width: 100%;
-}
-
-/* “плашка” як у тебе на скріні */
 .admin-catalog-pill {
   width: 100%;
   background: #f6e2ef;
@@ -492,21 +508,17 @@
   font-size: 16px;
   color: #000;
 }
-
-/* список з рисочками */
 .admin-catalog-list {
   margin: 14px 0 0;
-  padding: 0 0 0 34px; /* відступ як на скріні */
+  padding: 0 0 0 34px;
   list-style: none;
 }
-
 .admin-catalog-list li {
   position: relative;
   margin: 10px 0;
   font-size: 14px;
   color: #000;
 }
-
 .admin-catalog-list li::before {
   content: "–";
   position: absolute;
@@ -515,75 +527,13 @@
   opacity: 0.95;
 }
 
-/* responsive */
-@media (max-width: 1100px) {
-  .admin-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .admin-order-card {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    text-align: left;
-  }
-
-  .admin-order-right {
-    justify-self: start;
-    text-align: left;
-  }
-
-  .admin-orders-sort {
-    align-items: flex-start;
-  }
-
-  .admin-catalog-edit {
-    position: static;
-    margin: 10px auto 0;
-    display: flex;
-    justify-content: center;
-  }
-
-  .admin-catalog-head {
-    text-align: center;
-  }
-}
-
-@media (max-width: 760px) {
-  .admin-root {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-side {
-    border-right: none;
-    border-bottom: 1px solid #efe3ea;
-  }
-
-  .admin-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .admin-search {
-    min-width: 0;
-    width: 100%;
-  }
-}
-/* =========================
-   REVIEWS TAB (Pending)
-========================= */
-
+/* REVIEWS */
 .admin-reviews-list {
   display: flex;
   flex-direction: column;
   gap: 18px;
   margin-top: 10px;
 }
-
-/* pill card */
 .review-card {
   background: #f6f0f4;
   border-radius: 22px;
@@ -593,15 +543,12 @@
   align-items: center;
   gap: 14px;
 }
-
-/* left block */
 .review-left {
   display: flex;
   gap: 16px;
   align-items: flex-start;
   min-width: 0;
 }
-
 .review-avatar {
   width: 58px;
   height: 58px;
@@ -610,59 +557,34 @@
   background: #fbecf7;
   flex: 0 0 auto;
 }
-
-.review-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.review-body {
-  min-width: 0;
-}
-
+.review-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.review-body { min-width: 0; }
 .review-name {
   font-size: 13px;
   font-weight: 500;
   color: #000;
   margin-bottom: 4px;
 }
-
-/* stars */
 .review-stars {
   display: flex;
   gap: 2px;
   line-height: 1;
   margin-bottom: 6px;
 }
-
-.review-stars .star {
-  font-size: 12px;
-}
-
-.review-stars .star.on {
-  color: #e29acb;
-}
-
-.review-stars .star.off {
-  color: rgba(0, 0, 0, 0.25);
-}
-
+.review-stars .star { font-size: 12px; }
+.review-stars .star.on { color: #e29acb; }
+.review-stars .star.off { color: rgba(0, 0, 0, 0.25); }
 .review-text {
   font-size: 13px;
   color: rgba(0, 0, 0, 0.65);
   line-height: 1.25;
   max-width: 560px;
 }
-
-/* right actions like in screenshot */
 .review-actions {
   justify-self: end;
   text-align: right;
   width: 180px;
 }
-
 .review-actions-head {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -670,20 +592,13 @@
   margin-bottom: 8px;
   justify-items: center;
 }
-
-.review-action-label {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.9);
-}
-
+.review-action-label { font-size: 12px; color: rgba(0, 0, 0, 0.9); }
 .review-actions-btns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   justify-items: center;
 }
-
-/* icons */
 .review-icon-btn {
   width: 34px;
   height: 34px;
@@ -691,39 +606,140 @@
   background: transparent;
   cursor: pointer;
   border-radius: 10px;
-  line-height: 0;
   display: grid;
   place-items: center;
 }
-
-.review-icon-btn.ok {
-  color: #e29acb;
-  font-size: 22px;
-  font-weight: 600;
+.review-icon-btn.ok { color: #e29acb; font-size: 22px; font-weight: 600; }
+.review-icon-btn.del img { width: 18px; height: 18px; filter: none; }
+.admin-placeholder {
+  background: #fbecf7;
+  border: 1px dashed #e6cfe0;
+  border-radius: 18px;
+  padding: 18px;
+  font-size: 14px;
+  color: #333;
 }
 
-.review-icon-btn.del img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  filter: none;
-}
+/* =========================================
+   RESPONSIVE (ADAPTIVE)
+========================================= */
 
-/* responsive */
+/* TABLET (max-width: 1100px) */
 @media (max-width: 1100px) {
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-order-card {
+    grid-template-columns: 1fr; /* Одна колонка */
+    gap: 12px;
+    text-align: left;
+    padding: 16px;
+  }
+  .admin-order-status {
+    justify-content: flex-start; /* Статус зліва */
+  }
+  .admin-order-right {
+    justify-self: start;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
   .review-card {
     grid-template-columns: 1fr;
     justify-items: start;
+    gap: 16px;
   }
-
   .review-actions {
     justify-self: start;
     text-align: left;
-    width: auto;
+    width: 100%;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }
+  .review-actions-head { display: none; }
+  .review-actions-btns { display: flex; gap: 20px; }
+  .admin-catalog-edit {
+    position: static;
+    margin: 10px auto 0;
+    display: flex;
+    justify-content: center;
+  }
+  .admin-catalog-head { text-align: center; }
+}
 
-  .review-actions-head,
-  .review-actions-btns {
-    justify-items: start;
+/* MOBILE (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Хедер */
+  .admin-topbar {
+    height: 64px;
+    padding: 0 16px;
   }
+  .admin-topbar-center {
+    font-size: 18px;
+    position: static;
+    transform: none;
+    margin: 0;
+  }
+  .admin-brand { margin-right: 16px; }
+  .admin-brand-top { font-size: 12px; }
+  .admin-brand-sub { font-size: 12px; }
+
+  /* Body */
+  .admin-body { flex-direction: column; }
+  
+  /* Сайдбар (горизонтальний, центрований) */
+  .admin-side {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #efe3ea;
+    padding: 10px 16px;
+    align-items: center;
+    justify-content: center; /* Центруємо весь блок */
+    overflow-x: auto;
+  }
+  .admin-nav {
+    flex-direction: row;
+    padding: 0;
+    gap: 34px; /* Ваші налаштування */
+  }
+  .admin-nav-item {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .admin-nav-item span { display: none; }
+
+  /* Контент */
+  .admin-content { padding: 20px 16px 40px; }
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .admin-search { width: 100%; min-width: 0; }
+  .admin-add-btn { justify-content: center; }
+}
+
+/* SMALL MOBILE (max-width: 480px) */
+@media (max-width: 480px) {
+  .admin-grid { grid-template-columns: 1fr; }
+  .review-left {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .review-actions { justify-content: center; }
+  .admin-topbar-center { display: none; }
 }

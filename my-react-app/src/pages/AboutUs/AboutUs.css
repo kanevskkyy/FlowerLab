@@ -212,9 +212,9 @@
 }
 
 /* ================= FOOTER STYLES IN INFO SECTION ================= */
-.footer-item {
+.info-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   min-height: 28px;
 }

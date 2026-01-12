@@ -11,17 +11,18 @@ const CartPopup = ({ isOpen, onClose }) => {
 
   // ✅ Правильний розрахунокTotal з урахуванням різних форматів цін
   const total = cartItems.reduce((sum, item) => {
-    const price = typeof item.price === 'string' 
-      ? parseFloat(item.price.replace(/[^\d]/g, '')) 
-      : item.price;
+    const price =
+      typeof item.price === "string"
+        ? parseFloat(item.price.replace(/[^\d]/g, ""))
+        : item.price;
     const qty = item.qty || 1;
-    return sum + (price * qty);
+    return sum + price * qty;
   }, 0);
 
   // Функція для переходу на сторінку оформлення
   const handleCheckout = () => {
     onClose(); // Закриваємо кошик
-    navigate('/order-registered'); // Переходимо на сторінку
+    navigate("/order-registered"); // Переходимо на сторінку
   };
 
   return (
@@ -38,9 +39,13 @@ const CartPopup = ({ isOpen, onClose }) => {
         {cartItems.length === 0 && (
           <div className="cart-empty">
             <p className="empty-message">
-              You haven't added any items<br />to the cart yet.
+              You haven't added any items
+              <br />
+              to the cart yet.
             </p>
-            <button className="shop-btn" onClick={onClose}>GO SHOPPING</button>
+            <button className="shop-btn" onClick={onClose}>
+              GO SHOPPING
+            </button>
           </div>
         )}
 
@@ -58,29 +63,28 @@ const CartPopup = ({ isOpen, onClose }) => {
                     </div>
 
                     <p className="cart-item-price">
-                      {typeof item.price === 'string' ? item.price : `${item.price} ₴`}
+                      {typeof item.price === "string"
+                        ? item.price
+                        : `${item.price} ₴`}
                     </p>
 
                     <div className="qty-controls">
                       <button
                         className="qty-btn"
-                        onClick={() => decreaseQty(item.id)}
-                      >
+                        onClick={() => decreaseQty(item.id)}>
                         −
                       </button>
                       <span className="qty-value">{item.qty || 1}</span>
                       <button
                         className="qty-btn"
-                        onClick={() => increaseQty(item.id)}
-                      >
+                        onClick={() => increaseQty(item.id)}>
                         +
                       </button>
-                      
+
                       <button
                         className="trash-btn"
                         onClick={() => removeItem(item.id)}
-                        aria-label="Remove item"
-                      >
+                        aria-label="Remove item">
                         <img src={TrashIcon} alt="Remove" />
                       </button>
                     </div>

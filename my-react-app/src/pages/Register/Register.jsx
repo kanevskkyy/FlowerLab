@@ -1,8 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import "./Register.css";
 import { useAuth } from "../../context/useAuth";
-
 
 // SVG-іконки
 import logoIcon from "../../assets/icons/logo.svg";
@@ -10,31 +12,58 @@ import lockIcon from "../../assets/icons/lock.svg";
 import hideIcon from "../../assets/icons/hide.svg";
 import showIcon from "../../assets/icons/show.svg";
 import messageIcon from "../../assets/icons/message.svg";
+import toast from "react-hot-toast";
+
+// Схема валідації (Zod)
+// Прибрав DateOfBirth та Agree, бо їх немає у вашому макеті
+const schema = z
+  .object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    phone: z.string().regex(/^\+?[0-9]{10,12}$/, "Invalid phone format"),
+    email: z.string().min(1, "Email is required").email("Invalid email"),
+    password: z.string().min(6, "Min 6 characters"),
+    confirmPassword: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export default function Register() {
   const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const { register: registerUser } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSignUp = () => {
-    // TODO: тут потім буде API + валідація
-    login({
-      name: firstName || "name",
-      email: email || "youremail@gmail.com",
-      phone,
-      lastName,
-    });
+  // Підключення форми
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+    mode: "onBlur",
+  });
 
-    navigate("/cabinet", { replace: true });
+  const onSubmit = async (data) => {
+    try {
+      const { ...userData } = data;
+      // Передаємо дані у форматі, який очікує ваш контекст
+      await registerUser({
+        name: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone,
+        password: userData.password,
+      });
+      toast.success("Welcome! Registration successful.");
+      navigate("/cabinet", { replace: true });
+    } catch (error) {
+      console.error(error);
+      toast.error("Registration failed. Email might be taken.");
+    }
   };
 
   return (
@@ -43,7 +72,12 @@ export default function Register() {
         <div className="header-left"></div>
 
         <div className="logo">
-          <img src={logoIcon} alt="FlowerLab" className="logo-img" />
+          <img
+            src={logoIcon}
+            alt="FlowerLab"
+            className="logo-img"
+            onClick={() => navigate("/")}
+          />
         </div>
 
         <div className="header-right"></div>
@@ -53,126 +87,159 @@ export default function Register() {
         <div className="signup-box">
           <h2 className="signup-title">Registration</h2>
 
-          <div className="signup-grid">
-            <div className="form-field">
-              <label className="field-label">First Name</label>
-              <input
-                type="text"
-                className="input-base"
-                placeholder="Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-            </div>
-
-            <div className="form-field">
-              <label className="field-label">Last Name</label>
-              <input
-                type="text"
-                className="input-base"
-                placeholder="Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
-
-            <div className="form-field">
-              <label className="field-label">Phone Number</label>
-              <input
-                type="tel"
-                className="input-base"
-                placeholder="+380|501591912"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
-
-            <div className="form-field">
-              <label className="field-label">Email</label>
-              <div className="input-row">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="signup-grid">
+              {/* First Name */}
+              <div className="form-field">
+                <label className="field-label">First Name</label>
                 <input
-                  type="email"
-                  className="input-base with-right-icon"
-                  placeholder="youremail@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  className={`input-base ${
+                    errors.firstName ? "input-error" : ""
+                  }`}
+                  placeholder="Name"
+                  {...register("firstName")}
                 />
-                <span className="input-icon right">
-                  <img src={messageIcon} alt="email icon" className="field-icon" />
-                </span>
+                {errors.firstName && (
+                  <p className="error-text">{errors.firstName.message}</p>
+                )}
+              </div>
+
+              {/* Last Name */}
+              <div className="form-field">
+                <label className="field-label">Last Name</label>
+                <input
+                  type="text"
+                  className={`input-base ${
+                    errors.lastName ? "input-error" : ""
+                  }`}
+                  placeholder="Name"
+                  {...register("lastName")}
+                />
+                {errors.lastName && (
+                  <p className="error-text">{errors.lastName.message}</p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div className="form-field">
+                <label className="field-label">Phone Number</label>
+                <input
+                  type="tel"
+                  className={`input-base ${errors.phone ? "input-error" : ""}`}
+                  placeholder="+380..."
+                  {...register("phone")}
+                />
+                {errors.phone && (
+                  <p className="error-text">{errors.phone.message}</p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="form-field">
+                <label className="field-label">Email</label>
+                <div className="input-row">
+                  <input
+                    type="email"
+                    className={`input-base with-right-icon ${
+                      errors.email ? "input-error" : ""
+                    }`}
+                    placeholder="youremail@gmail.com"
+                    {...register("email")}
+                  />
+                  <span className="input-icon right">
+                    <img
+                      src={messageIcon}
+                      alt="email icon"
+                      className="field-icon"
+                    />
+                  </span>
+                </div>
+                {errors.email && (
+                  <p className="error-text">{errors.email.message}</p>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className="form-field full-width">
-            <label className="field-label">Password</label>
-            <div className="input-row">
-              <span className="input-icon left">
-                <img src={lockIcon} alt="lock" className="field-icon" />
-              </span>
+            {/* Password */}
+            <div className="form-field full-width">
+              <label className="field-label">Password</label>
+              <div className="input-row">
+                <span className="input-icon left">
+                  <img src={lockIcon} alt="lock" className="field-icon" />
+                </span>
 
-              <input
-                type={showPassword ? "text" : "password"}
-                className="input-base with-left-icon with-right-icon"
-                placeholder="      ••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              <button
-                type="button"
-                className="input-icon-btn right"
-                onClick={() => setShowPassword((v) => !v)}
-              >
-                <img
-                  src={showPassword ? showIcon : hideIcon}
-                  alt={showPassword ? "show password" : "hide password"}
-                  className="field-icon"
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className={`input-base with-left-icon with-right-icon ${
+                    errors.password ? "input-error" : ""
+                  }`}
+                  placeholder="••••••••"
+                  {...register("password")}
                 />
-              </button>
+
+                <button
+                  type="button"
+                  className="input-icon-btn right"
+                  onClick={() => setShowPassword((v) => !v)}>
+                  <img
+                    src={showPassword ? showIcon : hideIcon}
+                    alt={showPassword ? "show password" : "hide password"}
+                    className="field-icon"
+                  />
+                </button>
+              </div>
+              {errors.password && (
+                <p className="error-text">{errors.password.message}</p>
+              )}
             </div>
-          </div>
 
-          <div className="form-field full-width">
-            <label className="field-label">Confirm password</label>
-            <div className="input-row">
-              <span className="input-icon left">
-                <img src={lockIcon} alt="lock" className="field-icon" />
-              </span>
+            {/* Confirm Password */}
+            <div className="form-field full-width">
+              <label className="field-label">Confirm password</label>
+              <div className="input-row">
+                <span className="input-icon left">
+                  <img src={lockIcon} alt="lock" className="field-icon" />
+                </span>
 
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                className="input-base with-left-icon with-right-icon"
-                placeholder="      Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-
-              <button
-                type="button"
-                className="input-icon-btn right"
-                onClick={() => setShowConfirmPassword((v) => !v)}
-              >
-                <img
-                  src={showConfirmPassword ? showIcon : hideIcon}
-                  alt={showConfirmPassword ? "show password" : "hide password"}
-                  className="field-icon"
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className={`input-base with-left-icon with-right-icon ${
+                    errors.confirmPassword ? "input-error" : ""
+                  }`}
+                  placeholder="Password"
+                  {...register("confirmPassword")}
                 />
-              </button>
+
+                <button
+                  type="button"
+                  className="input-icon-btn right"
+                  onClick={() => setShowConfirmPassword((v) => !v)}>
+                  <img
+                    src={showConfirmPassword ? showIcon : hideIcon}
+                    alt={
+                      showConfirmPassword ? "show password" : "hide password"
+                    }
+                    className="field-icon"
+                  />
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="error-text">{errors.confirmPassword.message}</p>
+              )}
             </div>
-          </div>
 
-          <button type="button" className="signup-main-btn" onClick={handleSignUp}>
-            Sign up
-          </button>
+            <button type="submit" className="signup-main-btn">
+              Sign up
+            </button>
 
-          <button
-            type="button"
-            className="back-to-login-btn"
-            onClick={() => navigate("/login")}
-          >
-            Back to Sign in
-          </button>
+            <button
+              type="button"
+              className="back-to-login-btn"
+              onClick={() => navigate("/login")}>
+              Back to Sign in
+            </button>
+          </form>
         </div>
       </main>
     </div>
