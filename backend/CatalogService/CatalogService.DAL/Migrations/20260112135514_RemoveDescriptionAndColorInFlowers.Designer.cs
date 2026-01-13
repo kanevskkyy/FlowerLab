@@ -3,6 +3,7 @@ using System;
 using CatalogService.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CatalogService.DAL.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    partial class CatalogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260112135514_RemoveDescriptionAndColorInFlowers")]
+    partial class RemoveDescriptionAndColorInFlowers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,25 +118,20 @@ namespace CatalogService.DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<bool>("IsMain")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
                     b.Property<short>("Position")
                         .HasColumnType("smallint");
-
-                    b.Property<Guid>("SizeId")
-                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BouquetId", "SizeId", "IsMain");
+                    b.HasIndex("BouquetId");
 
-                    b.ToTable("BouquetImages", (string)null);
+                    b.ToTable("BouquetImages", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_BouquetImage_Position", "\"Position\" BETWEEN 1 AND 3");
+                        });
                 });
 
             modelBuilder.Entity("CatalogService.Domain.Entities.BouquetRecipient", b =>
@@ -368,20 +366,12 @@ namespace CatalogService.DAL.Migrations
             modelBuilder.Entity("CatalogService.Domain.Entities.BouquetImage", b =>
                 {
                     b.HasOne("CatalogService.Domain.Entities.Bouquet", "Bouquet")
-                        .WithMany()
+                        .WithMany("BouquetImages")
                         .HasForeignKey("BouquetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CatalogService.Domain.Entities.BouquetSize", "BouquetSize")
-                        .WithMany("BouquetImages")
-                        .HasForeignKey("BouquetId", "SizeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Bouquet");
-
-                    b.Navigation("BouquetSize");
                 });
 
             modelBuilder.Entity("CatalogService.Domain.Entities.BouquetRecipient", b =>
@@ -447,6 +437,8 @@ namespace CatalogService.DAL.Migrations
 
                     b.Navigation("BouquetFlowers");
 
+                    b.Navigation("BouquetImages");
+
                     b.Navigation("BouquetRecipients");
 
                     b.Navigation("BouquetSizes");
@@ -454,8 +446,6 @@ namespace CatalogService.DAL.Migrations
 
             modelBuilder.Entity("CatalogService.Domain.Entities.BouquetSize", b =>
                 {
-                    b.Navigation("BouquetImages");
-
                     b.Navigation("BouquetSizeFlowers");
                 });
 

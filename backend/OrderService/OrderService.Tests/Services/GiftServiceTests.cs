@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using OrderService.BLL.DTOs.GiftsDTOs;
@@ -14,6 +9,12 @@ using OrderService.BLL.Services.Interfaces;
 using OrderService.DAL.Repositories.Interfaces;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
+using shared.cache;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace OrderService.Tests.Services
@@ -26,19 +27,27 @@ namespace OrderService.Tests.Services
         private Mock<IGiftRepository> _giftRepositoryMock;
         private IGiftService _sut;
 
+        private Mock<IEntityCacheService> _cacheServiceMock;
+        private Mock<IEntityCacheInvalidationService<Gift>> _cacheInvalidationMock;
+
+
         public GiftServiceTests()
         {
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
             _imageServiceMock = new Mock<IImageService>();
             _giftRepositoryMock = new Mock<IGiftRepository>();
+            _cacheServiceMock = new Mock<IEntityCacheService>();
+            _cacheInvalidationMock = new Mock<IEntityCacheInvalidationService<Gift>>();
 
             _unitOfWorkMock.Setup(u => u.Gifts).Returns(_giftRepositoryMock.Object);
 
             _sut = new GiftService(
                 _unitOfWorkMock.Object,
                 _mapperMock.Object,
-                _imageServiceMock.Object
+                _imageServiceMock.Object,
+                _cacheServiceMock.Object,
+                _cacheInvalidationMock.Object
             );
         }
 

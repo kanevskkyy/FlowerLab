@@ -29,7 +29,7 @@ namespace CatalogService.DAL.Specification
             AddInclude(b => b.BouquetSizes);
             AddInclude(b => b.BouquetEvents);
             AddInclude(b => b.BouquetRecipients);
-            AddInclude(b => b.BouquetImages);
+            AddInclude(b => b.BouquetSizes);
 
             ApplySorting(parameters.SortBy);
         }

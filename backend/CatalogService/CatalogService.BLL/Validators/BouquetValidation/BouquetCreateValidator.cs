@@ -36,13 +36,13 @@ namespace CatalogService.BLL.Validators.BouquetValidation
                 .Must(BeAValidImage)
                 .WithMessage("Main photo must be an image of type jpg, png, gif, or webp.");
 
-            RuleForEach(x => x.Images)
-                .Must(BeAValidImage)
-                .WithMessage("Additional photos must be images of type jpg, png, gif, or webp.");
+            RuleFor(x => x.EventIds)
+                .NotEmpty()
+                .WithMessage("At least one event must be selected.");
 
-            RuleFor(x => x.Images)
-                .Must(images => images == null || images.Count <= 3)
-                .WithMessage("You can upload a maximum of 3 additional images.");
+            RuleFor(x => x.RecipientIds)
+                .NotEmpty()
+                .WithMessage("At least one recipient must be selected.");
         }
 
         private bool BeAValidImage(IFormFile? file)

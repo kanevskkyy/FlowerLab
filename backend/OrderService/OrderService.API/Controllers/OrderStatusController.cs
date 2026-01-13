@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NpgsqlTypes;
 using OrderService.BLL.DTOs.OrderStatusDTOs;
 using OrderService.BLL.Services.Interfaces;
+using System.Threading;
 
 namespace OrderService.API.Controllers
 {
@@ -10,7 +10,7 @@ namespace OrderService.API.Controllers
     [Route("api/order-statuses")]
     public class OrderStatusController : ControllerBase
     {
-        private IOrderStatusService orderStatusService;
+        private readonly IOrderStatusService orderStatusService;
 
         public OrderStatusController(IOrderStatusService orderStatusService)
         {
@@ -19,41 +19,51 @@ namespace OrderService.API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
         {
-            var statuses = await orderStatusService.GetAllAsync();
+            var statuses = await orderStatusService.GetAllAsync(cancellationToken);
             return Ok(statuses);
         }
 
         [HttpGet("{id:guid}", Name = "GetOrderStatusById")]
         [Authorize]
-        public async Task<IActionResult> GetByIdAsync(Guid id)
+        public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var status = await orderStatusService.GetByIdAsync(id);
+            var status = await orderStatusService.GetByIdAsync(id, cancellationToken);
             return Ok(status);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateAsync([FromBody] OrderStatusCreateDto dto)
+        public async Task<IActionResult> CreateAsync(
+            [FromBody] OrderStatusCreateDto dto,
+            CancellationToken cancellationToken)
         {
-            var createdStatus = await orderStatusService.CreateAsync(dto);
-            return CreatedAtRoute("GetOrderStatusById", new { id = createdStatus.Id }, createdStatus);
+            var createdStatus = await orderStatusService.CreateAsync(dto, cancellationToken);
+            return CreatedAtRoute(
+                "GetOrderStatusById",
+                new { id = createdStatus.Id },
+                createdStatus);
         }
 
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] OrderStatusUpdateDto dto)
+        public async Task<IActionResult> UpdateAsync(
+            Guid id,
+            [FromBody] OrderStatusUpdateDto dto,
+            CancellationToken cancellationToken)
         {
-            var updatedStatus = await orderStatusService.UpdateAsync(id, dto);
+            var updatedStatus = await orderStatusService.UpdateAsync(id, dto, cancellationToken);
             return Ok(updatedStatus);
         }
 
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteAsync(Guid id)
+        public async Task<IActionResult> DeleteAsync(
+            Guid id,
+            CancellationToken cancellationToken)
         {
-            await orderStatusService.DeleteAsync(id);
+            await orderStatusService.DeleteAsync(id, cancellationToken);
             return NoContent();
         }
     }

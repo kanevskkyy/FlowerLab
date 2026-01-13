@@ -12,10 +12,8 @@ namespace CatalogService.BLL.DTO
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
         public List<BouquetSizeCreateDto> Sizes { get; set; } = new();
-
         public List<Guid> EventIds { get; set; } = new();
         public List<Guid> RecipientIds { get; set; } = new();
         public IFormFile? MainPhoto { get; set; }
-        public List<IFormFile> Images { get; set; } = new();
     }
 }

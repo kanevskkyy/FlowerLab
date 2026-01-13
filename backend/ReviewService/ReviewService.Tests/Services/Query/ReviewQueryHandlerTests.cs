@@ -13,6 +13,7 @@ using Xunit;
 using ReviewService.Domain.Entities.QueryParameters;
 using MongoDB.Bson;
 using ReviewService.Domain.ValueObjects;
+using ReviewService.Application.Features.Reviews.Query.GetReviewById;
 
 namespace ReviewService.Tests.Services.Query
 {

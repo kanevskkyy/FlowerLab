@@ -1,4 +1,5 @@
 ﻿using CatalogService.BLL.DTO;
+using CatalogService.BLL.DTO.Bouquet;
 using CatalogService.BLL.Validators.BouquetValidation;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -27,7 +28,7 @@ namespace CatalogService.BLL.Validators
                 .WithMessage("The bouquet must have at least one size.");
 
             RuleForEach(x => x.Sizes)
-                .SetValidator(new BouquetSizeCreateValidator());
+                .SetValidator(new BouquetSizeUpdateValidator());
 
             RuleFor(x => x.Sizes)
                 .Must(HaveUniqueSize)
@@ -40,13 +41,13 @@ namespace CatalogService.BLL.Validators
                     .WithMessage("Main photo must be an image of type jpg, png, gif, or webp.");
             });
 
-            RuleForEach(x => x.NewImages)
-                .Must(BeAValidImage)
-                .WithMessage("Additional photos must be images of type jpg, png, gif, or webp.");
+            RuleFor(x => x.EventIds)
+                .NotEmpty()
+                .WithMessage("At least one event must be selected.");
 
-            RuleFor(x => x.NewImages)
-                .Must(images => images == null || images.Count <= 3)
-                .WithMessage("You can upload a maximum of 3 additional images.");
+            RuleFor(x => x.RecipientIds)
+                .NotEmpty()
+                .WithMessage("At least one recipient must be selected.");
         }
 
         private bool BeAValidImage(IFormFile? file)
@@ -55,7 +56,7 @@ namespace CatalogService.BLL.Validators
             return _allowedImageTypes.Contains(file.ContentType.ToLower());
         }
 
-        private bool HaveUniqueSize(List<BouquetSizeCreateDto> sizes)
+        private bool HaveUniqueSize(List<BouquetSizeUpdateDto> sizes)
         {
             if (sizes == null || !sizes.Any()) return true;
             return sizes.Select(s => s.SizeId).Distinct().Count() == sizes.Count;

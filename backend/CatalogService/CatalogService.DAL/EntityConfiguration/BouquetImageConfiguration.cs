@@ -14,22 +14,30 @@ namespace CatalogService.DAL.EntityConfiguration
         public void Configure(EntityTypeBuilder<BouquetImage> builder)
         {
             builder.ToTable("BouquetImages");
+            builder.HasKey(bi => bi.Id);
 
-            builder.HasKey(i => i.Id);
-
-            builder.Property(i => i.ImageUrl)
+            builder.Property(bi => bi.ImageUrl)
                 .IsRequired()
                 .HasMaxLength(255);
 
-            builder.Property(i => i.Position)
+            builder.Property(bi => bi.Position)
                 .IsRequired();
 
-            builder.HasCheckConstraint("CK_BouquetImage_Position", "\"Position\" BETWEEN 1 AND 3");
+            builder.Property(bi => bi.IsMain)
+                .IsRequired()
+                .HasDefaultValue(false);
 
-            builder.HasOne(i => i.Bouquet)
-                .WithMany(b => b.BouquetImages)
-                .HasForeignKey(i => i.BouquetId)
+            builder.HasOne(bi => bi.Bouquet)
+                .WithMany()
+                .HasForeignKey(bi => bi.BouquetId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(bi => bi.BouquetSize)
+                .WithMany(bs => bs.BouquetImages)
+                .HasForeignKey(bi => new { bi.BouquetId, bi.SizeId })
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(bi => new { bi.BouquetId, bi.SizeId, bi.IsMain });
         }
     }
 }

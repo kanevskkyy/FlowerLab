@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace CatalogService.BLL.DTO
 {
-    public record BouquetImageDto(Guid Id, string ImageUrl, short Position);
-
+    public record BouquetImageDto(
+            Guid Id,
+            string ImageUrl,
+            short Position,
+            bool IsMain
+        );
 }

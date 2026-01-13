@@ -21,10 +21,6 @@ namespace OrderService.DAL.EntityConfig
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(oif => oif.FlowerColor)
-                .IsRequired()
-                .HasMaxLength(50);
-
             builder.Property(oif => oif.Quantity)
                 .IsRequired();
 

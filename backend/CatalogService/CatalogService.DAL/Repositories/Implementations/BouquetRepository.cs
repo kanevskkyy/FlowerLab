@@ -36,14 +36,16 @@ namespace CatalogService.DAL.Repositories.Implementations
                 .Include(b => b.BouquetSizes)
                     .ThenInclude(bs => bs.BouquetSizeFlowers)
                         .ThenInclude(bsf => bsf.Flower)
+                .Include(b => b.BouquetSizes)
+                    .ThenInclude(bs => bs.BouquetImages) 
                 .Include(b => b.BouquetEvents)
                     .ThenInclude(be => be.Event)
                 .Include(b => b.BouquetRecipients)
                     .ThenInclude(br => br.Recipient)
-                .Include(b => b.BouquetImages)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
+
 
         public async Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
         {
@@ -70,6 +72,22 @@ namespace CatalogService.DAL.Repositories.Implementations
                 .ToListAsync(cancellationToken);
 
             return new PagedList<Bouquet>(items, totalCount, parameters.Page, parameters.PageSize);
+        }
+
+        public async Task<(decimal minPrice, decimal maxPrice)> GetMinAndMaxPriceAsync(CancellationToken cancellationToken = default)
+        {
+            var bouquetMinPrices = await context.BouquetSizes
+                .AsNoTracking()
+                .GroupBy(bs => bs.BouquetId)
+                .Select(g => g.Min(bs => bs.Price)) 
+                .ToListAsync(cancellationToken);
+
+            if (!bouquetMinPrices.Any()) return (0m, 0m); 
+
+            decimal minPrice = bouquetMinPrices.Min(); 
+            decimal maxPrice = bouquetMinPrices.Max(); 
+
+            return (minPrice, maxPrice);
         }
     }
 }

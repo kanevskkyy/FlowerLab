@@ -26,6 +26,7 @@ namespace CatalogService.BLL.Services.Implementations
         private IPublishEndpoint publishEndpoint;
         private IEntityCacheService cache;
         private IEntityCacheInvalidationService<Bouquet> cacheInvalidation;
+        private IEntityCacheInvalidationService<FilterResponse> filterCacheInvalidationService;
 
         public BouquetService(
             IUnitOfWork uow,
@@ -33,7 +34,8 @@ namespace CatalogService.BLL.Services.Implementations
             IImageService imageService,
             IPublishEndpoint publishEndpoint,
             IEntityCacheService cache,
-            IEntityCacheInvalidationService<Bouquet> cacheInvalidation)
+            IEntityCacheInvalidationService<Bouquet> cacheInvalidation,
+            IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
         {
             this.uow = uow;
             this.mapper = mapper;
@@ -42,6 +44,7 @@ namespace CatalogService.BLL.Services.Implementations
 
             this.cache = cache;
             this.cacheInvalidation = cacheInvalidation;
+            this.filterCacheInvalidationService = entityCacheInvalidationService;
         }
 
         public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
@@ -149,16 +152,14 @@ namespace CatalogService.BLL.Services.Implementations
                 MainPhotoUrl = string.Empty,
                 BouquetSizes = new List<BouquetSize>(),
                 BouquetEvents = new List<BouquetEvent>(),
-                BouquetRecipients = new List<BouquetRecipient>(),
-                BouquetImages = new List<BouquetImage>()
+                BouquetRecipients = new List<BouquetRecipient>()
             };
 
             if (dto.MainPhoto != null)
             {
                 using var ms = new MemoryStream();
                 await dto.MainPhoto.CopyToAsync(ms);
-                var mainUrl = await imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
-                bouquet.MainPhotoUrl = mainUrl;
+                bouquet.MainPhotoUrl = await imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
             }
             else
             {
@@ -172,19 +173,53 @@ namespace CatalogService.BLL.Services.Implementations
                     BouquetId = bouquet.Id,
                     SizeId = sizeDto.SizeId,
                     Price = sizeDto.Price,
-                    BouquetSizeFlowers = new List<BouquetSizeFlower>()
+                    BouquetSizeFlowers = new List<BouquetSizeFlower>(),
+                    BouquetImages = new List<BouquetImage>()
                 };
 
                 for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
                 {
-                    BouquetSizeFlower bouquetSizeFlower = new BouquetSizeFlower
+                    bouquetSize.BouquetSizeFlowers.Add(new BouquetSizeFlower
                     {
                         BouquetId = bouquet.Id,
                         SizeId = sizeDto.SizeId,
                         FlowerId = sizeDto.FlowerIds[i],
                         Quantity = sizeDto.FlowerQuantities[i]
-                    };
-                    bouquetSize.BouquetSizeFlowers.Add(bouquetSizeFlower);
+                    });
+                }
+
+                if (sizeDto.MainImage != null)
+                {
+                    using var ms = new MemoryStream();
+                    await sizeDto.MainImage.CopyToAsync(ms);
+                    string url = await imageService.UploadAsync(ms.ToArray(), sizeDto.MainImage.FileName, "bouquets");
+
+                    bouquetSize.BouquetImages.Add(new BouquetImage
+                    {
+                        BouquetId = bouquet.Id,
+                        SizeId = sizeDto.SizeId,
+                        ImageUrl = url,
+                        Position = 1,
+                        IsMain = true
+                    });
+                }
+
+                short position = 2;
+                foreach (var img in sizeDto.AdditionalImages.Take(3))
+                {
+                    using var ms = new MemoryStream();
+                    await img.CopyToAsync(ms);
+                    string url = await imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
+
+                    bouquetSize.BouquetImages.Add(new BouquetImage
+                    {
+                        BouquetId = bouquet.Id,
+                        SizeId = sizeDto.SizeId,
+                        ImageUrl = url,
+                        Position = position,
+                        IsMain = false
+                    });
+                    position++;
                 }
 
                 bouquet.BouquetSizes.Add(bouquetSize);
@@ -208,26 +243,11 @@ namespace CatalogService.BLL.Services.Implementations
                 });
             }
 
-            short pos = 1;
-            foreach (var img in dto.Images.Take(3))
-            {
-                using MemoryStream ms = new MemoryStream();
-                await img.CopyToAsync(ms);
-
-                string url = await imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
-                bouquet.BouquetImages.Add(new BouquetImage
-                {
-                    BouquetId = bouquet.Id,
-                    ImageUrl = url,
-                    Position = pos
-                });
-                pos++;
-            }
-
             await uow.Bouquets.AddAsync(bouquet, cancellationToken);
             await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
+            await filterCacheInvalidationService.InvalidateAllAsync();
 
             var savedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id, cancellationToken);
             return mapper.Map<BouquetDto>(savedBouquet);
@@ -293,7 +313,15 @@ namespace CatalogService.BLL.Services.Implementations
             bouquet.Name = dto.Name;
             bouquet.Description = dto.Description;
 
+            if (dto.MainPhoto != null)
+            {
+                using var ms = new MemoryStream();
+                await dto.MainPhoto.CopyToAsync(ms);
+                bouquet.MainPhotoUrl = await imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
+            }
+
             bouquet.BouquetSizes.Clear();
+
             foreach (var sizeDto in dto.Sizes)
             {
                 BouquetSize bouquetSize = new BouquetSize
@@ -301,7 +329,8 @@ namespace CatalogService.BLL.Services.Implementations
                     BouquetId = bouquet.Id,
                     Price = sizeDto.Price,
                     SizeId = sizeDto.SizeId,
-                    BouquetSizeFlowers = new List<BouquetSizeFlower>()
+                    BouquetSizeFlowers = new List<BouquetSizeFlower>(),
+                    BouquetImages = new List<BouquetImage>()
                 };
 
                 for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
@@ -313,6 +342,43 @@ namespace CatalogService.BLL.Services.Implementations
                         FlowerId = sizeDto.FlowerIds[i],
                         Quantity = sizeDto.FlowerQuantities[i]
                     });
+                }
+
+                if (sizeDto.MainImage != null)
+                {
+                    using var ms = new MemoryStream();
+                    await sizeDto.MainImage.CopyToAsync(ms);
+                    string url = await imageService.UploadAsync(ms.ToArray(), sizeDto.MainImage.FileName, "bouquets");
+
+                    bouquetSize.BouquetImages.Add(new BouquetImage
+                    {
+                        BouquetId = bouquet.Id,
+                        SizeId = sizeDto.SizeId,
+                        ImageUrl = url,
+                        Position = 1,
+                        IsMain = true
+                    });
+                }
+
+                if (sizeDto.NewImages != null && sizeDto.NewImages.Any())
+                {
+                    short position = 2;
+                    foreach (var img in sizeDto.NewImages.Take(3))
+                    {
+                        using var ms = new MemoryStream();
+                        await img.CopyToAsync(ms);
+                        string url = await imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
+
+                        bouquetSize.BouquetImages.Add(new BouquetImage
+                        {
+                            BouquetId = bouquet.Id,
+                            SizeId = sizeDto.SizeId,
+                            ImageUrl = url,
+                            Position = position,
+                            IsMain = false
+                        });
+                        position++;
+                    }
                 }
 
                 bouquet.BouquetSizes.Add(bouquetSize);
@@ -338,39 +404,12 @@ namespace CatalogService.BLL.Services.Implementations
                 });
             }
 
-            if (dto.MainPhoto != null)
-            {
-                using MemoryStream ms = new MemoryStream();
-                await dto.MainPhoto.CopyToAsync(ms);
-                string? mainUrl = await imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
-                bouquet.MainPhotoUrl = mainUrl;
-            }
-
-            if (dto.NewImages != null && dto.NewImages.Any())
-            {
-                bouquet.BouquetImages.Clear();
-
-                short pos = 1;
-                foreach (var img in dto.NewImages.Take(3))
-                {
-                    using var ms = new MemoryStream();
-                    await img.CopyToAsync(ms);
-                    var url = await imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
-
-                    bouquet.BouquetImages.Add(new BouquetImage
-                    {
-                        BouquetId = bouquet.Id,
-                        ImageUrl = url,
-                        Position = pos
-                    });
-                    pos++;
-                }
-            }
-
             uow.Bouquets.Update(bouquet);
             await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
+            await cacheInvalidation.InvalidateByIdAsync(bouquet.Id);
+            await filterCacheInvalidationService.InvalidateAllAsync();
 
             var updatedBouquet = await uow.Bouquets.GetWithDetailsAsync(bouquet.Id, cancellationToken);
             return mapper.Map<BouquetDto>(updatedBouquet);
@@ -386,21 +425,10 @@ namespace CatalogService.BLL.Services.Implementations
             await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
+            await cacheInvalidation.InvalidateByIdAsync(bouquet.Id);
+            await filterCacheInvalidationService.InvalidateAllAsync();
 
-            Console.WriteLine($"[CATALOG] Bouquet {id} deleted from DB");
-            Console.WriteLine($"[CATALOG] Publishing BouquetDeletedEvent for ID: {id}");
-
-            try
-            {
-                await publishEndpoint.Publish(new BouquetDeletedEvent(id));
-                Console.WriteLine($"[CATALOG] Event successfully published for ID: {id}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[CATALOG] Error publishing event: {ex.Message}");
-                throw;
-            }
+            await publishEndpoint.Publish(new BouquetDeletedEvent(id));
         }
-
     }
 }

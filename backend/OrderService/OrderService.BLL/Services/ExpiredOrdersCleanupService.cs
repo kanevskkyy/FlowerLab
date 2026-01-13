@@ -2,22 +2,24 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OrderService.DAL.UOW;
+using OrderService.Domain.Entities;
+using shared.cache;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OrderService.BLL.Services
 {
     public class ExpiredOrdersCleanupService : BackgroundService
     {
-        private IServiceProvider serviceProvider;
-        private ILogger<ExpiredOrdersCleanupService> logger;
-
-        public ExpiredOrdersCleanupService(IServiceProvider serviceProvider, ILogger<ExpiredOrdersCleanupService> logger)
+        private readonly IServiceScopeFactory scopeFactory;
+        private readonly ILogger<ExpiredOrdersCleanupService> logger;
+        public ExpiredOrdersCleanupService(
+            IServiceScopeFactory scopeFactory,
+            ILogger<ExpiredOrdersCleanupService> logger)
         {
-            this.serviceProvider = serviceProvider;
+            this.scopeFactory = scopeFactory;
             this.logger = logger;
         }
 
@@ -29,8 +31,9 @@ namespace OrderService.BLL.Services
             {
                 try
                 {
-                    using var scope = serviceProvider.CreateScope();
-                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    using var scope = scopeFactory.CreateScope();
+                    var unitOfWork =scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var cacheInvalidationService = scope.ServiceProvider.GetRequiredService<IEntityCacheInvalidationService<Gift>>();
 
                     var now = DateTime.UtcNow;
 
@@ -38,7 +41,7 @@ namespace OrderService.BLL.Services
 
                     foreach (var order in expiredOrders)
                     {
-                        logger.LogInformation($"Deleting expired order {order.Id}");
+                        logger.LogInformation("Deleting expired order {OrderId}", order.Id);
 
                         foreach (var reservation in order.Reservations)
                         {
@@ -48,12 +51,17 @@ namespace OrderService.BLL.Services
                         foreach (var giftReservation in order.GiftReservations)
                         {
                             unitOfWork.GiftReservations.Delete(giftReservation);
+                            await cacheInvalidationService.InvalidateByIdAsync(giftReservation.GiftId);
                         }
 
                         unitOfWork.Orders.Delete(order);
                     }
 
-                    if (expiredOrders.Any()) await unitOfWork.SaveChangesAsync(stoppingToken);
+                    if (expiredOrders.Any())
+                    {
+                        await unitOfWork.SaveChangesAsync(stoppingToken);
+                        await cacheInvalidationService.InvalidateAllAsync();
+                    }
                 }
                 catch (Exception ex)
                 {
