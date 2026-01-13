@@ -2,6 +2,9 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Projects;
 using StackExchange.Redis;
+using DotNetEnv;
+
+Env.Load();
 
 var builder = DistributedApplication.CreateBuilder(args);
 

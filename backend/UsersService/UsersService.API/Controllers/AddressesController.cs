@@ -8,7 +8,7 @@ using UsersService.BLL.Services.Interfaces;
 namespace UsersService.API.Controllers
 {
     [Authorize]
-    [Route("api/users/me/addresses")]
+    [Route("api/me/addresses")]
     [ApiController]
     public class AddressesController : ControllerBase
     {

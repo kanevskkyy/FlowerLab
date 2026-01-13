@@ -24,13 +24,13 @@ const schema = z.object({
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { setAuth } = useAuth(); // Використовуємо метод для оновлення стану
   const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting }, // Додав isSubmitting
   } = useForm({
     resolver: zodResolver(schema),
     mode: "onBlur",
@@ -41,33 +41,42 @@ export default function Login() {
     try {
       console.log("Logging in...", data);
 
-      // Відправляємо запит на Gateway -> UsersService
-      const response = await axiosClient.post("/auth/login", {
+
+      const response = await axiosClient.post("/api/users/auth/login", {
         email: data.email,
         password: data.password,
       });
 
-      // Отримуємо токен з відповіді
-      const { token } = response.data;
+      // Отримуємо токени з відповіді (твоє API повертає accessToken та refreshToken)
+      // Отримуємо токени з відповіді. Враховуємо можливий PascalCase від .NET
+      const accessToken = response.data.accessToken || response.data.AccessToken;
+      const refreshToken = response.data.refreshToken || response.data.RefreshToken;
 
-      if (token) {
-        // Зберігаємо токен
-        localStorage.setItem("token", token);
+      if (accessToken) {
+        // Зберігаємо токени
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
 
-        // Оновлюємо стан авторизації
-        // Передаємо токен, щоб AuthProvider міг одразу підтягнути юзера
-        await login(token);
+        // Оновлюємо стан авторизації в контексті
+        setAuth(accessToken);
 
         toast.success("Welcome back!");
         navigate("/cabinet", { replace: true });
+      } else {
+          // Якщо токен не прийшов (наприклад, null)
+           throw new Error("No access token received from server");
       }
     } catch (error) {
       console.error("Login failed:", error);
 
       // Обробка помилок від бекенду
+      // ExceptionHandlingMiddleware повертає { error: "message", type: "..." }
       const errorMsg =
+        error.response?.data?.error ||
+        error.response?.data?.Detail ||
         error.response?.data?.message ||
         "Login failed. Check your email or password.";
+
       toast.error(typeof errorMsg === "string" ? errorMsg : "Login failed.");
     }
   };
@@ -89,7 +98,6 @@ export default function Login() {
 
       <main className="login-content">
         <div className="login-box">
-          {/* Зверни увагу: Font-family для заголовка має бути Jomolhari у CSS */}
           <h2 className="login-title">Sign in</h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -97,7 +105,6 @@ export default function Login() {
             <div className="form-field full-width">
               <label className="field-label">Email</label>
               <div className="input-row">
-                {/* Додано клас with-right-icon для правильного padding */}
                 <input
                   type="email"
                   className={`input-base with-right-icon ${
@@ -123,7 +130,6 @@ export default function Login() {
                   <img src={lockIcon} alt="lock" className="field-icon" />
                 </span>
 
-                {/* Додано класи with-left-icon та with-right-icon */}
                 <input
                   type={showPassword ? "text" : "password"}
                   className={`input-base with-left-icon with-right-icon ${
@@ -150,11 +156,14 @@ export default function Login() {
             </div>
 
             {/* Main Sign In Button */}
-            <button type="submit" className="login-main-btn">
-              Sign in
+            <button
+              type="submit"
+              className="login-main-btn"
+              disabled={isSubmitting}>
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </button>
 
-            {/* Forgot Password Link (Нове) */}
+            {/* Forgot Password Link */}
             <button
               type="button"
               className="forgot-password-link"

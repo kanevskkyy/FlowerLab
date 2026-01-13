@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useSettings } from "../../context/useSettings"; // Імпорт нашого нового хука
+import { useAuth } from "../../context/useAuth";
 import CartPopup from "../../pages/CartPopup/CartPopup";
 
 // Assets (перевір, чи шляхи до картинок правильні у твоєму проєкті)
@@ -17,6 +18,7 @@ const Header = ({ onMenuOpen }) => {
 
   // Отримуємо дані з глобального контексту
   const { lang, toggleLang, currency, toggleCurrency } = useSettings();
+  const { user } = useAuth();
 
   return (
     <>
@@ -71,7 +73,9 @@ const Header = ({ onMenuOpen }) => {
             className="icon-btn profile-btn"
             onClick={() => navigate("/cabinet")}>
             <img src={UserProfileIcon} alt="Profile" className="icon" />
-            <span className="profile-label">sign up/in</span>
+            <span className="profile-label">
+              {user ? "Profile" : "Sign up/in"}
+            </span>
           </button>
         </div>
       </header>

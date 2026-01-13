@@ -30,6 +30,8 @@ import NotFound from "./pages/NotFound/NotFound";
 import Gifts from "./pages/Gifts/Gifts";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
+import EmailConfirmationPending from "./pages/EmailConfirmation/EmailConfirmationPending";
+import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
 
 function App() {
   return (
@@ -72,6 +74,13 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              
+              {/* Email Confirmation */}
+              <Route
+                path="/email-confirmation-pending"
+                element={<EmailConfirmationPending />}
+              />
+              <Route path="/confirm-email" element={<EmailConfirmation />} />
 
               {/* user protected */}
               <Route
