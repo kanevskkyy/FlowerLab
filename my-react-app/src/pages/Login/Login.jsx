@@ -47,8 +47,6 @@ export default function Login() {
         password: data.password,
       });
 
-      // Отримуємо токени з відповіді (твоє API повертає accessToken та refreshToken)
-      // Отримуємо токени з відповіді. Враховуємо можливий PascalCase від .NET
       const accessToken = response.data.accessToken || response.data.AccessToken;
       const refreshToken = response.data.refreshToken || response.data.RefreshToken;
 
