@@ -9,6 +9,7 @@ using OrderService.DAL.Helpers;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
 using OrderService.Domain.QueryParams;
+using shared.cache;
 using shared.events;
 using System;
 using System.Collections.Generic;
@@ -27,19 +28,23 @@ namespace OrderService.BLL.Services
         private CheckOrder.CheckOrderClient catalogClient;
         private IPublishEndpoint publishEndpoint;
         private ILiqPayService liqPayService;
+        private readonly IEntityCacheInvalidationService<Gift> cacheInvalidationService;
+
 
         public OrderServiceImpl(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             CheckOrder.CheckOrderClient catalogClient,
             IPublishEndpoint publishEndpoint,
-            ILiqPayService liqPayService)
+            ILiqPayService liqPayService,
+            IEntityCacheInvalidationService<Gift> cacheInvalidationService)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
             this.catalogClient = catalogClient;
             this.publishEndpoint = publishEndpoint;
             this.liqPayService = liqPayService;
+            this.cacheInvalidationService = cacheInvalidationService;
         }
 
         public async Task<string> GeneratePaymentUrlAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
@@ -319,6 +324,7 @@ namespace OrderService.BLL.Services
                         gift.AvailableCount -= orderGift.Count;
                         gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
                         unitOfWork.Gifts.Update(gift);
+                        await cacheInvalidationService.InvalidateByIdAsync(gift.Id);
                     }
                 }
 
@@ -365,6 +371,7 @@ namespace OrderService.BLL.Services
                     };
                     await publishEndpoint.Publish(orderAddressEvent, cancellationToken);
                 }
+                await cacheInvalidationService.InvalidateAllAsync();
             }
         }
 
