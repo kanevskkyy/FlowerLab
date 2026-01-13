@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
+import axiosClient from "../../api/axiosClient";
 import "./ResetPassword.css";
 
 // Icons
@@ -46,13 +47,29 @@ export default function ResetPassword() {
   });
 
   const onSubmit = async (data) => {
+    const token = searchParams.get("token");
+    const userId = searchParams.get("userId");
+
+    if (!token || !userId) {
+      toast.error("Invalid link parameters.");
+      return;
+    }
+
     try {
-      console.log("Setting new password:", data.password);
+      console.log("Setting new password...");
+      await axiosClient.post("/api/users/auth/reset-password", {
+        userId: userId,
+        token: token,
+        newPassword: data.password,
+        confirmPassword: data.password // Backend requires this for validation
+      });
+
       toast.success("Password successfully changed!");
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to reset password.");
+      const msg = error.response?.data?.message || "Failed to reset password.";
+      toast.error(msg);
     }
   };
 

@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import axiosClient from "../../api/axiosClient";
 import "./Cabinet.css";
 
 import Header from "../../components/Header/Header";
@@ -41,54 +43,105 @@ export default function Cabinet() {
     email: user?.email || "youremail@gmail.com",
   });
 
-  const [addresses, setAddresses] = useState({
-    address1: "Chernivtsi, Street Vyshneva, 32",
-    address2: "Chernivtsi, Street Medova, 19",
-  });
+  /* ===== ADDRESSES STATE ===== */
+  const [addressList, setAddressList] = useState([]);
+  const [newAddress, setNewAddress] = useState("");
+  
+  /* ===== ORDERS STATE ===== */
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
+  /* ... form handlers ... */
   const onChange = (key) => (e) =>
     setForm((p) => ({ ...p, [key]: e.target.value }));
 
-  const onAddressChange = (key) => (e) =>
-    setAddresses((p) => ({ ...p, [key]: e.target.value }));
+  /* ... address handlers ... */
+  const fetchAddresses = async () => {
+    try {
+      const { data } = await axiosClient.get("/api/users/me/addresses");
+      setAddressList(data);
+    } catch (error) {
+      console.error("Failed to fetch addresses:", error);
+    }
+  };
 
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+       // "pageSize=100" to get all recent orders, simpler for now than pagination
+      const { data } = await axiosClient.get("/api/orders/my?pageNumber=1&pageSize=100");
+      
+      // Map backend DTO to frontend structure
+      const mappedOrders = data.items.map(order => ({
+        id: `№${order.id.substring(0, 8).toUpperCase()}`, // Short ID for display
+        // Format date: "10:06 · 10.25.2023"
+        date: new Date(order.createdAt).toLocaleString('uk-UA', { 
+           hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric', year: 'numeric' 
+        }), 
+        type: order.items.length > 1 ? "multi" : "single",
+        status: order.status.name, // Assuming status object has name
+        total: order.totalPrice,
+        currency: "₴",
+        items: order.items.map(item => ({
+           title: item.bouquetName,
+           qty: `${item.count} pc`,
+           img: item.bouquetImage,
+           price: item.price
+        }))
+      }));
+      setOrders(mappedOrders);
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+      // toast.error("Failed to load orders"); // Optional
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === TABS.ADDRESSES) fetchAddresses();
+    if (activeTab === TABS.ORDERS) fetchOrders();
+  }, [activeTab]);
+
+  /* ... handlers ... */
   const handleSignOut = () => {
     logout();
     navigate("/login", { replace: true });
   };
 
-  const handleSaveAddresses = () => {
-    // тут потім буде запит на бек
-    // зараз просто демо:
-    console.log("Saved addresses:", addresses);
+
+
+  const handleSaveAddress = async () => {
+    if (!newAddress.trim()) return;
+    try {
+      await axiosClient.post("/api/users/me/addresses", {
+        address: newAddress,
+        isDefault: false, // Defaulting to false for now
+      });
+      setNewAddress("");
+      toast.success("Address added successfully!");
+      fetchAddresses();
+    } catch (error) {
+      console.error("Failed to save address:", error);
+      toast.error("Failed to save address.");
+    }
   };
 
-  /* ===== MOCK ORDERS ===== */
-  const orders = [
-    {
-      id: "№1006061",
-      date: "10:06 · 10.25.10.25",
-      type: "single",
-      status: "being processed",
-      total: 1000,
-      currency: "₴",
-      items: [{ title: "Bouquet Orchids", qty: "1 pc", img: bouquet1 }],
-    },
-    {
-      id: "№1006062",
-      date: "10:06 · 10.25.10.25",
-      type: "multi",
-      status: "completed",
-      total: 3000,
-      currency: "₴",
-      items: [
-        { title: "Bouquet 101 Roses", img: bouquet2 },
-        { title: "Bouquet Pinky Promise", img: bouquet3 },
-        { title: "Bouquet Ranunculus", img: bouquet4 },
-      ],
-    },
-  ];
+  const handleDeleteAddress = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this address?")) return;
+    try {
+      await axiosClient.delete(`/api/users/me/addresses/${id}`);
+      toast.success("Address deleted!");
+      fetchAddresses();
+    } catch (error) {
+      console.error("Failed to delete address:", error);
+      toast.error("Failed to delete address.");
+    }
+  };
 
+  /* ... existing orders code ... */
+
+  /* ===== RENDER ===== */
   return (
     <div className="cabinet-page">
       <Header onMenuOpen={() => setMenuOpen(true)} />
@@ -96,7 +149,7 @@ export default function Cabinet() {
 
       <main className="cabinet-main">
         <div className="cabinet-shell">
-          {/* ===== SIDEBAR ===== */}
+          {/* ... sidebar ... */}
           <aside className="cabinet-sidebar">
             <button
               className={`cabinet-nav-item ${
@@ -227,6 +280,13 @@ export default function Cabinet() {
                 </div>
 
                 <div className="orders-list">
+                  {!ordersLoading && orders.length === 0 && (
+                    <div className="orders-empty">
+                       <img src={OrderIcon} className="orders-empty-icon" alt="" />
+                       <span>You haven't placed any orders yet.</span>
+                    </div>
+                  )}
+
                   {orders.map((order) => (
                     <div key={order.id} className="order-card">
                       <div className="order-meta">
@@ -299,23 +359,32 @@ export default function Cabinet() {
                 <h1 className="cabinet-title">Saved Addresses</h1>
 
                 <div className="cabinet-grid-1">
-                  <div className="cabinet-field">
-                    <label>Address</label>
-                    <input
-                      value={addresses.address1}
-                      onChange={onAddressChange("address1")}
-                      placeholder="Chernivtsi, Street Vyshneva, 32"
-                    />
-                  </div>
+                 {/* List Existing Addresses */}
+                 {addressList.map((addr) => (
+                    <div key={addr.id} className="cabinet-pill" style={{ marginBottom: "1rem" }}>
+                      <div className="cabinet-pill-left">
+                        <img src={AddressIcon} className="cabinet-pill-icon" alt="" />
+                        <span className="cabinet-pill-text">{addr.address}</span>
+                      </div>
+                      <button 
+                        className="cabinet-pill-btn cabinet-delete-btn" 
+                        type="button"
+                        onClick={() => handleDeleteAddress(addr.id)}
+                        title="Delete address"
+                      >
+                         <img src={TrashIcon} alt="Delete" style={{width: 20, height: 20}}/>
+                      </button>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="cabinet-grid-1">
+                <div className="cabinet-grid-1" style={{ marginTop: "2rem" }}>
                   <div className="cabinet-field">
-                    <label>Secondary address*</label>
+                    <label>Add new address</label>
                     <input
-                      value={addresses.address2}
-                      onChange={onAddressChange("address2")}
-                      placeholder="Chernivtsi, Street Medova, 19"
+                      value={newAddress}
+                      onChange={(e) => setNewAddress(e.target.value)}
+                      placeholder="Enter new address..."
                     />
                   </div>
                 </div>
@@ -323,9 +392,10 @@ export default function Cabinet() {
                 <button
                   className="cabinet-save cabinet-addresses-save"
                   type="button"
-                  onClick={handleSaveAddresses}
+                  onClick={handleSaveAddress}
+                  disabled={!newAddress.trim()}
                 >
-                  Save changes
+                  Add Address
                 </button>
               </div>
             )}

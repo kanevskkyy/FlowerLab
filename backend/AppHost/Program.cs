@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using DotNetEnv;
 using Projects;
+using StackExchange.Redis;
 
 Env.Load();
 

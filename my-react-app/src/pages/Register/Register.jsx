@@ -4,12 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import "./Register.css";
-// import { useAuth } from "../../context/useAuth"; // Можна прибрати, якщо ми не пишемо в контекст одразу
 
-// 1. Додаємо імпорт API клієнта
+// 1. Імпорт API клієнта
 import axiosClient from "../../api/axiosClient";
 
-// SVG-іконки (Ті самі, що ти надав)
+// SVG-іконки
 import logoIcon from "../../assets/icons/logo.svg";
 import lockIcon from "../../assets/icons/lock.svg";
 import hideIcon from "../../assets/icons/hide.svg";
@@ -17,12 +16,14 @@ import showIcon from "../../assets/icons/show.svg";
 import messageIcon from "../../assets/icons/message.svg";
 import toast from "react-hot-toast";
 
-// Схема валідації (Zod)
+// Схема валідації
 const schema = z
   .object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    phone: z.string().regex(/^\+?[0-9]{10,12}$/, "Invalid phone format"),
+    phone: z
+      .string()
+      .regex(/^\+380\d{9}$/, "Format: +380XXXXXXXXX"),
     email: z.string().min(1, "Email is required").email("Invalid email"),
     password: z.string().min(8, "Min 8 characters"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
@@ -34,16 +35,13 @@ const schema = z
 
 export default function Register() {
   const navigate = useNavigate();
-  // const { register: registerUser } = useAuth(); // Вже не потрібно для API запиту
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Підключення форми
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }, // додав isSubmitting для блокування кнопки
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
     mode: "onBlur",
@@ -52,36 +50,27 @@ export default function Register() {
   // 2. Оновлена функція відправки на Бекенд
   const onSubmit = async (data) => {
     try {
-      // Формуємо DTO згідно з вимогами UsersService
+      // Формуємо DTO
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName,
-        phoneNumber: data.phone, // Мапимо phone -> phoneNumber
+        phoneNumber: data.phone,
         email: data.email,
         password: data.password,
         confirmPassword: data.confirmPassword,
       };
 
-      // Відправка POST запиту на Gateway -> UsersService
-      await axiosClient.post("/auth/registration", payload);
 
-      toast.success("Registration successful! Please sign in.");
+      await axiosClient.post("/api/users/auth/register", payload);
 
-      // Переходимо на логін, бо бекенд вимагає входу для отримання токена
-      navigate("/login");
+      toast.success("Registration successful! Please check your email.");
+      navigate("/email-confirmation-pending");
     } catch (error) {
       console.error("Registration error:", error);
 
-      // Витягуємо текст помилки з бекенду
-      const errorMsg =
-        error.response?.data?.message ||
-        error.response?.data ||
-        "Registration failed.";
+      let errorMsg = "Registration failed.";
 
-      // Якщо помилка прийшла як об'єкт, показуємо загальне повідомлення
-      toast.error(
-        typeof errorMsg === "string" ? errorMsg : "Check your input data."
-      );
+      toast.error(errorMsg);
     }
   };
 
@@ -89,7 +78,6 @@ export default function Register() {
     <div className="register-page">
       <header className="header">
         <div className="header-left"></div>
-
         <div className="logo">
           <img
             src={logoIcon}
@@ -98,7 +86,6 @@ export default function Register() {
             onClick={() => navigate("/")}
           />
         </div>
-
         <div className="header-right"></div>
       </header>
 
@@ -187,7 +174,6 @@ export default function Register() {
                 <span className="input-icon left">
                   <img src={lockIcon} alt="lock" className="field-icon" />
                 </span>
-
                 <input
                   type={showPassword ? "text" : "password"}
                   className={`input-base with-left-icon with-right-icon ${
@@ -196,7 +182,6 @@ export default function Register() {
                   placeholder="••••••••"
                   {...register("password")}
                 />
-
                 <button
                   type="button"
                   className="input-icon-btn right"
@@ -220,7 +205,6 @@ export default function Register() {
                 <span className="input-icon left">
                   <img src={lockIcon} alt="lock" className="field-icon" />
                 </span>
-
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   className={`input-base with-left-icon with-right-icon ${
@@ -229,7 +213,6 @@ export default function Register() {
                   placeholder="Password"
                   {...register("confirmPassword")}
                 />
-
                 <button
                   type="button"
                   className="input-icon-btn right"

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
 import "./ForgotPassword.css";
+import axiosClient from "../../api/axiosClient";
 
 // Icons
 import logoIcon from "../../assets/icons/logo.svg";
@@ -28,16 +29,15 @@ export default function ForgotPassword() {
 
   const onSubmit = async (data) => {
     try {
-      console.log("Email sent to:", data.email);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Recovery link sent!");
-
-      setTimeout(() => {
-        navigate("/reset-password?token=demo-token-123");
-      }, 1500);
+      await axiosClient.post("/api/users/auth/forgot-password", data);
+      toast.success("Recovery link sent! Check your email.");
+      
+      // Optional: Navigate to home or stay here
+      // setTimeout(() => navigate("/"), 2000); 
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong.");
+      const msg = error.response?.data?.message || "Something went wrong.";
+      toast.error(msg);
     }
   };
 

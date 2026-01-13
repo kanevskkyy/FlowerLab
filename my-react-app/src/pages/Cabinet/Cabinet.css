@@ -544,6 +544,21 @@
   font-size: 12px;
 }
 
-.cabinet-addresses-save {
-  margin-top: 60px;
+
+.orders-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.orders-empty-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.3;
+  margin-bottom: 8px;
 }
