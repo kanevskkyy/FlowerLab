@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import "./Register.css";
-import { useAuth } from "../../context/useAuth";
+// import { useAuth } from "../../context/useAuth"; // Можна прибрати, якщо ми не пишемо в контекст одразу
 
-// SVG-іконки
+// 1. Додаємо імпорт API клієнта
+import axiosClient from "../../api/axiosClient";
+
+// SVG-іконки (Ті самі, що ти надав)
 import logoIcon from "../../assets/icons/logo.svg";
 import lockIcon from "../../assets/icons/lock.svg";
 import hideIcon from "../../assets/icons/hide.svg";
@@ -15,14 +18,13 @@ import messageIcon from "../../assets/icons/message.svg";
 import toast from "react-hot-toast";
 
 // Схема валідації (Zod)
-// Прибрав DateOfBirth та Agree, бо їх немає у вашому макеті
 const schema = z
   .object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     phone: z.string().regex(/^\+?[0-9]{10,12}$/, "Invalid phone format"),
     email: z.string().min(1, "Email is required").email("Invalid email"),
-    password: z.string().min(6, "Min 6 characters"),
+    password: z.string().min(8, "Min 8 characters"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -32,7 +34,7 @@ const schema = z
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register: registerUser } = useAuth();
+  // const { register: registerUser } = useAuth(); // Вже не потрібно для API запиту
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,28 +43,45 @@ export default function Register() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting }, // додав isSubmitting для блокування кнопки
   } = useForm({
     resolver: zodResolver(schema),
     mode: "onBlur",
   });
 
+  // 2. Оновлена функція відправки на Бекенд
   const onSubmit = async (data) => {
     try {
-      const { ...userData } = data;
-      // Передаємо дані у форматі, який очікує ваш контекст
-      await registerUser({
-        name: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        phone: userData.phone,
-        password: userData.password,
-      });
-      toast.success("Welcome! Registration successful.");
-      navigate("/cabinet", { replace: true });
+      // Формуємо DTO згідно з вимогами UsersService
+      const payload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phoneNumber: data.phone, // Мапимо phone -> phoneNumber
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      };
+
+      // Відправка POST запиту на Gateway -> UsersService
+      await axiosClient.post("/auth/registration", payload);
+
+      toast.success("Registration successful! Please sign in.");
+
+      // Переходимо на логін, бо бекенд вимагає входу для отримання токена
+      navigate("/login");
     } catch (error) {
-      console.error(error);
-      toast.error("Registration failed. Email might be taken.");
+      console.error("Registration error:", error);
+
+      // Витягуємо текст помилки з бекенду
+      const errorMsg =
+        error.response?.data?.message ||
+        error.response?.data ||
+        "Registration failed.";
+
+      // Якщо помилка прийшла як об'єкт, показуємо загальне повідомлення
+      toast.error(
+        typeof errorMsg === "string" ? errorMsg : "Check your input data."
+      );
     }
   };
 
@@ -229,8 +248,11 @@ export default function Register() {
               )}
             </div>
 
-            <button type="submit" className="signup-main-btn">
-              Sign up
+            <button
+              type="submit"
+              className="signup-main-btn"
+              disabled={isSubmitting}>
+              {isSubmitting ? "Signing up..." : "Sign up"}
             </button>
 
             <button
