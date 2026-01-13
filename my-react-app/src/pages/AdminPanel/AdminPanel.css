@@ -4,7 +4,6 @@
   display: flex; /* Flex Column: Header зверху, решта знизу */
   flex-direction: column;
   background: #ffffff;
-  font-family: "Inter", sans-serif;
 }
 
 /* TOPBAR (HEADER) */

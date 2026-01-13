@@ -6,6 +6,9 @@ import * as z from "zod";
 import "./Login.css";
 import { useAuth } from "../../context/useAuth";
 
+// 1. Додаємо імпорт API клієнта
+import axiosClient from "../../api/axiosClient";
+
 // Icons
 import logoIcon from "../../assets/icons/logo.svg";
 import lockIcon from "../../assets/icons/lock.svg";
@@ -14,7 +17,6 @@ import showIcon from "../../assets/icons/show.svg";
 import messageIcon from "../../assets/icons/message.svg";
 import toast from "react-hot-toast";
 
-// Схема валідації
 const schema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
@@ -34,15 +36,39 @@ export default function Login() {
     mode: "onBlur",
   });
 
+  // 2. Оновлена логіка входу
   const onSubmit = async (data) => {
     try {
       console.log("Logging in...", data);
-      await login(data); // Викликаємо функцію з контексту
-      toast.success("Welcome back!");
-      navigate("/cabinet", { replace: true });
+
+      // Відправляємо запит на Gateway -> UsersService
+      const response = await axiosClient.post("/auth/login", {
+        email: data.email,
+        password: data.password,
+      });
+
+      // Отримуємо токен з відповіді
+      const { token } = response.data;
+
+      if (token) {
+        // Зберігаємо токен
+        localStorage.setItem("token", token);
+
+        // Оновлюємо стан авторизації
+        // Передаємо токен, щоб AuthProvider міг одразу підтягнути юзера
+        await login(token);
+
+        toast.success("Welcome back!");
+        navigate("/cabinet", { replace: true });
+      }
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Login failed. Check your email or password.");
+
+      // Обробка помилок від бекенду
+      const errorMsg =
+        error.response?.data?.message ||
+        "Login failed. Check your email or password.";
+      toast.error(typeof errorMsg === "string" ? errorMsg : "Login failed.");
     }
   };
 
@@ -63,13 +89,15 @@ export default function Login() {
 
       <main className="login-content">
         <div className="login-box">
-          <h2 className="login-title">SIGN IN</h2>
+          {/* Зверни увагу: Font-family для заголовка має бути Jomolhari у CSS */}
+          <h2 className="login-title">Sign in</h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* Email */}
+            {/* Email Field */}
             <div className="form-field full-width">
               <label className="field-label">Email</label>
               <div className="input-row">
+                {/* Додано клас with-right-icon для правильного padding */}
                 <input
                   type="email"
                   className={`input-base with-right-icon ${
@@ -87,7 +115,7 @@ export default function Login() {
               )}
             </div>
 
-            {/* Password */}
+            {/* Password Field */}
             <div className="form-field full-width">
               <label className="field-label">Password</label>
               <div className="input-row">
@@ -95,6 +123,7 @@ export default function Login() {
                   <img src={lockIcon} alt="lock" className="field-icon" />
                 </span>
 
+                {/* Додано класи with-left-icon та with-right-icon */}
                 <input
                   type={showPassword ? "text" : "password"}
                   className={`input-base with-left-icon with-right-icon ${
@@ -120,17 +149,25 @@ export default function Login() {
               )}
             </div>
 
-            {/* Submit Button */}
+            {/* Main Sign In Button */}
             <button type="submit" className="login-main-btn">
               Sign in
             </button>
 
-            {/* Link to Register */}
+            {/* Forgot Password Link (Нове) */}
+            <button
+              type="button"
+              className="forgot-password-link"
+              onClick={() => navigate("/forgot-password")}>
+              Forgot your password?
+            </button>
+
+            {/* Updated Footer Section */}
             <div className="login-footer">
-              <span>Don't have an account?</span>
+              <span>Don't have an account yet?</span>
               <button
                 type="button"
-                className="back-to-register-btn"
+                className="signup-outlined-btn"
                 onClick={() => navigate("/register")}>
                 Sign up
               </button>

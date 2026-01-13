@@ -28,6 +28,7 @@ body,
 .login-page .logo-img {
   height: 32px;
   object-fit: contain;
+  cursor: pointer;
 }
 
 /* CONTENT */
@@ -82,13 +83,26 @@ body,
   box-sizing: border-box;
 }
 
+/* --- Padding modifiers for inputs with icons --- */
+.input-base.with-left-icon {
+  padding-left: 40px;
+}
 
+.input-base.with-right-icon {
+  padding-right: 40px;
+}
+
+.input-base.with-left-icon.with-right-icon {
+  padding-left: 40px;
+  padding-right: 40px;
+}
 
 .input-icon {
   position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none; /* Щоб кліки проходили крізь іконку */
 }
 
 .input-icon.left {
@@ -115,8 +129,10 @@ body,
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
+/* Main Login Button */
 .login-main-btn {
   width: 100%;
   margin-top: 10px;
@@ -134,23 +150,54 @@ body,
   background: #d4b5c3;
 }
 
-.login-footer {
-  margin-top: 20px;
+/* Forgot Password Link */
+.forgot-password-link {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
   font-size: 14px;
-  color: #666;
+  font-weight: 400;
 }
 
-.back-to-register-btn {
-  border: none;
-  background: none;
-  text-decoration: underline;
+/* Footer Section (Sign up) */
+.login-footer {
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-footer span {
+  font-size: 14px;
+  color: #000;
+}
+
+/* Sign Up Button (Outlined) */
+.signup-outlined-btn {
+  width: 160px;
+  padding: 10px 0;
+  border-radius: 999px;
+  border: 1px solid #F3E1ED; /* Світло-рожевий контур */
+  background: #ffffff;
   cursor: pointer;
   font-size: 14px;
-  margin-left: 5px;
-  color: #000;
   font-weight: 500;
+  color: #000;
+  transition: all 0.2s;
 }
 
+.signup-outlined-btn:hover {
+  background-color: #fdf5fa;
+  border-color: #e7d0e1;
+}
+
+/* Validation Errors */
 .input-error {
   border-color: #d32f2f !important;
   background-color: #fffbfb !important;

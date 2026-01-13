@@ -28,6 +28,8 @@ import AdminCatalogEdit from "./pages/AdminCatalogEdit/AdminCatalogEdit";
 import AdminOrderDetails from "./pages/AdminOrderDetails/AdminOrderDetails";
 import NotFound from "./pages/NotFound/NotFound";
 import Gifts from "./pages/Gifts/Gifts";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 
 function App() {
   return (
@@ -68,6 +70,8 @@ function App() {
 
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* user protected */}
               <Route
