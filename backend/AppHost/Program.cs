@@ -8,6 +8,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var postgresPassword = builder.AddParameter("postgres-password", secret: true);
 
+var loginRabbitMQ = builder.AddParameter("rabbitmq-login", secret: true);
+var passwordRabbitMQ = builder.AddParameter("rabbitmq-password", secret: true);
+
 var postgres = builder.AddPostgres("flower-lab-postgres", password: postgresPassword)
     .WithImage("postgres:16")
     .WithDataVolume("flowerlab-postgres");
@@ -25,7 +28,7 @@ var redis = builder.AddRedis("flowerlab-redis")
 
 var mongoReviews = mongo.AddDatabase("FlowerLabReviews");
 
-var rabbitmq = builder.AddRabbitMQ("rabbitmq")
+var rabbitmq = builder.AddRabbitMQ("rabbitmq", userName: loginRabbitMQ, password: passwordRabbitMQ)
     .WithManagementPlugin()
     .WithDataVolume("FlowerLabRabbitMQ");
 

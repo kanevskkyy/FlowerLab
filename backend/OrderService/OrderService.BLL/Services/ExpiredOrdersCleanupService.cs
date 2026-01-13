@@ -33,7 +33,7 @@ namespace OrderService.BLL.Services
                 {
                     using var scope = scopeFactory.CreateScope();
                     var unitOfWork =scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var cacheInvalidationService =scope.ServiceProvider.GetRequiredService<IEntityCacheInvalidationService<Gift>>();
+                    var cacheInvalidationService = scope.ServiceProvider.GetRequiredService<IEntityCacheInvalidationService<Gift>>();
 
                     var now = DateTime.UtcNow;
 
@@ -51,6 +51,7 @@ namespace OrderService.BLL.Services
                         foreach (var giftReservation in order.GiftReservations)
                         {
                             unitOfWork.GiftReservations.Delete(giftReservation);
+                            await cacheInvalidationService.InvalidateByIdAsync(giftReservation.GiftId);
                         }
 
                         unitOfWork.Orders.Delete(order);
