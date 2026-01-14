@@ -31,7 +31,7 @@ const TABS = {
 
 export default function Cabinet() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, login, logout } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(TABS.PERSONAL);
@@ -41,7 +41,27 @@ export default function Cabinet() {
     lastName: user?.lastName || "",
     phone: user?.phone || "",
     email: user?.email || "youremail@gmail.com",
+    photoUrl: user?.photoUrl || "",
   });
+
+  /* ===== AVATAR STATE ===== */
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(user?.photoUrl || "");
+
+
+  /* ===== PASSWORD CHANGE STATE ===== */
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  /* ... */
+
+  const onPasswordChange = (key) => (e) =>
+    setPasswordForm((p) => ({ ...p, [key]: e.target.value }));
+
 
   /* ===== ADDRESSES STATE ===== */
   const [addressList, setAddressList] = useState([]);
@@ -54,6 +74,15 @@ export default function Cabinet() {
   /* ... form handlers ... */
   const onChange = (key) => (e) =>
     setForm((p) => ({ ...p, [key]: e.target.value }));
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
 
   /* ... address handlers ... */
   const fetchAddresses = async () => {
@@ -68,12 +97,10 @@ export default function Cabinet() {
   const fetchOrders = async () => {
     setOrdersLoading(true);
     try {
-       // "pageSize=100" to get all recent orders, simpler for now than pagination
       const { data } = await axiosClient.get("/api/orders/my?pageNumber=1&pageSize=100");
       
-      // Map backend DTO to frontend structure
       const mappedOrders = data.items.map(order => ({
-        id: `№${order.id.substring(0, 8).toUpperCase()}`, // Short ID for display
+        id: `№${order.id.substring(0, 8).toUpperCase()}`,
         // Format date: "10:06 · 10.25.2023"
         date: new Date(order.createdAt).toLocaleString('uk-UA', { 
            hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric', year: 'numeric' 
@@ -109,7 +136,76 @@ export default function Cabinet() {
     navigate("/login", { replace: true });
   };
 
+  const handleProfileUpdate = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("FirstName", form.firstName);
+      formData.append("LastName", form.lastName);
+      
+      // Sanitize phone: remove spaces and dashes for the backend
+      const cleanPhone = form.phone.replace(/[\s-]/g, "");
+      formData.append("PhoneNumber", cleanPhone);
+      
+      if (selectedFile) {
+        formData.append("Photo", selectedFile);
+      }
 
+      const response = await axiosClient.put("/api/users/me", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      // Refresh user data in AuthContext with NEW token
+      const newToken = response.data.token || response.data.accessToken;
+      if (newToken) {
+        await login(newToken);
+      }
+
+      toast.success("Profile updated successfully! ✨");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      
+      // Handle detailed validation errors from backend
+      const responseData = error.response?.data;
+      if (responseData?.errors) {
+        // If errors is an array (our middleware format)
+        if (Array.isArray(responseData.errors)) {
+          const firstErr = responseData.errors[0];
+          toast.error(firstErr?.error || firstErr?.Error || "Validation error");
+        } 
+        // If errors is an object (ASP.NET default format)
+        else if (typeof responseData.errors === 'object') {
+          const firstKey = Object.keys(responseData.errors)[0];
+          const firstMsg = responseData.errors[firstKey][0];
+          toast.error(`${firstKey}: ${firstMsg}`);
+        }
+      } else {
+        toast.error(responseData?.error || responseData?.message || "Failed to update profile");
+      }
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New passwords do not match!");
+      return;
+    }
+
+    try {
+      await axiosClient.put("/api/users/me/password", {
+        oldPassword: passwordForm.oldPassword,
+        newPassword: passwordForm.newPassword,
+        confirmPassword: passwordForm.confirmPassword,
+      });
+
+      toast.success("Password changed successfully! 🔐");
+      setIsPasswordModalOpen(false);
+      setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error) {
+      console.error("Failed to change password:", error);
+      toast.error(error.response?.data?.message || "Failed to change password");
+    }
+  };
 
   const handleSaveAddress = async () => {
     if (!newAddress.trim()) return;
@@ -199,6 +295,32 @@ export default function Cabinet() {
               <div className="cabinet-panel-inner">
                 <h1 className="cabinet-title">Personal information</h1>
 
+                <div className="cabinet-avatar-section">
+                  <div className="cabinet-avatar-wrapper" onClick={() => document.getElementById("avatar-input").click()}>
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="Avatar" className="cabinet-avatar-img" />
+                    ) : (
+                      <div className="cabinet-avatar-placeholder">
+                        {form.firstName.charAt(0)}{form.lastName.charAt(0)}
+                      </div>
+                    )}
+                    <div className="cabinet-avatar-overlay">
+                      <span>Change Photo</span>
+                    </div>
+                  </div>
+                  <input
+                    id="avatar-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                  <div className="cabinet-avatar-info">
+                    <h3>Profile Photo</h3>
+                    <p>Click to update your avatar</p>
+                  </div>
+                </div>
+
                 <div className="cabinet-grid-2">
                   <div className="cabinet-field">
                     <label>First Name</label>
@@ -246,7 +368,13 @@ export default function Cabinet() {
                       <img src={LockIcon} className="cabinet-pill-icon" alt="" />
                       <span className="cabinet-pill-text">Password</span>
                     </div>
-                    <button className="cabinet-pill-btn" type="button">Change</button>
+                    <button 
+                      className="cabinet-pill-btn" 
+                      type="button"
+                      onClick={() => setIsPasswordModalOpen(true)}
+                    >
+                      Change
+                    </button>
                   </div>
                 </div>
 
@@ -259,7 +387,13 @@ export default function Cabinet() {
                   </div>
                 </div>
 
-                <button className="cabinet-save" type="button">Save changes</button>
+                <button 
+                  className="cabinet-save" 
+                  type="button"
+                  onClick={handleProfileUpdate}
+                >
+                  Save changes
+                </button>
               </div>
             )}
 
@@ -294,7 +428,7 @@ export default function Cabinet() {
                         <span className="order-meta-date">{order.date}</span>
                       </div>
 
-                      {order.type === "single" && (
+                      {order.type === "single" && order.items?.[0] && (
                         <div className="order-single">
                           <div className="order-single-img">
                             <img src={order.items[0].img} alt="" />
@@ -322,15 +456,15 @@ export default function Cabinet() {
                       {order.type === "multi" && (
                         <>
                           <div className="order-multi-grid">
-                            {order.items.map((item, i) => (
+                            {order.items?.map((item, i) => (
                               <div key={i}>
                                 <div className="order-item-img">
-                                  <img src={item.img} alt="" />
+                                  {item?.img && <img src={item.img} alt="" />}
                                 </div>
-                                <div className="order-item-title">{item.title}</div>
+                                <div className="order-item-title">{item?.title}</div>
                                 <div className="order-item-bottom">
-                                  <span>{order.total / 3} ₴</span>
-                                  <span>1 pc</span>
+                                  <span>{item?.price} ₴</span>
+                                  <span>{item?.qty}</span>
                                 </div>
                               </div>
                             ))}
@@ -402,6 +536,62 @@ export default function Cabinet() {
           </section>
         </div>
       </main>
+
+      {/* ===== PASSWORD MODAL ===== */}
+      {isPasswordModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content cabinet-password-modal">
+            <h2 className="modal-title">Change Password</h2>
+            <form onSubmit={handlePasswordChange}>
+              <div className="cabinet-field">
+                <label>Old Password</label>
+                <input
+                  type="password"
+                  value={passwordForm.oldPassword}
+                  onChange={onPasswordChange("oldPassword")}
+                  placeholder="********"
+                  required
+                />
+              </div>
+
+              <div className="cabinet-field">
+                <label>New Password</label>
+                <input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={onPasswordChange("newPassword")}
+                  placeholder="********"
+                  required
+                />
+              </div>
+
+              <div className="cabinet-field">
+                <label>Confirm New Password</label>
+                <input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={onPasswordChange("confirmPassword")}
+                  placeholder="********"
+                  required
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  className="modal-btn-cancel" 
+                  type="button" 
+                  onClick={() => setIsPasswordModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button className="modal-btn-save" type="submit">
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

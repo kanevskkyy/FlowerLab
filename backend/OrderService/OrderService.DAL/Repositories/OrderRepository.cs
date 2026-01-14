@@ -80,7 +80,7 @@ namespace OrderService.DAL.Repositories
                 .Take(parameters.PageSize)
                 .ToListAsync(cancellationToken);
 
-            return new PagedList<Order>(items, totalCount, parameters.PageNumber, parameters.PageSize);
+            return PagedList<Order>.Create(items, totalCount, parameters.PageNumber, parameters.PageSize);
         }
     }
 }

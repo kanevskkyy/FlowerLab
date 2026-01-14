@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import axiosClient from "../../api/axiosClient";
+import toast from "react-hot-toast";
 import "./AdminBouquetForm.css";
-
-const CATEGORIES = {
-  events: ["Birthday", "Wedding", "Engagement", "Anniversary"],
-  forWho: ["Mom", "Wife", "Husband", "Kid", "Teacher", "Co-worker"],
-  flowerTypes: ["Peony", "Rose", "Lily", "Tulip", "Orchid", "Hydrangea"],
-};
 
 export default function AdminBouquetForm() {
   const navigate = useNavigate();
@@ -14,11 +10,15 @@ export default function AdminBouquetForm() {
   const location = useLocation();
 
   const isEditMode = Boolean(id);
-  // Перевіряємо за URL, чи ми додаємо подарунок
   const isGiftMode = location.pathname.includes("gifts");
 
-  // ✅ ВИПРАВЛЕНО: Категорія встановлюється правильно одразу тут.
-  // useEffect для цього більше не потрібен.
+  // Metadata from API
+  const [events, setEvents] = useState([]);
+  const [recipients, setRecipients] = useState([]);
+  const [flowers, setFlowers] = useState([]);
+  const [sizes, setSizes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     title: "",
     price: "",
@@ -30,25 +30,62 @@ export default function AdminBouquetForm() {
     img: null,
   });
 
-  // useEffect для завантаження даних при редагуванні (залишаємо)
+  // Fetch metadata on mount
   useEffect(() => {
-    if (isEditMode) {
-      // Імітація завантаження даних
-      const timer = setTimeout(() => {
-        setFormData({
-          title: isGiftMode ? "Teddy Bear" : "Bouquet Roses",
-          price: isGiftMode ? "850" : "1500",
-          description: "Sample description...",
-          category: isGiftMode ? "Gifts" : "Bouquets",
-          events: ["Birthday"],
-          forWho: ["Mom"],
-          flowerTypes: isGiftMode ? [] : ["Rose"],
-          img: null,
-        });
-      }, 100);
-      return () => clearTimeout(timer);
+    const fetchMetadata = async () => {
+      try {
+        setLoading(true);
+        const [eventsRes, recipientsRes, flowersRes, sizesRes] =
+          await Promise.all([
+            axiosClient.get("/api/catalog/sizes"),
+            axiosClient.get("/api/catalog/flowers"),
+            axiosClient.get("/api/catalog/recipients"),
+            axiosClient.get("/api/catalog/events"),
+          ]);
+
+        setEvents(eventsRes.data);
+        setRecipients(recipientsRes.data);
+        setFlowers(flowersRes.data);
+        setSizes(sizesRes.data);
+      } catch (error) {
+        console.error("Failed to fetch metadata:", error);
+        toast.error("Failed to load form data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetadata();
+  }, []);
+
+  // Load bouquet data in edit mode
+  useEffect(() => {
+    if (isEditMode && !loading) {
+      const fetchBouquet = async () => {
+        try {
+          const response = await axiosClient.get(`/api/catalog/bouquets/${id}`);
+          const data = response.data;
+
+          setFormData({
+            title: data.name,
+            price: data.sizes[0]?.price || "",
+            description: data.description || "",
+            category: isGiftMode ? "Gifts" : "Bouquets",
+            events: data.events.map((e) => e.id),
+            forWho: data.recipients.map((r) => r.id),
+            flowerTypes: data.sizes[0]?.flowers.map((f) => f.id) || [],
+            img: data.mainPhotoUrl,
+            imgFile: null,
+          });
+        } catch (error) {
+          console.error("Failed to fetch bouquet:", error);
+          toast.error("Failed to load bouquet data");
+        }
+      };
+
+      fetchBouquet();
     }
-  }, [isEditMode, id, isGiftMode]);
+  }, [isEditMode, id, isGiftMode, loading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,17 +107,83 @@ export default function AdminBouquetForm() {
     const file = e.target.files[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, img: previewUrl }));
+      setFormData((prev) => ({ ...prev, img: previewUrl, imgFile: file }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Saving Product:", formData);
-    // Повертаємось на правильну вкладку
-    localStorage.setItem("adminActiveTab", isGiftMode ? "gifts" : "bouquets");
-    navigate("/admin");
+
+    try {
+      const data = new FormData();
+      data.append("Name", formData.title);
+      data.append("Description", formData.description || "");
+
+      // Add event IDs
+      formData.events.forEach((eventId) => {
+        data.append("EventIds", eventId);
+      });
+
+      // Add recipient IDs
+      formData.forWho.forEach((recipientId) => {
+        data.append("RecipientIds", recipientId);
+      });
+
+      // Create single size (M) with price
+      console.log("Available sizes:", sizes);
+      const sizeM = sizes.find((s) => s.name === "M" || s.sizeName === "M");
+      if (!sizeM) {
+        toast.error("Size M not found");
+        return;
+      }
+
+      data.append("Sizes[0].SizeId", sizeM.id);
+      data.append("Sizes[0].Price", formData.price);
+
+      // Add selected flowers with quantity 1
+      formData.flowerTypes.forEach((flowerId, index) => {
+        data.append(`Sizes[0].FlowerIds[${index}]`, flowerId);
+        data.append(`Sizes[0].FlowerQuantities[${index}]`, 1);
+      });
+
+      // Add images
+      if (formData.imgFile) {
+        data.append("MainPhoto", formData.imgFile);
+        data.append("Sizes[0].MainImage", formData.imgFile);
+      } else if (!isEditMode) {
+        toast.error("Please upload an image");
+        return;
+      }
+
+      if (isEditMode) {
+        await axiosClient.put(`/api/catalog/bouquets/${id}`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Bouquet updated successfully!");
+      } else {
+        await axiosClient.post("/api/catalog/bouquets", data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Bouquet created successfully!");
+      }
+
+      localStorage.setItem("adminActiveTab", isGiftMode ? "gifts" : "bouquets");
+      navigate("/admin");
+    } catch (error) {
+      console.error("Failed to save bouquet:", error);
+      toast.error(error.response?.data?.message || "Failed to save bouquet");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="abf-page">
+        <div className="abf-container">
+          <div style={{ textAlign: "center", padding: "2rem" }}>Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="abf-page">
@@ -176,18 +279,18 @@ export default function AdminBouquetForm() {
               <div className="abf-cat-group">
                 <h4>Events</h4>
                 <div className="abf-tags">
-                  {CATEGORIES.events.map((item) => (
+                  {events.map((item) => (
                     <label
-                      key={item}
+                      key={item.id}
                       className={`abf-tag ${
-                        formData.events.includes(item) ? "active" : ""
+                        formData.events.includes(item.id) ? "active" : ""
                       }`}>
                       <input
                         type="checkbox"
-                        checked={formData.events.includes(item)}
-                        onChange={() => handleCheckboxChange("events", item)}
+                        checked={formData.events.includes(item.id)}
+                        onChange={() => handleCheckboxChange("events", item.id)}
                       />
-                      {item}
+                      {item.name}
                     </label>
                   ))}
                 </div>
@@ -197,18 +300,18 @@ export default function AdminBouquetForm() {
               <div className="abf-cat-group">
                 <h4>For Who</h4>
                 <div className="abf-tags">
-                  {CATEGORIES.forWho.map((item) => (
+                  {recipients.map((item) => (
                     <label
-                      key={item}
+                      key={item.id}
                       className={`abf-tag ${
-                        formData.forWho.includes(item) ? "active" : ""
+                        formData.forWho.includes(item.id) ? "active" : ""
                       }`}>
                       <input
                         type="checkbox"
-                        checked={formData.forWho.includes(item)}
-                        onChange={() => handleCheckboxChange("forWho", item)}
+                        checked={formData.forWho.includes(item.id)}
+                        onChange={() => handleCheckboxChange("forWho", item.id)}
                       />
-                      {item}
+                      {item.name}
                     </label>
                   ))}
                 </div>
@@ -219,20 +322,20 @@ export default function AdminBouquetForm() {
                 <div className="abf-cat-group">
                   <h4>Flower Type</h4>
                   <div className="abf-tags">
-                    {CATEGORIES.flowerTypes.map((item) => (
+                    {flowers.map((item) => (
                       <label
-                        key={item}
+                        key={item.id}
                         className={`abf-tag ${
-                          formData.flowerTypes.includes(item) ? "active" : ""
+                          formData.flowerTypes.includes(item.id) ? "active" : ""
                         }`}>
                         <input
                           type="checkbox"
-                          checked={formData.flowerTypes.includes(item)}
+                          checked={formData.flowerTypes.includes(item.id)}
                           onChange={() =>
-                            handleCheckboxChange("flowerTypes", item)
+                            handleCheckboxChange("flowerTypes", item.id)
                           }
                         />
-                        {item}
+                        {item.name}
                       </label>
                     ))}
                   </div>

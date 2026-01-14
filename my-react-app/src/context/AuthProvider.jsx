@@ -42,6 +42,7 @@ export default function AuthProvider({ children }) {
             "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone"
           ] ||
           "",
+        photoUrl: decoded.PhotoUrl || "",
       };
     } catch (e) {
       console.error("Invalid token:", e);
@@ -59,6 +60,7 @@ export default function AuthProvider({ children }) {
 
   // Цю функцію викликає Login.jsx після успішного запиту
   const setAuth = useCallback((token) => {
+    localStorage.setItem("accessToken", token);
     const userData = decodeToken(token);
     setUser(userData);
   }, []);

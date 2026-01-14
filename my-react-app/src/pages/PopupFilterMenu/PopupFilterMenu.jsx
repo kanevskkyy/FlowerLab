@@ -1,13 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axiosClient from "../../api/axiosClient";
 import "./PopupFilterMenu.css";
 
 const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
+  const [metadata, setMetadata] = useState({
+    events: [],
+    recipients: [],
+    flowers: [],
+    sizes: [],
+  });
+
   const [price, setPrice] = useState(1000);
-  const [size, setSize] = useState("S");
-  const [quantity, setQuantity] = useState("51");
-  const [events, setEvents] = useState([]);
-  const [forWho, setForWho] = useState([]);
-  const [flowerType, setFlowerType] = useState([]);
+  const [selectedSizeId, setSelectedSizeId] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [selectedEventIds, setSelectedEventIds] = useState([]);
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState([]);
+  const [selectedFlowerIds, setSelectedFlowerIds] = useState([]);
+
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const [eventsRes, recipientsRes, flowersRes, sizesRes] =
+          await Promise.all([
+            axiosClient.get("/api/catalog/events"),
+            axiosClient.get("/api/catalog/recipients"),
+            axiosClient.get("/api/catalog/flowers"),
+            axiosClient.get("/api/catalog/sizes"),
+          ]);
+
+        setMetadata({
+          events: eventsRes.data,
+          recipients: recipientsRes.data,
+          flowers: flowersRes.data,
+          sizes: sizesRes.data,
+        });
+      } catch (error) {
+        console.error("Failed to fetch filter metadata:", error);
+      }
+    };
+
+    if (isOpen) {
+      fetchMetadata();
+    }
+  }, [isOpen]);
 
   const toggleArrayValue = (value, setter, array) => {
     setter(
@@ -17,25 +52,23 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
     );
   };
 
-  // ✅ ВИПРАВЛЕНО: Скидання фільтрів
   const resetFilters = () => {
-    setPrice(0); // Скидаємо ціну в 0 (щоб повзунок був на початку)
-    setSize(""); // Прибираємо вибір розміру
-    setQuantity(""); // Прибираємо вибір кількості
-    setEvents([]); // Очищаємо масиви
-    setForWho([]);
-    setFlowerType([]);
+    setPrice(0);
+    setSelectedSizeId("");
+    setQuantity("");
+    setSelectedEventIds([]);
+    setSelectedRecipientIds([]);
+    setSelectedFlowerIds([]);
   };
 
   const applyFilters = () => {
     onApply({
-      // Якщо ціна 0, передаємо її, щоб Catalog.jsx проігнорував фільтр (0 - falsy)
-      price: price === 0 ? null : price,
-      size,
-      quantity,
-      events,
-      forWho,
-      flowerType,
+      maxPrice: price === 0 ? null : price,
+      sizeIds: selectedSizeId ? [selectedSizeId] : [],
+      quantities: quantity ? [parseInt(quantity)] : [],
+      eventIds: selectedEventIds,
+      recipientIds: selectedRecipientIds,
+      flowerIds: selectedFlowerIds,
     });
     onClose();
   };
@@ -77,14 +110,15 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
         <div className="two-columns">
           <div>
             <p className="filter-label">Size</p>
-            {["S", "M", "L", "XL"].map((s) => (
-              <label key={s} className="radio-item">
+            {metadata.sizes.map((s) => (
+              <label key={s.id} className="radio-item">
                 <input
                   type="radio"
-                  checked={size === s}
-                  onChange={() => setSize(s)}
+                  name="size"
+                  checked={selectedSizeId === s.id}
+                  onChange={() => setSelectedSizeId(s.id)}
                 />
-                {s}
+                {s.name}
               </label>
             ))}
           </div>
@@ -95,6 +129,7 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
               <label key={q} className="radio-item">
                 <input
                   type="radio"
+                  name="quantity"
                   checked={quantity === q}
                   onChange={() => setQuantity(q)}
                 />
@@ -104,53 +139,60 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
           </div>
         </div>
 
-        {/* EVENT */}
-        <p className="filter-label">Event</p>
-        {["Birthday", "Wedding", "Engagement", "Anniversary"].map((e) => (
-          <label key={e} className="checkbox-item">
-            <input
-              type="checkbox"
-              checked={events.includes(e)}
-              onChange={() => toggleArrayValue(e, setEvents, events)}
-            />
-            {e}
-          </label>
-        ))}
+        <div className="filter-scroll-area">
+          {/* EVENT */}
+          <p className="filter-label">Event</p>
+          {metadata.events.map((e) => (
+            <label key={e.id} className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={selectedEventIds.includes(e.id)}
+                onChange={() =>
+                  toggleArrayValue(e.id, setSelectedEventIds, selectedEventIds)
+                }
+              />
+              {e.name}
+            </label>
+          ))}
 
-        {/* FOR WHO */}
-        <p className="filter-label">For who</p>
-        {["Mom", "Wife", "Husband", "Kid", "Teacher", "Co-worker"].map((p) => (
-          <label key={p} className="checkbox-item">
-            <input
-              type="checkbox"
-              checked={forWho.includes(p)}
-              onChange={() => toggleArrayValue(p, setForWho, forWho)}
-            />
-            {p}
-          </label>
-        ))}
+          {/* FOR WHO */}
+          <p className="filter-label">For who</p>
+          {metadata.recipients.map((r) => (
+            <label key={r.id} className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={selectedRecipientIds.includes(r.id)}
+                onChange={() =>
+                  toggleArrayValue(
+                    r.id,
+                    setSelectedRecipientIds,
+                    selectedRecipientIds
+                  )
+                }
+              />
+              {r.name}
+            </label>
+          ))}
 
-        {/* FLOWER TYPE */}
-        <p className="filter-label">Flower type</p>
-        {[
-          "Peony",
-          "Rose",
-          "Lily",
-          "Tulip",
-          "Orchid",
-          "Hydrangea",
-          "Daffodil",
-          "Chrysanthemum",
-        ].map((f) => (
-          <label key={f} className="checkbox-item">
-            <input
-              type="checkbox"
-              checked={flowerType.includes(f)}
-              onChange={() => toggleArrayValue(f, setFlowerType, flowerType)}
-            />
-            {f}
-          </label>
-        ))}
+          {/* FLOWER TYPE */}
+          <p className="filter-label">Flower type</p>
+          {metadata.flowers.map((f) => (
+            <label key={f.id} className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={selectedFlowerIds.includes(f.id)}
+                onChange={() =>
+                  toggleArrayValue(
+                    f.id,
+                    setSelectedFlowerIds,
+                    selectedFlowerIds
+                  )
+                }
+              />
+              {f.name}
+            </label>
+          ))}
+        </div>
 
         <button className="reset-btn" onClick={resetFilters}>
           RESET FILTERS

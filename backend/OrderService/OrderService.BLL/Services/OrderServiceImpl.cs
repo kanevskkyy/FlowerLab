@@ -70,7 +70,7 @@ namespace OrderService.BLL.Services
             var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
             var dtoList = mapper.Map<List<OrderSummaryDto>>(pagedOrders.Items);
 
-            return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
+            return PagedList<OrderSummaryDto>.Create(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 
         public async Task<OrderDetailDto> GetByIdAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
@@ -383,7 +383,7 @@ namespace OrderService.BLL.Services
             var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(parameters, cancellationToken);
 
             var dtoList = mapper.Map<List<OrderSummaryDto>>(pagedOrders.Items);
-            return new PagedList<OrderSummaryDto>(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
+            return PagedList<OrderSummaryDto>.Create(dtoList, pagedOrders.TotalCount, pagedOrders.CurrentPage, pagedOrders.PageSize);
         }
 
         public async Task<bool> HasUserOrderedBouquetAsync(Guid userId, Guid bouquetId)

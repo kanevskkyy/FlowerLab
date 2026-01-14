@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axiosClient from "../../api/axiosClient";
+import toast from "react-hot-toast";
 import PopupMenu from "../popupMenu/PopupMenu";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -9,134 +11,7 @@ import "./Catalog.css";
 import FilterIcon from "../../assets/images/FilterIcon.svg";
 import PopupFilterMenu from "../PopupFilterMenu/PopupFilterMenu";
 
-// Import all images
-import bouquet1S from "../../assets/images/bouquet1S.jpg";
-import bouquet1M from "../../assets/images/bouquet1M.jpg";
-import bouquet1L from "../../assets/images/bouquet1L.jpg";
-import bouquet1XL from "../../assets/images/bouquet1XL.jpg";
-import bouquet2S from "../../assets/images/bouquet2S.jpg";
-import bouquet2M from "../../assets/images/bouquet2M.jpg";
-import bouquet2L from "../../assets/images/bouquet2L.jpg";
-import bouquet2XL from "../../assets/images/bouquet2XL.jpg";
-import bouquet3S from "../../assets/images/bouquet3S.jpg";
-import bouquet3M from "../../assets/images/bouquet3M.JPG";
-import bouquet3L from "../../assets/images/bouquet3L.jpg";
-import bouquet3XL from "../../assets/images/bouquet3XL.png";
-import bouquet4S from "../../assets/images/bouquet4S.jpg";
-import bouquet4M from "../../assets/images/bouquet4M.JPG";
-import bouquet4L from "../../assets/images/bouquet4L.JPG";
-import bouquet4XL from "../../assets/images/bouquet4XL.jpg";
-import bouquet5S from "../../assets/images/bouquet5S.jpg";
-import bouquet5M from "../../assets/images/bouquet5M.jpg";
-import bouquet5L from "../../assets/images/bouquet5L.jpg";
-import bouquet5XL from "../../assets/images/bouquet5XL.jpg";
-import bouquet6S from "../../assets/images/bouquet6S.jpg";
-import bouquet6M from "../../assets/images/bouquet6M.png";
-import bouquet6L from "../../assets/images/bouquet6L.png";
-import bouquet6XL from "../../assets/images/bouquet6XL.png";
-import bouquet7S from "../../assets/images/bouquet7S.jpg";
-import bouquet7M from "../../assets/images/bouquet7M.jpg";
-import bouquet7L from "../../assets/images/bouquet7L.png";
-import bouquet7XL from "../../assets/images/bouquet7XL.png";
-import bouquet8S from "../../assets/images/bouquet8S.jpg";
-import bouquet8M from "../../assets/images/bouquet8M.jpg";
-import bouquet8L from "../../assets/images/bouquet8L.jpg";
-import bouquet8XL from "../../assets/images/bouquet8XL.jpg";
-import bouquet9S from "../../assets/images/bouquet9S.jpg";
-import bouquet9M from "../../assets/images/bouquet9M.jpg";
-import bouquet9L from "../../assets/images/bouquet9L.png";
-import bouquet9XL from "../../assets/images/bouquet9XL.jpg";
-import bouquet10S from "../../assets/images/bouquet10S.jpg";
-import bouquet10M from "../../assets/images/bouquet10M.jpg";
-import bouquet10L from "../../assets/images/bouquet10L.jpg";
-import bouquet10XL from "../../assets/images/bouquet10XL.jpg";
-import bouquet11S from "../../assets/images/bouquet11S.jpg";
-import bouquet11M from "../../assets/images/bouquet11M.jpg";
-import bouquet11L from "../../assets/images/bouquet11L.jpg";
-import bouquet11XL from "../../assets/images/bouquet11XL.jpg";
-import bouquet12S from "../../assets/images/bouquet12S.jpg";
-import bouquet12M from "../../assets/images/bouquet12M.png";
-import bouquet12L from "../../assets/images/bouquet12L.png";
-import bouquet12XL from "../../assets/images/bouquet12XL.png";
-import bouquet13S from "../../assets/images/bouquet13S.jpg";
-import bouquet13M from "../../assets/images/bouquet13M.jpg";
-import bouquet13L from "../../assets/images/bouquet13L.jpg";
-import bouquet13XL from "../../assets/images/bouquet13XL.jpg";
-import bouquet14S from "../../assets/images/bouquet14S.jpg";
-import bouquet14M from "../../assets/images/bouquet14M.jpg";
-import bouquet14L from "../../assets/images/bouquet14L.jpg";
-import bouquet14XL from "../../assets/images/bouquet14XL.jpg";
-import bouquet15S from "../../assets/images/bouquet15S.jpg";
-import bouquet15M from "../../assets/images/bouquet15M.jpg";
-import bouquet15L from "../../assets/images/bouquet15L.jpg";
-import bouquet15XL from "../../assets/images/bouquet15XL.jpg";
-
-// Import products data
-import { productsData } from "../../data/productsData";
-
-// Map image names to imports
-const imageMap = {
-  bouquet1S,
-  bouquet1M,
-  bouquet1L,
-  bouquet1XL,
-  bouquet2S,
-  bouquet2M,
-  bouquet2L,
-  bouquet2XL,
-  bouquet3S,
-  bouquet3M,
-  bouquet3L,
-  bouquet3XL,
-  bouquet4S,
-  bouquet4M,
-  bouquet4L,
-  bouquet4XL,
-  bouquet5S,
-  bouquet5M,
-  bouquet5L,
-  bouquet5XL,
-  bouquet6S,
-  bouquet6M,
-  bouquet6L,
-  bouquet6XL,
-  bouquet7S,
-  bouquet7M,
-  bouquet7L,
-  bouquet7XL,
-  bouquet8S,
-  bouquet8M,
-  bouquet8L,
-  bouquet8XL,
-  bouquet9S,
-  bouquet9M,
-  bouquet9L,
-  bouquet9XL,
-  bouquet10S,
-  bouquet10M,
-  bouquet10L,
-  bouquet10XL,
-  bouquet11S,
-  bouquet11M,
-  bouquet11L,
-  bouquet11XL,
-  bouquet12S,
-  bouquet12M,
-  bouquet12L,
-  bouquet12XL,
-  bouquet13S,
-  bouquet13M,
-  bouquet13L,
-  bouquet13XL,
-  bouquet14S,
-  bouquet14M,
-  bouquet14L,
-  bouquet14XL,
-  bouquet15S,
-  bouquet15M,
-  bouquet15L,
-  bouquet15XL,
-};
+// Map image names to imports (Removed - images now come from API)
 
 const Catalog = () => {
   const navigate = useNavigate();
@@ -150,10 +25,83 @@ const Catalog = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState(null);
 
+  const [products, setProducts] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+
   const ITEMS_PER_PAGE = 9;
 
   const sortRef = useRef(null);
   const sortButtonRef = useRef(null);
+
+  // Fetch bouquets from API
+  useEffect(() => {
+    const fetchBouquets = async () => {
+      setLoading(true);
+      try {
+        // Radical cleanup of params to ensure NO empty strings (especially Name=) are sent
+        const params = {};
+        if (searchQuery && searchQuery.trim() !== "") {
+          params.Name = searchQuery;
+        }
+        params.SortBy = sortBy;
+        params.PageSize = ITEMS_PER_PAGE;
+        params.Page = currentPage;
+
+        if (filters) {
+          Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== "") {
+              if (Array.isArray(value)) {
+                if (value.length > 0) params[key] = value;
+              } else {
+                params[key] = value;
+              }
+            }
+          });
+        }
+
+        const response = await axiosClient.get("/api/catalog/bouquets", {
+          params,
+          headers: { Accept: "application/json" },
+        });
+
+        // Match the backend PagedResult structure if it exists, otherwise use array
+        // Assuming the backend returns an object with Items, TotalCount, TotalPages
+        if (response.data.items) {
+          setProducts(
+            response.data.items.map((p) => ({
+              id: p.id,
+              title: p.name,
+              price: p.price,
+              img: p.mainPhotoUrl,
+            }))
+          );
+          setTotalProducts(response.data.totalCount);
+          setTotalPages(response.data.totalPages);
+        } else {
+          // Fallback if it's just an array
+          const items = Array.isArray(response.data) ? response.data : [];
+          setProducts(
+            items.map((p) => ({
+              id: p.id,
+              title: p.name,
+              price: p.price,
+              img: p.mainPhotoUrl,
+            }))
+          );
+          setTotalProducts(items.length);
+          setTotalPages(1);
+        }
+      } catch (error) {
+        console.error("Failed to fetch bouquets:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBouquets();
+  }, [filters, sortBy, currentPage, searchQuery]);
 
   // Закриття сортування при кліку поза межами
   useEffect(() => {
@@ -175,112 +123,8 @@ const Catalog = () => {
   const applyFilters = (filterData) => {
     setFilters(filterData);
     setCurrentPage(1);
-    // Скрол вгору при застосуванні нових фільтрів
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // === ОНОВЛЕНА ЛОГІКА ФІЛЬТРАЦІЇ ===
-  const getFilteredProducts = () => {
-    let filtered = productsData.map((product) => ({
-      ...product,
-      img: imageMap[product.mainImage],
-    }));
-
-    // Пошук
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (p) =>
-          (p.title && p.title.toLowerCase().includes(query)) ||
-          (p.composition && p.composition.toLowerCase().includes(query))
-      );
-    }
-
-    // Фільтри
-    if (filters) {
-      // Price (Max limit)
-      if (filters.price) {
-        filtered = filtered.filter(
-          (p) => Number(p.price) <= Number(filters.price)
-        );
-      }
-
-      // Size
-      if (filters.size) {
-        filtered = filtered.filter((p) => p.size === filters.size);
-      }
-
-      // Quantity (Min limit)
-      if (filters.quantity) {
-        filtered = filtered.filter(
-          (p) => p.quantity >= parseInt(filters.quantity)
-        );
-      }
-
-      // Events (Safe check with || [])
-      if (filters.events && filters.events.length > 0) {
-        filtered = filtered.filter((p) =>
-          filters.events.some((event) => (p.events || []).includes(event))
-        );
-      }
-
-      // For Who (Safe check with || [])
-      if (filters.forWho && filters.forWho.length > 0) {
-        filtered = filtered.filter((p) =>
-          filters.forWho.some((who) => (p.forWho || []).includes(who))
-        );
-      }
-
-      // Flower Type (Safe check with || [])
-      if (filters.flowerType && filters.flowerType.length > 0) {
-        filtered = filtered.filter((p) =>
-          filters.flowerType.some((type) => (p.flowerType || []).includes(type))
-        );
-      }
-    }
-
-    return filtered;
-  };
-
-  // Сортування продуктів
-  const getSortedProducts = (products) => {
-    const sorted = [...products];
-
-    switch (sortBy) {
-      case "date-new":
-        return sorted.sort(
-          (a, b) => new Date(b.dateAdded) - new Date(a.dateAdded)
-        );
-      case "date-old":
-        return sorted.sort(
-          (a, b) => new Date(a.dateAdded) - new Date(b.dateAdded)
-        );
-      case "price-high":
-        return sorted.sort((a, b) => b.price - a.price);
-      case "price-low":
-        return sorted.sort((a, b) => a.price - b.price);
-      case "popularity":
-      default:
-        return sorted.sort((a, b) => b.popularity - a.popularity);
-    }
-  };
-
-  // Отримати продукти для поточної сторінки
-  const getCurrentPageProducts = () => {
-    const filtered = getFilteredProducts();
-    const sorted = getSortedProducts(filtered);
-
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-
-    return {
-      products: sorted.slice(startIndex, endIndex),
-      totalProducts: sorted.length,
-      totalPages: Math.ceil(sorted.length / ITEMS_PER_PAGE),
-    };
-  };
-
-  const { products, totalProducts, totalPages } = getCurrentPageProducts();
 
   // Функція для додавання товару в кошик
   const handleAddToCart = (product) => {
@@ -391,16 +235,16 @@ const Catalog = () => {
 
             {sortOpen && (
               <div className="sort-popup" ref={sortRef}>
-                <p onClick={() => handleSortChange("date-new")}>
+                <p onClick={() => handleSortChange("date_desc")}>
                   Date: New to old
                 </p>
-                <p onClick={() => handleSortChange("date-old")}>
+                <p onClick={() => handleSortChange("date_asc")}>
                   Date: Old to new
                 </p>
-                <p onClick={() => handleSortChange("price-high")}>
+                <p onClick={() => handleSortChange("price_desc")}>
                   Price: High to low
                 </p>
-                <p onClick={() => handleSortChange("price-low")}>
+                <p onClick={() => handleSortChange("price_asc")}>
                   Price: Low to high
                 </p>
                 <p onClick={() => handleSortChange("popularity")}>Popularity</p>

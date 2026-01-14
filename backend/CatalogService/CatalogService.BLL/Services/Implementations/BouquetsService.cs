@@ -61,7 +61,7 @@ namespace CatalogService.BLL.Services.Implementations
         {
             PagedList<Bouquet> pagedBouquets = await uow.Bouquets.GetBySpecificationPagedAsync(parameters, cancellationToken);
             List<BouquetSummaryDto> mapped = pagedBouquets.Items.Select(b => mapper.Map<BouquetSummaryDto>(b)).ToList();
-            return new PagedList<BouquetSummaryDto>(
+            return PagedList<BouquetSummaryDto>.Create(
                 mapped,
                 pagedBouquets.TotalCount,
                 pagedBouquets.CurrentPage,

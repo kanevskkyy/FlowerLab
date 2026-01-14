@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { useMemo, useState, useEffect } from "react";
+import axiosClient from "../../api/axiosClient";
 import toast from "react-hot-toast";
 import "./AdminPanel.css"; // ✅ Стилі підвантажуються звідси
 
@@ -66,70 +67,49 @@ export default function AdminPanel() {
   };
 
   // ========= PRODUCTS (Bouquets + Gifts) =========
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      title: "Bouquet Roses",
-      img: testphoto,
-      price: "1000 ₴",
-      category: "Bouquets",
-    },
-    {
-      id: 2,
-      title: "Bouquet Peonies",
-      img: bouquet2L,
-      price: "1200 ₴",
-      category: "Bouquets",
-    },
-    {
-      id: 3,
-      title: "Bouquet Hydrangea",
-      img: bouquet3L,
-      price: "900 ₴",
-      category: "Bouquets",
-    },
-    {
-      id: 4,
-      title: "Bouquet Orchids",
-      img: bouquet1L,
-      price: "1500 ₴",
-      category: "Bouquets",
-    },
-    {
-      id: 5,
-      title: "Bouquet Ranunculus",
-      img: bouquet2L,
-      price: "1100 ₴",
-      category: "Bouquets",
-    },
-    {
-      id: 6,
-      title: "Bouquet Daisies",
-      img: bouquet3L,
-      price: "800 ₴",
-      category: "Bouquets",
-    },
-    // Подарунки
-    {
-      id: 101,
-      title: "Teddy Bear",
-      img: gift1 || testphoto,
-      price: "850 ₴",
-      category: "Gifts",
-    },
-    {
-      id: 102,
-      title: "Star Balloon",
-      img: gift2 || testphoto,
-      price: "250 ₴",
-      category: "Gifts",
-    },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
-  const handleDeleteProduct = (id) => {
+  // Fetch bouquets from API
+  useEffect(() => {
+    if (active === "bouquets" || active === "gifts") {
+      fetchProducts();
+    }
+  }, [active]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const response = await axiosClient.get("/api/catalog/bouquets");
+      const items = response.data.items || response.data;
+
+      setProducts(
+        items.map((b) => ({
+          id: b.id,
+          title: b.name,
+          img: b.mainPhotoUrl,
+          price: `${b.price} ₴`,
+          category: "Bouquets",
+        }))
+      );
+    } catch (error) {
+      console.error("Failed to fetch bouquets:", error);
+      toast.error("Failed to load bouquets");
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
-      setProducts((prev) => prev.filter((b) => b.id !== id));
-      toast.success("Item deleted successfully");
+      try {
+        await axiosClient.delete(`/api/catalog/bouquets/${id}`);
+        toast.success("Item deleted successfully");
+        fetchProducts(); // Refresh list
+      } catch (error) {
+        console.error("Failed to delete bouquet:", error);
+        toast.error("Failed to delete bouquet");
+      }
     }
   };
 
@@ -303,6 +283,7 @@ export default function AdminPanel() {
                     onClick={() => {
                       setActive("bouquets");
                       setQ("");
+                      setIsCatalogOpen(false);
                     }}>
                     Bouquets
                   </button>
@@ -313,10 +294,10 @@ export default function AdminPanel() {
                     onClick={() => {
                       setActive("gifts");
                       setQ("");
+                      setIsCatalogOpen(false);
                     }}>
                     Gifts
                   </button>
-                  {/* 👇 Повернув назву "Catalog" */}
                   <button
                     className={`admin-sub-item ${
                       active === "catalog" ? "active" : ""
@@ -324,6 +305,7 @@ export default function AdminPanel() {
                     onClick={() => {
                       setActive("catalog");
                       setQ("");
+                      setIsCatalogOpen(false);
                     }}>
                     Catalog Settings
                   </button>

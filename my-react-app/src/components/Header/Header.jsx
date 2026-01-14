@@ -72,7 +72,11 @@ const Header = ({ onMenuOpen }) => {
           <button
             className="icon-btn profile-btn"
             onClick={() => navigate("/cabinet")}>
-            <img src={UserProfileIcon} alt="Profile" className="icon" />
+            <img 
+              src={user?.photoUrl || UserProfileIcon} 
+              alt="Profile" 
+              className={`icon ${user?.photoUrl ? 'profile-avatar' : ''}`} 
+            />
             <span className="profile-label">
               {user ? "Profile" : "Sign up/in"}
             </span>

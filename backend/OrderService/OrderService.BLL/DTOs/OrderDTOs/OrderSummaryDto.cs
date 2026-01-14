@@ -13,7 +13,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public string? PhoneNumber { get; set; }
 
         public Guid? UserId { get; set; }
-        public string? UserFirstName { get; set; } 
+        public string? UserFirstName { get; set; }
         public string? UserLastName { get; set; }
         public decimal TotalPrice { get; set; }
         public DateTime CreatedAt { get; set; }

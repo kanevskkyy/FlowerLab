@@ -44,7 +44,7 @@ namespace UsersService.API.Middleware
                 case ValidationException validationEx:
                     statusCode = HttpStatusCode.BadRequest;
                     message = "Validation error.";
-                    errors = validationEx.Errors.Select(e => new { Field = e.PropertyName, Error = e.ErrorMessage });
+                    errors = validationEx.Errors.Select(e => new { field = e.PropertyName, error = e.ErrorMessage });
                     logger.LogWarning("Validation error: {Errors}", errors);
                     break;
 
@@ -81,7 +81,8 @@ namespace UsersService.API.Middleware
             var response = new
             {
                 error = message,
-                type = exception.GetType().Name
+                type = exception.GetType().Name,
+                errors = errors
             };
 
             context.Response.StatusCode = (int)statusCode;
