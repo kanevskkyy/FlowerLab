@@ -7,7 +7,7 @@ import "./Login.css";
 import { useAuth } from "../../context/useAuth";
 
 // 1. Додаємо імпорт API клієнта
-import axiosClient from "../../api/axiosClient";
+import authService from "../../services/authService";
 
 // Icons
 import logoIcon from "../../assets/icons/logo.svg";
@@ -42,13 +42,13 @@ export default function Login() {
       console.log("Logging in...", data);
 
 
-      const response = await axiosClient.post("/api/users/auth/login", {
-        email: data.email,
-        password: data.password,
-      });
+      const loginResponse = await authService.login(
+        data.email,
+        data.password,
+      );
 
-      const accessToken = response.data.accessToken || response.data.AccessToken;
-      const refreshToken = response.data.refreshToken || response.data.RefreshToken;
+      const accessToken = loginResponse.accessToken || loginResponse.AccessToken;
+      const refreshToken = loginResponse.refreshToken || loginResponse.RefreshToken;
 
       if (accessToken) {
         // Зберігаємо токени

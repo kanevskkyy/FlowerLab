@@ -9,20 +9,26 @@ namespace OrderService.DAL.Helpers
     public class PagedList<T>
     {
         public int CurrentPage { get; set; }
-        public int TotalPages { get; set; }
         public int PageSize { get; set; }
         public int TotalCount { get; set; }
+        public int TotalPages { get; set; }
+        public List<T> Items { get; set; } = new();
+
         public bool HasPrevious => CurrentPage > 1;
         public bool HasNext => CurrentPage < TotalPages;
-        public List<T> Items { get; set; }
 
-        public PagedList(List<T> items, int count, int pageNumber, int pageSize)
+        public PagedList() { }
+
+        public static PagedList<T> Create(IEnumerable<T> items, int totalCount, int currentPage, int pageSize)
         {
-            Items = items ?? new List<T>();
-            TotalCount = count;
-            PageSize = pageSize;
-            CurrentPage = pageNumber;
-            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            return new PagedList<T>
+            {
+                Items = items.ToList(),
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = currentPage,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
         }
 
         public static PagedList<T> ToPagedList<T>(List<T> source, int pageNumber, int pageSize)
@@ -33,7 +39,7 @@ namespace OrderService.DAL.Helpers
                 .Take(pageSize)
                 .ToList();
 
-            return new PagedList<T>(items, count, pageNumber, pageSize);
+            return PagedList<T>.Create(items, count, pageNumber, pageSize);
         }
     }
 }

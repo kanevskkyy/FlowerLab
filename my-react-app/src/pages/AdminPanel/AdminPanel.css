@@ -64,6 +64,12 @@
   transform: rotate(90deg);
 }
 
+
+/* Backdrop (прихований на десктопі, показується на мобільних) */
+.admin-submenu-backdrop {
+  display: none;
+}
+
 /* BRAND IN HEADER */
 .admin-brand {
   display: flex;
@@ -729,6 +735,55 @@
   }
   .admin-search { width: 100%; min-width: 0; }
   .admin-add-btn { justify-content: center; }
+
+  /* Catalog submenu - виїжджає поверх контенту */
+  .nav-group {
+    position: relative;
+  }
+  
+  .admin-submenu {
+    position: fixed;
+    top: 128px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FBECF7;
+    border: 1px solid #efe3ea;
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin: 0;
+    min-width: 220px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: slideDown 0.25s ease;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  
+  .admin-sub-item {
+    font-size: 15px;
+    padding: 10px 8px;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  
+  .admin-sub-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* Стрілочка ховається на мобільних */
+  .nav-arrow {
+    display: none;
+  }
 }
 
 /* SMALL MOBILE (max-width: 480px) */

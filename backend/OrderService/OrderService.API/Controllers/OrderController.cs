@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace OrderService.API.Controllers
 {
     [ApiController]
-    [Route("api/orders")]
+    [Route("api")]
     public class OrderController : ControllerBase
     {
         private IOrderService orderService;

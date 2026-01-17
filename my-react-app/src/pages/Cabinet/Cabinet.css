@@ -562,3 +562,162 @@
   opacity: 0.3;
   margin-bottom: 8px;
 }
+/* MODAL STYLES */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.modal-btn-cancel {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #efe3ea;
+  background: transparent;
+  border-radius: 12px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-btn-cancel:hover {
+  background: #f7f1f5;
+}
+
+.modal-btn-save {
+  flex: 2;
+  padding: 12px;
+  border: none;
+  background: #C86AAC;
+  color: white;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.modal-btn-save:hover {
+  opacity: 0.9;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* AVATAR SECTION */
+.cabinet-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  background: #fdfafc;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #efe3ea;
+}
+
+.cabinet-avatar-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  background: #C86AAC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(200, 106, 172, 0.25);
+  border: 2px solid #fff;
+}
+
+.cabinet-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cabinet-avatar-placeholder {
+  color: white;
+  font-size: 28px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cabinet-avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.cabinet-avatar-wrapper:hover .cabinet-avatar-overlay {
+  opacity: 1;
+}
+
+.cabinet-avatar-overlay span {
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  padding: 0 10px;
+}
+
+.cabinet-avatar-info h3 {
+  font-size: 16px;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.cabinet-avatar-info p {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}

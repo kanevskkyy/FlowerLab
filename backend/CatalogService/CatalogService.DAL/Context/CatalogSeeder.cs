@@ -114,7 +114,7 @@ namespace CatalogService.DAL.Context
                     {
                         Name = "Romantic Bouquet",
                         Description = "For romantic occasions",
-                        MainPhotoUrl = "https://example.com/romantic.jpg",
+                        MainPhotoUrl = "/images/bouquets/romantic_bouquet_main.png",
                         BouquetSizes = new List<BouquetSize>
                         {
                             new BouquetSize
@@ -123,8 +123,7 @@ namespace CatalogService.DAL.Context
                                 Price = 29.99m,
                                 BouquetImages = new List<BouquetImage>
                                 {
-                                    new BouquetImage { ImageUrl = "https://example.com/romantic_s1.jpg", Position = 1, IsMain = true },
-                                    new BouquetImage { ImageUrl = "https://example.com/romantic_s2.jpg", Position = 2, IsMain = false }
+                                    new BouquetImage { ImageUrl = "/images/bouquets/romantic_bouquet_main.png", Position = 1, IsMain = true }
                                 }
                             },
                             new BouquetSize
@@ -133,17 +132,7 @@ namespace CatalogService.DAL.Context
                                 Price = 39.99m,
                                 BouquetImages = new List<BouquetImage>
                                 {
-                                    new BouquetImage { ImageUrl = "https://example.com/romantic_m1.jpg", Position = 1, IsMain = true },
-                                    new BouquetImage { ImageUrl = "https://example.com/romantic_m2.jpg", Position = 2, IsMain = false }
-                                }
-                            },
-                            new BouquetSize
-                            {
-                                Size = lSize,
-                                Price = 49.99m,
-                                BouquetImages = new List<BouquetImage>
-                                {
-                                    new BouquetImage { ImageUrl = "https://example.com/romantic_l1.jpg", Position = 1, IsMain = true }
+                                    new BouquetImage { ImageUrl = "/images/bouquets/romantic_bouquet_main.png", Position = 1, IsMain = true }
                                 }
                             }
                         },
@@ -168,7 +157,7 @@ namespace CatalogService.DAL.Context
                     {
                         Name = "Spring Delight",
                         Description = "Fresh spring bouquet",
-                        MainPhotoUrl = "https://example.com/spring.jpg",
+                        MainPhotoUrl = "/images/bouquets/spring_delight_main.png",
                         BouquetSizes = new List<BouquetSize>
                         {
                             new BouquetSize
@@ -177,17 +166,7 @@ namespace CatalogService.DAL.Context
                                 Price = 19.99m,
                                 BouquetImages = new List<BouquetImage>
                                 {
-                                    new BouquetImage { ImageUrl = "https://example.com/spring_s1.jpg", Position = 1, IsMain = true }
-                                }
-                            },
-                            new BouquetSize
-                            {
-                                Size = mSize,
-                                Price = 29.99m,
-                                BouquetImages = new List<BouquetImage>
-                                {
-                                    new BouquetImage { ImageUrl = "https://example.com/spring_m1.jpg", Position = 1, IsMain = true },
-                                    new BouquetImage { ImageUrl = "https://example.com/spring_m2.jpg", Position = 2, IsMain = false }
+                                    new BouquetImage { ImageUrl = "/images/bouquets/spring_delight_main.png", Position = 1, IsMain = true }
                                 }
                             }
                         },
@@ -210,7 +189,7 @@ namespace CatalogService.DAL.Context
                     {
                         Name = "Elegant Mix",
                         Description = "Elegant mixed flowers",
-                        MainPhotoUrl = "https://example.com/elegant.jpg",
+                        MainPhotoUrl = "/images/bouquets/elegant_mix_main.png",
                         BouquetSizes = new List<BouquetSize>
                         {
                             new BouquetSize
@@ -219,17 +198,7 @@ namespace CatalogService.DAL.Context
                                 Price = 34.99m,
                                 BouquetImages = new List<BouquetImage>
                                 {
-                                    new BouquetImage { ImageUrl = "https://example.com/elegant_m1.jpg", Position = 1, IsMain = true },
-                                    new BouquetImage { ImageUrl = "https://example.com/elegant_m2.jpg", Position = 2, IsMain = false }
-                                }
-                            },
-                            new BouquetSize
-                            {
-                                Size = lSize,
-                                Price = 44.99m,
-                                BouquetImages = new List<BouquetImage>
-                                {
-                                    new BouquetImage { ImageUrl = "https://example.com/elegant_l1.jpg", Position = 1, IsMain = true }
+                                    new BouquetImage { ImageUrl = "/images/bouquets/elegant_mix_main.png", Position = 1, IsMain = true }
                                 }
                             }
                         },

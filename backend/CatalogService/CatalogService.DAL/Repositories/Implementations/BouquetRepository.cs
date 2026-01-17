@@ -42,7 +42,6 @@ namespace CatalogService.DAL.Repositories.Implementations
                     .ThenInclude(be => be.Event)
                 .Include(b => b.BouquetRecipients)
                     .ThenInclude(br => br.Recipient)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
 
@@ -52,26 +51,23 @@ namespace CatalogService.DAL.Repositories.Implementations
             var spec = new BouquetSpecification(parameters);
             var query = SpecificationEvaluator<Bouquet>.GetQuery(dbSet.AsQueryable(), spec);
 
+            // Restoring necessary Includes that might not be handled by the simple Specification Evaluator
             query = query
                 .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)
                 .Include(b => b.BouquetSizes).ThenInclude(bs => bs.Size)
-                .Include(b => b.BouquetSizes).ThenInclude(bs => bs.BouquetSizeFlowers).ThenInclude(bsf => bsf.Flower);
-
-            query = parameters.SortBy switch
-            {
-                "price_asc" => query.OrderBy(b => b.BouquetSizes.Min(bs => bs.Price)),
-                "price_desc" => query.OrderByDescending(b => b.BouquetSizes.Min(bs => bs.Price)),
-                _ => query.OrderByDescending(b => b.CreatedAt)
-            };
-
+                .Include(b => b.BouquetSizes).ThenInclude(bs => bs.BouquetSizeFlowers).ThenInclude(bsf => bsf.Flower)
+                .Include(b => b.BouquetEvents).ThenInclude(be => be.Event)
+                .Include(b => b.BouquetRecipients).ThenInclude(br => br.Recipient);
+            
             var totalCount = await query.CountAsync(cancellationToken);
+            
             var items = await query
                 .Skip((parameters.Page - 1) * parameters.PageSize)
                 .Take(parameters.PageSize)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            return new PagedList<Bouquet>(items, totalCount, parameters.Page, parameters.PageSize);
+            return PagedList<Bouquet>.Create(items, totalCount, parameters.Page, parameters.PageSize);
         }
 
         public async Task<(decimal minPrice, decimal maxPrice)> GetMinAndMaxPriceAsync(CancellationToken cancellationToken = default)

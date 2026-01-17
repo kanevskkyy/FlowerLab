@@ -10,24 +10,27 @@ namespace ReviewService.Domain.Helpers
     public class PagedList<T>
     {
         public int CurrentPage { get; set; }
-        public int TotalPages { get; set; }
         public int PageSize { get; set; }
         public int TotalCount { get; set; }
+        public int TotalPages { get; set; }
+        public List<T> Items { get; set; } = new();
+
         public bool HasPrevious => CurrentPage > 1;
         public bool HasNext => CurrentPage < TotalPages;
-        public List<T> Items { get; set; }
 
         public PagedList() { }
 
-        public PagedList(List<T> items, int count, int pageNumber, int pageSize)
+        public static PagedList<T> Create(IEnumerable<T> items, int totalCount, int currentPage, int pageSize)
         {
-            Items = items ?? new List<T>();
-            TotalCount = count;
-            PageSize = pageSize;
-            CurrentPage = pageNumber;
-            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            return new PagedList<T>
+            {
+                Items = items.ToList(),
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = currentPage,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
         }
-
         public static async Task<PagedList<T>> ToPagedListAsync(IFindFluent<T, T> source, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
             int count = (int)await source.CountDocumentsAsync(cancellationToken: cancellationToken);
@@ -36,7 +39,7 @@ namespace ReviewService.Domain.Helpers
                 .Limit(pageSize)
                 .ToListAsync(cancellationToken);
 
-            return new PagedList<T>(items, count, pageNumber, pageSize);
+            return PagedList<T>.Create(items, count, pageNumber, pageSize);
         }
     }
 }

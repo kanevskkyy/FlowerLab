@@ -147,3 +147,13 @@
     display: none !important;
   }
 }
+/* PROFILE AVATAR IN HEADER */
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(200, 106, 172, 0.2);
+  margin-bottom: 2px;
+}

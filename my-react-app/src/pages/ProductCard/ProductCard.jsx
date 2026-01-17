@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axiosClient from "../../api/axiosClient";
+import toast from "react-hot-toast";
 import { useCart } from "../../context/CartContext";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -7,140 +9,12 @@ import PopupMenu from "../popupMenu/PopupMenu";
 import "./ProductCard.css";
 import ShoppingBagIcon from "../../assets/images/ShoppingBagIcon.svg";
 
-// Import all images
-import Bouquet1S from "../../assets/images/bouquet1S.jpg";
-import Bouquet1M from "../../assets/images/bouquet1M.jpg";
-import Bouquet1L from "../../assets/images/bouquet1L.jpg";
-import Bouquet1XL from "../../assets/images/bouquet1XL.jpg";
-import Bouquet2S from "../../assets/images/bouquet2S.jpg";
-import Bouquet2M from "../../assets/images/bouquet2M.jpg";
-import Bouquet2L from "../../assets/images/bouquet2L.jpg";
-import Bouquet2XL from "../../assets/images/bouquet2XL.jpg";
-import Bouquet3S from "../../assets/images/bouquet3S.jpg";
-import Bouquet3M from "../../assets/images/bouquet3M.JPG";
-import Bouquet3L from "../../assets/images/bouquet3L.jpg";
-import Bouquet3XL from "../../assets/images/bouquet3XL.png";
-import bouquet4S from "../../assets/images/bouquet4S.jpg";
-import bouquet4M from "../../assets/images/bouquet4M.JPG";
-import bouquet4L from "../../assets/images/bouquet4L.jpg";
-import bouquet4XL from "../../assets/images/bouquet4XL.jpg";
-import bouquet5S from "../../assets/images/bouquet5S.jpg";
-import bouquet5M from "../../assets/images/bouquet5M.jpg";
-import bouquet5L from "../../assets/images/bouquet5L.jpg";
-import bouquet5XL from "../../assets/images/bouquet5XL.jpg";
-import bouquet6S from "../../assets/images/bouquet6S.jpg";
-import bouquet6M from "../../assets/images/bouquet6M.png";
-import bouquet6L from "../../assets/images/bouquet6L.png";
-import bouquet6XL from "../../assets/images/bouquet6XL.png";
-import bouquet7S from "../../assets/images/bouquet7S.jpg";
-import bouquet7M from "../../assets/images/bouquet7M.jpg";
-import bouquet7L from "../../assets/images/bouquet7L.png";
-import bouquet7XL from "../../assets/images/bouquet7XL.png";
-import bouquet8S from "../../assets/images/bouquet8S.jpg";
-import bouquet8M from "../../assets/images/bouquet8M.jpg";
-import bouquet8L from "../../assets/images/bouquet8L.jpg";
-import bouquet8XL from "../../assets/images/bouquet8XL.jpg";
-import bouquet9S from "../../assets/images/bouquet9S.jpg";
-import bouquet9M from "../../assets/images/bouquet9M.jpg";
-import bouquet9L from "../../assets/images/bouquet9L.png";
-import bouquet9XL from "../../assets/images/bouquet9XL.jpg";
-import bouquet10S from "../../assets/images/bouquet10S.jpg";
-import bouquet10M from "../../assets/images/bouquet10M.jpg";
-import bouquet10L from "../../assets/images/bouquet10L.jpg";
-import bouquet10XL from "../../assets/images/bouquet10XL.jpg";
-import bouquet11S from "../../assets/images/bouquet11S.jpg";
-import bouquet11M from "../../assets/images/bouquet11M.jpg";
-import bouquet11L from "../../assets/images/bouquet11L.jpg";
-import bouquet11XL from "../../assets/images/bouquet11XL.jpg";
-import bouquet12S from "../../assets/images/bouquet12S.jpg";
-import bouquet12M from "../../assets/images/bouquet12M.png";
-import bouquet12L from "../../assets/images/bouquet12L.png";
-import bouquet12XL from "../../assets/images/bouquet12XL.png";
-import bouquet13S from "../../assets/images/bouquet13S.jpg";
-import bouquet13M from "../../assets/images/bouquet13M.jpg";
-import bouquet13L from "../../assets/images/bouquet13L.jpg";
-import bouquet13XL from "../../assets/images/bouquet13XL.jpg";
-import bouquet14S from "../../assets/images/bouquet14S.jpg";
-import bouquet14M from "../../assets/images/bouquet14M.jpg";
-import bouquet14L from "../../assets/images/bouquet14L.jpg";
-import bouquet14XL from "../../assets/images/bouquet14XL.jpg";
-import bouquet15S from "../../assets/images/bouquet15S.jpg";
-import bouquet15M from "../../assets/images/bouquet15M.jpg";
-import bouquet15L from "../../assets/images/bouquet15L.jpg";
-import bouquet15XL from "../../assets/images/bouquet15XL.jpg";
-
 // Gifts
 import gift1 from "../../assets/images/gift1.jpg";
 import gift2 from "../../assets/images/gift2.jpg";
 import gift3 from "../../assets/images/gift3.png";
 
-// Import products data
-import { productsData } from "../../data/productsData";
-import toast from "react-hot-toast";
-
-// Map image names to imports
-const imageMap = {
-  bouquet1S: Bouquet1S,
-  bouquet1M: Bouquet1M,
-  bouquet1L: Bouquet1L,
-  bouquet1XL: Bouquet1XL,
-  bouquet2S: Bouquet2S,
-  bouquet2M: Bouquet2M,
-  bouquet2L: Bouquet2L,
-  bouquet2XL: Bouquet2XL,
-  bouquet3S: Bouquet3S,
-  bouquet3M: Bouquet3M,
-  bouquet3L: Bouquet3L,
-  bouquet3XL: Bouquet3XL,
-  bouquet4S: bouquet4S,
-  bouquet4M: bouquet4M,
-  bouquet4L: bouquet4L,
-  bouquet4XL: bouquet4XL,
-  bouquet5S: bouquet5S,
-  bouquet5M: bouquet5M,
-  bouquet5L: bouquet5L,
-  bouquet5XL: bouquet5XL,
-  bouquet6S: bouquet6S,
-  bouquet6M: bouquet6M,
-  bouquet6L: bouquet6L,
-  bouquet6XL: bouquet6XL,
-  bouquet7S: bouquet7S,
-  bouquet7M: bouquet7M,
-  bouquet7L: bouquet7L,
-  bouquet7XL: bouquet7XL,
-  bouquet8S: bouquet8S,
-  bouquet8M: bouquet8M,
-  bouquet8L: bouquet8L,
-  bouquet8XL: bouquet8XL,
-  bouquet9S: bouquet9S,
-  bouquet9M: bouquet9M,
-  bouquet9L: bouquet9L,
-  bouquet9XL: bouquet9XL,
-  bouquet10S: bouquet10S,
-  bouquet10M: bouquet10M,
-  bouquet10L: bouquet10L,
-  bouquet10XL: bouquet10XL,
-  bouquet11S: bouquet11S,
-  bouquet11M: bouquet11M,
-  bouquet11L: bouquet11L,
-  bouquet11XL: bouquet11XL,
-  bouquet12S: bouquet12S,
-  bouquet12M: bouquet12M,
-  bouquet12L: bouquet12L,
-  bouquet12XL: bouquet12XL,
-  bouquet13S: bouquet13S,
-  bouquet13M: bouquet13M,
-  bouquet13L: bouquet13L,
-  bouquet13XL: bouquet13XL,
-  bouquet14S: bouquet14S,
-  bouquet14M: bouquet14M,
-  bouquet14L: bouquet14L,
-  bouquet14XL: bouquet14XL,
-  bouquet15S: bouquet15S,
-  bouquet15M: bouquet15M,
-  bouquet15L: bouquet15L,
-  bouquet15XL: bouquet15XL,
-};
+// Map image names to imports (Removed - images now come from API)
 
 // =================================================================
 // MAIN COMPONENT WRAPPER
@@ -158,43 +32,85 @@ const ProductCardContent = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const [selectedSize, setSelectedSize] = useState("M");
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [selectedGift, setSelectedGift] = useState(null);
-
-  // Знайти продукт за ID
-  const productData =
-    productsData.find((p) => p.id === parseInt(id)) || productsData[0];
-
-  // Створити об'єкт продукту з зображеннями
-  const product = {
-    ...productData,
-    images: {
-      S: imageMap[productData.images.S],
-      M: imageMap[productData.images.M],
-      L: imageMap[productData.images.L],
-      XL: imageMap[productData.images.XL],
-    },
-  };
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
 
-  const recommendations = useMemo(() => {
-    const currentId = parseInt(id);
-    const others = productsData.filter((p) => p.id !== currentId);
+    const fetchProductData = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosClient.get(`/api/catalog/bouquets/${id}`, {
+          headers: { Accept: "application/json" },
+        });
+        const data = response.data;
 
-    const shift = currentId % others.length;
-    const rotated = [...others.slice(shift), ...others.slice(0, shift)];
+        // Map backend DTO to frontend structure
+        const mappedProduct = {
+          id: data.id,
+          title: data.name,
+          description: data.description,
+          composition:
+            data.sizes[0]?.flowers
+              .map((f) => `${f.name} (${f.quantity})`)
+              .join(", ") || "Diverse floral mix",
+          images: data.sizes.reduce((acc, size) => {
+            acc[size.sizeName] = size.images[0]?.imageUrl || data.mainPhotoUrl;
+            return acc;
+          }, {}),
+          prices: data.sizes.reduce((acc, size) => {
+            acc[size.sizeName] = size.price;
+            return acc;
+          }, {}),
+          availableSizes: data.sizes.map((s) => s.sizeName),
+        };
 
-    return rotated.slice(0, 3).map((p) => ({
-      id: p.id,
-      image: imageMap[p.mainImage],
-      title: p.title,
-      price: p.price,
-    }));
+        setProduct(mappedProduct);
+        // Default to M if available, else first size
+        const defaultSize = mappedProduct.availableSizes.includes("M")
+          ? "M"
+          : mappedProduct.availableSizes[0];
+        setSelectedSize(defaultSize);
+      } catch (error) {
+        console.error("Failed to fetch product details:", error);
+        toast.error("Product not found");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchRecommendations = async () => {
+      try {
+        // Fetch top products excluding current one
+        const response = await axiosClient.get("/api/catalog/bouquets", {
+          params: { PageSize: 4 },
+          headers: { Accept: "application/json" },
+        });
+        const items = response.data.items || response.data;
+        setRecommendations(
+          items
+            .filter((p) => p.id !== id)
+            .slice(0, 3)
+            .map((p) => ({
+              id: p.id,
+              image: p.mainPhotoUrl,
+              title: p.name,
+              price: p.price,
+            }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch recommendations:", error);
+      }
+    };
+
+    fetchProductData();
+    fetchRecommendations();
   }, [id]);
 
   const gifts = [
@@ -203,6 +119,14 @@ const ProductCardContent = () => {
     { id: "gift3", image: gift3, title: "Balloon", price: "150 ₴" },
   ];
 
+  if (loading) {
+    return <div className="loading-screen">Loading bouquet details...</div>;
+  }
+
+  if (!product) {
+    return <div className="error-screen">Product not found</div>;
+  }
+
   const handleAddToCart = () => {
     const cartProduct = {
       id: `${id}-${selectedSize}`,
@@ -210,7 +134,9 @@ const ProductCardContent = () => {
       title: product.title,
       price: `${product.prices[selectedSize]} ₴`,
       size: selectedSize,
-      img: product.images[selectedSize],
+      img:
+        product.images[selectedSize] ||
+        product.images[Object.keys(product.images)[0]],
       qty: 1,
     };
     addToCart(cartProduct);
@@ -294,7 +220,7 @@ const ProductCardContent = () => {
             <div className="size-section">
               <h3>Size</h3>
               <div className="size-buttons">
-                {["S", "M", "L", "XL"].map((size) => (
+                {product.availableSizes.map((size) => (
                   <button
                     key={size}
                     className={`size-btn ${

@@ -13,7 +13,7 @@ using UsersService.Domain.Entities;
 namespace UsersService.API.Controllers
 {
     [Authorize]
-    [Route("api/users")]
+    [Route("api/me")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -26,20 +26,20 @@ namespace UsersService.API.Controllers
 
         private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-        [HttpGet("me")]
+        [HttpGet]
         public async Task<IActionResult> GetCurrentUser() => Ok(await userService.GetCurrentAsync(UserId));
 
-        [HttpPut("me")]
+        [HttpPut]
         public async Task<IActionResult> UpdateCurrentUser([FromForm] UpdateUserDto dto) => Ok(await userService.UpdateAsync(UserId, dto));
 
-        [HttpPut("me/password")]
+        [HttpPut("password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {
             await userService.ChangePasswordAsync(UserId, dto);
             return Ok(new { Message = "Пароль успішно змінено 🔐" });
         }
 
-        [HttpDelete("me")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteAccount()
         {
             await userService.DeleteAsync(UserId);

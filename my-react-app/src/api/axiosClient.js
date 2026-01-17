@@ -4,6 +4,7 @@ const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
+    "Accept": "application/json",
   },
   withCredentials: true, // Якщо бекенд колись почне використовувати cookies
 });

@@ -25,8 +25,8 @@ namespace UsersService.BLL.FluentValidation
                 .MaximumLength(50).WithMessage("Last name cannot exceed 50 characters");
 
             RuleFor(x => x.PhoneNumber)
-                .Matches(@"^\+380\d{9}$")
-                .WithMessage("Phone number must be in the format +380XXXXXXXXX")
+                .Matches(@"^\+380[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$|^\+380\d{9}$")
+                .WithMessage("Phone number must be a valid Ukrainian number (+380...)")
                 .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
 
             RuleFor(x => x.Photo)
