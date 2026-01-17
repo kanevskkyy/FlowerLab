@@ -1,48 +1,40 @@
-import { useMemo, useState, useCallback } from "react";
-import { AuthContext } from "../context/authContext";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
+export default function AdminProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
-const STORAGE_KEY = "flowerlab_auth_user";
-
-function readStoredUser() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    // ignore invalid JSON or access errors
-    return null;
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}>
+        Loading...
+      </div>
+    );
   }
-}
 
-export default function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => readStoredUser());
+  // 1. Not logged in -> Redirect to Login
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-  const login = useCallback((payload) => {
-    setUser(payload);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch {
-      // ignore storage write errors
-    }
-  }, []);
+  // 2. Check Role (Assuming role is stored in user.role)
+  // Adapt this check depending on how your backend returns roles (string vs array)
+  const role = user.role || "";
+  const isAdmin =
+    role === "Admin" || (Array.isArray(role) && role.includes("Admin"));
 
-  const logout = useCallback(() => {
-    setUser(null);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore storage remove errors
-    }
-  }, []);
+  // 3. Not Admin -> Redirect to Home
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
-  const value = useMemo(
-    () => ({ user, login, logout }),
-    [user, login, logout]
-  );
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // 4. Authorized -> Render content
+  return children;
 }

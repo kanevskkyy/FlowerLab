@@ -42,7 +42,6 @@ namespace CatalogService.DAL.Repositories.Implementations
                     .ThenInclude(be => be.Event)
                 .Include(b => b.BouquetRecipients)
                     .ThenInclude(br => br.Recipient)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
 

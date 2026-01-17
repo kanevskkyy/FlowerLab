@@ -14,6 +14,7 @@ namespace CatalogService.BLL.DTO.Bouquet
         public List<Guid> FlowerIds { get; set; } = new();
         public List<int> FlowerQuantities { get; set; } = new();
         public IFormFile? MainImage { get; set; }
+        public string? MainImageUrl { get; set; }
         public List<IFormFile> NewImages { get; set; } = new();
     }
 

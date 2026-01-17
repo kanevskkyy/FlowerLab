@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./HeroSection.css";
 
 // Images
-import heroImg1 from "../../assets/images/bouquet1L.jpg";
-import heroImg2 from "../../assets/images/bouquet2L.jpg";
-import heroImg3 from "../../assets/images/bouquet3L.jpg";
-import logo from "../../assets/images/banner-logo.svg";
+import heroImg1 from "../../../assets/images/bouquet1L.jpg";
+import heroImg2 from "../../../assets/images/bouquet2L.jpg";
+import heroImg3 from "../../../assets/images/bouquet3L.jpg";
+import logo from "../../../assets/images/banner-logo.svg";
 
 const HeroSection = () => {
   const navigate = useNavigate();

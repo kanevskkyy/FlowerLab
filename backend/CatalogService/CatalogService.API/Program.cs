@@ -223,6 +223,7 @@ namespace CatalogService.API
             var app = builder.Build();
             app.UseCors(MyAllowSpecificOrigins);
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>(); // Handling Exceptions First
             app.UseMiddleware<RequestLoggingMiddleware>();
 
             // Configure the HTTP request pipeline.
