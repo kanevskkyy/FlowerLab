@@ -10,7 +10,7 @@ namespace CatalogService.DAL.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private CatalogDbContext context;
+        private readonly CatalogDbContext _context;
 
         public UnitOfWork(
             CatalogDbContext context,
@@ -21,7 +21,7 @@ namespace CatalogService.DAL.UnitOfWork
             IRecipientRepository recipientRepository
             )
         {
-            this.context = context;
+            _context = context;
             Bouquets = bouquetRepository;
             Flowers = flowerRepository;
             Events = eventRepository;
@@ -38,12 +38,17 @@ namespace CatalogService.DAL.UnitOfWork
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return await context.SaveChangesAsync(cancellationToken);
+            return await _context.SaveChangesAsync(cancellationToken); // Updated to use _context
+        }
+
+        public IEnumerable<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry> GetChangeTrackerEntries()
+        {
+            return _context.ChangeTracker.Entries();
         }
 
         public void Dispose()
         {
-            context.Dispose();
+            _context.Dispose(); // Updated to use _context
         }
     }
 }

@@ -85,5 +85,15 @@ namespace CatalogService.DAL.Repositories.Implementations
 
             return (minPrice, maxPrice);
         }
+
+        public void DeleteImages(IEnumerable<BouquetImage> images)
+        {
+            context.BouquetImages.RemoveRange(images);
+        }
+
+        public void AddImage(BouquetImage image)
+        {
+            context.BouquetImages.Add(image);
+        }
     }
 }

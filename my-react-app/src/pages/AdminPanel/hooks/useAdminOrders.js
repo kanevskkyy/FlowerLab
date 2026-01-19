@@ -1,63 +1,152 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
-
-// Images (in real app, data comes from API, images usually urls)
-import testphoto from "../../../assets/images/testphoto.jpg";
-import bouquet1L from "../../../assets/images/bouquet1L.jpg";
+import orderService from "../../../services/orderService";
 
 export function useAdminOrders() {
-  const [orders, setOrders] = useState([
-    {
-      id: 1001,
-      title: "Bouquet Orchids",
-      qty: "1 pc",
-      customer: "Oleh Vynnyk",
-      date: "25.10.25 10:06",
-      total: "1000 ₴",
-      avatar: testphoto,
-      status: "New",
-    },
-    {
-      id: 1002,
-      title: "Bouquet 101 Roses",
-      qty: "1 pc",
-      customer: "Tina Karol",
-      date: "24.10.25 14:30",
-      total: "5500 ₴",
-      avatar: bouquet1L,
-      status: "Processing",
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    pageNumber: 1,
+    pageSize: 10,
+    totalCount: 0,
+    totalPages: 1
+  });
 
-  const [sort, setSort] = useState("new");
+  const [sort, setSort] = useState("new"); // "new" (desc date) or "old" (asc date)
 
-  const handleStatusChange = (id, newStatus) => {
+  // For Detail Modal (legacy/unused now but good to keep clean)
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  // Statuses list
+  const [statuses, setStatuses] = useState([]);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      let sortParam = "DateDesc";
+      // Map sort keys to API params
+      switch (sort) {
+        case "date-asc": sortParam = "DateAsc"; break;
+        case "qty-desc": sortParam = "QtyDesc"; break;
+        case "qty-asc": sortParam = "QtyAsc"; break;
+        case "name-asc": sortParam = "NameAsc"; break;
+        case "name-desc": sortParam = "NameDesc"; break;
+        case "date-desc": 
+        default: sortParam = "DateDesc"; break;
+      }
+      
+      // Fetch orders AND statuses in parallel if statuses empty
+      const promises = [
+        orderService.getAll({
+            pageNumber: pagination.pageNumber,
+            pageSize: pagination.pageSize,
+            sort: sortParam
+        })
+      ];
+      
+      const shouldFetchStatuses = statuses.length === 0;
+      if (shouldFetchStatuses) {
+          promises.push(orderService.getStatuses());
+      }
+
+      const results = await Promise.all(promises);
+      const data = results[0];
+      if (shouldFetchStatuses) {
+          setStatuses(results[1]);
+      }
+
+      // Map API response
+      const mappedOrders = (data.items || []).map(order => ({
+        id: order.id,
+        title: order.items?.length > 1 
+          ? `${order.items[0].bouquetName} + ${order.items.length - 1} more`
+          : order.items?.[0]?.bouquetName || "Unknown Item",
+        qty: order.items?.length > 1 
+          ? `${order.items.reduce((acc, i) => acc + i.count, 0)} items`
+          : `${order.items?.[0]?.count || 1} pc`,
+        customer: `${order.firstName} ${order.lastName}`,
+        date: new Date(order.createdAt).toLocaleString('uk-UA', {
+           day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }),
+        total: `${order.totalPrice} ₴`,
+        avatar: order.items?.[0]?.bouquetImage || null,
+        status: order.status, // KEEP OBJECT {id, name}
+        rawDate: new Date(order.createdAt),
+      }));
+
+      setOrders(mappedOrders);
+      
+      setPagination(prev => ({
+        ...prev,
+        totalCount: data.totalCount || 0,
+        totalPages: Math.ceil((data.totalCount || 0) / prev.pageSize)
+      }));
+
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+      toast.error("Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.pageNumber, pagination.pageSize, sort, statuses.length]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const handleStatusChange = async (id, newStatusId) => {
+    const originalOrders = [...orders];
+    const targetStatus = statuses.find(s => s.id === newStatusId);
+    
+    if (!targetStatus) return;
+
+    // Optimistic update
     setOrders((prev) =>
       prev.map((order) =>
-        order.id === id ? { ...order, status: newStatus } : order
+        order.id === id ? { ...order, status: targetStatus } : order
       )
     );
-    if (newStatus === "Cancelled") {
-      toast.error(`Order #${id} marked as Cancelled`);
-    } else if (newStatus === "Delivered") {
-      toast.success(`Order #${id} delivered! 🎉`);
-    } else {
-      toast.success(`Order #${id} is now ${newStatus}`);
+
+    try {
+      await orderService.updateStatus(id, newStatusId);
+      
+      if (targetStatus.name === "Cancelled") {
+        toast.error(`Order status updated to Cancelled`);
+      } else if (targetStatus.name === "Delivered") {
+        toast.success(`Order delivered! 🎉`);
+      } else {
+        toast.success(`Order status updated to ${targetStatus.name}`);
+      }
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      toast.error("Failed to update status");
+      // Revert on failure
+      setOrders(originalOrders);
     }
   };
 
-  const sortedOrders = useMemo(() => {
-    const sorted = [...orders];
-    if (sort === "old") {
-      return sorted.reverse();
-    }
-    return sorted;
-  }, [orders, sort]);
+  const handleOrderClick = (id) => {
+      // Logic moved to navigation in component
+  };
+
+  const closeDetail = () => {};
 
   return {
-    orders: sortedOrders,
+    orders,
+    statuses, // Expose statuses
+    loading,
     sort,
     setSort,
-    handleStatusChange
+    pagination,
+    setPagination,
+    handleStatusChange,
+    handleOrderClick,
+    
+    selectedOrder,
+    isDetailOpen,
+    detailLoading,
+    closeDetail
   };
 }

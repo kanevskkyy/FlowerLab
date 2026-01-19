@@ -29,17 +29,17 @@
 }
 
 .breadcrumb-link:hover {
-  color: #C86AAC;
+  color: #c86aac;
 }
 
 .breadcrumb-link::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
   width: 0;
   height: 1px;
-  background: #C86AAC;
+  background: #c86aac;
   transition: width 0.3s ease;
 }
 
@@ -85,6 +85,41 @@
   transition: opacity 0.3s ease;
 }
 
+/* THUMBNAILS */
+.product-thumbnails {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.product-thumb {
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.product-thumb:hover {
+  border-color: #e0e0e0;
+}
+
+.product-thumb.active {
+  border-color: #c86aac;
+  box-shadow: 0 0 0 2px rgba(200, 106, 172, 0.1);
+}
+
+.product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* ================= PRODUCT INFO ================= */
 .product-info {
   flex: 1;
@@ -94,7 +129,7 @@
 }
 
 .product-title {
-  font-family: 'Jomolhari', serif;
+  font-family: "Jomolhari", serif;
   font-size: 32px;
   font-weight: 400;
   letter-spacing: 0.5px;
@@ -105,7 +140,7 @@
 .product-price {
   font-size: 28px;
   font-weight: 600;
-  color: #C86AAC;
+  color: #c86aac;
   margin: 0;
 }
 
@@ -161,14 +196,14 @@
 }
 
 .size-btn:hover {
-  border-color: #C86AAC;
-  background: #FBECF7;
+  border-color: #c86aac;
+  background: #fbecf7;
 }
 
 .size-btn.active {
-  border-color: #C86AAC;
-  background: #FBECF7;
-  color: #C86AAC;
+  border-color: #c86aac;
+  background: #fbecf7;
+  color: #c86aac;
 }
 
 /* ================= PRODUCT ACTIONS - STYLED LIKE CATALOG ================= */
@@ -199,33 +234,33 @@
 .buy-now-btn {
   background: #fff;
   color: #000;
-  border : 3px solid #D185BD;
-    padding: 20px 40px;
+  border: 3px solid #d185bd;
+  padding: 20px 40px;
 }
 
 .buy-now-btn:hover {
-  background: #FBECF7;
-  border-color: #C86AAC;
-  color: #C86AAC;
+  background: #fbecf7;
+  border-color: #c86aac;
+  color: #c86aac;
   transform: translateY(-2px);
 }
 
 .add-cart-btn {
   background: #fff;
   color: #000;
-  border : 3px solid #D185BD;
-    padding: 14px 40px;
+  border: 3px solid #d185bd;
+  padding: 14px 40px;
 }
 
 .add-cart-btn:hover {
-  background: #FBECF7;
+  background: #fbecf7;
   transform: translateY(-2px);
-  border-color: #C86AAC;
-  color: #C86AAC;
+  border-color: #c86aac;
+  color: #c86aac;
 }
 
-.cart-icon img{
-  height: 35px; 
+.cart-icon img {
+  height: 35px;
   width: auto;
   display: block;
 }
@@ -236,7 +271,7 @@
 }
 
 .section-title {
-  font-family: 'Jomolhari', serif;
+  font-family: "Jomolhari", serif;
   font-size: 28px;
   font-weight: 400;
   text-align: center;
@@ -297,7 +332,7 @@
 .rec-price {
   font-size: 15px;
   font-weight: 600;
-  color: #C86AAC;
+  color: #c86aac;
   margin: 0;
 }
 
@@ -312,9 +347,9 @@
 .gift-price {
   font-size: 16px;
   font-weight: 600;
-  color: #C86AAC;
+  color: #c86aac;
   text-align: center;
-  margin: -5px 0 0; 
+  margin: -5px 0 0;
 }
 /* ================= GIFT MODAL ================= */
 .gift-modal-overlay {
@@ -364,8 +399,8 @@
 }
 
 .modal-close:hover {
-  background: #FBECF7;
-  color: #C86AAC;
+  background: #fbecf7;
+  color: #c86aac;
   transform: rotate(90deg);
 }
 
@@ -395,7 +430,7 @@
 .modal-price {
   font-size: 22px;
   font-weight: 700;
-  color: #C86AAC;
+  color: #c86aac;
   margin: 0;
 }
 
@@ -435,12 +470,12 @@
 }
 
 .add-btn {
-  background: #C86AAC;
+  background: #c86aac;
   color: #fff;
 }
 
 .add-btn:hover {
-  background: #D185BD;
+  background: #d185bd;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(200, 106, 172, 0.3);
 }
@@ -459,7 +494,7 @@
 }
 
 .review-card {
-  background: #F7F5F5;
+  background: #f7f5f5;
   padding: 25px;
   border-radius: 16px;
   transition: all 0.3s ease;
@@ -481,7 +516,7 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #F4BDE5 0%, #D185BD 100%);
+  background: linear-gradient(135deg, #f4bde5 0%, #d185bd 100%);
   flex-shrink: 0;
 }
 
@@ -500,7 +535,7 @@
 
 .review-stars {
   font-size: 16px;
-  color: #C86AAC;
+  color: #c86aac;
   margin: 0;
 }
 
@@ -548,9 +583,9 @@
 }
 
 .back-to-catalog-btn:hover {
-  background: #FBECF7;
-  border-color: #C86AAC;
-  color: #C86AAC;
+  background: #fbecf7;
+  border-color: #c86aac;
+  color: #c86aac;
   transform: translateY(-2px);
 }
 

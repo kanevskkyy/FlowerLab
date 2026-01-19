@@ -34,7 +34,35 @@ namespace OrderService.DAL.Specification
             }
 
 
-            Query.OrderByDescending(o => o.CreatedAt);
+            if (!string.IsNullOrEmpty(parameters.Sort))
+            {
+                switch (parameters.Sort)
+                {
+                    case "DateAsc":
+                        Query.OrderBy(o => o.CreatedAt);
+                        break;
+                    case "QtyDesc":
+                        Query.OrderByDescending(o => o.Items.Sum(i => i.Count));
+                        break;
+                    case "QtyAsc":
+                        Query.OrderBy(o => o.Items.Sum(i => i.Count));
+                        break;
+                    case "NameAsc":
+                        Query.OrderBy(o => o.UserFirstName).ThenBy(o => o.UserLastName);
+                        break;
+                    case "NameDesc":
+                        Query.OrderByDescending(o => o.UserFirstName).ThenByDescending(o => o.UserLastName);
+                        break;
+                    case "DateDesc":
+                    default:
+                        Query.OrderByDescending(o => o.CreatedAt);
+                        break;
+                }
+            }
+            else
+            {
+                Query.OrderByDescending(o => o.CreatedAt);
+            }
         }
     }
 }

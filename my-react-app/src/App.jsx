@@ -33,127 +33,131 @@ import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import EmailConfirmationPending from "./pages/EmailConfirmation/EmailConfirmationPending";
 import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
 
+import ModalProvider from "./context/ModalProvider";
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
           <SettingsProvider>
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                duration: 3000,
-                style: {
-                  background: "#333",
-                  color: "#fff",
-                },
-                success: {
-                  iconTheme: {
-                    primary: "#F4BCE5", // Ваш фірмовий рожевий
-                    secondary: "#fff",
+            <ModalProvider>
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  duration: 3000,
+                  style: {
+                    background: "#333",
+                    color: "#fff",
                   },
-                },
-              }}
-            />
-            <Routes>
-              {/* public */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/catalog" element={<Catalog />} />
-              <Route path="/gifts" element={<Gifts />} />
-              <Route path="/product/:id" element={<ProductCard />} />
-              <Route path="/about" element={<AboutUs />} />
+                  success: {
+                    iconTheme: {
+                      primary: "#F4BCE5", // Ваш фірмовий рожевий
+                      secondary: "#fff",
+                    },
+                  },
+                }}
+              />
+              <Routes>
+                {/* public */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/catalog" element={<Catalog />} />
+                <Route path="/gifts" element={<Gifts />} />
+                <Route path="/product/:id" element={<ProductCard />} />
+                <Route path="/about" element={<AboutUs />} />
 
-              <Route path="/order" element={<OrderPlacementPickUp />} />
-              <Route
-                path="/order-registered"
-                element={<OrderPlacementRegistered />}
-              />
-              <Route path="/checkout" element={<CheckOut />} />
+                <Route path="/order" element={<OrderPlacementPickUp />} />
+                <Route
+                  path="/order-registered"
+                  element={<OrderPlacementRegistered />}
+                />
+                <Route path="/checkout" element={<CheckOut />} />
 
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              
-              {/* Email Confirmation */}
-              <Route
-                path="/email-confirmation-pending"
-                element={<EmailConfirmationPending />}
-              />
-              <Route path="/confirm-email" element={<EmailConfirmation />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-              {/* user protected */}
-              <Route
-                path="/cabinet"
-                element={
-                  <ProtectedRoute>
-                    <Cabinet />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Email Confirmation */}
+                <Route
+                  path="/email-confirmation-pending"
+                  element={<EmailConfirmationPending />}
+                />
+                <Route path="/confirm-email" element={<EmailConfirmation />} />
 
-              {/* admin protected */}
-              <Route
-                path="/admin"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminPanel />
-                  </AdminProtectedRoute>
-                }
-              />
+                {/* user protected */}
+                <Route
+                  path="/cabinet"
+                  element={
+                    <ProtectedRoute>
+                      <Cabinet />
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/admin/bouquets/new"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminBouquetForm />
-                  </AdminProtectedRoute>
-                }
-              />
+                {/* admin protected */}
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminPanel />
+                    </AdminProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/admin/bouquets/edit/:id"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminBouquetForm />
-                  </AdminProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/gifts/new"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminBouquetForm />
-                  </AdminProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/gifts/edit/:id"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminBouquetForm />
-                  </AdminProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/catalog/edit"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminCatalogEdit />
-                  </AdminProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/orders/:id"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminOrderDetails />
-                  </AdminProtectedRoute>
-                }
-              />
+                <Route
+                  path="/admin/bouquets/new"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminBouquetForm />
+                    </AdminProtectedRoute>
+                  }
+                />
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route
+                  path="/admin/bouquets/edit/:id"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminBouquetForm />
+                    </AdminProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/gifts/new"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminBouquetForm />
+                    </AdminProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/gifts/edit/:id"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminBouquetForm />
+                    </AdminProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/catalog/edit"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminCatalogEdit />
+                    </AdminProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/orders/:id"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminOrderDetails />
+                    </AdminProtectedRoute>
+                  }
+                />
+
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ModalProvider>
           </SettingsProvider>
         </CartProvider>
       </AuthProvider>

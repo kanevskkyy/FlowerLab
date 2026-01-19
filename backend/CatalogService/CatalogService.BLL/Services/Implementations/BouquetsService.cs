@@ -47,7 +47,8 @@ namespace CatalogService.BLL.Services.Implementations
             this.filterCacheInvalidationService = entityCacheInvalidationService;
         }
 
-        public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
+        public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters,
+            CancellationToken cancellationToken = default)
         {
             return await cache.GetOrSetAsync(
                 parameters.ToCacheKey(),
@@ -57,9 +58,11 @@ namespace CatalogService.BLL.Services.Implementations
             );
         }
 
-        private async Task<PagedList<BouquetSummaryDto>> FetchBouquetsAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default)
+        private async Task<PagedList<BouquetSummaryDto>> FetchBouquetsAsync(BouquetQueryParameters parameters,
+            CancellationToken cancellationToken = default)
         {
-            PagedList<Bouquet> pagedBouquets = await uow.Bouquets.GetBySpecificationPagedAsync(parameters, cancellationToken);
+            PagedList<Bouquet> pagedBouquets =
+                await uow.Bouquets.GetBySpecificationPagedAsync(parameters, cancellationToken);
             List<BouquetSummaryDto> mapped = pagedBouquets.Items.Select(b => mapper.Map<BouquetSummaryDto>(b)).ToList();
             return PagedList<BouquetSummaryDto>.Create(
                 mapped,
@@ -109,7 +112,8 @@ namespace CatalogService.BLL.Services.Implementations
 
                 if (sizeDto.FlowerIds.Count != sizeDto.FlowerQuantities.Count)
                 {
-                    throw new BadRequestException($"Number of flower IDs does not match quantities for size {size.Name}.");
+                    throw new BadRequestException(
+                        $"Number of flower IDs does not match quantities for size {size.Name}.");
                 }
 
                 if (!sizeDto.FlowerIds.Any())
@@ -120,12 +124,14 @@ namespace CatalogService.BLL.Services.Implementations
 
             foreach (var evId in dto.EventIds)
             {
-                if (!await uow.Events.ExistsAsync(e => e.Id == evId, cancellationToken)) throw new NotFoundException($"Event {evId} not found.");
+                if (!await uow.Events.ExistsAsync(e => e.Id == evId, cancellationToken))
+                    throw new NotFoundException($"Event {evId} not found.");
             }
 
             foreach (var rId in dto.RecipientIds)
             {
-                if (!await uow.Recipients.ExistsAsync(r => r.Id == rId, cancellationToken)) throw new NotFoundException($"Recipient {rId} not found.");
+                if (!await uow.Recipients.ExistsAsync(r => r.Id == rId, cancellationToken))
+                    throw new NotFoundException($"Recipient {rId} not found.");
             }
 
             foreach (var sizeDto in dto.Sizes)
@@ -140,7 +146,7 @@ namespace CatalogService.BLL.Services.Implementations
                     {
                         Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
                         throw new BadRequestException($"Not enough '{flower.Name}' flowers for size {size.Name}. " +
-                            $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
+                                                      $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
                     }
                 }
             }
@@ -200,12 +206,13 @@ namespace CatalogService.BLL.Services.Implementations
                         SizeId = sizeDto.SizeId,
                         ImageUrl = url,
                         Position = 1,
-                        IsMain = true
+                        IsMain = true,
+                        Id = Guid.Empty // Force Added state
                     });
                 }
 
                 short position = 2;
-                foreach (var img in sizeDto.AdditionalImages.Take(3))
+                foreach (var img in sizeDto.AdditionalImages)
                 {
                     using var ms = new MemoryStream();
                     await img.CopyToAsync(ms);
@@ -217,7 +224,8 @@ namespace CatalogService.BLL.Services.Implementations
                         SizeId = sizeDto.SizeId,
                         ImageUrl = url,
                         Position = position,
-                        IsMain = false
+                        IsMain = false,
+                        Id = Guid.Empty // Force Added state
                     });
                     position++;
                 }
@@ -253,7 +261,8 @@ namespace CatalogService.BLL.Services.Implementations
             return mapper.Map<BouquetDto>(savedBouquet);
         }
 
-        public async Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto, CancellationToken cancellationToken = default)
+        public async Task<BouquetDto> UpdateAsync(Guid id, BouquetUpdateDto dto,
+            CancellationToken cancellationToken = default)
         {
             Bouquet? bouquet = await uow.Bouquets.GetWithDetailsAsync(id, cancellationToken);
             if (bouquet == null)
@@ -275,7 +284,8 @@ namespace CatalogService.BLL.Services.Implementations
                     throw new NotFoundException($"Size {sizeDto.SizeId} not found.");
 
                 if (sizeDto.FlowerIds.Count != sizeDto.FlowerQuantities.Count)
-                    throw new BadRequestException($"Number of flower IDs does not match quantities for size {size.Name}.");
+                    throw new BadRequestException(
+                        $"Number of flower IDs does not match quantities for size {size.Name}.");
 
                 if (!sizeDto.FlowerIds.Any())
                     throw new BadRequestException($"Flowers must be specified for size {size.Name}.");
@@ -305,7 +315,7 @@ namespace CatalogService.BLL.Services.Implementations
                     {
                         var size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
                         throw new BadRequestException($"Not enough '{flower.Name}' flowers for size {size.Name}. " +
-                            $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
+                                                      $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
                     }
                 }
             }
@@ -374,58 +384,55 @@ namespace CatalogService.BLL.Services.Implementations
                         }
                     }
 
-                    // Handle Images (Keep existing, add new)
-                    // If new main image uploaded, replace old main ?? Or just set new one as main and demote others?
-                    // Logic: If new MainImage provided, find current main and remove/demote? 
-                    // Let's assume replacment of Main Image implies deleting the old Main Image entry or updating it.
-                    // For now, let's just add new ones.
-
-                    if (sizeDto.MainImage != null)
+                    try
                     {
-                         using var ms = new MemoryStream();
-                         await sizeDto.MainImage.CopyToAsync(ms);
-                         string url = await imageService.UploadAsync(ms.ToArray(), sizeDto.MainImage.FileName, "bouquets");
-                         
-                         var oldMain = existingSize.BouquetImages.FirstOrDefault(bi => bi.IsMain);
-                         if (oldMain != null) 
-                         {
-                             // UPDATE existing main image
-                             oldMain.ImageUrl = url;
-                         }
-                         else
-                         {
-                             // ADD new main image if none existed
-                             existingSize.BouquetImages.Add(new BouquetImage
-                             {
-                                 BouquetId = bouquet.Id,
-                                 SizeId = sizeDto.SizeId,
-                                 ImageUrl = url,
-                                 Position = 1,
-                                 IsMain = true
-                             });
-                         }
-                    }
-
-                    if (sizeDto.NewImages != null && sizeDto.NewImages.Any())
-                    {
-                        var maxPos = existingSize.BouquetImages.Any() ? existingSize.BouquetImages.Max(bi => bi.Position) : (short)1;
-                        foreach (var img in sizeDto.NewImages.Take(3))
+                        if (sizeDto.AdditionalImages != null && sizeDto.AdditionalImages.Any())
                         {
-                            using var ms = new MemoryStream();
-                            await img.CopyToAsync(ms);
-                            string url = await imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
+                            var maxPos = existingSize.BouquetImages.Any()
+                                ? existingSize.BouquetImages.Max(bi => bi.Position)
+                                : (short)0;
 
-                            existingSize.BouquetImages.Add(new BouquetImage
+                            foreach (var img in sizeDto.AdditionalImages)
                             {
-                                BouquetId = bouquet.Id,
-                                SizeId = sizeDto.SizeId,
-                                ImageUrl = url,
-                                Position = ++maxPos,
-                                IsMain = false
-                            });
+                                using var ms = new MemoryStream();
+                                await img.CopyToAsync(ms);
+                                string url = await imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
+
+                                var newImg = new BouquetImage
+                                {
+                                    BouquetId = bouquet.Id,
+                                    SizeId = sizeDto.SizeId,
+                                    ImageUrl = url,
+                                    Position = ++maxPos,
+                                    IsMain = false, // Always add as additional
+                                    Id = Guid
+                                        .Empty // IMPORTANT: Force "Added" state to override BaseEntity defaults
+                                };
+                                existingSize.BouquetImages.Add(newImg);
+                                uow.Bouquets.AddImage(newImg); // Explicitly track as Added
+                            }
+                        }
+
+                        if (sizeDto.ImageIdsToDelete != null && sizeDto.ImageIdsToDelete.Any())
+                        {
+                            var imagesToDelete = existingSize.BouquetImages
+                                .Where(bi => sizeDto.ImageIdsToDelete.Contains(bi.Id))
+                                .ToList();
+
+                            foreach (var img in imagesToDelete)
+                            {
+                                existingSize.BouquetImages.Remove(img);
+                                // Optional: Delete from cloud storage if needed
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[UpdateAsync] Error in image processing: {ex}");
+                        throw new BadRequestException($"Image processing failed: {ex.Message}");
+                    }
                 }
+
                 else
                 {
                     // ADD New Size
@@ -453,7 +460,8 @@ namespace CatalogService.BLL.Services.Implementations
                     {
                         using var ms = new MemoryStream();
                         await sizeDto.MainImage.CopyToAsync(ms);
-                        string url = await imageService.UploadAsync(ms.ToArray(), sizeDto.MainImage.FileName, "bouquets");
+                        string url = await imageService.UploadAsync(ms.ToArray(), sizeDto.MainImage.FileName,
+                            "bouquets");
 
                         newSize.BouquetImages.Add(new BouquetImage
                         {
@@ -461,14 +469,15 @@ namespace CatalogService.BLL.Services.Implementations
                             SizeId = sizeDto.SizeId,
                             ImageUrl = url,
                             Position = 1,
-                            IsMain = true
+                            IsMain = true,
+                            Id = Guid.Empty // Force "Added" state
                         });
                     }
 
-                    if (sizeDto.NewImages != null && sizeDto.NewImages.Any())
+                    if (sizeDto.AdditionalImages != null && sizeDto.AdditionalImages.Any())
                     {
                         short position = 2;
-                        foreach (var img in sizeDto.NewImages.Take(3))
+                        foreach (var img in sizeDto.AdditionalImages)
                         {
                             using var ms = new MemoryStream();
                             await img.CopyToAsync(ms);
@@ -479,10 +488,10 @@ namespace CatalogService.BLL.Services.Implementations
                                 BouquetId = bouquet.Id,
                                 SizeId = sizeDto.SizeId,
                                 ImageUrl = url,
-                                Position = position,
-                                IsMain = false
+                                Position = position++,
+                                IsMain = false,
+                                Id = Guid.Empty // Force "Added" state
                             });
-                            position++;
                         }
                     }
 
@@ -503,18 +512,31 @@ namespace CatalogService.BLL.Services.Implementations
             }
 
             // 3. Sync Recipients
-            var recipientsToRemove = bouquet.BouquetRecipients.Where(br => !dto.RecipientIds.Contains(br.RecipientId)).ToList();
+            var recipientsToRemove = bouquet.BouquetRecipients
+                .Where(br => !dto.RecipientIds.Contains(br.RecipientId)).ToList();
             foreach (var r in recipientsToRemove) bouquet.BouquetRecipients.Remove(r);
 
             foreach (var rId in dto.RecipientIds)
             {
                 if (!bouquet.BouquetRecipients.Any(br => br.RecipientId == rId))
                 {
-                    bouquet.BouquetRecipients.Add(new BouquetRecipient { BouquetId = bouquet.Id, RecipientId = rId });
+                    bouquet.BouquetRecipients.Add(
+                        new BouquetRecipient { BouquetId = bouquet.Id, RecipientId = rId });
                 }
             }
 
-            // uow.Bouquets.Update(bouquet); // Not needed as entity is tracked
+            uow.Bouquets.Update(bouquet);
+            // DEFENSIVE FIX: Force all "Modified" BouquetImages to "Unchanged"
+            // We strictly follow "Append-Only" for images. Valid existing images should NOT be updated.
+            var modifiedImages = uow.GetChangeTrackerEntries()
+                .Where(e => e.Entity is BouquetImage &&
+                            e.State == Microsoft.EntityFrameworkCore.EntityState.Modified);
+
+            foreach (var imgEntry in modifiedImages)
+            {
+                imgEntry.State = Microsoft.EntityFrameworkCore.EntityState.Unchanged;
+            }
+
             await uow.SaveChangesAsync(cancellationToken);
 
             await cacheInvalidation.InvalidateAllAsync();
@@ -542,3 +564,5 @@ namespace CatalogService.BLL.Services.Implementations
         }
     }
 }
+    
+

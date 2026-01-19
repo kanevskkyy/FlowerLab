@@ -13,5 +13,7 @@ namespace CatalogService.DAL.Repositories.Interfaces
         Task<(decimal minPrice, decimal maxPrice)> GetMinAndMaxPriceAsync(CancellationToken cancellationToken = default);
         Task<Bouquet?> GetWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
         Task<PagedList<Bouquet>> GetBySpecificationPagedAsync(BouquetQueryParameters parameters, CancellationToken cancellationToken = default);
+        void DeleteImages(IEnumerable<BouquetImage> images);
+        void AddImage(BouquetImage image);
     }
 }

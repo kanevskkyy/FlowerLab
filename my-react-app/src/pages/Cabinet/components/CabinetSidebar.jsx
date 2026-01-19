@@ -1,10 +1,22 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/useAuth";
 import UserInfoIcon from "../../../assets/icons/userinfo.svg";
 import OrderIcon from "../../../assets/icons/orders.svg";
 import AddressIcon from "../../../assets/icons/address.svg";
 import ExitIcon from "../../../assets/icons/exit.svg";
+import EditIcon from "../../../assets/icons/edit.svg"; // Using edit icon for Admin Dashboard
 
-export default function CabinetSidebar({ activeTab, setActiveTab, TABS, onSignOut }) {
+export default function CabinetSidebar({
+  activeTab,
+  setActiveTab,
+  TABS,
+  onSignOut,
+}) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "Admin";
+
   return (
     <aside className="cabinet-sidebar">
       <button
@@ -12,8 +24,7 @@ export default function CabinetSidebar({ activeTab, setActiveTab, TABS, onSignOu
           activeTab === TABS.PERSONAL ? "active" : ""
         }`}
         onClick={() => setActiveTab(TABS.PERSONAL)}
-        type="button"
-      >
+        type="button">
         <img src={UserInfoIcon} className="cabinet-nav-icon" alt="" />
         <span>Personal information</span>
       </button>
@@ -23,8 +34,7 @@ export default function CabinetSidebar({ activeTab, setActiveTab, TABS, onSignOu
           activeTab === TABS.ORDERS ? "active" : ""
         }`}
         onClick={() => setActiveTab(TABS.ORDERS)}
-        type="button"
-      >
+        type="button">
         <img src={OrderIcon} className="cabinet-nav-icon" alt="" />
         <span>My orders</span>
       </button>
@@ -34,13 +44,22 @@ export default function CabinetSidebar({ activeTab, setActiveTab, TABS, onSignOu
           activeTab === TABS.ADDRESSES ? "active" : ""
         }`}
         onClick={() => setActiveTab(TABS.ADDRESSES)}
-        type="button"
-      >
+        type="button">
         <img src={AddressIcon} className="cabinet-nav-icon" alt="" />
         <span>Saved addresses</span>
       </button>
 
       <div className="cabinet-sidebar-spacer" />
+
+      {isAdmin && (
+        <button
+          className="cabinet-nav-item"
+          onClick={() => navigate("/admin")}
+          type="button">
+          <img src={EditIcon} className="cabinet-nav-icon" alt="" />
+          <span>Admin Dashboard</span>
+        </button>
+      )}
 
       <button className="cabinet-signout" onClick={onSignOut} type="button">
         <img src={ExitIcon} className="cabinet-nav-icon" alt="" />

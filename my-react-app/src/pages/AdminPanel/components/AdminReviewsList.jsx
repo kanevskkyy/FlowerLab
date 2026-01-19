@@ -18,42 +18,46 @@ function AdminReviewsList({ reviews, onPost, onDelete }) {
     <section className="admin-section admin-reviews">
       <h2 className="admin-section-title">Pending reviews</h2>
       <div className="admin-reviews-list">
-        {reviews.map((r) => (
-          <div key={r.id} className="review-card">
-            <div className="review-left">
-              <div className="review-avatar">
-                <img src={r.avatar} alt="" />
-              </div>
-              <div className="review-body">
-                <div className="review-name">{r.name}</div>
-                <Stars value={r.stars} />
-                <div className="review-text">{r.text}</div>
-              </div>
-            </div>
-            <div className="review-actions">
-              <div className="review-actions-head">
-                <div className="review-action-label">Post</div>
-                <div className="review-action-label">Delete</div>
-              </div>
-              <div className="review-actions-btns">
-                <button
-                  type="button"
-                  className="review-icon-btn ok"
-                  onClick={() => onPost(r.id)}
-                >
-                  ✓
-                </button>
-                <button
-                  type="button"
-                  className="review-icon-btn del"
-                  onClick={() => onDelete(r.id)}
-                >
-                  <img src={trashIco} alt="" />
-                </button>
-              </div>
-            </div>
+        {reviews.length === 0 ? (
+          <div style={{ padding: "2rem", textAlign: "center", color: "#888" }}>
+            No pending reviews
           </div>
-        ))}
+        ) : (
+          reviews.map((r) => (
+            <div key={r.id} className="review-card">
+              <div className="review-left">
+                <div className="review-avatar">
+                  <img src={r.avatar} alt="" />
+                </div>
+                <div className="review-body">
+                  <div className="review-name">{r.name}</div>
+                  <Stars value={r.stars} />
+                  <div className="review-text">{r.text}</div>
+                </div>
+              </div>
+              <div className="review-actions">
+                <div className="review-actions-head">
+                  <div className="review-action-label">Post</div>
+                  <div className="review-action-label">Delete</div>
+                </div>
+                <div className="review-actions-btns">
+                  <button
+                    type="button"
+                    className="review-icon-btn ok"
+                    onClick={() => onPost(r.id)}>
+                    ✓
+                  </button>
+                  <button
+                    type="button"
+                    className="review-icon-btn del"
+                    onClick={() => onDelete(r.id)}>
+                    <img src={trashIco} alt="" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </section>
   );

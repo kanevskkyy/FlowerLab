@@ -15,7 +15,7 @@ namespace ReviewService.API.Controllers
 
 {
     [ApiController]
-    [Route("api/reviews")]
+    [Route("api")]
     public class ReviewsController : ControllerBase
     {
         private IMediator mediator;
