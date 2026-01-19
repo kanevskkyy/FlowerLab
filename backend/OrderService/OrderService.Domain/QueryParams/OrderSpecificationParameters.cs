@@ -23,6 +23,7 @@ namespace OrderService.Domain.QueryParams
         public Guid? GuestToken { get; set; }
         public Guid? StatusId { get; set; }
         public Guid? BouquetId { get; set; }
+        public string? Sort { get; set; }
 
     }
 }

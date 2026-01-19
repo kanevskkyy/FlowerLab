@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import axiosClient from "../../../api/axiosClient";
+import { useConfirm } from "../../../context/ModalProvider";
 
 export function useMyAddresses(activeTab, TABS) {
   const [addressList, setAddressList] = useState([]);
   const [newAddress, setNewAddress] = useState("");
+  const confirm = useConfirm();
 
   const fetchAddresses = async () => {
     try {
@@ -35,16 +37,23 @@ export function useMyAddresses(activeTab, TABS) {
     }
   };
 
-  const handleDeleteAddress = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this address?")) return;
-    try {
-      await axiosClient.delete(`/api/users/me/addresses/${id}`);
-      toast.success("Address deleted!");
-      fetchAddresses();
-    } catch (error) {
-      console.error("Failed to delete address:", error);
-      toast.error("Failed to delete address.");
-    }
+  const handleDeleteAddress = (id) => {
+    confirm({
+      title: "Delete address?",
+      message: "Are you sure you want to delete this address?",
+      confirmText: "Delete",
+      confirmType: "danger",
+      onConfirm: async () => {
+        try {
+          await axiosClient.delete(`/api/users/me/addresses/${id}`);
+          toast.success("Address deleted!");
+          fetchAddresses();
+        } catch (error) {
+          console.error("Failed to delete address:", error);
+          toast.error("Failed to delete address.");
+        }
+      },
+    });
   };
 
   return {
@@ -52,6 +61,6 @@ export function useMyAddresses(activeTab, TABS) {
     newAddress,
     setNewAddress,
     handleSaveAddress,
-    handleDeleteAddress
+    handleDeleteAddress,
   };
 }

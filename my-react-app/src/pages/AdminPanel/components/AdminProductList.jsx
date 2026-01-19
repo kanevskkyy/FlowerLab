@@ -5,6 +5,7 @@ import trashIco from "../../../assets/icons/trash.svg";
 
 function AdminProductList({
   active,
+  title,
   products,
   q,
   setQ,
@@ -21,9 +22,7 @@ function AdminProductList({
 
   return (
     <section className="admin-section">
-      <h2 className="admin-section-title">
-        {active === "bouquets" ? "Bouquets management" : "Gifts management"}
-      </h2>
+      <h2 className="admin-section-title">{title} management</h2>
       <div className="admin-toolbar">
         <div className="admin-search">
           <img className="admin-search-ico" src={searchIco} alt="" />
@@ -35,7 +34,7 @@ function AdminProductList({
         </div>
 
         <button className="admin-add-btn" type="button" onClick={onAdd}>
-          Add {active === "bouquets" ? "bouquet" : "gift"}{" "}
+          Add {title === "Bouquets" ? "bouquet" : "gift"}{" "}
           <span className="admin-plus">+</span>
         </button>
       </div>
@@ -57,16 +56,14 @@ function AdminProductList({
                   <button
                     className="admin-mini-btn"
                     type="button"
-                    onClick={() => onEdit(p)}
-                  >
+                    onClick={() => onEdit(p)}>
                     <img src={editIco} alt="Edit" />
                   </button>
 
                   <button
                     className="admin-mini-btn"
                     type="button"
-                    onClick={() => onDelete(p.id)}
-                  >
+                    onClick={() => onDelete(p.id)}>
                     <img src={trashIco} alt="Delete" />
                   </button>
                 </div>

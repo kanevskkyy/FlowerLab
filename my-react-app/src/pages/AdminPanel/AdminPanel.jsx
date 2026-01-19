@@ -1,106 +1,157 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/useAuth";
-import { useMemo, useState, useEffect } from "react";
-import toast from "react-hot-toast";
-import "./AdminPanel.css"; 
-
+import "./AdminPanel.css";
 import logoutIco from "../../assets/icons/exit.svg";
 
-// Sub-components
+// Components
 import AdminSidebar from "./components/AdminSidebar";
 import AdminProductList from "./components/AdminProductList";
+
 import AdminOrdersList from "./components/AdminOrdersList";
 import AdminCatalogSettings from "./components/AdminCatalogSettings";
 import AdminReviewsList from "./components/AdminReviewsList";
 
+// Services
+import authService from "../../services/authService";
+
 // Hooks
 import { useAdminProducts } from "./hooks/useAdminProducts";
 import { useAdminOrders } from "./hooks/useAdminOrders";
+import { useAdminCatalog } from "./hooks/useAdminCatalog";
 import { useAdminReviews } from "./hooks/useAdminReviews";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
 
-  // --- TAB STATE ---
-  const [active, setActive] = useState(() => {
-    return localStorage.getItem("adminActiveTab") || "bouquets";
-  });
+  // Tab State
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("adminActiveTab") || "bouquets",
+  );
 
+  // Catalog Sidebar State
   const [isCatalogOpen, setIsCatalogOpen] = useState(() => {
-    const current = localStorage.getItem("adminActiveTab");
-    return (
-      current === "bouquets" || current === "gifts" || current === "catalog"
-    );
+    return ["bouquets", "gifts", "catalog"].includes(activeTab);
   });
 
-  useEffect(() => {
-    localStorage.setItem("adminActiveTab", active);
-  }, [active]);
-
-  const handleTabChange = (key) => {
-    setActive(key);
-    // Sidebar logic related to submenu can stay here or be in hook if complex
-    if (key !== "bouquets" && key !== "gifts" && key !== "catalog") {
-       // logic to close submenus if needed
-    }
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem("adminActiveTab", tab);
   };
 
-  const handleSignOut = () => {
-    logout();
-    toast.success("Successfully logged out");
-    navigate("/login", { replace: true });
-    localStorage.removeItem("adminActiveTab");
+  const handleLogout = () => {
+    authService.logout();
+    navigate("/login");
   };
-
 
   // --- HOOKS ---
-  const { 
-    products, 
-    q, 
-    setQ, 
-    handleDeleteProduct 
-  } = useAdminProducts(active);
+  // Products
+  const {
+    products,
+    giftProducts,
+    loading: productsLoading,
+    q,
+    setQ,
+    selectedCategory,
+    setSelectedCategory,
+    categories,
+    handleDeleteProduct,
+    handleAddProduct,
+    handleEditProduct,
+  } = useAdminProducts(activeTab);
 
-  const { 
-    orders, 
-    sort, 
-    setSort, 
-    handleStatusChange 
+  // Orders
+  const {
+    orders,
+    statuses, // New
+    sort,
+    setSort,
+    handleStatusChange,
   } = useAdminOrders();
 
+  // Reviews
   const {
-    pendingReviews,
-    handlePostReview,
-    handleDeleteReview
+    reviews,
+    handleApproveReview,
+    handleRejectReview,
+    handleDeleteReview,
   } = useAdminReviews();
 
+  // Catalog Settings
+  const { settings, handleEdit } = useAdminCatalog();
 
-  // --- VIEW HELPERS ---
-  const handleEditProduct = (product) => {
-      if (active === "gifts") navigate(`/admin/gifts/edit/${product.id}`);
-      else navigate(`/admin/bouquets/edit/${product.id}`);
+  // Render logic
+  const renderContent = () => {
+    switch (activeTab) {
+      case "bouquets":
+        return (
+          <AdminProductList
+            title="Bouquets"
+            products={products}
+            loading={productsLoading}
+            q={q}
+            setQ={setQ}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            categories={categories}
+            onDelete={handleDeleteProduct}
+            activeTab={activeTab}
+            onAdd={handleAddProduct}
+            onEdit={handleEditProduct}
+          />
+        );
+      case "gifts":
+        return (
+          <AdminProductList
+            title="Gifts"
+            products={products}
+            loading={productsLoading}
+            q={q}
+            setQ={setQ}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            categories={categories}
+            onDelete={handleDeleteProduct}
+            activeTab={activeTab}
+            onAdd={handleAddProduct}
+            onEdit={handleEditProduct}
+          />
+        );
+      case "orders":
+        return (
+          <AdminOrdersList
+            orders={orders}
+            statuses={statuses}
+            sort={sort}
+            setSort={setSort}
+            onStatusChange={handleStatusChange}
+            onOrderClick={(id) => navigate(`/admin/orders/${id}`)}
+          />
+        );
+      case "catalog":
+        return (
+          <AdminCatalogSettings
+            settings={settings}
+            onEdit={() => navigate("/admin/catalog/edit")}
+          />
+        );
+      case "reviews":
+        return (
+          <AdminReviewsList
+            reviews={reviews}
+            onPost={handleApproveReview}
+            onDelete={handleDeleteReview}
+          />
+        );
+      default:
+        return <div>Select a tab</div>;
+    }
   };
-
-  const handleAddProduct = () => {
-    if (active === "gifts") navigate("/admin/gifts/new");
-    else navigate("/admin/bouquets/new");
-  };
-
-  const catalogSettings = useMemo(
-    () => ({
-      events: ["Birthday", "Wedding", "Engagement"],
-      forWho: ["Mom", "Wife", "Husband", "Kid", "Teacher", "Co-worker"],
-      flowerTypes: ["Peony", "Rose", "Lily", "Tulip", "Orchid", "Hydrangea"],
-    }),
-    []
-  );
 
   return (
     <div className="admin-root">
       {/* HEADER */}
       <header className="admin-topbar">
-        <div className="admin-brand ">
+        <div className="admin-brand" onClick={() => navigate("/")}>
           <h2 className="admin-brand-top">FLOWER LAB</h2>
           <span className="admin-brand-sub">VLADA</span>
         </div>
@@ -111,7 +162,7 @@ export default function AdminPanel() {
           <button
             className="admin-top-logout"
             type="button"
-            onClick={handleSignOut}>
+            onClick={handleLogout}>
             <img src={logoutIco} alt="Logout" />
             <span>Log out</span>
           </button>
@@ -120,56 +171,15 @@ export default function AdminPanel() {
 
       <div className="admin-body">
         {/* SIDEBAR */}
-        <AdminSidebar 
-            active={active} 
-            setActive={handleTabChange}
-            isCatalogOpen={isCatalogOpen}
-            setIsCatalogOpen={setIsCatalogOpen}
+        <AdminSidebar
+          active={activeTab}
+          setActive={handleTabChange}
+          isCatalogOpen={isCatalogOpen}
+          setIsCatalogOpen={setIsCatalogOpen}
         />
 
         {/* CONTENT */}
-        <main className="admin-content">
-          {/* ========== BOUQUETS & GIFTS MANAGEMENT ========== */}
-          {(active === "bouquets" || active === "gifts") && (
-            <AdminProductList 
-                active={active}
-                products={products}
-                q={q}
-                setQ={setQ}
-                onAdd={handleAddProduct}
-                onEdit={handleEditProduct}
-                onDelete={handleDeleteProduct}
-            />
-          )}
-
-          {/* ========== ORDERS ========== */}
-          {active === "orders" && (
-            <AdminOrdersList 
-                orders={orders}
-                sort={sort}
-                setSort={setSort}
-                onStatusChange={handleStatusChange}
-                onOrderClick={(id) => navigate(`/admin/orders/${id}`)}
-            />
-          )}
-
-          {/* ========== CATALOG SETTINGS (active === 'catalog') ========== */}
-          {active === "catalog" && (
-            <AdminCatalogSettings 
-                settings={catalogSettings}
-                onEdit={() => navigate("/admin/catalog/edit")}
-            />
-          )}
-
-          {/* ========== REVIEWS ========== */}
-          {active === "reviews" && (
-            <AdminReviewsList 
-                reviews={pendingReviews}
-                onPost={handlePostReview}
-                onDelete={handleDeleteReview}
-            />
-          )}
-        </main>
+        <main className="admin-content">{renderContent()}</main>
       </div>
     </div>
   );

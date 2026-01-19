@@ -34,11 +34,17 @@ const ProductCardContent = () => {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [selectedGift, setSelectedGift] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
+
+  // Reset image index when size changes
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [selectedSize]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -60,8 +66,17 @@ const ProductCardContent = () => {
             data.sizes[0]?.flowers
               .map((f) => `${f.name} (${f.quantity})`)
               .join(", ") || "Diverse floral mix",
+          // Store Array of images for each size
           images: data.sizes.reduce((acc, size) => {
-            acc[size.sizeName] = size.images[0]?.imageUrl || data.mainPhotoUrl;
+            // Get all images for this size, sorted by position?
+            // Assuming API returns them or we just map them.
+            // If size has no images, fallback to main bouquet photo
+            const sizeImgs =
+              size.images && size.images.length > 0
+                ? size.images.map((i) => i.imageUrl)
+                : [data.mainPhotoUrl];
+
+            acc[size.sizeName] = sizeImgs;
             return acc;
           }, {}),
           prices: data.sizes.reduce((acc, size) => {
@@ -85,9 +100,9 @@ const ProductCardContent = () => {
       }
     };
 
+    // ... (recommendations fetch kept same)
     const fetchRecommendations = async () => {
       try {
-        // Fetch top products excluding current one
         const response = await axiosClient.get("/api/catalog/bouquets", {
           params: { PageSize: 4 },
           headers: { Accept: "application/json" },
@@ -102,7 +117,7 @@ const ProductCardContent = () => {
               image: p.mainPhotoUrl,
               title: p.name,
               price: p.price,
-            }))
+            })),
         );
       } catch (error) {
         console.error("Failed to fetch recommendations:", error);
@@ -113,6 +128,7 @@ const ProductCardContent = () => {
     fetchRecommendations();
   }, [id]);
 
+  // ... (Gifts array kept same) ...
   const gifts = [
     { id: "gift1", image: gift1, title: "Teddy Bear", price: "350 ₴" },
     { id: "gift2", image: gift2, title: "Chocolates", price: "250 ₴" },
@@ -127,6 +143,10 @@ const ProductCardContent = () => {
     return <div className="error-screen">Product not found</div>;
   }
 
+  // Safe access to current images
+  const currentImages = product.images[selectedSize] || [];
+  const mainImageToShow = currentImages[selectedImageIndex] || currentImages[0];
+
   const handleAddToCart = () => {
     const cartProduct = {
       id: `${id}-${selectedSize}`,
@@ -134,9 +154,7 @@ const ProductCardContent = () => {
       title: product.title,
       price: `${product.prices[selectedSize]} ₴`,
       size: selectedSize,
-      img:
-        product.images[selectedSize] ||
-        product.images[Object.keys(product.images)[0]],
+      img: mainImageToShow, // Use displayed image
       qty: 1,
     };
     addToCart(cartProduct);
@@ -147,6 +165,8 @@ const ProductCardContent = () => {
     handleAddToCart();
     navigate("/order-registered");
   };
+
+  // ... (handlers kept same)
 
   const handleGiftClick = (gift) => {
     setSelectedGift(gift);
@@ -167,7 +187,6 @@ const ProductCardContent = () => {
     setSelectedGift(null);
   };
 
-  // ✅ ФУНКЦІЯ ДЛЯ ПЕРЕХОДУ В КАТАЛОГ (зі скролом)
   const handleBackToCatalog = () => {
     window.scrollTo(0, 0);
     navigate("/catalog");
@@ -190,14 +209,28 @@ const ProductCardContent = () => {
 
         {/* Main Product Content */}
         <div className="product-content">
-          {/* Product Image */}
+          {/* Product Image Section */}
           <div className="product-image-section">
             <div className="product-image">
               <img
-                src={product.images[selectedSize]}
+                src={mainImageToShow}
                 alt={`${product.title} - Size ${selectedSize}`}
               />
             </div>
+
+            {/* THUMBNAILS GALLERY */}
+            {currentImages.length > 1 && (
+              <div className="product-thumbnails">
+                {currentImages.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className={`product-thumb ${idx === selectedImageIndex ? "active" : ""}`}
+                    onClick={() => setSelectedImageIndex(idx)}>
+                    <img src={img} alt={`Thumb ${idx}`} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}

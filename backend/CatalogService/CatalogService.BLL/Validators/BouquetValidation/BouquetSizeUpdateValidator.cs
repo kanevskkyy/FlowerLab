@@ -47,11 +47,11 @@ namespace CatalogService.BLL.Validators.BouquetValidation
             });
 
      
-            RuleForEach(x => x.NewImages)
+            RuleForEach(x => x.AdditionalImages)
                 .Must(BeAValidImage)
                 .WithMessage("New images must be of type jpg, png, gif, or webp.");
 
-            RuleFor(x => x.NewImages)
+            RuleFor(x => x.AdditionalImages)
                 .Must(images => images == null || images.Count <= 3)
                 .WithMessage("You can upload a maximum of 3 new images per size.");
         }

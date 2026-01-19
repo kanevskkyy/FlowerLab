@@ -16,12 +16,13 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
         <div className="nav-group">
           <button
             className={`admin-nav-item ${
-              active === "bouquets" || active === "gifts" || active === "catalog"
+              active === "bouquets" ||
+              active === "gifts" ||
+              active === "catalog"
                 ? "active-parent"
                 : ""
             }`}
-            onClick={() => setIsCatalogOpen(!isCatalogOpen)}
-          >
+            onClick={() => setIsCatalogOpen(!isCatalogOpen)}>
             <img className="admin-nav-ico" src={bouquetsIco} alt="" />
             <span style={{ flex: 1 }}>CATALOG</span>
             {/* Стрілочка (клас у CSS) */}
@@ -38,8 +39,8 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
                 }`}
                 onClick={() => {
                   setActive("bouquets");
-                }}
-              >
+                  setIsCatalogOpen(false);
+                }}>
                 Bouquets
               </button>
               <button
@@ -48,8 +49,8 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
                 }`}
                 onClick={() => {
                   setActive("gifts");
-                }}
-              >
+                  setIsCatalogOpen(false);
+                }}>
                 Gifts
               </button>
               <button
@@ -58,8 +59,8 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
                 }`}
                 onClick={() => {
                   setActive("catalog");
-                }}
-              >
+                  setIsCatalogOpen(false);
+                }}>
                 Catalog Settings
               </button>
             </div>
@@ -72,8 +73,7 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
             key={item.key}
             type="button"
             className={`admin-nav-item ${active === item.key ? "active" : ""}`}
-            onClick={() => setActive(item.key)}
-          >
+            onClick={() => setActive(item.key)}>
             <img className="admin-nav-ico" src={item.icon} alt="" />
             <span>{item.label}</span>
           </button>

@@ -37,7 +37,9 @@
   padding: 10px 0;
 }
 
-.ace-back-btn:hover { color: #000; }
+.ace-back-btn:hover {
+  color: #000;
+}
 
 .ace-save-btn {
   background: #111;
@@ -51,7 +53,9 @@
   transition: background 0.2s;
 }
 
-.ace-save-btn:hover { background: #333; }
+.ace-save-btn:hover {
+  background: #333;
+}
 
 /* CONTENT LAYOUT */
 .ace-content {
@@ -65,7 +69,7 @@
   background: #fff;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .ace-card-title {
@@ -89,7 +93,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #FBECF7; /* Фірмовий рожевий */
+  background: #fbecf7; /* Фірмовий рожевий */
   padding: 8px 14px;
   border-radius: 20px;
   font-size: 14px;
@@ -98,7 +102,7 @@
 }
 
 .ace-tag-remove {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   border: none;
   border-radius: 50%;
   width: 20px;
@@ -113,7 +117,7 @@
 }
 
 .ace-tag-remove:hover {
-  background: rgba(0,0,0,0.15);
+  background: rgba(0, 0, 0, 0.15);
   color: #d32f2f;
 }
 
@@ -177,7 +181,8 @@
     margin-bottom: 10px;
   }
 
-  .ace-back-btn, .ace-save-btn {
+  .ace-back-btn,
+  .ace-save-btn {
     flex: 1;
     text-align: center;
   }
@@ -191,3 +196,5 @@
     width: 100%;
   }
 }
+
+/* Confirm modal styles moved to reusable component */
