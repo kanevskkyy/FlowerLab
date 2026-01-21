@@ -66,6 +66,24 @@ namespace OrderService.API.Controllers
             return CreatedAtRoute("GetOrderById", new { id = result.Id }, result);
         }
 
+        [HttpGet("discount-eligibility")]
+        public async Task<IActionResult> CheckDiscountEligibility(CancellationToken cancellationToken)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Console.WriteLine($"[CheckDiscount] User ID String: '{userIdString}'"); 
+            
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return Ok(false);
+            }
+
+            var userId = Guid.Parse(userIdString);
+            var isEligible = await orderService.CheckDiscountEligibilityAsync(userId, cancellationToken);
+            
+            Console.WriteLine($"[CheckDiscount] User: {userId}, Eligible: {isEligible}");
+            return Ok(isEligible);
+        }
+
         [HttpGet("my")]
         public async Task<IActionResult> GetMyOrders([FromQuery] OrderSpecificationParameters parameters, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {

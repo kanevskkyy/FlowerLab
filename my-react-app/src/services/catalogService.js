@@ -126,6 +126,23 @@ const catalogService = {
     const response = await axiosClient.get("/api/catalog/sizes");
     return response.data;
   },
+  // Orders
+  createOrder: async (orderData) => {
+    const response = await axiosClient.post("/api/orders", orderData);
+    return response.data;
+  },
+
+  // Addresses (for checkout dropdown)
+  getUserAddresses: async () => {
+    const response = await axiosClient.get("/api/users/me/addresses");
+    return response.data;
+  },
+
+  // Payment
+  payOrder: async (orderId) => {
+    const response = await axiosClient.post(`/api/orders/${orderId}/pay`);
+    return response.data; // Expected: { paymentUrl: "..." }
+  },
 };
 
 export default catalogService;

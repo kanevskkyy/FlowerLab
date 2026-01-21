@@ -33,6 +33,7 @@ namespace CatalogService.BLL.Automapper
                 .ForMember(d => d.Quantity, opt => opt.MapFrom(s => s.Quantity));
 
             CreateMap<Bouquet, BouquetSummaryDto>()
+                .ForMember(d => d.Sizes, opt => opt.MapFrom(s => s.BouquetSizes))
                 .ForMember(d => d.Price, opt => opt.MapFrom(s =>
                     s.BouquetSizes.Any() ? s.BouquetSizes.Min(bs => bs.Price) : 0m))
                 .ForMember(d => d.MainPhotoUrl, opt => opt.MapFrom(s => s.MainPhotoUrl));

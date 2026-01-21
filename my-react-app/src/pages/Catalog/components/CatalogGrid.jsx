@@ -25,13 +25,14 @@ function CatalogGrid({ products, onOrder }) {
           <div className="item-bottom">
             <div className="item-text">
               <p>{p.title}</p>
-              <p>{p.price} ₴</p>
+              <p>{p.price}</p>
             </div>
 
             <button
               className="order-btn"
-              onClick={() => onOrder ? onOrder(p) : navigate(`/product/${p.id}`)}
-            >
+              onClick={() =>
+                onOrder ? onOrder(p) : navigate(`/product/${p.id}`)
+              }>
               ORDER
             </button>
           </div>

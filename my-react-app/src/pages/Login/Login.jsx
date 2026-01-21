@@ -39,16 +39,14 @@ export default function Login() {
   // 2. Оновлена логіка входу
   const onSubmit = async (data) => {
     try {
-      console.log("Logging in...", data);
+      console.log("Logging in...");
 
+      const loginResponse = await authService.login(data.email, data.password);
 
-      const loginResponse = await authService.login(
-        data.email,
-        data.password,
-      );
-
-      const accessToken = loginResponse.accessToken || loginResponse.AccessToken;
-      const refreshToken = loginResponse.refreshToken || loginResponse.RefreshToken;
+      const accessToken =
+        loginResponse.accessToken || loginResponse.AccessToken;
+      const refreshToken =
+        loginResponse.refreshToken || loginResponse.RefreshToken;
 
       if (accessToken) {
         // Зберігаємо токени
@@ -61,8 +59,8 @@ export default function Login() {
         toast.success("Welcome back!");
         navigate("/cabinet", { replace: true });
       } else {
-          // Якщо токен не прийшов (наприклад, null)
-           throw new Error("No access token received from server");
+        // Якщо токен не прийшов (наприклад, null)
+        throw new Error("No access token received from server");
       }
     } catch (error) {
       console.error("Login failed:", error);

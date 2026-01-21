@@ -7,6 +7,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
 
 // pages
+// pages
 import HomePage from "./pages/HomePage/HomePage";
 import Catalog from "./pages/Catalog/Catalog";
 import ProductCard from "./pages/ProductCard/ProductCard";
@@ -16,10 +17,10 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Cabinet from "./pages/Cabinet/Cabinet";
 
-// твої існуючі
 import OrderPlacementPickUp from "./pages/OrderPlacementPickUp/OrderPlacementPickUp";
 import OrderPlacementRegistered from "./pages/OrderPlacementRegistered/OrderPlacementRegistered";
 import CheckOut from "./pages/CheckOut/CheckOut";
+import OrderSuccess from "./pages/OrderSuccess/OrderSuccess";
 
 // admin (створиш/підключиш)
 import AdminPanel from "./pages/AdminPanel/AdminPanel";
@@ -72,6 +73,7 @@ function App() {
                   element={<OrderPlacementRegistered />}
                 />
                 <Route path="/checkout" element={<CheckOut />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
 
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />

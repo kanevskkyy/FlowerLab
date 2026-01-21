@@ -62,6 +62,10 @@ const CartPopup = ({ isOpen, onClose }) => {
                       <p className="cart-item-title">{item.title}</p>
                     </div>
 
+                    {item.sizeName && (
+                      <p className="cart-item-size">Size: {item.sizeName}</p>
+                    )}
+
                     <p className="cart-item-price">
                       {typeof item.price === "string"
                         ? item.price

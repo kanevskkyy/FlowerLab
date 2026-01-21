@@ -1,43 +1,31 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useCart } from "../../context/CartContext";
+import { useGifts } from "./hooks/useGifts";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import PopupMenu from "../popupMenu/PopupMenu";
 import "./Gifts.css"; // Локальні стилі (копія каталогу)
 
-// Імпорт зображень
-import gift1 from "../../assets/images/gift1.jpg";
-import gift2 from "../../assets/images/gift2.jpg";
-import gift3 from "../../assets/images/gift3.png";
-
 const Gifts = () => {
   const { addToCart } = useCart();
+  const { gifts, loading } = useGifts();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const giftsItems = [
-    { id: 101, title: "Teddy Bear", price: "1000 ₴", img: gift1 },
-    { id: 102, title: "Star Balloon", price: "250 ₴", img: gift2 },
-    { id: 103, title: "Box of Chocolates", price: "500 ₴", img: gift3 },
-    { id: 104, title: "Big Teddy XL", price: "1500 ₴", img: gift1 },
-    { id: 105, title: "Heart Balloon Set", price: "450 ₴", img: gift2 },
-    { id: 106, title: "Premium Sweets Box", price: "800 ₴", img: gift3 },
-  ];
-
   const handleAddToCart = (item) => {
     addToCart({
       id: item.id,
-      title: item.title,
-      price: item.price, // Переконайтеся, що тут строка з валютою або число
-      img: item.img,
+      title: item.name, // API returns 'name'
+      price: `${item.price} ₴`, // API returns number
+      img: item.imageUrl, // API returns 'imageUrl'
       qty: 1,
       isGift: true,
     });
-    toast.success(`${item.title} added to cart!`);
+    toast.success(`${item.name} added to cart!`);
   };
 
   return (
@@ -48,31 +36,51 @@ const Gifts = () => {
       <main className="catalog">
         <h1 className="catalog-title">GIFTS & EXTRAS</h1>
 
-        {/* СІТКА (Структура 1 в 1 як у Catalog.jsx) */}
-        <div className="catalog-grid">
-          {giftsItems.map((item) => (
-            <div className="catalog-item" key={item.id}>
-              {/* ФОТО */}
-              <div className="item-img">
-                <img src={item.img} alt={item.title} />
-              </div>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "4rem" }}>
+            Loading gifts...
+          </div>
+        ) : (
+          <div className="catalog-grid">
+            {gifts.length > 0 ? (
+              gifts.map((item) => (
+                <div className="catalog-item" key={item.id}>
+                  {/* PHOTO */}
+                  <div className="item-img">
+                    <img
+                      src={item.imageUrl || "/placeholder.png"}
+                      alt={item.name}
+                    />
+                  </div>
 
-              {/* НИЖНЯ ЧАСТИНА */}
-              <div className="item-bottom">
-                <div className="item-text">
-                  <p>{item.title}</p>
-                  <p>{item.price}</p>
+                  {/* BOTTOM */}
+                  <div className="item-bottom">
+                    <div className="item-text">
+                      <p>{item.name}</p>
+                      <p>{item.price} ₴</p>
+                    </div>
+
+                    <button
+                      className="order-btn"
+                      onClick={() => handleAddToCart(item)}>
+                      ORDER
+                    </button>
+                  </div>
                 </div>
-
-                <button
-                  className="order-btn"
-                  onClick={() => handleAddToCart(item)}>
-                  ORDER
-                </button>
+              ))
+            ) : (
+              <div
+                style={{
+                  gridColumn: "1/-1",
+                  textAlign: "center",
+                  padding: "2rem",
+                  color: "#999",
+                }}>
+                No gifts found.
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
       </main>
 
       <Footer />

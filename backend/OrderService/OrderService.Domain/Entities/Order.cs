@@ -24,6 +24,8 @@ namespace OrderService.Domain.Entities
         public string? GiftMessage { get; set; }
         public PickupStore? PickupStoreAddress { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? ReceiverName { get; set; }
+        public string? ReceiverPhone { get; set; }
         public Guid? DeliveryInformationId { get; set; }
 
         public Guid? GuestToken { get; set; }

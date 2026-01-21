@@ -324,13 +324,6 @@ export function useAdminBouquetForm() {
           return;
         }
 
-        // DEBUG: Check what we are sending
-        console.log("--- SUBMITTING BOUQUET DATA ---");
-        for (var pair of data.entries()) {
-          console.log(pair[0] + ", " + pair[1]);
-        }
-        console.log("-------------------------------");
-
         if (isEditMode) {
           await catalogService.updateBouquet(id, data);
           toast.success("Bouquet updated successfully!");

@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useCart } from "../../context/CartContext"; 
+import { useState, useEffect } from "react";
+import { useCart } from "../../context/CartContext";
 import "./HomePage.css";
+import catalogService from "../../services/catalogService";
 
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -13,23 +14,44 @@ import PopularSection from "./components/PopularSection";
 import AboutSection from "./components/AboutSection";
 import ReviewsSection from "./components/ReviewsSection";
 
-import bouquet1L from "../../assets/images/bouquet1L.jpg";
-import bouquet2 from "../../assets/images/bouquet2L.jpg";
-import bouquet3 from "../../assets/images/bouquet3L.jpg";
-
-
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { addToCart } = useCart(); 
+  const { addToCart } = useCart();
 
-  const popularItems = [
-    { id: 1, title: "bouquet 1", img: bouquet1L, price: "1200 ₴" },
-    { id: 2, title: "bouquet 2", img: bouquet2, price: "950 ₴" },
-    { id: 3, title: "bouquet 3", img: bouquet3, price: "1500 ₴" },
-    { id: 4, title: "bouquet 4", img: bouquet1L, price: "1100 ₴" },
-    { id: 5, title: "bouquet 5", img: bouquet2, price: "1300 ₴" },
-    { id: 6, title: "bouquet 6", img: bouquet3, price: "1400 ₴" },
-  ];
+  const [popularItems, setPopularItems] = useState([]);
+
+  useEffect(() => {
+    const fetchPopular = async () => {
+      try {
+        const data = await catalogService.getBouquets();
+        const items = data.items || data || [];
+        // Take top 4 or 6 items
+        const mapped = items.slice(0, 6).map((b) => {
+          // Default Size Logic (Minimum Price)
+          let minPriceSize = null;
+          if (b.sizes && b.sizes.length > 0) {
+            const sortedSizes = [...b.sizes].sort((a, b) => a.price - b.price);
+            minPriceSize = sortedSizes[0];
+          }
+
+          return {
+            id: b.id, // This is productId
+            bouquetId: b.id, // Distinct for clarity
+            sizeId: minPriceSize ? minPriceSize.sizeId : null,
+            sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
+            title: b.name,
+            img: b.mainPhotoUrl,
+            // Fallback Price Strategy
+            price: minPriceSize ? `${minPriceSize.price} ₴` : `${b.price} ₴`,
+          };
+        });
+        setPopularItems(mapped);
+      } catch (err) {
+        console.error("Failed to fetch popular bouquets:", err);
+      }
+    };
+    fetchPopular();
+  }, []);
 
   const reviewsData = [
     {
@@ -65,8 +87,16 @@ export default function HomePage() {
   ];
 
   const handleAddToCart = (item) => {
+    // Safeguard: If sizeId is missing (e.g. backend cache stale), redirect to product page
+    if (!item.sizeId) {
+      window.location.href = `/product/${item.id}`;
+      return;
+    }
+
     addToCart({
-      id: item.id,
+      id: `${item.bouquetId}-${item.sizeName}`, // Composite ID for cart
+      bouquetId: item.bouquetId,
+      sizeId: item.sizeId,
       title: item.title,
       img: item.img,
       price: item.price,
@@ -86,10 +116,7 @@ export default function HomePage() {
 
         <IntroSection />
 
-        <PopularSection 
-            items={popularItems} 
-            onAddToCart={handleAddToCart}
-        />
+        <PopularSection items={popularItems} onAddToCart={handleAddToCart} />
 
         <AboutSection />
 

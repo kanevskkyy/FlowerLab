@@ -224,6 +224,8 @@ namespace OrderService.BLL.Services
                 PickupStoreAddress = dto.PickupStoreAddress,
                 Notes = dto.Notes,
                 PhoneNumber = finalPhoneNumber,
+                ReceiverName = dto.ReceiverName,
+                ReceiverPhone = dto.ReceiverPhone,
                 GiftMessage = dto.GiftMessage,
                 StatusId = awaitingPaymentStatus.Id,
                 IsDelivery = dto.IsDelivery,
@@ -410,6 +412,15 @@ namespace OrderService.BLL.Services
             dtoResult.TotalPrice = order.Items.Sum(i => i.Price * i.Count);
 
             return dtoResult;
+        }
+
+        public async Task<bool> CheckDiscountEligibilityAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
+                new OrderSpecificationParameters { UserId = userId, PageSize = 1 },
+                cancellationToken);
+
+            return pagedOrders.TotalCount == 0;
         }
 
     }

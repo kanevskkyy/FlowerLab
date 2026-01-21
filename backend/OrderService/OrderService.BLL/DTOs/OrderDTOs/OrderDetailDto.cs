@@ -18,6 +18,8 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public string? Notes { get; set; }
         public string? GiftMessage { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? ReceiverName { get; set; }
+        public string? ReceiverPhone { get; set; }
 
         public string? PickupStoreAddress { get; set; }
         public bool IsDelivery { get; set; }

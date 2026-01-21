@@ -56,7 +56,6 @@ export default function ResetPassword() {
     }
 
     try {
-      console.log("Setting new password...");
       await axiosClient.post("/api/users/auth/reset-password", {
         userId: userId,
         token: token,

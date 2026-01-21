@@ -242,7 +242,7 @@
 }
 
 .form-group input:focus {
-  background: #FCEEF9;
+  background: #fff;
   box-shadow: 0 0 0 2px #D46AAC;
 }
 
@@ -308,7 +308,7 @@
   padding: 16px;
   border-radius: 30px;
   border: none;
-  background: #D46AAC;
+  background: #F4BCE5;
   color: #fff;
   font-size: 16px;
   font-weight: 500;
