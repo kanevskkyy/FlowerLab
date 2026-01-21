@@ -81,9 +81,10 @@ const AboutUs = () => {
           <br />
           We continuously grow, learn, and improve our work. We expand our team,
           introduce new shapes, colors, and arrangements, explore global trends,
-          and adapt them for our clients. Our studio also collaborates with
-          various brands and venues, creating floral solutions for events,
-          gifts, and visual decor.
+          and adapt them for our clients.
+          <br />
+          Our studio also collaborates with various brands and venues, creating
+          floral solutions for events, gifts, and visual decor.
           <br />
           FlowerLab Vlada is quality, style, and service that inspire and leave
           a lasting impression.
@@ -142,7 +143,7 @@ const AboutUs = () => {
       {/* CONTACTS & LOCATIONS */}
       <div className="info-container">
         <div className="info-column">
-          <h2 className="section-title">Our locations:</h2>
+          <h2 className="info-title">Our locations:</h2>
           <div className="info-items">
             <div className="info-item footer-location">
               <img
@@ -177,7 +178,7 @@ const AboutUs = () => {
         </div>
 
         <div className="info-column">
-          <h2 className="section-title">Our contact information:</h2>
+          <h2 className="info-title">Our contact information:</h2>
           <div className="info-items">
             <div className="info-item footer-phone">
               <img

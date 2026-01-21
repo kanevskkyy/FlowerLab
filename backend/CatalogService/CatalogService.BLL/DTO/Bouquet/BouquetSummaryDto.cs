@@ -12,6 +12,7 @@ namespace CatalogService.BLL.DTO
         public string Name { get; set; } = null!;
         public decimal Price { get; set; } 
         public string MainPhotoUrl { get; set; } = null!;
+        public List<BouquetSizeDto> Sizes { get; set; } = new();
         public DateTime CreatedAt { get; set; }
     }
 }

@@ -28,6 +28,13 @@ const orderService = {
     });
     return response.data;
   },
+
+  checkDiscountEligibility: async () => {
+    const response = await axiosClient.get(
+      `/api/orders/discount-eligibility?_t=${Date.now()}`,
+    );
+    return response.data;
+  },
 };
 
 export default orderService;

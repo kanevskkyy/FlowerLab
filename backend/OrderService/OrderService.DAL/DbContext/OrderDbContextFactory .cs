@@ -14,7 +14,7 @@ namespace OrderService.DAL.DbContext
         public OrderDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<OrderDbContext>();
-            optionsBuilder.UseNpgsql("Host=localhost;Database=OrderDb;Username=postgres;Password=yourpassword");
+            optionsBuilder.UseNpgsql("Host=localhost;Port=64819;Database=FlowerShopOrderDb;Username=postgres;Password=postgres");
 
             return new OrderDbContext(optionsBuilder.Options);
         }

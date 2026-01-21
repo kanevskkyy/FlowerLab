@@ -146,6 +146,12 @@ namespace OrderService.DAL.Migrations
                     b.Property<int?>("PickupStoreAddress")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ReceiverName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReceiverPhone")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("StatusId")
                         .HasColumnType("uuid");
 

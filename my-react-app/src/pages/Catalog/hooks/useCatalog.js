@@ -49,24 +49,58 @@ export function useCatalog() {
 
         if (data.items) {
           setProducts(
-            data.items.map((p) => ({
-              id: p.id,
-              title: p.name,
-              price: p.price,
-              img: p.mainPhotoUrl,
-            }))
+            data.items.map((p) => {
+              // Find size with minimum price (ignoring 0 if possible, or just strict min)
+              // Assuming price > 0 is valid.
+              let minPriceSize = null;
+              if (p.sizes && p.sizes.length > 0) {
+                // Sort by price ascending
+                const sortedSizes = [...p.sizes].sort(
+                  (a, b) => a.price - b.price,
+                );
+                minPriceSize = sortedSizes[0];
+              }
+
+              return {
+                id: p.id,
+                bouquetId: p.id,
+                sizeId: minPriceSize ? minPriceSize.sizeId : null,
+                sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
+                title: p.name,
+                // Fallback Price Strategy
+                price: minPriceSize
+                  ? `${minPriceSize.price} ₴`
+                  : `${p.price} ₴`,
+                img: p.mainPhotoUrl,
+              };
+            }),
           );
           setTotalProducts(data.totalCount);
           setTotalPages(data.totalPages);
         } else {
           const items = Array.isArray(data) ? data : [];
           setProducts(
-            items.map((p) => ({
-              id: p.id,
-              title: p.name,
-              price: p.price,
-              img: p.mainPhotoUrl,
-            }))
+            items.map((p) => {
+              let minPriceSize = null;
+              if (p.sizes && p.sizes.length > 0) {
+                const sortedSizes = [...p.sizes].sort(
+                  (a, b) => a.price - b.price,
+                );
+                minPriceSize = sortedSizes[0];
+              }
+              return {
+                id: p.id,
+                bouquetId: p.id,
+                sizeId: minPriceSize ? minPriceSize.sizeId : null,
+                sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
+                title: p.name,
+                // Fallback Price Strategy
+                price: minPriceSize
+                  ? `${minPriceSize.price} ₴`
+                  : `${p.price} ₴`,
+                img: p.mainPhotoUrl,
+              };
+            }),
           );
           setTotalProducts(items.length);
           setTotalPages(1);
@@ -108,7 +142,19 @@ export function useCatalog() {
   };
 
   const handleAddToCart = (product) => {
-    addToCart({ ...product, qty: 1 });
+    // Safeguard: If sizeId is missing (e.g. backend cache stale), redirect to product page
+    if (!product.sizeId) {
+      // Optional: Toast message explaining why? Or just redirect.
+      // toast.error("Please select a size");
+      window.location.href = `/product/${product.id}`; // using window.location to be safe or navigate if available
+      return;
+    }
+
+    addToCart({
+      ...product,
+      id: `${product.bouquetId}-${product.sizeName}`,
+      qty: 1,
+    });
   };
 
   return {
@@ -122,14 +168,14 @@ export function useCatalog() {
     menuOpen,
     filterOpen,
     searchQuery,
-    
+
     // Setters (if needed directly)
     setSortOpen,
     setMenuOpen,
     setFilterOpen,
     setSearchQuery,
     setCurrentPage, // exposed for search input onChange
-    
+
     // Handlers
     applyFilters,
     handleSortChange,
