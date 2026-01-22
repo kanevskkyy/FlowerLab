@@ -22,102 +22,134 @@ export function useAdminOrders() {
   // Statuses list
   const [statuses, setStatuses] = useState([]);
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    try {
-      let sortParam = "DateDesc";
-      // Map sort keys to API params
-      switch (sort) {
-        case "date-asc":
-          sortParam = "DateAsc";
-          break;
-        case "qty-desc":
-          sortParam = "QtyDesc";
-          break;
-        case "qty-asc":
-          sortParam = "QtyAsc";
-          break;
-        case "name-asc":
-          sortParam = "NameAsc";
-          break;
-        case "name-desc":
-          sortParam = "NameDesc";
-          break;
-        case "date-desc":
-        default:
-          sortParam = "DateDesc";
-          break;
+  const fetchOrders = useCallback(
+    async (isLoadMore = false) => {
+      // If loading first page -> full load. If loading more -> background load
+      if (isLoadMore) {
+        setDetailLoading(true); // Reusing this or add specific state
+      } else {
+        setLoading(true);
       }
 
-      // Fetch orders AND statuses in parallel if statuses empty
-      const promises = [
-        orderService.getAll({
-          pageNumber: pagination.pageNumber,
-          pageSize: pagination.pageSize,
-          sort: sortParam,
-        }),
-      ];
+      try {
+        let sortParam = "DateDesc";
+        // Map sort keys to API params
+        switch (sort) {
+          case "date-asc":
+            sortParam = "DateAsc";
+            break;
+          case "qty-desc":
+            sortParam = "QtyDesc";
+            break;
+          case "qty-asc":
+            sortParam = "QtyAsc";
+            break;
+          case "name-asc":
+            sortParam = "NameAsc";
+            break;
+          case "name-desc":
+            sortParam = "NameDesc";
+            break;
+          case "date-desc":
+          default:
+            sortParam = "DateDesc";
+            break;
+        }
 
-      const shouldFetchStatuses = statuses.length === 0;
-      if (shouldFetchStatuses) {
-        promises.push(orderService.getStatuses());
+        // Fetch orders AND statuses in parallel if statuses empty
+        const promises = [
+          orderService.getAll({
+            pageNumber: pagination.pageNumber,
+            pageSize: pagination.pageSize,
+            sort: sortParam,
+          }),
+        ];
+
+        const shouldFetchStatuses = statuses.length === 0;
+        if (shouldFetchStatuses) {
+          promises.push(orderService.getStatuses());
+        }
+
+        const results = await Promise.all(promises);
+        const data = results[0];
+        if (shouldFetchStatuses) {
+          setStatuses(results[1]);
+        }
+
+        // Map API response
+        const mappedOrders = (data.items || []).map((order) => ({
+          id: order.id,
+          title:
+            order.items?.length > 1
+              ? `${order.items[0].bouquetName} + ${order.items.length - 1} more`
+              : order.items?.[0]?.bouquetName || "Unknown Item",
+          qty:
+            order.items?.length > 1
+              ? `${order.items.reduce((acc, i) => acc + i.count, 0)} items`
+              : `${order.items?.[0]?.count || 1} pc`,
+          customer:
+            `${order.userFirstName || order.firstName || ""} ${order.userLastName || order.lastName || ""}`.trim() ||
+            "Guest",
+          date: new Date(
+            order.status?.createdAt || order.createdAt || Date.now(),
+          ).toLocaleString("uk-UA", {
+            day: "numeric",
+            month: "numeric",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          total: `${order.totalPrice} ₴`,
+          avatar: order.items?.[0]?.bouquetImage || null,
+          status: order.status, // KEEP OBJECT {id, name}
+          rawDate: new Date(
+            order.status?.createdAt || order.createdAt || Date.now(),
+          ),
+        }));
+
+        // If LoadMore -> Append, else -> Replace
+        if (isLoadMore) {
+          setOrders((prev) => [...prev, ...mappedOrders]);
+        } else {
+          setOrders(mappedOrders);
+        }
+
+        setPagination((prev) => ({
+          ...prev,
+          totalCount: data.totalCount || 0,
+          totalPages: Math.ceil((data.totalCount || 0) / prev.pageSize),
+        }));
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+        toast.error("Failed to load orders");
+      } finally {
+        setLoading(false);
+        setDetailLoading(false);
       }
+    },
+    [pagination.pageNumber, pagination.pageSize, sort, statuses.length],
+  );
 
-      const results = await Promise.all(promises);
-      const data = results[0];
-      if (shouldFetchStatuses) {
-        setStatuses(results[1]);
-      }
-
-      // Map API response
-      const mappedOrders = (data.items || []).map((order) => ({
-        id: order.id,
-        title:
-          order.items?.length > 1
-            ? `${order.items[0].bouquetName} + ${order.items.length - 1} more`
-            : order.items?.[0]?.bouquetName || "Unknown Item",
-        qty:
-          order.items?.length > 1
-            ? `${order.items.reduce((acc, i) => acc + i.count, 0)} items`
-            : `${order.items?.[0]?.count || 1} pc`,
-        customer:
-          `${order.userFirstName || order.firstName || ""} ${order.userLastName || order.lastName || ""}`.trim() ||
-          "Guest",
-        date: new Date(
-          order.status?.createdAt || order.createdAt || Date.now(),
-        ).toLocaleString("uk-UA", {
-          day: "numeric",
-          month: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        total: `${order.totalPrice} ₴`,
-        avatar: order.items?.[0]?.bouquetImage || null,
-        status: order.status, // KEEP OBJECT {id, name}
-        rawDate: new Date(
-          order.status?.createdAt || order.createdAt || Date.now(),
-        ),
-      }));
-
-      setOrders(mappedOrders);
-
-      setPagination((prev) => ({
-        ...prev,
-        totalCount: data.totalCount || 0,
-        totalPages: Math.ceil((data.totalCount || 0) / prev.pageSize),
-      }));
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-      toast.error("Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.pageNumber, pagination.pageSize, sort, statuses.length]);
-
+  // Initial Fetch (only when sort changes or first mount)
   useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+    // Reset to page 1 when sort changes
+    setPagination((p) => ({ ...p, pageNumber: 1 }));
+  }, [sort]);
+
+  // Trigger fetch when pageNumber changes
+  useEffect(() => {
+    fetchOrders(pagination.pageNumber > 1);
+  }, [fetchOrders, pagination.pageNumber]);
+
+  const loadMore = () => {
+    if (
+      pagination.pageNumber < pagination.totalPages &&
+      !loading &&
+      !detailLoading
+    ) {
+      setPagination((prev) => ({ ...prev, pageNumber: prev.pageNumber + 1 }));
+    }
+  };
 
   const handleStatusChange = async (id, newStatusId) => {
     const originalOrders = [...orders];
@@ -171,5 +203,8 @@ export function useAdminOrders() {
     isDetailOpen,
     detailLoading,
     closeDetail,
+    loadMore,
+    hasNextPage: pagination.pageNumber < pagination.totalPages,
+    isLoadingMore: detailLoading,
   };
 }

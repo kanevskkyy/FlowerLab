@@ -38,8 +38,8 @@ const catalogService = {
   },
 
   // Gifts
-  getGifts: async () => {
-    const response = await axiosClient.get("/api/gifts");
+  getGifts: async (params = {}) => {
+    const response = await axiosClient.get("/api/gifts", { params });
     return response.data;
   },
 

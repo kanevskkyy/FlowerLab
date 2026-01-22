@@ -20,7 +20,7 @@ namespace OrderService.BLL.Services
         private readonly IEntityCacheService cacheService;
         private readonly IEntityCacheInvalidationService<OrderStatus> cacheInvalidationService;
 
-        private const string ALL_STATUSES_KEY = "order-status:all";
+        private const string ALL_STATUSES_KEY = "order-status:all:v2";
         private static readonly TimeSpan MEMORY_TTL = TimeSpan.FromHours(1);
         private static readonly TimeSpan REDIS_TTL = TimeSpan.FromDays(7);
 

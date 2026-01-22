@@ -29,6 +29,7 @@ namespace OrderService.BLL.Services
         private IPublishEndpoint publishEndpoint;
         private ILiqPayService liqPayService;
         private readonly IEntityCacheInvalidationService<Gift> cacheInvalidationService;
+        private readonly IEntityCacheInvalidationService<OrderStatus> orderStatusCacheInvalidator;
 
 
         public OrderServiceImpl(
@@ -37,7 +38,8 @@ namespace OrderService.BLL.Services
             CheckOrder.CheckOrderClient catalogClient,
             IPublishEndpoint publishEndpoint,
             ILiqPayService liqPayService,
-            IEntityCacheInvalidationService<Gift> cacheInvalidationService)
+            IEntityCacheInvalidationService<Gift> cacheInvalidationService,
+            IEntityCacheInvalidationService<OrderStatus> orderStatusCacheInvalidator)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
@@ -45,6 +47,7 @@ namespace OrderService.BLL.Services
             this.publishEndpoint = publishEndpoint;
             this.liqPayService = liqPayService;
             this.cacheInvalidationService = cacheInvalidationService;
+            this.orderStatusCacheInvalidator = orderStatusCacheInvalidator;
         }
 
         public async Task<string> GeneratePaymentUrlAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
@@ -140,6 +143,7 @@ namespace OrderService.BLL.Services
                     UpdatedAt = DateTime.UtcNow.ToUniversalTime()
                 };
                 await unitOfWork.OrderStatuses.AddAsync(awaitingPaymentStatus);
+                await orderStatusCacheInvalidator.InvalidateAllAsync();
             }
 
             // === ONE ACTIVE ORDER POLICY ===
@@ -167,6 +171,7 @@ namespace OrderService.BLL.Services
                         UpdatedAt = DateTime.UtcNow
                     };
                     await unitOfWork.OrderStatuses.AddAsync(cancelledStatus);
+                    await orderStatusCacheInvalidator.InvalidateAllAsync();
                 }
 
                 foreach (var oldOrderSummary in existingAwaitingOrders.Items)

@@ -95,7 +95,7 @@ body,
 .catalog-page .search-wrapper .search-icon {
   width: 18px;
   height: 18px;
-  background-image: url("../../assets/images/search-icon.svg"); /* Перевір шлях */
+  background-image: url("../../assets/icons/search-icon.svg"); /* Перевір шлях */
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

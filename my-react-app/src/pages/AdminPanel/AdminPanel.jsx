@@ -57,6 +57,9 @@ export default function AdminPanel() {
     handleDeleteProduct,
     handleAddProduct,
     handleEditProduct,
+    loadMore: loadProducts,
+    hasNextPage: hasNextProducts,
+    isLoadingMore: isLoadingProducts,
   } = useAdminProducts(activeTab);
 
   // Orders
@@ -66,6 +69,9 @@ export default function AdminPanel() {
     sort,
     setSort,
     handleStatusChange,
+    loadMore: loadOrders,
+    hasNextPage: hasNextOrders,
+    isLoadingMore: isLoadingOrders,
   } = useAdminOrders();
 
   // Reviews
@@ -74,6 +80,9 @@ export default function AdminPanel() {
     handleApproveReview,
     handleRejectReview,
     handleDeleteReview,
+    loadMore: loadReviews,
+    hasNextPage: hasNextReviews,
+    isLoadingMore: isLoadingReviews,
   } = useAdminReviews();
 
   // Catalog Settings
@@ -92,11 +101,12 @@ export default function AdminPanel() {
             setQ={setQ}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
-            categories={categories}
-            onDelete={handleDeleteProduct}
             activeTab={activeTab}
             onAdd={handleAddProduct}
             onEdit={handleEditProduct}
+            loadMore={loadProducts}
+            hasNextPage={hasNextProducts}
+            isLoadingMore={isLoadingProducts}
           />
         );
       case "gifts":
@@ -114,6 +124,9 @@ export default function AdminPanel() {
             activeTab={activeTab}
             onAdd={handleAddProduct}
             onEdit={handleEditProduct}
+            loadMore={loadProducts}
+            hasNextPage={hasNextProducts}
+            isLoadingMore={isLoadingProducts}
           />
         );
       case "orders":
@@ -125,6 +138,9 @@ export default function AdminPanel() {
             setSort={setSort}
             onStatusChange={handleStatusChange}
             onOrderClick={(id) => navigate(`/admin/orders/${id}`)}
+            loadMore={loadOrders}
+            hasNextPage={hasNextOrders}
+            isLoadingMore={isLoadingOrders}
           />
         );
       case "catalog":
@@ -140,6 +156,9 @@ export default function AdminPanel() {
             reviews={reviews}
             onPost={handleApproveReview}
             onDelete={handleDeleteReview}
+            loadMore={loadReviews}
+            hasNextPage={hasNextReviews}
+            isLoadingMore={isLoadingReviews}
           />
         );
       default:

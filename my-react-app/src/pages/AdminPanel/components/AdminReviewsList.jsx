@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import trashIco from "../../../assets/icons/trash.svg";
 
 const Stars = ({ value }) => {
@@ -13,12 +13,44 @@ const Stars = ({ value }) => {
   );
 };
 
-function AdminReviewsList({ reviews, onPost, onDelete }) {
+function AdminReviewsList({
+  reviews,
+  onPost,
+  onDelete,
+  loadMore,
+  hasNextPage,
+  isLoadingMore,
+}) {
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    if (!hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: "100px" },
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    return () => {
+      if (sentinelRef.current) {
+        observer.unobserve(sentinelRef.current);
+      }
+    };
+  }, [loadMore, hasNextPage]);
+
   return (
     <section className="admin-section admin-reviews">
       <h2 className="admin-section-title">Pending reviews</h2>
       <div className="admin-reviews-list">
-        {reviews.length === 0 ? (
+        {reviews.length === 0 && !isLoadingMore ? (
           <div style={{ padding: "2rem", textAlign: "center", color: "#888" }}>
             No pending reviews
           </div>
@@ -57,6 +89,15 @@ function AdminReviewsList({ reviews, onPost, onDelete }) {
               </div>
             </div>
           ))
+        )}
+
+        {/* Sentinel for Infinite Scroll */}
+        {hasNextPage && (
+          <div
+            ref={sentinelRef}
+            style={{ height: "20px", textAlign: "center", color: "#666" }}>
+            {isLoadingMore ? "Loading more..." : ""}
+          </div>
         )}
       </div>
     </section>

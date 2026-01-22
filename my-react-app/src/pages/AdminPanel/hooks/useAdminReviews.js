@@ -6,10 +6,20 @@ export function useAdminReviews() {
   const [pendingReviews, setPendingReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchReviews = async () => {
+  const [pagination, setPagination] = useState({
+    pageNumber: 1,
+    pageSize: 10,
+    totalCount: 0,
+    totalPages: 1,
+  });
+
+  const fetchReviews = async (isLoadMore = false) => {
     setLoading(true);
     try {
-      const data = await reviewService.getPendingReviews();
+      const data = await reviewService.getPendingReviews({
+        pageNumber: isLoadMore ? pagination.pageNumber : 1, // Correct page logic handled below/in state
+        pageSize: pagination.pageSize,
+      });
       // Adjust handling based on your PagedList structure (e.g. data.items or data)
       const rawItems = data.items || data || [];
 
@@ -22,7 +32,17 @@ export function useAdminReviews() {
         date: r.createdAt, // if needed
       }));
 
-      setPendingReviews(mapped);
+      if (isLoadMore) {
+        setPendingReviews((prev) => [...prev, ...mapped]);
+      } else {
+        setPendingReviews(mapped);
+      }
+
+      setPagination((prev) => ({
+        ...prev,
+        totalCount: data.totalCount || 0,
+        totalPages: Math.ceil((data.totalCount || 0) / prev.pageSize),
+      }));
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
       toast.error("Could not load reviews");
@@ -34,6 +54,18 @@ export function useAdminReviews() {
   useEffect(() => {
     fetchReviews();
   }, []);
+
+  const loadMore = () => {
+    if (pagination.pageNumber < pagination.totalPages && !loading) {
+      setPagination((prev) => ({ ...prev, pageNumber: prev.pageNumber + 1 }));
+    }
+  };
+
+  useEffect(() => {
+    if (pagination.pageNumber > 1) {
+      fetchReviews(true);
+    }
+  }, [pagination.pageNumber]);
 
   const handleApproveReview = async (id) => {
     try {
@@ -63,5 +95,8 @@ export function useAdminReviews() {
     handleApproveReview,
     handleRejectReview: handleDeleteReview, // Reuse delete for reject
     handleDeleteReview,
+    loadMore,
+    hasNextPage: pagination.pageNumber < pagination.totalPages,
+    isLoadingMore: loading && pagination.pageNumber > 1,
   };
 }

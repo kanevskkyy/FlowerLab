@@ -1,8 +1,16 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import ProductSkeleton from "../../../components/ProductSkeleton/ProductSkeleton";
 
-function CatalogGrid({ products, onOrder }) {
+function CatalogGrid({ products, onOrder, loading }) {
   const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="catalog-grid">
+        <ProductSkeleton count={6} />
+      </div>
+    );
+  }
 
   if (!products || products.length === 0) {
     return (

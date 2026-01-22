@@ -23,7 +23,7 @@ const Catalog = () => {
     totalProducts,
     totalPages,
     currentPage,
-    // loading, // Can be used for loading spinner
+    loading,
     sortOpen,
     menuOpen,
     filterOpen,
@@ -98,6 +98,7 @@ const Catalog = () => {
         {/* GRID — PRODUCTS */}
         <CatalogGrid
           products={products}
+          loading={loading}
           onOrder={(p) => navigate(`/product/${p.id}`)}
         />
 
