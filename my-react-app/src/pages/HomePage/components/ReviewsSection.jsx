@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import arrowLeft from "../../../assets/icons/review-arrow-left.svg";
+import arrowRight from "../../../assets/icons/review-arrow-right.svg";
+import star from "../../../assets/icons/star.svg";
 
 function ReviewsSection({ reviews }) {
   const [currentReviewIdx, setCurrentReviewIdx] = useState(0);
@@ -12,9 +15,7 @@ function ReviewsSection({ reviews }) {
   };
 
   const prevReview = () => {
-    setCurrentReviewIdx((prev) =>
-      prev === 0 ? reviews.length - 1 : prev - 1
-    );
+    setCurrentReviewIdx((prev) => (prev === 0 ? reviews.length - 1 : prev - 1));
   };
 
   const onTouchStart = (e) => {
@@ -51,26 +52,33 @@ function ReviewsSection({ reviews }) {
       className="home-reviews-section"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
+      onTouchEnd={onTouchEnd}>
       <h2 className="section-title">REVIEWS</h2>
       <div className="home-reviews-wrapper">
         <button className="reviews-arrow" onClick={prevReview}>
-          ‹
+          <img src={arrowLeft} alt="arrow-left" />
         </button>
 
         <div className="home-reviews-cards">
           {getVisibleReviews().map((review, index) => (
             <div
               key={`${review.id}-${index}`}
-              className="home-review-card fade-in"
-            >
+              className="home-review-card fade-in">
               <div className="home-review-top">
                 <div className="home-review-avatar" />
                 <span className="home-review-name">{review.name}</span>
               </div>
               <div className="home-review-stars">
-                {"★".repeat(review.stars)}
+                {Array.from({ length: review.stars }).map((_, i) => (
+                  <img
+                    key={i}
+                    src={star}
+                    alt="star"
+                    style={{
+                      
+                    }}
+                  />
+                ))}
               </div>
               <p className="home-review-text">"{review.text}"</p>
             </div>
@@ -78,7 +86,7 @@ function ReviewsSection({ reviews }) {
         </div>
 
         <button className="reviews-arrow" onClick={nextReview}>
-          ›
+          <img src={arrowRight} alt="arrow-right" />
         </button>
       </div>
     </section>

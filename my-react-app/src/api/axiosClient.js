@@ -6,9 +6,22 @@ const axiosClient = axios.create({
   baseURL: baseURL,
   headers: {
     "Content-Type": "application/json",
-    "Accept": "application/json",
+    Accept: "application/json",
   },
-  withCredentials: true,
+  paramsSerializer: (params) => {
+    const parts = [];
+    for (const [key, value] of Object.entries(params)) {
+      if (value === null || value === undefined) continue;
+      if (Array.isArray(value)) {
+        value.forEach((v) =>
+          parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(v)}`),
+        );
+      } else {
+        parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+      }
+    }
+    return parts.join("&");
+  },
 });
 
 // Інтерсептор для додавання Access Token до кожного запиту
@@ -68,10 +81,9 @@ axiosClient.interceptors.response.use(
         if (!refreshToken) throw new Error("No refresh token");
 
         // Використовуємо повний URL або інстанс axios з baseURL
-        const response = await axios.post(
-          `${baseURL}/api/users/auth/refresh`, 
-          { refreshToken }
-        );
+        const response = await axios.post(`${baseURL}/api/users/auth/refresh`, {
+          refreshToken,
+        });
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 
@@ -95,8 +107,7 @@ axiosClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosClient;
-

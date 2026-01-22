@@ -17,7 +17,10 @@ namespace CatalogService.DAL.Specification
                 (!parameters.SizeIds.Any() || b.BouquetSizes.Any(s => parameters.SizeIds.Contains(s.SizeId))) &&
                 (!parameters.EventIds.Any() || b.BouquetEvents.Any(e => parameters.EventIds.Contains(e.EventId))) &&
                 (!parameters.RecipientIds.Any() || b.BouquetRecipients.Any(r => parameters.RecipientIds.Contains(r.RecipientId))) &&
-                (!parameters.FlowerIds.Any() || parameters.FlowerIds.All(fId => b.BouquetFlowers.Any(bf => bf.FlowerId == fId))) &&
+                (!parameters.FlowerIds.Any() || 
+                    b.BouquetFlowers.Any(bf => parameters.FlowerIds.Contains(bf.FlowerId)) || 
+                    b.BouquetSizes.Any(bs => bs.BouquetSizeFlowers.Any(bsf => parameters.FlowerIds.Contains(bsf.FlowerId)))
+                ) &&
                 (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity))) &&
                 (string.IsNullOrEmpty(parameters.Name) ||
                     b.Name.ToLower().Contains(parameters.Name.ToLower()) ||

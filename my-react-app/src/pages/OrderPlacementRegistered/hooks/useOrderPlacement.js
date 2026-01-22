@@ -172,6 +172,9 @@ export const useOrderPlacement = () => {
 
   // Fetch User Addresses
   useEffect(() => {
+    // Cleanup legacy flag
+    localStorage.removeItem("consumed_first_order_discount");
+
     const fetchUserAddresses = async () => {
       if (user) {
         try {
@@ -195,23 +198,8 @@ export const useOrderPlacement = () => {
 
   const checkEligibility = useCallback(async () => {
     if (user) {
-      if (localStorage.getItem("consumed_first_order_discount") === "true") {
-        setIsEligibleForDiscount(false);
-        return;
-      }
-
       try {
         const eligible = await orderService.checkDiscountEligibility();
-
-        // Double-check local flag after async operation
-        const isConsumed =
-          localStorage.getItem("consumed_first_order_discount") === "true";
-
-        if (isConsumed) {
-          setIsEligibleForDiscount(false);
-          return;
-        }
-
         setIsEligibleForDiscount(eligible);
       } catch (error) {
         console.error("Failed to check discount eligibility", error);
@@ -219,16 +207,6 @@ export const useOrderPlacement = () => {
       }
     }
   }, [user]);
-
-  // Safety net: Force disable discount if flag is present, regardless of other logic
-  // Safety net: Force disable discount if flag is present, regardless of other logic
-  useEffect(() => {
-    if (localStorage.getItem("consumed_first_order_discount") === "true") {
-      if (isEligibleForDiscount) {
-        setIsEligibleForDiscount(false);
-      }
-    }
-  }, [isEligibleForDiscount]);
 
   // Initial check
   useEffect(() => {
@@ -238,14 +216,29 @@ export const useOrderPlacement = () => {
   // Re-check on focus/pageshow (back button)
   useEffect(() => {
     const onResume = (event) => {
-      // Use event.persisted to detect BF Cache restore
+      // 1. Detect BFCache restore
       if (event && event.persisted) {
         window.location.reload();
         return;
       }
 
+      // 2. Detect History Back Navigation (standard)
+      const navEntry = performance.getEntriesByType("navigation")[0];
+      if (navEntry && navEntry.type === "back_forward") {
+        // We need to ensure we don't reload infinitely if the reload itself counts as back_forward
+        const hasReloaded = sessionStorage.getItem("order_placement_reloaded");
+        if (!hasReloaded) {
+          sessionStorage.setItem("order_placement_reloaded", "true");
+          window.location.reload();
+          return;
+        }
+      } else {
+        // Clear the flag if it's a normal navigation so next back works
+        sessionStorage.removeItem("order_placement_reloaded");
+      }
+
       // Optimistically reset to false to avoid showing stale 10%
-      setIsEligibleForDiscount(false);
+      // setIsEligibleForDiscount(false);
       checkEligibility();
     };
 
@@ -253,15 +246,23 @@ export const useOrderPlacement = () => {
     window.addEventListener("pageshow", onResume);
     document.addEventListener("visibilitychange", onResume);
 
-    // Hack to disable BFCache: forcing reload on back navigation
-    const onBeforeUnload = () => {};
-    window.addEventListener("beforeunload", onBeforeUnload);
+    // Initial check for back_forward on mount
+    const navEntry = performance.getEntriesByType("navigation")[0];
+    if (navEntry && navEntry.type === "back_forward") {
+      const hasReloaded = sessionStorage.getItem("order_placement_reloaded");
+      if (!hasReloaded) {
+        sessionStorage.setItem("order_placement_reloaded", "true");
+        window.location.reload();
+      } else {
+        // If we already reloaded, just check eligibility
+        sessionStorage.removeItem("order_placement_reloaded");
+      }
+    }
 
     return () => {
       window.removeEventListener("focus", onResume);
       window.removeEventListener("pageshow", onResume);
       document.removeEventListener("visibilitychange", onResume);
-      window.removeEventListener("beforeunload", onBeforeUnload);
     };
   }, [checkEligibility]);
 
@@ -391,11 +392,8 @@ export const useOrderPlacement = () => {
       total: total,
     };
 
+    // Navigate to checkout
     toast.success("Order validated! Proceeding to checkout...");
-    localStorage.setItem("consumed_first_order_discount", "true");
-
-    // Force state update to 0% BEFORE navigation so BFCache snapshot is clean
-    setIsEligibleForDiscount(false);
 
     // customizable delay to ensure React commits the state change
     setTimeout(() => {

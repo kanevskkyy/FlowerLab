@@ -1,5 +1,4 @@
-import React from "react";
-import bouquet4 from "../../../assets/images/about-image.png";
+import bouquet4 from "../../../assets/images/about-image.webp";
 
 function AboutSection() {
   return (
@@ -9,8 +8,8 @@ function AboutSection() {
         <div className="about-text">
           <p>
             Welcome to our flower shop — a place where every bouquet tells a
-            story. We believe that flowers are more than just a gift; they are
-            a way to express emotions, share happiness, and make every moment
+            story. We believe that flowers are more than just a gift; they are a
+            way to express emotions, share happiness, and make every moment
             memorable.
           </p>
           <p>
@@ -21,8 +20,8 @@ function AboutSection() {
           </p>
           <p>
             We take pride in our attention to detail, creative designs, and
-            friendly service. Each bouquet is handcrafted with love, tailored
-            to fit your style and occasion.
+            friendly service. Each bouquet is handcrafted with love, tailored to
+            fit your style and occasion.
           </p>
         </div>
         <div className="about-image">

@@ -1,5 +1,4 @@
-import React from "react";
-import ShoppingBagIcon from "../../../assets/images/ShoppingBagIcon.svg";
+import ShoppingBagIcon from "../../../assets/icons/ShoppingBagIcon.svg";
 
 const ProductInfo = ({
   product,

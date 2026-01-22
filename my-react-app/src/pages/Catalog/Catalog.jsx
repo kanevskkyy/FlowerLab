@@ -1,11 +1,10 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import PopupMenu from "../popupMenu/PopupMenu";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./Catalog.css";
 
-import FilterIcon from "../../assets/images/FilterIcon.svg";
+import FilterIcon from "../../assets/icons/FilterIcon.svg";
 import PopupFilterMenu from "../PopupFilterMenu/PopupFilterMenu";
 
 // Sub-components
@@ -16,10 +15,9 @@ import CatalogPagination from "./components/CatalogPagination";
 // Hooks
 import { useCatalog } from "./hooks/useCatalog";
 
-
 const Catalog = () => {
   const navigate = useNavigate();
-  
+
   const {
     products,
     totalProducts,
@@ -30,13 +28,14 @@ const Catalog = () => {
     menuOpen,
     filterOpen,
     searchQuery,
-    
+    filters,
+
     setSortOpen,
     setMenuOpen,
     setFilterOpen,
     setSearchQuery,
     setCurrentPage,
-    
+
     applyFilters,
     handleSortChange,
     handleLoadMore,
@@ -64,6 +63,7 @@ const Catalog = () => {
               isOpen={filterOpen}
               onClose={() => setFilterOpen(false)}
               onApply={applyFilters}
+              currentFilters={filters}
             />
 
             <div className="search-wrapper">
@@ -81,10 +81,10 @@ const Catalog = () => {
           </div>
 
           {/* Sort */}
-          <CatalogSort 
-            isOpen={sortOpen} 
-            setIsOpen={setSortOpen} 
-            onSortChange={handleSortChange} 
+          <CatalogSort
+            isOpen={sortOpen}
+            setIsOpen={setSortOpen}
+            onSortChange={handleSortChange}
           />
         </div>
 
@@ -96,17 +96,17 @@ const Catalog = () => {
         </div>
 
         {/* GRID — PRODUCTS */}
-        <CatalogGrid 
-            products={products}
-            onOrder={(p) => navigate(`/product/${p.id}`)}
+        <CatalogGrid
+          products={products}
+          onOrder={(p) => navigate(`/product/${p.id}`)}
         />
 
         {/* PAGINATION */}
-        <CatalogPagination 
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={goToPage}
-            onLoadMore={handleLoadMore}
+        <CatalogPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          onLoadMore={handleLoadMore}
         />
       </main>
 

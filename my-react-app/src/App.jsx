@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AuthProvider from "./context/AuthProvider";
 import { CartProvider } from "./context/CartProvider";
@@ -36,9 +37,40 @@ import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
 
 import ModalProvider from "./context/ModalProvider";
 
+// Global handler for back-navigation reloads
+const BackNavigationHandler = () => {
+  useEffect(() => {
+    const onResume = (event) => {
+      if (event && event.persisted) {
+        window.location.reload();
+        return;
+      }
+
+      const navEntry = performance.getEntriesByType("navigation")[0];
+      if (navEntry && navEntry.type === "back_forward") {
+        const hasReloaded = sessionStorage.getItem("global_reloaded");
+        if (!hasReloaded) {
+          sessionStorage.setItem("global_reloaded", "true");
+          window.location.reload();
+        } else {
+          sessionStorage.removeItem("global_reloaded");
+        }
+      } else {
+        sessionStorage.removeItem("global_reloaded");
+      }
+    };
+
+    window.addEventListener("pageshow", onResume);
+    return () => window.removeEventListener("pageshow", onResume);
+  }, []);
+
+  return null;
+};
+
 function App() {
   return (
     <BrowserRouter>
+      <BackNavigationHandler />
       <AuthProvider>
         <CartProvider>
           <SettingsProvider>

@@ -142,14 +142,59 @@ namespace OrderService.BLL.Services
                 await unitOfWork.OrderStatuses.AddAsync(awaitingPaymentStatus);
             }
 
+            // === ONE ACTIVE ORDER POLICY ===
+            // Check if user already has orders in 'AwaitingPayment' status.
+            // If so, cancel them to prevent "ghost" unpaid orders accumulating.
+            var existingAwaitingOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
+                new OrderSpecificationParameters
+                {
+                    UserId = userId,
+                    GuestToken = userId == null ? dto.GuestToken : null,
+                    StatusId = awaitingPaymentStatus.Id,
+                    PageSize = 50 // Should be enough to catch all duplicates
+                }, cancellationToken);
+
+            if (existingAwaitingOrders.TotalCount > 0)
+            {
+                var cancelledStatus = await unitOfWork.OrderStatuses.GetByNameAsync("Cancelled");
+                if (cancelledStatus == null)
+                {
+                    // Fallback if status doesn't exist (should not happen usually)
+                    cancelledStatus = new OrderStatus
+                    {
+                        Name = "Cancelled",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    await unitOfWork.OrderStatuses.AddAsync(cancelledStatus);
+                }
+
+                foreach (var oldOrderSummary in existingAwaitingOrders.Items)
+                {
+                    // We need full entity with reservations to cancel them properly
+                    var fullOldOrder = await unitOfWork.Orders.GetByIdWithIncludesAsync(oldOrderSummary.Id, cancellationToken);
+                    
+                    if (fullOldOrder != null)
+                    {
+                        fullOldOrder.StatusId = cancelledStatus.Id;
+                        fullOldOrder.UpdatedAt = DateTime.UtcNow;
+
+                        // Release reservations
+                        foreach (var res in fullOldOrder.Reservations) res.IsActive = false;
+                        foreach (var gRes in fullOldOrder.GiftReservations) gRes.IsActive = false;
+
+                        unitOfWork.Orders.Update(fullOldOrder);
+                    }
+                }
+                // We don't save changes here explicitly, they will be committed at the end of method
+            }
+            // ===============================
+
             bool isFirstOrder = false;
             if (userId.HasValue)
             {
-                var existingOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
-                new OrderSpecificationParameters { UserId = userId },
-                cancellationToken);
-
-                isFirstOrder = !existingOrders.Items.Any(o => o.Items.Any());
+                // Use the robust eligibility check (whitelist logic) instead of naive count
+                isFirstOrder = await CheckDiscountEligibilityAsync(userId.Value, cancellationToken);
             }
 
             if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
@@ -417,10 +462,27 @@ namespace OrderService.BLL.Services
         public async Task<bool> CheckDiscountEligibilityAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             var pagedOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
-                new OrderSpecificationParameters { UserId = userId, PageSize = 1 },
+                new OrderSpecificationParameters { UserId = userId, PageSize = 100 },
                 cancellationToken);
 
-            return pagedOrders.TotalCount == 0;
+            Console.WriteLine($"[CheckDiscount] User {userId} has {pagedOrders.TotalCount} total orders.");
+
+            // if (pagedOrders.TotalCount > 100) return false;
+
+            // Whitelist of statuses that mean the discount was successfully CONSUMED.
+            // Any other status (AwaitingPayment, Failed, Cancelled, New, Draft) means it wasn't used properly yet.
+            var consumedStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Completed" };
+
+            // Check if ANY order has a "consumed" status
+            bool hasSuccessfulOrders = pagedOrders.Items.Any(o => 
+            {
+                Console.WriteLine($"[CheckDiscount] Order {o.Id} Status: {o.Status?.Name}");
+                return o.Status != null && consumedStatuses.Contains(o.Status.Name);
+            });
+
+            Console.WriteLine($"[CheckDiscount] Has Successful Orders: {hasSuccessfulOrders}. Eligible: {!hasSuccessfulOrders}");
+
+            return !hasSuccessfulOrders;
         }
 
     }

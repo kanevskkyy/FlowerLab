@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useSettings } from "../../context/useSettings"; // Імпорт нашого нового хука
@@ -6,9 +5,9 @@ import { useAuth } from "../../context/useAuth";
 import CartPopup from "../../pages/CartPopup/CartPopup";
 
 // Assets (перевір, чи шляхи до картинок правильні у твоєму проєкті)
-import ShoppingBagIcon from "../../assets/images/ShoppingBagIcon.svg";
-import UserProfileIcon from "../../assets/images/UserProfileIcon.svg";
-import FlowerLabVladaLogo from "../../assets/images/FlowerLabVladaLogo.svg";
+import ShoppingBagIcon from "../../assets/icons/ShoppingBagIcon.svg";
+import UserProfileIcon from "../../assets/icons/UserProfileIcon.svg";
+import FlowerLabVladaLogo from "../../assets/icons/FlowerLabVladaLogo.svg";
 
 import "./Header.css";
 
