@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import AdminOrdersSort from "./AdminOrdersSort";
 
 function AdminOrdersList({
@@ -8,7 +8,35 @@ function AdminOrdersList({
   setSort,
   onStatusChange,
   onOrderClick,
+  loadMore,
+  hasNextPage,
+  isLoadingMore,
 }) {
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    if (!hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: "100px" },
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    return () => {
+      if (sentinelRef.current) {
+        observer.unobserve(sentinelRef.current);
+      }
+    };
+  }, [loadMore, hasNextPage]);
+
   return (
     <section className="admin-section admin-orders">
       <h2 className="admin-section-title admin-orders-title">Orders</h2>
@@ -61,6 +89,15 @@ function AdminOrdersList({
             </div>
           );
         })}
+
+        {/* Sentinel for Infinite Scroll */}
+        {hasNextPage && (
+          <div
+            ref={sentinelRef}
+            style={{ height: "20px", textAlign: "center", color: "#666" }}>
+            {isLoadingMore ? "Loading more..." : ""}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,0 +1,16 @@
+.product-card-skeleton {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px; /* Match your product card border-radius */
+  overflow: hidden;
+}
+
+.skeleton-image {
+  aspect-ratio: 1 / 1; /* Match product card image aspect ratio */
+  width: 100%;
+}
+
+.skeleton-content {
+  padding: 16px; /* Match product card padding */
+}

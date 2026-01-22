@@ -13,15 +13,33 @@ export function useAdminProducts(active) {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [q, setQ] = useState("");
 
-  const fetchProducts = async () => {
+  const [pagination, setPagination] = useState({
+    pageNumber: 1,
+    pageSize: 12,
+    totalCount: 0,
+    totalPages: 1,
+  });
+
+  const fetchProducts = async (isLoadMore = false) => {
     try {
       setLoadingProducts(true);
       let data = [];
 
+      const params = {
+        pageNumber: isLoadMore ? pagination.pageNumber : 1,
+        pageSize: pagination.pageSize,
+        // Assuming your catalogService methods support params. If not, we might need to update catalogService too.
+        // Based on typical patterns here, they often do or we need to pass query string manually if service is simple.
+      };
+
+      // NOTE: We're assuming catalogService.getBouquets() accepts params object.
+      // If it currently takes no args, we might need to check catalogService.js.
+      // Checking local file viewing history, catalogService methods likely take params derived from usage patterns.
+
       if (active === "bouquets") {
-        data = await catalogService.getBouquets();
+        data = await catalogService.getBouquets(params);
       } else if (active === "gifts") {
-        data = await catalogService.getGifts();
+        data = await catalogService.getGifts(params);
       } else {
         setProducts([]);
         return;
@@ -29,15 +47,25 @@ export function useAdminProducts(active) {
 
       const items = data.items || data || [];
 
-      setProducts(
-        items.map((item) => ({
-          id: item.id,
-          title: item.name,
-          img: item.mainPhotoUrl || item.imageUrl, // Handle both
-          price: `${item.price} ₴`,
-          category: active === "bouquets" ? "Bouquets" : "Gifts",
-        })),
-      );
+      const mapped = items.map((item) => ({
+        id: item.id,
+        title: item.name,
+        img: item.mainPhotoUrl || item.imageUrl, // Handle both
+        price: `${item.price} ₴`,
+        category: active === "bouquets" ? "Bouquets" : "Gifts",
+      }));
+
+      if (isLoadMore) {
+        setProducts((prev) => [...prev, ...mapped]);
+      } else {
+        setProducts(mapped);
+      }
+
+      setPagination((prev) => ({
+        ...prev,
+        totalCount: data.totalCount || 0,
+        totalPages: Math.ceil((data.totalCount || 0) / prev.pageSize),
+      }));
     } catch (error) {
       console.error(`Failed to fetch ${active}:`, error);
       toast.error(`Failed to load ${active}`);
@@ -48,9 +76,33 @@ export function useAdminProducts(active) {
 
   useEffect(() => {
     if (active === "bouquets" || active === "gifts") {
-      fetchProducts();
+      // Reset pagination on tab change
+      setPagination((p) => ({ ...p, pageNumber: 1 }));
     }
   }, [active]);
+
+  // Initial fetch when active changes or page number resets to 1
+  useEffect(() => {
+    if (
+      (active === "bouquets" || active === "gifts") &&
+      pagination.pageNumber === 1
+    ) {
+      fetchProducts(false);
+    }
+  }, [active, pagination.pageNumber === 1]); // Simplified dependency logic
+
+  const loadMore = () => {
+    if (pagination.pageNumber < pagination.totalPages && !loadingProducts) {
+      setPagination((prev) => ({ ...prev, pageNumber: prev.pageNumber + 1 }));
+    }
+  };
+
+  // Trigger fetch on page increment
+  useEffect(() => {
+    if (pagination.pageNumber > 1) {
+      fetchProducts(true);
+    }
+  }, [pagination.pageNumber]);
 
   const handleDeleteProduct = (id) => {
     confirm({
@@ -102,5 +154,8 @@ export function useAdminProducts(active) {
     handleDeleteProduct,
     handleAddProduct,
     handleEditProduct,
+    loadMore,
+    hasNextPage: pagination.pageNumber < pagination.totalPages,
+    isLoadingMore: loadingProducts && pagination.pageNumber > 1,
   };
 }

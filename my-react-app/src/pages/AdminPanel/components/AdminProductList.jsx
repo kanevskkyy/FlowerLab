@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import searchIco from "../../../assets/icons/search.svg";
 import editIco from "../../../assets/icons/edit.svg";
 import trashIco from "../../../assets/icons/trash.svg";
@@ -12,7 +12,35 @@ function AdminProductList({
   onAdd,
   onEdit,
   onDelete,
+  loadMore,
+  hasNextPage,
+  isLoadingMore,
 }) {
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    if (!hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: "100px" },
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    return () => {
+      if (sentinelRef.current) {
+        observer.unobserve(sentinelRef.current);
+      }
+    };
+  }, [loadMore, hasNextPage]);
+
   const splitTitle = (t) => {
     if (!t) return { a: "", b: "" };
     const parts = t.trim().split(" ");
@@ -72,6 +100,21 @@ function AdminProductList({
           );
         })}
       </div>
+
+      {/* Sentinel for Infinite Scroll */}
+      {hasNextPage && (
+        <div
+          ref={sentinelRef}
+          style={{
+            height: "20px",
+            textAlign: "center",
+            color: "#666",
+            marginTop: "20px",
+            width: "100%",
+          }}>
+          {isLoadingMore ? "Loading more..." : ""}
+        </div>
+      )}
     </section>
   );
 }
