@@ -39,8 +39,6 @@ export default function Login() {
   // 2. Оновлена логіка входу
   const onSubmit = async (data) => {
     try {
-      console.log("Logging in...");
-
       const loginResponse = await authService.login(data.email, data.password);
 
       const accessToken =

@@ -1,17 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import catalogService from "../../../services/catalogService";
 import { useCart } from "../../../context/CartContext";
 
 export function useCatalog() {
   const { addToCart } = useCart();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [sortOpen, setSortOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("popularity");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState(null);
+
+  // --- Derived State from URL ---
+  const searchQuery = searchParams.get("search") || "";
+  const sortBy = searchParams.get("sortBy") || "popularity";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+
+  // Parse filters from URL
+  const filters = useMemo(() => {
+    const f = {};
+    const maxPrice = searchParams.get("maxPrice");
+    if (maxPrice) f.maxPrice = Number(maxPrice);
+
+    const sizeIds = searchParams.getAll("sizeIds");
+    if (sizeIds.length > 0) f.sizeIds = sizeIds;
+
+    const quantities = searchParams.getAll("quantities");
+    if (quantities.length > 0) f.quantities = quantities.map(Number);
+
+    const eventIds = searchParams.getAll("eventIds");
+    if (eventIds.length > 0) f.eventIds = eventIds;
+
+    const recipientIds = searchParams.getAll("recipientIds");
+    if (recipientIds.length > 0) f.recipientIds = recipientIds;
+
+    const flowerIds = searchParams.getAll("flowerIds");
+    if (flowerIds.length > 0) f.flowerIds = flowerIds;
+
+    // Return null if empty to match original logic
+    return Object.keys(f).length > 0 ? f : null;
+  }, [searchParams.toString()]);
 
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -44,6 +72,7 @@ export function useCatalog() {
             }
           });
         }
+
 
         const data = await catalogService.getBouquets(params);
 
@@ -115,17 +144,69 @@ export function useCatalog() {
     fetchBouquets();
   }, [filters, sortBy, currentPage, searchQuery]);
 
-  // Actions
-  const applyFilters = (filterData) => {
-    setFilters(filterData);
-    setCurrentPage(1);
+  // --- Actions that update URL ---
+
+  const setSearchQuery = (term) => {
+    setSearchParams((prev) => {
+      if (term) prev.set("search", term);
+      else prev.delete("search");
+      prev.set("page", "1"); // Reset to page 1
+      return prev;
+    });
+  };
+
+  const setSortBy = (sort) => {
+    setSearchParams((prev) => {
+      if (sort) prev.set("sortBy", sort);
+      else prev.delete("sortBy");
+      prev.set("page", "1");
+      return prev;
+    });
+  };
+
+  const setCurrentPage = (page) => {
+    setSearchParams((prev) => {
+      prev.set("page", page.toString());
+      return prev;
+    });
+  };
+
+  const applyFilters = (newFilters) => {
+    setSearchParams((prev) => {
+      // Clear old filter keys first (to avoid appending if we want to replace)
+      // Since getAll returns array, we can't easily "replace" without deleting first in some routers,
+      // but react-router-dom's set/delete works fine.
+
+      // Reset Page
+      prev.set("page", "1");
+
+      // 1. Max Price
+      if (newFilters.maxPrice) prev.set("maxPrice", newFilters.maxPrice);
+      else prev.delete("maxPrice");
+
+      // 2. Arrays: helper to set or delete
+      const updateArrayParam = (key, values) => {
+        prev.delete(key);
+        if (values && values.length > 0) {
+          values.forEach((v) => prev.append(key, v));
+        }
+      };
+
+      updateArrayParam("sizeIds", newFilters.sizeIds);
+      updateArrayParam("quantities", newFilters.quantities);
+      updateArrayParam("eventIds", newFilters.eventIds);
+      updateArrayParam("recipientIds", newFilters.recipientIds);
+      updateArrayParam("flowerIds", newFilters.flowerIds);
+
+      return prev;
+    });
+    setFilterOpen(false); // Close menu
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSortChange = (sortOption) => {
     setSortBy(sortOption);
     setSortOpen(false);
-    setCurrentPage(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -168,6 +249,7 @@ export function useCatalog() {
     menuOpen,
     filterOpen,
     searchQuery,
+    filters, // Exposed derived filters
 
     // Setters (if needed directly)
     setSortOpen,

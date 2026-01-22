@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Images
-import heroImg1 from "../../../assets/images/bouquet1L.jpg";
-import heroImg2 from "../../../assets/images/bouquet2L.jpg";
-import heroImg3 from "../../../assets/images/bouquet3L.jpg";
-import logo from "../../../assets/images/banner-logo.svg";
+import heroImg1 from "../../../assets/images/bouquet1L.webp";
+import heroImg2 from "../../../assets/images/bouquet2L.webp";
+import heroImg3 from "../../../assets/images/bouquet3L.webp";
+import logo from "../../../assets/icons/banner-logo.svg";
+import arrowLeft from "../../../assets/icons/arrow-left.svg";
+import arrowRight from "../../../assets/icons/arrow-right.svg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -84,10 +86,10 @@ const HeroSection = () => {
 
       {/* Стрілки навігації */}
       <button className="hero-arrow left" onClick={prevSlide}>
-        ‹
+        <img src={arrowLeft} alt="arrow-left" />
       </button>
       <button className="hero-arrow right" onClick={nextSlide}>
-        ›
+        <img src={arrowRight} alt="arrow-right" />
       </button>
     </div>
   );

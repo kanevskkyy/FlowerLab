@@ -1,9 +1,8 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./CartPopup.css";
 import { useCart } from "../../context/CartContext";
-import TrashIcon from "../../assets/images/trash-icon.svg";
-import CloseIcon from "../../assets/images/close-icon.svg";
+import TrashIcon from "../../assets/icons/trash-icon.svg";
+import CloseIcon from "../../assets/icons/close-icon.svg";
 
 const CartPopup = ({ isOpen, onClose }) => {
   const navigate = useNavigate();

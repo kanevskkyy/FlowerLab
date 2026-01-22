@@ -14,7 +14,6 @@
   padding: 20px 0;
 }
 
-
 /* CONTAINER */
 .hero-container {
   position: relative;
@@ -77,14 +76,13 @@
   transform: translateY(-50%);
   background: transparent;
   border: none;
-  font-family: var(--font-heading, serif);
-  font-size: 3rem;
-  color: #fff;
   cursor: pointer;
   z-index: 10;
   padding: 0 1.25rem;
   opacity: 0.7;
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
   outline: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -147,7 +145,9 @@
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, background-color 0.2s;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
   letter-spacing: 0.5px;
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
@@ -201,7 +201,6 @@
     display: none;
   }
 }
-
 
 /* ===== TITLES ===== */
 .section-title {
@@ -265,7 +264,9 @@
   aspect-ratio: 1 / 1;
   cursor: pointer;
   background: #f0f0f0;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .popular-card:hover {
@@ -285,7 +286,11 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(0deg, rgba(62, 31, 43, 0.65) 0%, rgba(163, 92, 129, 0.00) 100%);
+  background: linear-gradient(
+    0deg,
+    rgba(62, 31, 43, 0.65) 0%,
+    rgba(163, 92, 129, 0) 100%
+  );
   pointer-events: none;
   z-index: 2;
 }
@@ -347,7 +352,9 @@
   display: block;
   filter: brightness(0) invert(1);
   opacity: 0.9;
-  transition: transform 0.2s ease, opacity 0.2s;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s;
 }
 
 .popular-card:hover .shopping-bag-icon img {
@@ -366,7 +373,7 @@
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   gap: 40px;
-  align-items: center;
+  align-items: start;
 }
 
 .about-text {
@@ -382,7 +389,7 @@
   background: #fbecf7;
   border-radius: 20px;
   overflow: hidden;
-  height: 30rem;
+  height: 37rem;
 }
 
 .about-img {
@@ -419,23 +426,22 @@
 }
 
 @keyframes smoothFadeIn {
-  0% { 
-    opacity: 0; 
+  0% {
+    opacity: 0;
     /* Починаємо трохи зменшеними і зсунутими вниз на 10px — це додає "ваги" */
-    transform: scale(0.96) translateY(10px); 
+    transform: scale(0.96) translateY(10px);
   }
-  100% { 
-    opacity: 1; 
-    transform: scale(1) translateY(0);    
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
 .home-review-card.fade-in {
-
   animation: smoothFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  
+
   will-change: transform, opacity;
-  backface-visibility: hidden; 
+  backface-visibility: hidden;
 }
 
 .home-review-card {
@@ -475,8 +481,15 @@
 .home-review-stars {
   color: #ebc3de; /* Рожеві зірки */
   margin-bottom: 12px;
-  font-size: 18px;
-  letter-spacing: 2px;
+  display: flex; /* Force horizontal alignment */
+  flex-direction: row;
+  gap: 2px;
+}
+
+.home-review-stars img {
+  width: 16px;
+  height: 16px;
+  margin-right: 2px;
 }
 
 .home-review-text {
@@ -496,7 +509,9 @@
   color: #000;
   cursor: pointer;
   padding: 0 10px;
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -576,7 +591,10 @@
 
   .about-image {
     width: 100%;
-    height: 250px;
+    height: 30rem;
+  }
+  .about-text {
+    gap: 8px;
   }
 
   /* === REVIEWS SECTION (1 колонка + стрілки) === */
@@ -656,10 +674,11 @@
   .popular-name {
     font-size: 12px;
   }
-
+  .about-image {
+    width: 100%;
+    height: 20rem;
+  }
   .about-text {
     font-size: 14px;
   }
 }
-
-

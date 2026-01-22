@@ -22,7 +22,7 @@ namespace CatalogService.Domain.QueryParametrs
 
         public string ToCacheKey()
         {
-            var sb = new StringBuilder("bouquets:");
+            var sb = new StringBuilder("bouquets_v2:");
 
             if (!string.IsNullOrEmpty(Name))
                 sb.Append($"name:{Name}:");

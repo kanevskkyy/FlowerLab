@@ -25,6 +25,12 @@ namespace CatalogService.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery] BouquetQueryParameters query, CancellationToken cancellationToken)
         {
+            Console.WriteLine($"[DEBUG] GetAll Bouquets. FlowerIds count: {query.FlowerIds?.Count ?? 0}");
+            if (query.FlowerIds?.Any() == true)
+            {
+                Console.WriteLine($"[DEBUG] FlowerIds: {string.Join(", ", query.FlowerIds)}");
+            }
+            
             var result = await bouquetService.GetAllAsync(query, cancellationToken);
             return Ok(result);
         }

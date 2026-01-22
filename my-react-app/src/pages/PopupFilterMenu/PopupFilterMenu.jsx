@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axiosClient from "../../api/axiosClient";
 import "./PopupFilterMenu.css";
 
-const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
+const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
   const [metadata, setMetadata] = useState({
     events: [],
     recipients: [],
@@ -10,12 +10,37 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
     sizes: [],
   });
 
-  const [price, setPrice] = useState(1000);
+  const [price, setPrice] = useState(50000);
   const [selectedSizeId, setSelectedSizeId] = useState("");
   const [quantity, setQuantity] = useState("");
   const [selectedEventIds, setSelectedEventIds] = useState([]);
   const [selectedRecipientIds, setSelectedRecipientIds] = useState([]);
   const [selectedFlowerIds, setSelectedFlowerIds] = useState([]);
+
+  // Initialize from props when opened
+  useEffect(() => {
+    if (isOpen && currentFilters) {
+      if (currentFilters.maxPrice) setPrice(currentFilters.maxPrice);
+      else setPrice(50000); // Default if not set
+
+      if (currentFilters.sizeIds && currentFilters.sizeIds.length > 0)
+        setSelectedSizeId(currentFilters.sizeIds[0]);
+      else setSelectedSizeId("");
+
+      // Handle Quantity (stored as array in URL/hook but single string in UI for now?)
+      // Front UI uses radio for single qty, but hook supports array. Let's assume single for now.
+      if (currentFilters.quantities && currentFilters.quantities.length > 0)
+        setQuantity(currentFilters.quantities[0].toString());
+      else setQuantity("");
+
+      setSelectedEventIds(currentFilters.eventIds || []);
+      setSelectedRecipientIds(currentFilters.recipientIds || []);
+      setSelectedFlowerIds(currentFilters.flowerIds || []);
+    } else if (isOpen && !currentFilters) {
+      // Reset if no filters exist
+      resetFilters();
+    }
+  }, [isOpen, currentFilters]);
 
   useEffect(() => {
     const fetchMetadata = async () => {
@@ -48,12 +73,12 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
     setter(
       array.includes(value)
         ? array.filter((v) => v !== value)
-        : [...array, value]
+        : [...array, value],
     );
   };
 
   const resetFilters = () => {
-    setPrice(0);
+    setPrice(50000); // Reset to default max
     setSelectedSizeId("");
     setQuantity("");
     setSelectedEventIds([]);
@@ -63,7 +88,7 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
 
   const applyFilters = () => {
     onApply({
-      maxPrice: price === 0 ? null : price,
+      maxPrice: price === 50000 || price === 0 ? null : price,
       sizeIds: selectedSizeId ? [selectedSizeId] : [],
       quantities: quantity ? [parseInt(quantity)] : [],
       eventIds: selectedEventIds,
@@ -166,7 +191,7 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
                   toggleArrayValue(
                     r.id,
                     setSelectedRecipientIds,
-                    selectedRecipientIds
+                    selectedRecipientIds,
                   )
                 }
               />
@@ -185,7 +210,7 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply }) => {
                   toggleArrayValue(
                     f.id,
                     setSelectedFlowerIds,
-                    selectedFlowerIds
+                    selectedFlowerIds,
                   )
                 }
               />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AboutUs.css";
 
@@ -6,16 +6,16 @@ import PopupMenu from "../popupMenu/PopupMenu";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 
-import LocationIcon from "../../assets/images/location-icon.svg";
-import PhoneIcon from "../../assets/images/phone-icon.svg";
-import InstagramIcon from "../../assets/images/instagram-icon.svg";
-import SparklesIcon from "../../assets/images/sparkles-icon.svg";
-import FlowerIcon from "../../assets/images/flower-icon.svg";
-import HandIcon from "../../assets/images/hand-icon.svg";
-import TruckIcon from "../../assets/images/truck-icon.svg";
+import LocationIcon from "../../assets/icons/location-icon.svg";
+import PhoneIcon from "../../assets/icons/phone-icon.svg";
+import InstagramIcon from "../../assets/icons/instagram-icon.svg";
+import SparklesIcon from "../../assets/icons/sparkles-icon.svg";
+import FlowerIcon from "../../assets/icons/flower-icon.svg";
+import HandIcon from "../../assets/icons/hand-icon.svg";
+import TruckIcon from "../../assets/icons/truck-icon.svg";
 
 import Photo1 from "../../assets/images/headerPhoto.svg";
-import Photo2 from "../../assets/images/bouquet1.JPG";
+import Photo2 from "../../assets/images/bouquet1.webp";
 
 const AboutUs = () => {
   const navigate = useNavigate();

@@ -1,6 +1,5 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
-import ShoppingBagIcon from "../../../assets/images/ShoppingBagIcon.svg";
+import ShoppingBagIcon from "../../../assets/icons/ShoppingBagIcon.svg";
 import toast from "react-hot-toast";
 
 function PopularSection({ items, onAddToCart }) {
@@ -14,8 +13,7 @@ function PopularSection({ items, onAddToCart }) {
           <div
             key={item.id}
             className="popular-card"
-            onClick={() => navigate(`/product/${item.id}`)}
-          >
+            onClick={() => navigate(`/product/${item.id}`)}>
             <div className="popular-image">
               <img src={item.img} alt={item.title} className="popular-img" />
             </div>
@@ -29,8 +27,7 @@ function PopularSection({ items, onAddToCart }) {
                   e.stopPropagation();
                   onAddToCart(item);
                   toast.success(`${item.title} added to cart!`);
-                }}
-              >
+                }}>
                 <img src={ShoppingBagIcon} alt="Cart" />
               </span>
             </div>

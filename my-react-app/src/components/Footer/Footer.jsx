@@ -1,7 +1,6 @@
-import React from "react";
-import LocationIcon from "../../assets/images/location-icon.svg";
-import PhoneIcon from "../../assets/images/phone-icon.svg";
-import InstagramIcon from "../../assets/images/instagram-icon.svg";
+import LocationIcon from "../../assets/icons/location-icon.svg";
+import PhoneIcon from "../../assets/icons/phone-icon.svg";
+import InstagramIcon from "../../assets/icons/instagram-icon.svg";
 import "./Footer.css";
 
 const Footer = () => {
