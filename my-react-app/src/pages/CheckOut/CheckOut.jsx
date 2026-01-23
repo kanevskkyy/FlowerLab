@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import PopupMenu from "../popupMenu/PopupMenu";
+import PaymentTimer from "../../components/PaymentTimer/PaymentTimer";
 import "./CheckOut.css";
 
 import { useCheckOut } from "./hooks/useCheckOut";
@@ -10,6 +11,7 @@ import { useCheckOut } from "./hooks/useCheckOut";
 const CheckOut = () => {
   const location = useLocation();
   const orderData = location.state?.orderData || {};
+  const createdAt = orderData.createdAt;
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -45,6 +47,15 @@ const CheckOut = () => {
             <h2>LIQPAY</h2>
             <p className="payment-label">Payment Information</p>
             <p className="order-number">Order Payment Details</p>
+
+            {createdAt && (
+              <div style={{ marginBottom: "1rem" }}>
+                <PaymentTimer
+                  createdAt={createdAt}
+                  onExpire={() => window.location.reload()}
+                />
+              </div>
+            )}
 
             <div className="total-section">
               <span>Total to Pay:</span>

@@ -1,6 +1,7 @@
 using AggregatorService.Clients;
 using AggregatorService.Clients.Interfaces;
 using AggregatorService.Redis;
+using AggregatorService.DTOs;
 using shared.cache;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,7 +50,7 @@ builder.Services.AddMemoryCache(options =>
     options.CompactionPercentage = 0.2;
 });
 builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
-builder.Services.AddScoped<IEntityCacheInvalidationService<FilterResponse>, FilterCacheInvalidationService>();
+builder.Services.AddScoped<shared.cache.IEntityCacheInvalidationService<AggregatorService.DTOs.FilterResponseDto>, AggregatorService.Redis.FilterCacheInvalidationService>();
 //
 
 

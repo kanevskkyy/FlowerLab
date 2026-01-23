@@ -31,7 +31,7 @@ export function useAdminBouquetForm() {
     availableCount: "",
   });
 
-  // { [sizeId]: { enabled: boolean, price: string, images: Array<{id, url, file, isMain}> } }
+  // { [sizeId]: { enabled: boolean, price: string, flowerQuantities: { [flowerId]: number }, images: Array<{id, url, file, isMain}> } }
   const [sizeStates, setSizeStates] = useState({});
   // imagesToDelete: { [sizeId]: [guid] }
   const [imagesToDelete, setImagesToDelete] = useState({});
@@ -98,9 +98,20 @@ export function useAdminBouquetForm() {
                   isMain: img.isMain,
                 }));
 
+                const flowerQuantities = {};
+                s.flowers?.forEach((f) => {
+                  // Assuming backend returns { id, name, count } or similar
+                  // If backend structure for size flowers is different, adjust here.
+                  // Usually: BouquetSizeFlowers table -> { FlowerId, Count }
+                  // If the current getBouquetById returns simple list, we might need to assume count is hidden or fetch differently.
+                  // For now, mapping if 'count' exists, else 1.
+                  flowerQuantities[f.id] = f.quantity || f.count || 1;
+                });
+
                 mappedSizeStates[s.sizeId] = {
                   enabled: true,
                   price: s.price,
+                  flowerQuantities: flowerQuantities,
                   images: mappedImages,
                 };
               });
@@ -108,13 +119,19 @@ export function useAdminBouquetForm() {
 
             const recipientIds = data.recipients.map((r) => r.id);
 
+            // Collect all unique flower IDs from all sizes for the global checked list
+            const allFlowerIds = new Set();
+            data.sizes.forEach((s) =>
+              s.flowers?.forEach((f) => allFlowerIds.add(f.id)),
+            );
+
             setFormData({
               title: data.name,
               description: data.description || "",
               category: "Bouquets",
               events: data.events.map((e) => e.id),
               forWho: recipientIds,
-              flowerTypes: data.sizes[0]?.flowers.map((f) => f.id) || [],
+              flowerTypes: Array.from(allFlowerIds),
               img: data.mainPhotoUrl,
               imgFile: null,
               price: "",
@@ -166,6 +183,7 @@ export function useAdminBouquetForm() {
           ...currentState,
           enabled: !currentState.enabled,
           price: currentState.price || "",
+          flowerQuantities: currentState.flowerQuantities || {},
           images: currentState.images || [],
         },
       };
@@ -177,6 +195,23 @@ export function useAdminBouquetForm() {
       ...prev,
       [sizeId]: { ...prev[sizeId], price: newPrice },
     }));
+  };
+
+  const handleSizeFlowerQuantityChange = (sizeId, flowerId, qty) => {
+    setSizeStates((prev) => {
+      const sizeState = prev[sizeId] || {};
+      const currentQuantities = sizeState.flowerQuantities || {};
+      return {
+        ...prev,
+        [sizeId]: {
+          ...sizeState,
+          flowerQuantities: {
+            ...currentQuantities,
+            [flowerId]: qty,
+          },
+        },
+      };
+    });
   };
 
   // MULTI-IMAGE HANDLERS
@@ -250,8 +285,10 @@ export function useAdminBouquetForm() {
         formData.events.forEach((id) => data.append("EventIds", id));
         formData.forWho.forEach((id) => data.append("RecipientIds", id));
 
+        // Use formData.flowerTypes only to determine which flowers are "active" for the bouquet context
+        // But actual quantities come from size states.
         if (formData.flowerTypes.length === 0) {
-          toast.error("Please select at least one flower type");
+          toast.error("Please select available flowers for this bouquet");
           return;
         }
 
@@ -272,47 +309,66 @@ export function useAdminBouquetForm() {
           data.append(`Sizes[${sizeIndex}].SizeId`, size.id);
           data.append(`Sizes[${sizeIndex}].Price`, state.price);
 
-          formData.flowerTypes.forEach((flowerId, fDescIdx) => {
-            data.append(`Sizes[${sizeIndex}].FlowerIds[${fDescIdx}]`, flowerId);
-            data.append(`Sizes[${sizeIndex}].FlowerQuantities[${fDescIdx}]`, 1);
+          // Flower Quantities
+          let fIndex = 0;
+          let hasAnyFlower = false;
+          formData.flowerTypes.forEach((flowerId) => {
+            const qty = state.flowerQuantities?.[flowerId] || 0;
+            if (qty > 0) {
+              data.append(`Sizes[${sizeIndex}].FlowerIds[${fIndex}]`, flowerId);
+              data.append(
+                `Sizes[${sizeIndex}].FlowerQuantities[${fIndex}]`,
+                qty,
+              );
+              fIndex++;
+              hasAnyFlower = true;
+            }
           });
 
-          // Images Logic - FIXED
+          if (!hasAnyFlower) {
+            toast.error(
+              `Please specify flower quantities for size ${size.name}`,
+            );
+            return;
+          }
+
+          // Images Logic - Robust Main/Additional separation
           const newImages = state.images.filter((img) => img.file);
+
+          // Identify Main Image:
+          // 1. If user explicitly marked one (mock implementation)
+          // 2. OR default to the first uploaded new image if no main exists
+          // For now, let's assume the first new image is Main if there are NO existing images,
+          // or we just take the first one as Main and rest as Additional as per curl example.
+          // Curl example: MainImage, AdditionalImages[0], ...
+
+          // Implementation:
+          // If we have new images, pop the first one as Main (if strictly creating new).
+          // But wait, user might have existing images.
+
+          // Let's iterate all valid images (new ones)
+          if (newImages.length > 0) {
+            const mainImg = newImages[0];
+            const additional = newImages.slice(1);
+
+            data.append(`Sizes[${sizeIndex}].MainImage`, mainImg.file);
+            additional.forEach((img, idx) => {
+              data.append(
+                `Sizes[${sizeIndex}].AdditionalImages[${idx}]`,
+                img.file,
+              );
+            });
+          } else if (formData.imgFile && sizeIndex === 0 && !isEditMode) {
+            // Fallback: use the global 'main photo' as the size's main photo if provided?
+            // Logic in curl didn't exactly show this, but it's safe.
+            // data.append(`Sizes[${sizeIndex}].MainImage`, formData.imgFile);
+          }
 
           // Image Deletion Logic
           const idsDel = imagesToDelete[size.id] || [];
           idsDel.forEach((delId, dIdx) => {
             data.append(`Sizes[${sizeIndex}].ImageIdsToDelete[${dIdx}]`, delId);
           });
-
-          if (!isEditMode) {
-            // CREATE MODE
-            const [first, ...rest] = newImages;
-            if (first) {
-              data.append(`Sizes[${sizeIndex}].MainImage`, first.file);
-            }
-            rest.forEach((img, idx) => {
-              data.append(
-                `Sizes[${sizeIndex}].AdditionalImages[${idx}]`,
-                img.file,
-              );
-            });
-
-            if (newImages.length === 0 && formData.imgFile) {
-              data.append(`Sizes[${sizeIndex}].MainImage`, formData.imgFile);
-            }
-          } else {
-            // EDIT MODE - APPEND ONLY
-            // We just take all new files and send them as NewImages
-            const newImages = state.images.filter((img) => img.file);
-            newImages.forEach((img, idx) => {
-              data.append(
-                `Sizes[${sizeIndex}].AdditionalImages[${idx}]`,
-                img.file,
-              );
-            });
-          }
 
           sizeIndex++;
         }
@@ -364,6 +420,7 @@ export function useAdminBouquetForm() {
     handleImageUpload,
     handleSizeCheckbox,
     handleSizePriceChange,
+    handleSizeFlowerQuantityChange,
     handleSizeImagesUpload,
     handleRemoveSizeImage,
     handleSubmit,

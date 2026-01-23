@@ -18,6 +18,7 @@ export default function AdminBouquetForm() {
     handleImageUpload,
     handleSizeCheckbox,
     handleSizePriceChange,
+    handleSizeFlowerQuantityChange,
     handleSizeImagesUpload,
     handleRemoveSizeImage,
     handleSubmit,
@@ -170,6 +171,47 @@ export default function AdminBouquetForm() {
                                   </div>
                                 )}
                               </div>
+
+                              {/* Flower Quantities - NEW */}
+                              {isEnabled && formData.flowerTypes.length > 0 && (
+                                <div className="abf-size-flowers">
+                                  <p className="abf-mini-label">
+                                    Flower Composition:
+                                  </p>
+                                  <div className="abf-flower-qtys">
+                                    {formData.flowerTypes.map((fId) => {
+                                      const flower = flowers.find(
+                                        (f) => f.id === fId,
+                                      );
+                                      if (!flower) return null;
+                                      const qty =
+                                        st.flowerQuantities?.[fId] || "";
+                                      return (
+                                        <div
+                                          key={fId}
+                                          className="abf-flower-qty-item">
+                                          <span className="abf-fq-name">
+                                            {flower.name}
+                                          </span>
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            placeholder="Qty"
+                                            value={qty}
+                                            onChange={(e) =>
+                                              handleSizeFlowerQuantityChange(
+                                                size.id,
+                                                fId,
+                                                e.target.value,
+                                              )
+                                            }
+                                          />
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
 
                               {isEnabled && (
                                 <div className="abf-size-img-section">

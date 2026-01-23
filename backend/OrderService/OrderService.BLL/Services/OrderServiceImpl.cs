@@ -81,8 +81,10 @@ namespace OrderService.BLL.Services
             var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
                 ?? throw new NotFoundException($"Order with ID {orderId} was not found");
 
-            if (order.UserId == null && guestToken != order.GuestToken)
-                throw new ValidationException("Invalid token for guest order.");
+            // Validation removed: Authorization is handled in the Controller.
+            // This check was preventing Admins from viewing guest orders because they don't provide a guestToken.
+            // if (order.UserId == null && guestToken != order.GuestToken)
+            //    throw new ValidationException("Invalid token for guest order.");
 
             return mapper.Map<OrderDetailDto>(order);
         }

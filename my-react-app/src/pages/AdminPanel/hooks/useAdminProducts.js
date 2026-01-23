@@ -38,8 +38,22 @@ export function useAdminProducts(active) {
 
       if (active === "bouquets") {
         data = await catalogService.getBouquets(params);
+        // Sort by CreatedAt Desc (newest first)
+        if (Array.isArray(data.items || data)) {
+          // Handle both paginated 'items' and direct array
+          const list = data.items || data;
+          list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
       } else if (active === "gifts") {
         data = await catalogService.getGifts(params);
+        // Sort by UpdatedAt or CreatedAt Desc (newest or recently edited first)
+        if (Array.isArray(data)) {
+          data.sort((a, b) => {
+            const dateA = new Date(a.updatedAt || a.createdAt);
+            const dateB = new Date(b.updatedAt || b.createdAt);
+            return dateB - dateA;
+          });
+        }
       } else {
         setProducts([]);
         return;

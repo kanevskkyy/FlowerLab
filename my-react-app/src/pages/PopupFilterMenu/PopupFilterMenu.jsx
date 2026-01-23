@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axiosClient from "../../api/axiosClient";
+import catalogService from "../../services/catalogService";
 import "./PopupFilterMenu.css";
 
 const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
@@ -10,7 +10,11 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
     sizes: [],
   });
 
-  const [price, setPrice] = useState(50000);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(50000);
+  const [globalMin, setGlobalMin] = useState(0);
+  const [globalMax, setGlobalMax] = useState(50000);
+
   const [selectedSizeId, setSelectedSizeId] = useState("");
   const [quantity, setQuantity] = useState("");
   const [selectedEventIds, setSelectedEventIds] = useState([]);
@@ -20,15 +24,17 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
   // Initialize from props when opened
   useEffect(() => {
     if (isOpen && currentFilters) {
-      if (currentFilters.maxPrice) setPrice(currentFilters.maxPrice);
-      else setPrice(50000); // Default if not set
+      if (currentFilters.minPrice) setMinPrice(currentFilters.minPrice);
+      else setMinPrice(globalMin);
+
+      if (currentFilters.maxPrice) setMaxPrice(currentFilters.maxPrice);
+      else setMaxPrice(globalMax);
 
       if (currentFilters.sizeIds && currentFilters.sizeIds.length > 0)
         setSelectedSizeId(currentFilters.sizeIds[0]);
       else setSelectedSizeId("");
 
       // Handle Quantity (stored as array in URL/hook but single string in UI for now?)
-      // Front UI uses radio for single qty, but hook supports array. Let's assume single for now.
       if (currentFilters.quantities && currentFilters.quantities.length > 0)
         setQuantity(currentFilters.quantities[0].toString());
       else setQuantity("");
@@ -37,28 +43,89 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
       setSelectedRecipientIds(currentFilters.recipientIds || []);
       setSelectedFlowerIds(currentFilters.flowerIds || []);
     } else if (isOpen && !currentFilters) {
-      // Reset if no filters exist
       resetFilters();
     }
-  }, [isOpen, currentFilters]);
+  }, [isOpen, currentFilters, globalMin, globalMax]);
 
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        const [eventsRes, recipientsRes, flowersRes, sizesRes] =
-          await Promise.all([
-            axiosClient.get("/api/catalog/events"),
-            axiosClient.get("/api/catalog/recipients"),
-            axiosClient.get("/api/catalog/flowers"),
-            axiosClient.get("/api/catalog/sizes"),
-          ]);
+        const data = await catalogService.getFilters();
 
         setMetadata({
-          events: eventsRes.data,
-          recipients: recipientsRes.data,
-          flowers: flowersRes.data,
-          sizes: sizesRes.data,
+          events: data.eventResponseList || [],
+          recipients: data.receivmentResponseList || [],
+          flowers: data.flowerResponseList || [],
+          sizes: data.sizeResponseList || [],
         });
+
+        // 1. Try to get price range from filter metadata first
+        let gMin = 0;
+        let gMax = 50000;
+
+        if (data.priceRange) {
+          gMin = data.priceRange.minPrice || 0;
+          gMax = data.priceRange.maxPrice || 50000;
+        }
+
+        // 2. If metadata range seems default or suspicious, verify with direct product queries
+        // or just ALWAYS verify to be sure (as user requested precise bounds).
+        // Fetch Min
+        try {
+          const minResp = await catalogService.getBouquets({
+            PageSize: 1,
+            SortBy: "price_asc",
+          });
+          if (minResp.items && minResp.items.length > 0) {
+            // Note: Does item contain Sizes? We should check min price of the item itself.
+            // Assuming item.price is the starting price.
+            const p = minResp.items[0];
+            // Check if it has sizes with lower price? Usually item.price is base.
+            // Let's assume item.price is sufficient.
+            const msgMin = p.price;
+            if (msgMin !== undefined) gMin = msgMin;
+          }
+        } catch (e) {
+          console.error("Failed to fetch Min Price", e);
+        }
+
+        // Fetch Max
+        try {
+          const maxResp = await catalogService.getBouquets({
+            PageSize: 1,
+            SortBy: "price_desc",
+          });
+          if (maxResp.items && maxResp.items.length > 0) {
+            const p = maxResp.items[0];
+            // If item has sizes, max price might be in sizes?
+            // But sorting 'price_desc' likely sorts by base price?
+            // If the backend sorts correctly, the first item is the most expensive.
+            // We take its price.
+            // If it has a more expensive size, we ideally want THAT.
+            // But calculating that perfectly is hard without fetching all.
+            // Let's trust the backend sort.
+            let msgMax = p.price;
+            if (p.sizes && p.sizes.length > 0) {
+              // Check if any size is max
+              const maxSz = Math.max(...p.sizes.map((s) => s.price));
+              if (maxSz > msgMax) msgMax = maxSz;
+            }
+            if (msgMax !== undefined) gMax = msgMax;
+          }
+        } catch (e) {
+          console.error("Failed to fetch Max Price", e);
+        }
+
+        setGlobalMin(gMin);
+        setGlobalMax(gMax);
+
+        // Update selected if no current filters or if they match defaults
+        if (!currentFilters || !currentFilters.maxPrice) {
+          setMaxPrice(gMax);
+        }
+        if (!currentFilters || !currentFilters.minPrice) {
+          setMinPrice(gMin);
+        }
       } catch (error) {
         console.error("Failed to fetch filter metadata:", error);
       }
@@ -78,7 +145,8 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
   };
 
   const resetFilters = () => {
-    setPrice(50000); // Reset to default max
+    setMinPrice(globalMin);
+    setMaxPrice(globalMax);
     setSelectedSizeId("");
     setQuantity("");
     setSelectedEventIds([]);
@@ -88,7 +156,8 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
 
   const applyFilters = () => {
     onApply({
-      maxPrice: price === 50000 || price === 0 ? null : price,
+      minPrice: minPrice === globalMin ? null : minPrice,
+      maxPrice: maxPrice === globalMax ? null : maxPrice,
       sizeIds: selectedSizeId ? [selectedSizeId] : [],
       quantities: quantity ? [parseInt(quantity)] : [],
       eventIds: selectedEventIds,
@@ -113,21 +182,37 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
         <div className="price-inputs">
           <input
             type="number"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            value={minPrice}
+            onChange={(e) => setMinPrice(Number(e.target.value))}
+            min={globalMin}
+            max={maxPrice}
           />
           <span>—</span>
-          <input type="number" value={50000} disabled className="max-price" />
+          <input
+            type="number"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(Number(e.target.value))}
+            min={minPrice}
+            max={globalMax}
+          />
         </div>
 
         <div className="range-wrapper">
+          {/* Simple slider controls Max Price for now to avoid complex CSS. 
+              Or we can use two sliders if we overlay them. 
+              For now let's just use one slider for Max Price as it is most common, 
+              but inputs allow full control.
+          */}
           <input
             type="range"
-            min="0"
-            max="50000"
+            min={globalMin}
+            max={globalMax}
             step="100"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            value={maxPrice}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              if (val >= minPrice) setMaxPrice(val);
+            }}
           />
         </div>
 

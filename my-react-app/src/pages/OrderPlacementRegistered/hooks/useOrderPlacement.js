@@ -85,7 +85,7 @@ const schema = z
 
 export const useOrderPlacement = () => {
   const navigate = useNavigate();
-  const { cartItems, removeItem } = useCart();
+  const { cartItems, removeItem, clearCart } = useCart();
   const { user } = useAuth();
   const { gifts, loading: giftsLoading } = useGifts();
 
@@ -270,7 +270,7 @@ export const useOrderPlacement = () => {
   const subtotal = cartItems.reduce((sum, item) => {
     const price =
       typeof item.price === "string"
-        ? parseFloat(item.price.replace(/[^\d]/g, ""))
+        ? parseFloat(item.price.replace(/[^\d.]/g, ""))
         : item.price;
     const qty = item.qty || 1;
     return sum + price * qty;
@@ -302,42 +302,58 @@ export const useOrderPlacement = () => {
   const handleAddAddress = async () => {
     if (!newAddress.trim()) return;
 
-    try {
-      // 1. Persist to backend
-      const response = await axiosClient.post("/api/users/me/addresses", {
-        address: newAddress,
-        isDefault: false,
-      });
-
-      // 2. Fetch updated list or manually add
-      const addrs = await catalogService.getUserAddresses();
-      const mapped = addrs.map((a) => ({
-        id: a.id,
-        text: a.address || "Unknown Address",
-      }));
-      setDeliveryAddresses(mapped);
-
-      // 3. Select the new address
-      const created = mapped.find((a) => a.text === newAddress);
-      if (created) {
-        setValue("selectedAddressId", created.id, { shouldValidate: true });
-      } else if (mapped.length > 0) {
-        // Fallback: select the last one added
-        setValue("selectedAddressId", mapped[mapped.length - 1].id, {
-          shouldValidate: true,
+    if (user) {
+      // Authenticated: Persist to Backend
+      try {
+        // 1. Persist to backend
+        const response = await axiosClient.post("/api/users/me/addresses", {
+          address: newAddress,
+          isDefault: false,
         });
+
+        // 2. Fetch updated list or manually add
+        const addrs = await catalogService.getUserAddresses();
+        const mapped = addrs.map((a) => ({
+          id: a.id,
+          text: a.address || "Unknown Address",
+        }));
+        setDeliveryAddresses(mapped);
+
+        // 3. Select the new address
+        const created = mapped.find((a) => a.text === newAddress);
+        if (created) {
+          setValue("selectedAddressId", created.id, { shouldValidate: true });
+        } else if (mapped.length > 0) {
+          setValue("selectedAddressId", mapped[mapped.length - 1].id, {
+            shouldValidate: true,
+          });
+        }
+
+        setNewAddress("");
+        setIsAddingAddress(false);
+        toast.success("Address saved successfully!");
+      } catch (error) {
+        console.error("Failed to save address", error);
+        toast.error("Failed to save address (Login required?)");
       }
+    } else {
+      // Guest: Add locally to state
+      const tempId = `temp-${Date.now()}`;
+      const newAddrObj = {
+        id: tempId,
+        text: newAddress,
+      };
+
+      setDeliveryAddresses((prev) => [...prev, newAddrObj]);
+      setValue("selectedAddressId", tempId, { shouldValidate: true });
 
       setNewAddress("");
       setIsAddingAddress(false);
-      toast.success("Address saved successfully!");
-    } catch (error) {
-      console.error("Failed to save address", error);
-      toast.error("Failed to save address");
+      toast.success("Address added for this order");
     }
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     // Helper to map Shop ID to Backend Enum
     const getShopEnum = (id) => {
       // Frontend IDs: 1 (Hertsena), 2 (Vasile)
@@ -362,17 +378,32 @@ export const useOrderPlacement = () => {
       isDelivery: deliveryType === "delivery",
 
       // Items Mapping
-      items: cartItems.map((item) => ({
-        bouquetId: item.bouquetId,
-        sizeId: item.sizeId,
-        count: item.qty || 1, // Cart uses 'qty', Backend expects 'count'
-      })),
+      items: cartItems
+        .filter((item) => item.bouquetId && item.sizeId) // Only real bouquets
+        .map((item) => ({
+          bouquetId: item.bouquetId,
+          sizeId: item.sizeId,
+          count: item.qty || 1,
+        })),
 
       // Gifts Mapping
-      gifts: selectedGifts.map((giftId) => ({
-        giftId: giftId,
-        count: 1,
-      })),
+      // Combine:
+      // 1. Gifts selected via checkboxes in this form (selectedGifts)
+      // 2. Gifts added to the cart explicitly (cartItems where isGift is true or mapped)
+      gifts: [
+        ...selectedGifts.map((giftId) => ({
+          giftId: giftId,
+          count: 1,
+        })),
+        ...cartItems
+          .filter((item) => item.isGift || (!item.bouquetId && item.id)) // Heuristic for gifts: has flag OR has ID but no bouquetId
+          // Note: Cart items might use 'id' as 'giftId' if it's a direct gift add.
+          // We need to ensure we send the correct ID.
+          .map((item) => ({
+            giftId: item.productId || item.id, // Depending on how it was added to cart
+            count: item.qty || 1,
+          })),
+      ],
 
       // Delivery Info
       deliveryInformation:
@@ -388,17 +419,43 @@ export const useOrderPlacement = () => {
 
       giftMessage: isCardAdded ? data.cardMessage : null,
 
-      // Pass total for display on Checkout page (not sent to backend logic usually, but useful for UI)
+      // Pass total for display on Checkout page
       total: total,
     };
 
-    // Navigate to checkout
-    toast.success("Order validated! Proceeding to checkout...");
+    // Create Order immediately
+    try {
+      const response = await catalogService.createOrder(finalOrderData);
 
-    // customizable delay to ensure React commits the state change
-    setTimeout(() => {
-      navigate("/checkout", { state: { orderData: finalOrderData } });
-    }, 100);
+      // Clear cart immediately as order is created/reserved
+      clearCart();
+
+      toast.success("Order confirmed!");
+
+      // Pass created order data including ID and createdAt to Checkout
+      navigate("/checkout", {
+        state: {
+          orderData: {
+            // Merge form data with response data
+            ...finalOrderData,
+            id: response.id,
+            guestToken: response.guestToken,
+            createdAt: response.createdAt,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Failed to create order", error);
+
+      const errorMessage =
+        error.response?.data?.detail ||
+        error.response?.data?.title ||
+        (typeof error.response?.data === "string"
+          ? error.response?.data
+          : "Failed to create order");
+
+      toast.error(errorMessage);
+    }
   };
 
   return {

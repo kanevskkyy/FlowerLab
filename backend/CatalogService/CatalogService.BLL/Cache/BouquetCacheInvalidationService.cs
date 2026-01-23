@@ -21,11 +21,13 @@ namespace CatalogService.BLL.Cache
         {
             await _cache.RemoveAsync($"bouquet:{bouquetId}");
             await _cache.RemoveByPatternAsync("bouquets:");
+            await _cache.RemoveByPatternAsync("bouquets_v2:");
         }
 
         public async Task InvalidateAllAsync()
         {
             await _cache.RemoveByPatternAsync("bouquets:");
+            await _cache.RemoveByPatternAsync("bouquets_v2:");
         }
     }
 }

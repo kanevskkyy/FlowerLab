@@ -46,6 +46,8 @@ export default function AuthProvider({ children }) {
       };
     } catch (e) {
       console.error("Invalid token:", e);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       return null;
     }
   };
@@ -75,7 +77,7 @@ export default function AuthProvider({ children }) {
   // Експортуємо setAuth як login, щоб не ламати твій код в Login.jsx
   const value = useMemo(
     () => ({ user, login: setAuth, setAuth, logout, loading }),
-    [user, setAuth, logout, loading]
+    [user, setAuth, logout, loading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

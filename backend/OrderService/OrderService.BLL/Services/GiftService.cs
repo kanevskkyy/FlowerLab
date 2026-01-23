@@ -114,6 +114,7 @@ namespace OrderService.BLL.Services
             }
 
             mapper.Map(dto, gift);
+            gift.UpdatedAt = DateTime.UtcNow;
             unitOfWork.Gifts.Update(gift);
             await unitOfWork.SaveChangesAsync();
 

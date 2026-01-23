@@ -12,7 +12,7 @@ const CartPopup = ({ isOpen, onClose }) => {
   const total = cartItems.reduce((sum, item) => {
     const price =
       typeof item.price === "string"
-        ? parseFloat(item.price.replace(/[^\d]/g, ""))
+        ? parseFloat(item.price.replace(/[^\d.]/g, ""))
         : item.price;
     const qty = item.qty || 1;
     return sum + price * qty;
@@ -99,7 +99,7 @@ const CartPopup = ({ isOpen, onClose }) => {
             <div className="cart-footer">
               <div className="cart-total">
                 <span>TOTAL:</span>
-                <span className="total-amount">{total} ₴</span>
+                <span className="total-amount">{total.toFixed(2)} ₴</span>
               </div>
 
               <button className="checkout-btn" onClick={handleCheckout}>
