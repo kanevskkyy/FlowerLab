@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import PaymentTimer from "../../components/PaymentTimer/PaymentTimer";
 import "./CheckOut.css";
 

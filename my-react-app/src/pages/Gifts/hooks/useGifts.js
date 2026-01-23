@@ -9,6 +9,7 @@ export function useGifts() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export function useGifts() {
         setTotalPages(data.totalPages || 1);
       } catch (error) {
         console.error("Failed to fetch gifts:", error);
+        setError(true);
         toast.error("Failed to load gifts");
       } finally {
         setLoading(false);
@@ -54,6 +56,7 @@ export function useGifts() {
   return {
     gifts,
     loading,
+    error,
     currentPage,
     totalPages,
     totalProducts,

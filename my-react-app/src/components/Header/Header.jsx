@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useSettings } from "../../context/useSettings"; // Імпорт нашого нового хука
 import { useAuth } from "../../context/useAuth";
-import CartPopup from "../../pages/CartPopup/CartPopup";
+import CartPopup from "../CartPopup/CartPopup";
 
 // Assets (перевір, чи шляхи до картинок правильні у твоєму проєкті)
 import ShoppingBagIcon from "../../assets/icons/ShoppingBagIcon.svg";
@@ -71,10 +71,10 @@ const Header = ({ onMenuOpen }) => {
           <button
             className="icon-btn profile-btn"
             onClick={() => navigate("/cabinet")}>
-            <img 
-              src={user?.photoUrl || UserProfileIcon} 
-              alt="Profile" 
-              className={`icon ${user?.photoUrl ? 'profile-avatar' : ''}`} 
+            <img
+              src={user?.photoUrl || UserProfileIcon}
+              alt="Profile"
+              className={`icon ${user?.photoUrl ? "profile-avatar" : ""}`}
             />
             <span className="profile-label">
               {user ? "Profile" : "Sign up/in"}

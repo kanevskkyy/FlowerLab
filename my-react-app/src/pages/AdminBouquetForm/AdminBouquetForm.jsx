@@ -6,7 +6,9 @@ export default function AdminBouquetForm() {
   const {
     isEditMode,
     isGiftMode,
+
     loading,
+    isSubmitting,
     events,
     recipients,
     flowers,
@@ -51,8 +53,12 @@ export default function AdminBouquetForm() {
               ? `Edit ${isGiftMode ? "Gift" : "Bouquet"}`
               : `New ${isGiftMode ? "Gift" : "Bouquet"}`}
           </h1>
-          <button className="abf-save-btn" onClick={handleSubmit}>
-            Save
+          <button
+            className="abf-save-btn"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            style={{ opacity: isSubmitting ? 0.7 : 1 }}>
+            {isSubmitting ? "Saving..." : "Save"}
           </button>
         </header>
 

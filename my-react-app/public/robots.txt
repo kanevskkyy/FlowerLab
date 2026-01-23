@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /cabinet
+Disallow: /checkout
+Disallow: /order
+Disallow: /order-registered
+Disallow: /order-success
+Disallow: /confirm-email
+Disallow: /email-confirmation-pending
+Disallow: /reset-password
+Disallow: /forgot-password
+
+Sitemap: https://flowerlab-vlada.com/sitemap.xml
