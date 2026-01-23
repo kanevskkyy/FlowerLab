@@ -6,9 +6,6 @@ import { useCart } from "../../context/CartContext";
 import orderService from "../../services/orderService";
 import "./OrderSuccess.css";
 
-// You might want to import a checkmark icon or use an SVG directly
-// import checkCircle from "../../assets/icons/check-circle.svg";
-
 const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -161,6 +158,8 @@ const OrderSuccess = () => {
               ? "We could not process your payment. Please try again."
               : "Your order has been placed successfully."}
           </p>
+
+          <p className="email-note">You will receive an email with the order details.</p>
 
           {orderNumber && (
             <p className="order-number-text">

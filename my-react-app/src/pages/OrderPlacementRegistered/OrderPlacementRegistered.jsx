@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import { useOrderPlacement } from "./hooks/useOrderPlacement";
 
 // Sub-components

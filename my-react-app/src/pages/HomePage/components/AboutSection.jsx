@@ -25,7 +25,12 @@ function AboutSection() {
           </p>
         </div>
         <div className="about-image">
-          <img src={bouquet4} alt="About banner" className="about-img" />
+          <img
+            src={bouquet4}
+            alt="About banner"
+            className="about-img"
+            loading="lazy"
+          />
         </div>
       </div>
     </section>

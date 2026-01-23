@@ -17,6 +17,9 @@ export function useAdminBouquetForm() {
   const [flowers, setFlowers] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ... (Lines 21-262 skipped)
 
   const [formData, setFormData] = useState({
     title: "",
@@ -262,6 +265,8 @@ export function useAdminBouquetForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
       const data = new FormData();
@@ -402,6 +407,8 @@ export function useAdminBouquetForm() {
       } else {
         toast.error(error.response?.data?.message || "Failed to save item");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -409,6 +416,7 @@ export function useAdminBouquetForm() {
     isEditMode,
     isGiftMode,
     loading,
+    isSubmitting,
     events,
     recipients,
     flowers,

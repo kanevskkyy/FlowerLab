@@ -61,10 +61,19 @@ export function useAdminProducts(active) {
 
       const items = data.items || data || [];
 
+      const optimizeCloudinaryUrl = (url) => {
+        if (!url || !url.includes("cloudinary.com")) return url;
+        // Avoid double optimization if already present (basic check)
+        if (url.includes("/w_")) return url;
+        const parts = url.split("upload/");
+        if (parts.length < 2) return url;
+        return `${parts[0]}upload/w_400,h_400,c_fill,q_auto,f_auto/${parts[1]}`;
+      };
+
       const mapped = items.map((item) => ({
         id: item.id,
         title: item.name,
-        img: item.mainPhotoUrl || item.imageUrl, // Handle both
+        img: optimizeCloudinaryUrl(item.mainPhotoUrl || item.imageUrl), // Handle both
         price: `${item.price} ₴`,
         category: active === "bouquets" ? "Bouquets" : "Gifts",
       }));

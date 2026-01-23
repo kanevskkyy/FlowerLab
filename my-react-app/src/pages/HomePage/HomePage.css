@@ -264,9 +264,16 @@
   aspect-ratio: 1 / 1;
   cursor: pointer;
   background: #f0f0f0;
+
+  /* Hardware Acceleration Hints */
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
+
+  /* Snappier transition (ease-out starts faster) */
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+    transform 0.3s ease-out,
+    box-shadow 0.3s ease-out;
 }
 
 .popular-card:hover {
@@ -300,7 +307,13 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.6s ease;
+
+  /* Hardware Acceleration & Optimization */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  transition: transform 0.6s ease-out;
 }
 
 .popular-card:hover .popular-img {

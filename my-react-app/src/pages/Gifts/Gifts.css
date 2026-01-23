@@ -45,7 +45,9 @@
   gap: 16px;
   padding: 16px;
   border-radius: 20px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   background: #fff;
 }
 
@@ -70,7 +72,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  object-fit: cover;
+
+  /* Hardware Acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  transition: transform 0.5s ease-out;
 }
 
 .gifts-page .catalog-item:hover .item-img img {

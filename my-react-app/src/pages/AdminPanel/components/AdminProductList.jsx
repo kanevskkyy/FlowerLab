@@ -73,7 +73,12 @@ function AdminProductList({
           return (
             <div key={p.id} className="admin-card">
               <div className="admin-card-img">
-                <img src={p.img} alt={p.title} draggable="false" />
+                <img
+                  src={p.img}
+                  alt={p.title}
+                  draggable="false"
+                  loading="lazy"
+                />
               </div>
               <div className="admin-card-bottom">
                 <div className="admin-card-title">

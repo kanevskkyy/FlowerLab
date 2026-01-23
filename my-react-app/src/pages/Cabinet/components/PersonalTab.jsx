@@ -89,7 +89,6 @@ export default function PersonalTab() {
             <img src={MessageIcon} className="cabinet-pill-icon" alt="" />
             <span className="cabinet-pill-text">{form.email}</span>
           </div>
-          <button className="cabinet-pill-btn" type="button">Change</button>
         </div>
 
         <div className="cabinet-pill">
@@ -104,15 +103,6 @@ export default function PersonalTab() {
           >
             Change
           </button>
-        </div>
-      </div>
-
-      <div className="cabinet-grid-2 cabinet-grid-single-left">
-        <div className="cabinet-pill danger">
-          <div className="cabinet-pill-left">
-            <img src={TrashIcon} className="cabinet-pill-icon" alt="" />
-            <span className="cabinet-pill-text">Delete account</span>
-          </div>
         </div>
       </div>
 
