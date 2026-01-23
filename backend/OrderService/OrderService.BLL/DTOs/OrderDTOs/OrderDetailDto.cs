@@ -28,6 +28,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public IEnumerable<OrderItemReadDto> Items { get; set; } = new List<OrderItemReadDto>();
         public IEnumerable<OrderGiftReadDto> Gifts { get; set; } = new List<OrderGiftReadDto>();
         public decimal TotalPrice { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
 }

@@ -34,10 +34,15 @@ export const useProductData = (id) => {
           id: data.id,
           title: data.name,
           description: data.description,
-          composition:
-            data.sizes[0]?.flowers
-              .map((f) => `${f.name} (${f.quantity})`)
-              .join(", ") || "Diverse floral mix",
+          // Map composition per size
+          compositions: data.sizes.reduce((acc, size) => {
+            const compStr =
+              size.flowers
+                ?.map((f) => `${f.name} (${f.quantity})`)
+                .join(", ") || "Diverse floral mix";
+            acc[size.sizeName] = compStr;
+            return acc;
+          }, {}),
           // Store Array of images for each size
           images: data.sizes.reduce((acc, size) => {
             const sizeImgs =
@@ -57,6 +62,8 @@ export const useProductData = (id) => {
             return acc;
           }, {}),
           availableSizes: data.sizes.map((s) => s.sizeName),
+          events: data.events?.map((e) => e.name) || [],
+          recipients: data.recipients?.map((r) => r.name) || [],
         };
 
         setProduct(mappedProduct);

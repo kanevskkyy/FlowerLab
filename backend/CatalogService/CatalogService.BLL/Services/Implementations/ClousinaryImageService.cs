@@ -26,9 +26,18 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<string> UploadAsync(byte[] fileBytes, string fileName, string folder)
         {
+            using var stream = new MemoryStream(fileBytes);
+            return await UploadAsync(stream, fileName, folder);
+        }
+
+        public async Task<string> UploadAsync(Stream stream, string fileName, string folder)
+        {
+            // Reset stream position if possible, just in case
+            if (stream.CanSeek) stream.Position = 0;
+
             ImageUploadParams uploadParams = new ImageUploadParams()
             {
-                File = new FileDescription(fileName, new MemoryStream(fileBytes)),
+                File = new FileDescription(fileName, stream),
                 Folder = folder,
                 UseFilename = true,
                 UniqueFilename = true,

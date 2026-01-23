@@ -17,6 +17,7 @@ import Recommendations from "./components/Recommendations";
 import Reviews from "./components/Reviews";
 import GiftModal from "./components/GiftModal";
 import AddReviewModal from "./components/AddReviewModal";
+import ProductDetailSkeleton from "./components/ProductDetailSkeleton";
 
 import "./ProductCard.css";
 
@@ -60,7 +61,7 @@ const ProductCardContent = () => {
   }, [fetchedGifts]);
 
   if (loading) {
-    return <div className="loading-screen">Loading bouquet details...</div>;
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {

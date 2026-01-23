@@ -102,54 +102,67 @@ namespace CatalogService.BLL.Services.Implementations
                 throw new BadRequestException("Each size can only be specified once.");
             }
 
+            // --- BULK VALIDATION OPTIMIZATION ---
+
+            // 1. Gather all IDs
+            var allSizeIds = dto.Sizes.Select(s => s.SizeId).Distinct().ToList();
+            var allEventIds = dto.EventIds.Distinct().ToList();
+            var allRecipientIds = dto.RecipientIds.Distinct().ToList();
+            var allFlowerIds = dto.Sizes.SelectMany(s => s.FlowerIds).Distinct().ToList();
+
+            // 2. Fetch all existing entities in one go
+            var existingSizes = await uow.Sizes.GetListAsync(s => allSizeIds.Contains(s.Id), cancellationToken);
+            var existingEvents = await uow.Events.GetListAsync(e => allEventIds.Contains(e.Id), cancellationToken);
+            var existingRecipients = await uow.Recipients.GetListAsync(r => allRecipientIds.Contains(r.Id), cancellationToken);
+            var existingFlowers = await uow.Flowers.GetListAsync(f => allFlowerIds.Contains(f.Id), cancellationToken);
+
+            // 3. Validate existence in memory
+            var loadedSizeIds = existingSizes.Select(s => s.Id).ToHashSet();
+            foreach (var sId in allSizeIds)
+            {
+                if (!loadedSizeIds.Contains(sId)) throw new NotFoundException($"Size {sId} not found.");
+            }
+
+            var loadedEventIds = existingEvents.Select(e => e.Id).ToHashSet();
+            foreach (var eId in allEventIds)
+            {
+                if (!loadedEventIds.Contains(eId)) throw new NotFoundException($"Event {eId} not found.");
+            }
+
+            var loadedRecipientIds = existingRecipients.Select(r => r.Id).ToHashSet();
+            foreach (var rId in allRecipientIds)
+            {
+                if (!loadedRecipientIds.Contains(rId)) throw new NotFoundException($"Recipient {rId} not found.");
+            }
+
+            var loadedFlowers = existingFlowers.ToDictionary(f => f.Id); // Keep object for Quantity check
             foreach (var sizeDto in dto.Sizes)
             {
-                Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
-                if (size == null)
-                {
-                    throw new NotFoundException($"Size {sizeDto.SizeId} not found.");
-                }
-
                 if (sizeDto.FlowerIds.Count != sizeDto.FlowerQuantities.Count)
-                {
-                    throw new BadRequestException(
-                        $"Number of flower IDs does not match quantities for size {size.Name}.");
-                }
+                    throw new BadRequestException($"Flower IDs count mismatch for size {sizeDto.SizeId}.");
 
-                if (!sizeDto.FlowerIds.Any())
-                {
-                    throw new BadRequestException($"Flowers must be specified for size {size.Name}.");
-                }
-            }
-
-            foreach (var evId in dto.EventIds)
-            {
-                if (!await uow.Events.ExistsAsync(e => e.Id == evId, cancellationToken))
-                    throw new NotFoundException($"Event {evId} not found.");
-            }
-
-            foreach (var rId in dto.RecipientIds)
-            {
-                if (!await uow.Recipients.ExistsAsync(r => r.Id == rId, cancellationToken))
-                    throw new NotFoundException($"Recipient {rId} not found.");
-            }
-
-            foreach (var sizeDto in dto.Sizes)
-            {
                 for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
                 {
-                    Flower? flower = await uow.Flowers.GetByIdAsync(sizeDto.FlowerIds[i], cancellationToken);
-                    if (flower == null)
-                        throw new NotFoundException($"Flower {sizeDto.FlowerIds[i]} not found.");
+                    var fId = sizeDto.FlowerIds[i];
+                    if (!loadedFlowers.TryGetValue(fId, out var flower))
+                        throw new NotFoundException($"Flower {fId} not found.");
 
+                    // Note: This logic assumes we consume from the global stock ONE time per size definition,
+                    // or checking availability. Since this is just a catalog definition, checking availability
+                    // against global stock is tricky if multiple sizes use the same flower.
+                    // The original logic checked: flower.Quantity < requestedQty.
+                    // We keep that check.
                     if (flower.Quantity < sizeDto.FlowerQuantities[i])
                     {
-                        Size? size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
-                        throw new BadRequestException($"Not enough '{flower.Name}' flowers for size {size.Name}. " +
-                                                      $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
+                         // Optional: Provide Size Name if we wanted to be fancy, but we have the ID.
+                         // For speed, simpler error is acceptable, or look up Name from existingSizes.
+                         var sizeName = existingSizes.First(s => s.Id == sizeDto.SizeId).Name;
+                         throw new BadRequestException($"Not enough '{flower.Name}' flowers for size {sizeName}. Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
                     }
                 }
             }
+
+            // --- END BULK VALIDATION ---
 
             Bouquet bouquet = new Bouquet
             {
@@ -161,16 +174,18 @@ namespace CatalogService.BLL.Services.Implementations
                 BouquetRecipients = new List<BouquetRecipient>()
             };
 
+            // Main Photo Upload (Streamed)
             if (dto.MainPhoto != null)
             {
-                using var ms = new MemoryStream();
-                await dto.MainPhoto.CopyToAsync(ms);
-                bouquet.MainPhotoUrl = await imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
+                using var stream = dto.MainPhoto.OpenReadStream();
+                bouquet.MainPhotoUrl = await imageService.UploadAsync(stream, dto.MainPhoto.FileName, "bouquets");
             }
             else
             {
                 throw new BadRequestException("Main photo is required.");
             }
+
+            var uploadTasks = new List<Task>();
 
             foreach (var sizeDto in dto.Sizes)
             {
@@ -196,59 +211,68 @@ namespace CatalogService.BLL.Services.Implementations
 
                 if (sizeDto.MainImage != null)
                 {
-                    using var ms = new MemoryStream();
-                    await sizeDto.MainImage.CopyToAsync(ms);
-                    string url = await imageService.UploadAsync(ms.ToArray(), sizeDto.MainImage.FileName, "bouquets");
-
-                    bouquetSize.BouquetImages.Add(new BouquetImage
-                    {
-                        BouquetId = bouquet.Id,
-                        SizeId = sizeDto.SizeId,
-                        ImageUrl = url,
-                        Position = 1,
-                        IsMain = true,
-                        Id = Guid.Empty // Force Added state
-                    });
+                     var currentMainImage = sizeDto.MainImage;
+                     var task = Task.Run(async () =>
+                     {
+                         using var stream = currentMainImage.OpenReadStream();
+                         string url = await imageService.UploadAsync(stream, currentMainImage.FileName, "bouquets");
+                         
+                         lock (bouquetSize.BouquetImages)
+                         {
+                             bouquetSize.BouquetImages.Add(new BouquetImage
+                             {
+                                 BouquetId = bouquet.Id,
+                                 SizeId = sizeDto.SizeId,
+                                 ImageUrl = url,
+                                 Position = 1,
+                                 IsMain = true,
+                                 Id = Guid.Empty
+                             });
+                         }
+                     });
+                     uploadTasks.Add(task);
                 }
 
-                short position = 2;
+                short positionCounter = 2;
                 foreach (var img in sizeDto.AdditionalImages)
                 {
-                    using var ms = new MemoryStream();
-                    await img.CopyToAsync(ms);
-                    string url = await imageService.UploadAsync(ms.ToArray(), img.FileName, "bouquets");
-
-                    bouquetSize.BouquetImages.Add(new BouquetImage
+                    var currentImg = img;
+                    var currentPos = positionCounter++;
+                    
+                    var task = Task.Run(async () =>
                     {
-                        BouquetId = bouquet.Id,
-                        SizeId = sizeDto.SizeId,
-                        ImageUrl = url,
-                        Position = position,
-                        IsMain = false,
-                        Id = Guid.Empty // Force Added state
+                        using var stream = currentImg.OpenReadStream();
+                        string url = await imageService.UploadAsync(stream, currentImg.FileName, "bouquets");
+
+                        lock (bouquetSize.BouquetImages)
+                        {
+                            bouquetSize.BouquetImages.Add(new BouquetImage
+                            {
+                                BouquetId = bouquet.Id,
+                                SizeId = sizeDto.SizeId,
+                                ImageUrl = url,
+                                Position = currentPos,
+                                IsMain = false,
+                                Id = Guid.Empty
+                            });
+                        }
                     });
-                    position++;
+                    uploadTasks.Add(task);
                 }
 
                 bouquet.BouquetSizes.Add(bouquetSize);
             }
 
+            await Task.WhenAll(uploadTasks);
+
             foreach (var evId in dto.EventIds)
             {
-                bouquet.BouquetEvents.Add(new BouquetEvent
-                {
-                    BouquetId = bouquet.Id,
-                    EventId = evId
-                });
+                bouquet.BouquetEvents.Add(new BouquetEvent{ BouquetId = bouquet.Id, EventId = evId });
             }
 
             foreach (var rId in dto.RecipientIds)
             {
-                bouquet.BouquetRecipients.Add(new BouquetRecipient
-                {
-                    BouquetId = bouquet.Id,
-                    RecipientId = rId
-                });
+                bouquet.BouquetRecipients.Add(new BouquetRecipient { BouquetId = bouquet.Id, RecipientId = rId });
             }
 
             await uow.Bouquets.AddAsync(bouquet, cancellationToken);

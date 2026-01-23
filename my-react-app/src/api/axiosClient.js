@@ -27,7 +27,7 @@ const axiosClient = axios.create({
 // Інтерсептор для додавання Access Token до кожного запиту
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
-  if (token) {
+  if (token && token !== "null" && token !== "undefined") {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

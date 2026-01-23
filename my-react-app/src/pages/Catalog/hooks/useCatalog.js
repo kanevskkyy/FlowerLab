@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import catalogService from "../../../services/catalogService";
 import { useCart } from "../../../context/CartContext";
@@ -14,7 +14,8 @@ export function useCatalog() {
   // --- Derived State from URL ---
   const searchQuery = searchParams.get("search") || "";
   const sortBy = searchParams.get("sortBy") || "popularity";
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const currentPageRaw = parseInt(searchParams.get("page") || "1", 10);
+  const currentPage = isNaN(currentPageRaw) ? 1 : currentPageRaw;
 
   // Parse filters from URL
   const filters = useMemo(() => {
@@ -47,6 +48,7 @@ export function useCatalog() {
   const [loading, setLoading] = useState(false);
 
   const ITEMS_PER_PAGE = 9;
+  const isLoadMoreMode = useRef(false);
 
   // Fetch bouquets from API
   useEffect(() => {
@@ -58,8 +60,23 @@ export function useCatalog() {
           params.Name = searchQuery;
         }
         params.SortBy = sortBy;
-        params.PageSize = ITEMS_PER_PAGE;
-        params.Page = currentPage;
+
+        // Simple Pagination Logic
+        let fetchPage = currentPage;
+        let fetchSize = ITEMS_PER_PAGE;
+
+        // Smart Restoration
+        const viewMode = sessionStorage.getItem("viewMode");
+        const isRestoringAppend =
+          viewMode === "append" && products.length === 0 && currentPage > 1;
+
+        if (isRestoringAppend) {
+          fetchPage = 1;
+          fetchSize = currentPage * ITEMS_PER_PAGE;
+        }
+
+        params.PageSize = fetchSize;
+        params.Page = fetchPage;
 
         if (filters) {
           Object.entries(filters).forEach(([key, value]) => {
@@ -73,66 +90,58 @@ export function useCatalog() {
           });
         }
 
-
         const data = await catalogService.getBouquets(params);
 
         if (data.items) {
-          setProducts(
-            data.items.map((p) => {
-              // Find size with minimum price (ignoring 0 if possible, or just strict min)
-              // Assuming price > 0 is valid.
-              let minPriceSize = null;
-              if (p.sizes && p.sizes.length > 0) {
-                // Sort by price ascending
-                const sortedSizes = [...p.sizes].sort(
-                  (a, b) => a.price - b.price,
-                );
-                minPriceSize = sortedSizes[0];
-              }
+          const mappedItems = data.items.map((p) => {
+            let minPriceSize = null;
+            if (p.sizes && p.sizes.length > 0) {
+              const sortedSizes = [...p.sizes].sort(
+                (a, b) => a.price - b.price,
+              );
+              minPriceSize = sortedSizes[0];
+            }
 
-              return {
-                id: p.id,
-                bouquetId: p.id,
-                sizeId: minPriceSize ? minPriceSize.sizeId : null,
-                sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
-                title: p.name,
-                // Fallback Price Strategy
-                price: minPriceSize
-                  ? `${minPriceSize.price} ₴`
-                  : `${p.price} ₴`,
-                img: p.mainPhotoUrl,
-              };
-            }),
-          );
+            return {
+              id: p.id,
+              bouquetId: p.id,
+              sizeId: minPriceSize ? minPriceSize.sizeId : null,
+              sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
+              title: p.name,
+              price: minPriceSize ? `${minPriceSize.price} ₴` : `${p.price} ₴`,
+              img: p.mainPhotoUrl,
+            };
+          });
+
+          setProducts((prev) => {
+
+            if (currentPage === 1 || prev.length === 0 || isRestoringAppend) {
+              return mappedItems;
+            }
+
+            if (isLoadMoreMode.current) {
+              // Append
+              const existingIds = new Set(prev.map((p) => p.id));
+              const uniqueNewItems = mappedItems.filter(
+                (p) => !existingIds.has(p.id),
+              );
+              return [...prev, ...uniqueNewItems];
+            }
+
+            // Replace
+            return mappedItems;
+          });
+
           setTotalProducts(data.totalCount);
-          setTotalPages(data.totalPages);
+          setTotalPages(Math.ceil(data.totalCount / ITEMS_PER_PAGE));
         } else {
-          const items = Array.isArray(data) ? data : [];
-          setProducts(
-            items.map((p) => {
-              let minPriceSize = null;
-              if (p.sizes && p.sizes.length > 0) {
-                const sortedSizes = [...p.sizes].sort(
-                  (a, b) => a.price - b.price,
-                );
-                minPriceSize = sortedSizes[0];
-              }
-              return {
-                id: p.id,
-                bouquetId: p.id,
-                sizeId: minPriceSize ? minPriceSize.sizeId : null,
-                sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
-                title: p.name,
-                // Fallback Price Strategy
-                price: minPriceSize
-                  ? `${minPriceSize.price} ₴`
-                  : `${p.price} ₴`,
-                img: p.mainPhotoUrl,
-              };
-            }),
-          );
-          setTotalProducts(items.length);
-          setTotalPages(1);
+          // Handle empty/fallback
+          if (currentPage === 1) {
+            setProducts([]);
+            setTotalProducts(0);
+            setTotalPages(1);
+          }
+          // if page > 1 and no items, keeps previous.
         }
       } catch (error) {
         console.error("Failed to fetch bouquets:", error);
@@ -150,7 +159,7 @@ export function useCatalog() {
     setSearchParams((prev) => {
       if (term) prev.set("search", term);
       else prev.delete("search");
-      prev.set("page", "1"); // Reset to page 1
+      prev.set("page", "1");
       return prev;
     });
   };
@@ -173,18 +182,14 @@ export function useCatalog() {
 
   const applyFilters = (newFilters) => {
     setSearchParams((prev) => {
-      // Clear old filter keys first (to avoid appending if we want to replace)
-      // Since getAll returns array, we can't easily "replace" without deleting first in some routers,
-      // but react-router-dom's set/delete works fine.
-
-      // Reset Page
       prev.set("page", "1");
+      // ... existing logic ...
+      if (newFilters.minPrice) prev.set("minPrice", newFilters.minPrice);
+      else prev.delete("minPrice");
 
-      // 1. Max Price
       if (newFilters.maxPrice) prev.set("maxPrice", newFilters.maxPrice);
       else prev.delete("maxPrice");
 
-      // 2. Arrays: helper to set or delete
       const updateArrayParam = (key, values) => {
         prev.delete(key);
         if (values && values.length > 0) {
@@ -200,7 +205,7 @@ export function useCatalog() {
 
       return prev;
     });
-    setFilterOpen(false); // Close menu
+    setFilterOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -212,12 +217,16 @@ export function useCatalog() {
 
   const handleLoadMore = () => {
     if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      isLoadMoreMode.current = true;
+      sessionStorage.setItem("viewMode", "append");
+      setCurrentPage(currentPage + 1);
+      // Removed window.scrollTo to prevent jumping up
     }
   };
 
   const goToPage = (page) => {
+    isLoadMoreMode.current = false;
+    sessionStorage.setItem("viewMode", "replace");
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

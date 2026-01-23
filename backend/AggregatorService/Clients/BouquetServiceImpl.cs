@@ -30,5 +30,10 @@ namespace AggregatorService.Clients
 
             return aggregatedDto;
         }
+
+        public async Task<GetBouquetsResponse> GetBouquetsAsync(GetBouquetsRequest request)
+        {
+            return await bouquetGrpcServiceClient.GetBouquetsAsync(request);
+        }
     }
 }

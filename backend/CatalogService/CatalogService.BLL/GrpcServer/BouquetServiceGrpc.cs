@@ -25,6 +25,69 @@ namespace CatalogService.BLL.GrpcServer
             return Map(bouquet);
         }
 
+        public override async Task<GetBouquetsResponse> GetBouquets(GetBouquetsRequest request, ServerCallContext context)
+        {
+            var query = new CatalogService.Domain.QueryParametrs.BouquetQueryParameters
+            {
+                Page = request.Page > 0 ? request.Page : 1,
+                PageSize = request.PageSize > 0 ? request.PageSize : 9,
+                SortBy = request.SortBy,
+                Name = request.Name,
+                MinPrice = request.MinPrice > 0 ? (decimal?)request.MinPrice : null,
+                MaxPrice = request.MaxPrice > 0 ? (decimal?)request.MaxPrice : null,
+                FlowerIds = request.FlowerIds?.Select(Guid.Parse).ToList(),
+                EventIds = request.EventIds?.Select(Guid.Parse).ToList(),
+                RecipientIds = request.RecipientIds?.Select(Guid.Parse).ToList(),
+                SizeIds = request.SizeIds?.Select(Guid.Parse).ToList(),
+                Quantities = request.Quantities?.ToList()
+            };
+
+            var result = await bouquetService.GetAllAsync(query);
+
+            var response = new GetBouquetsResponse
+            {
+                TotalCount = result.TotalCount,
+                TotalPages = result.TotalPages,
+                CurrentPage = result.CurrentPage
+            };
+
+            response.Items.AddRange(result.Items.Select(b => 
+            {
+                var model = new BouquetSimpleModel
+                {
+                    Id = b.Id.ToString(),
+                    Name = b.Name,
+                    Price = (double)b.Price,
+                    MainPhotoUrl = b.MainPhotoUrl
+                };
+
+                model.Sizes.AddRange(b.Sizes.Select(s => new BouquetSizeModel
+                {
+                    SizeId = s.SizeId.ToString(),
+                    SizeName = s.SizeName,
+                    Price = (double)s.Price,
+                    MaxAssemblableCount = s.MaxAssemblableCount,
+                    IsAvailable = s.IsAvailable,
+                    Flowers =
+                    {
+                        s.Flowers.Select(f => new FlowerInBouquetModel
+                        {
+                            Id = f.Id.ToString(),
+                            Name = f.Name,
+                            Quantity = f.Quantity
+                        })
+                    },
+                    // Images - skipping for simple list if not needed, but Proto has it required? No, repeated.
+                    // If frontend catalog grid needs images on hover, we might need them.
+                    // Assuming list view mainly uses MainPhotoUrl.
+                }));
+                
+                return model;
+            }));
+
+            return response;
+        }
+
 
         private BouquetResponse Map(BouquetDto dto)
         {

@@ -20,57 +20,19 @@ export function useCheckOut({ orderData }) {
   const handleCompletePayment = async () => {
     setLoading(true);
     try {
-      // 1. Create Order
-      // 1. Create Order
-      // Strip frontend-only fields (total, paymentMethod, paymentDetails etc.)
-      const {
-        total,
-        paymentMethod,
-        paymentDetails,
-        cartItems,
-        selectedGifts,
-        isCardAdded,
-        deliveryAddressText,
-        shopAddressText,
-        ...validOrderDto
-      } = orderData;
+      let orderId = orderData.id;
+      let guestToken = orderData.guestToken;
 
-      // Validate Items have SizeId (Critical for backend)
-      // Filter out invalid items (missing SizeId)
-      const validItems = [];
-      const invalidItems = [];
-      validOrderDto.items?.forEach((item) => {
-        if (item.sizeId) {
-          validItems.push(item);
-        } else {
-          invalidItems.push(item);
-        }
-      });
-
-      if (invalidItems.length > 0) {
-        console.warn("Filtered out items without SizeId:", invalidItems);
-        toast("Some items were removed due to missing size information.", {
-          icon: "⚠️",
-        });
-      }
-
-      if (validItems.length === 0) {
-        toast.error("No valid items to checkout.");
+      if (!orderId) {
+        toast.error("Order ID is missing. Please restart checkout.");
         setLoading(false);
         return;
       }
 
-      const payload = {
-        ...validOrderDto,
-        items: validItems,
-      };
-
-      const newOrder = await catalogService.createOrder(payload);
-
       // 2. Get Payment URL
-      const { paymentUrl } = await catalogService.payOrder(newOrder.id);
+      const { paymentUrl } = await catalogService.payOrder(orderId, guestToken);
 
-      // 3. Redirect to LiqPay
+      // 4. Redirect to LiqPay
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {

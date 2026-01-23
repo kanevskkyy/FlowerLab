@@ -82,14 +82,11 @@
   width: 35px;
   height: 35px;
   cursor: pointer;
-  filter: grayscale(100%) opacity(0.3); /* Default gray */
   transition: all 0.2s ease;
 }
 
 /* Hover or Selected state: Pink */
 .star-icon.filled {
-  filter: invert(56%) sepia(36%) saturate(692%) hue-rotate(275deg)
-    brightness(89%) contrast(85%); /* #c86aac */
   transform: scale(1.1);
 }
 
@@ -100,7 +97,7 @@
   border-radius: 12px;
   font-family: inherit;
   font-size: 15px;
-  resize: vertical;
+  resize: none;
   min-height: 100px;
   box-sizing: border-box;
 }

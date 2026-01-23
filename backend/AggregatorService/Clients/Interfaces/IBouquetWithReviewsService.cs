@@ -5,5 +5,6 @@ namespace AggregatorService.Clients.Interfaces
     public interface IBouquetWithReviewsService
     {
         Task<BouquetInfoWithReviewsDTO> GetAggegatedBouquetInfo(Guid bouquetId);
+        Task<GetBouquetsResponse> GetBouquetsAsync(GetBouquetsRequest request);
     }
 }

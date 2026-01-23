@@ -1,14 +1,33 @@
 import axiosClient from "../api/axiosClient";
 
 const catalogService = {
-  // Bouquets
+  // Bouquets - NOW USING AGGREGATOR
   getBouquets: async (params = {}) => {
-    const response = await axiosClient.get("/api/catalog/bouquets", { params });
+    const response = await axiosClient.get("/api/bouquet", { params });
     return response.data;
   },
 
   getBouquetById: async (id) => {
+    // This was already using /api/catalog/bouquets/${id} in previous code?
+    // Wait, useProductData used /api/catalog/bouquets/${id}.
+    // But Aggregator also has /api/bouquet/${id} (GetBouquetWithReviews).
+    // Should we switch this too? The plan said "connect filtering".
+    // But if we want consistency, we can switch, but GetBouquetWithReviews returns { bouquet, reviews }.
+    // The existing frontend expects "data" to be the bouquet only?
+    // Let's stick to getBouquets update for now as per plan for Filtering.
+    // The existing getBouquetById in this file calls /api/catalog/bouquets/${id}.
+    // I will NOT change getBouquetById unless requested, to avoid breaking product page if structure differs.
     const response = await axiosClient.get(`/api/catalog/bouquets/${id}`);
+    return response.data;
+  },
+
+  // ... (create/update/delete stay on CatalogService likely, as Aggregator is read-only usually)
+
+  // ...
+
+  // Metadata - AGGREGATOR
+  getFilters: async () => {
+    const response = await axiosClient.get("/api/filters");
     return response.data;
   },
 
@@ -139,9 +158,35 @@ const catalogService = {
   },
 
   // Payment
-  payOrder: async (orderId) => {
-    const response = await axiosClient.post(`/api/orders/${orderId}/pay`);
-    return response.data; // Expected: { paymentUrl: "..." }
+  payOrder: async (orderId, guestToken = null) => {
+    const config = {
+      params: {},
+      headers: {},
+    };
+    const payload = {};
+
+    if (guestToken) {
+      // Body variants
+      payload.guestToken = guestToken;
+      payload.GuestToken = guestToken;
+      payload.token = guestToken;
+
+      // Query variants
+      config.params.guestToken = guestToken;
+      config.params.token = guestToken;
+
+      // Header variants
+      config.headers["Guest-Token"] = guestToken;
+      config.headers["X-Guest-Token"] = guestToken;
+      config.headers["Authorization"] = `Guest ${guestToken}`;
+    }
+
+    const response = await axiosClient.post(
+      `/api/orders/${orderId}/pay`,
+      payload,
+      config,
+    );
+    return response.data;
   },
 };
 

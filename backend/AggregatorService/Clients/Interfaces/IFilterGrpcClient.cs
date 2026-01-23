@@ -1,7 +1,9 @@
-﻿namespace AggregatorService.Clients.Interfaces
+﻿using AggregatorService.DTOs;
+
+namespace AggregatorService.Clients.Interfaces
 {
     public interface IFilterGrpcClient
     {
-        Task<FilterResponse> GetAllFiltersAsync();
+        Task<FilterResponseDto?> GetAllFiltersAsync();
     }
 }

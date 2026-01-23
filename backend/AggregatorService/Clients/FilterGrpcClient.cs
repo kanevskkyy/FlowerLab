@@ -1,4 +1,5 @@
 ﻿using AggregatorService.Clients.Interfaces;
+using AggregatorService.DTOs;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using shared.cache;
@@ -12,7 +13,7 @@ namespace AggregatorService.Clients
         private FilterService.FilterServiceClient _filterServiceClient;
         private ILogger<FilterGrpcClient> _logger;
         private IEntityCacheService _cache;
-        private IEntityCacheInvalidationService<FilterResponse> _cacheInvalidation;
+        private IEntityCacheInvalidationService<FilterResponseDto> _cacheInvalidation;
 
         private const string CACHE_KEY = "filters:all";
 
@@ -20,7 +21,7 @@ namespace AggregatorService.Clients
             FilterService.FilterServiceClient filterServiceClient,
             ILogger<FilterGrpcClient> logger,
             IEntityCacheService cache,
-            IEntityCacheInvalidationService<FilterResponse> cacheInvalidation)
+            IEntityCacheInvalidationService<FilterResponseDto> cacheInvalidation)
         {
             _filterServiceClient = filterServiceClient;
             _logger = logger;
@@ -28,19 +29,59 @@ namespace AggregatorService.Clients
             _cacheInvalidation = cacheInvalidation;
         }
 
-        public async Task<FilterResponse?> GetAllFiltersAsync()
+        public async Task<FilterResponseDto?> GetAllFiltersAsync()
         {
+            // Note: Changed cache key to force refresh or use different key if structure changed significantly
+            // But since we are changing type from FilterResponse to FilterResponseDto, we should use a new key
+            // or rely on Redis overwritting it (if it doesn't crash on deserialization mismatch).
+            // Using a new key "filters:dto:all" is safer.
             return await _cache.GetOrSetAsync(
-                CACHE_KEY,
+                "filters:dto:all",
                 async () =>
                 {
                     try
                     {
                         var call = _filterServiceClient.GetAllFiltersAsync(new FilterEmptyRequest());
-                        FilterResponse filterResponse = await call.ResponseAsync;
+                        FilterResponse filters = await call.ResponseAsync;
 
                         _logger.LogInformation("Filters fetched from CatalogService via gRPC.");
-                        return filterResponse;
+                        
+                        // Map to DTO
+                        return new AggregatorService.DTOs.FilterResponseDto
+                        {
+                            PriceRange = filters.PriceRange != null ? new AggregatorService.DTOs.FilterPriceRangeDto
+                            {
+                                MinPrice = filters.PriceRange.MinPrice,
+                                MaxPrice = filters.PriceRange.MaxPrice
+                            } : null,
+                            
+                            SizeResponseList = filters.SizeResponseList?.Sizes?.Select(s => new AggregatorService.DTOs.FilterSizeDto 
+                            {
+                                Id = s.Id,
+                                Name = s.Name
+                            }).ToList() ?? new List<AggregatorService.DTOs.FilterSizeDto>(),
+
+                            EventResponseList = filters.EventResponseList?.Events?.Select(e => new AggregatorService.DTOs.FilterEventDto 
+                            {
+                                Id = e.Id,
+                                Name = e.Name
+                            }).ToList() ?? new List<AggregatorService.DTOs.FilterEventDto>(),
+                            
+                            ReceivmentResponseList = filters.ReceivmentResponseList?.Receivments?.Select(r => new AggregatorService.DTOs.FilterRecipientDto 
+                            {
+                                Id = r.Id,
+                                Name = r.Name
+                            }).ToList() ?? new List<AggregatorService.DTOs.FilterRecipientDto>(),
+                            
+                            FlowerResponseList = filters.FlowerResponseList?.Flowers?.Select(f => new AggregatorService.DTOs.FilterFlowerDto 
+                            {
+                                Id = f.Id,
+                                Name = f.Name,
+                                Color = f.Color,
+                                Description = f.Description,
+                                Quantity = f.Quantity
+                            }).ToList() ?? new List<AggregatorService.DTOs.FilterFlowerDto>()
+                        };
                     }
                     catch (RpcException ex)
                     {

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import { useCart } from "../../context/CartContext";
-import PaymentTimer from "../../components/PaymentTimer/PaymentTimer";
 import orderService from "../../services/orderService";
 import "./OrderSuccess.css";
 
@@ -25,6 +24,7 @@ const OrderSuccess = () => {
 
   const [orderDate, setOrderDate] = useState(null);
   const [orderStatus, setOrderStatus] = useState(null);
+  const [order, setOrder] = useState(null);
 
   useEffect(() => {
     // Only clear cart if we came from our own checkout (state present)
@@ -46,34 +46,53 @@ const OrderSuccess = () => {
 
     const fetchOrderData = async () => {
       try {
-        const order = await orderService.getById(orderNumber);
-        if (order) {
-          setOrderDate(order.createdAt);
-          setOrderStatus(order.status?.name || order.status);
+        const fetchedOrder = await orderService.getById(orderNumber);
+        if (fetchedOrder) {
+          setOrder(fetchedOrder);
+          setOrderDate(fetchedOrder.createdAt);
+          const status = fetchedOrder.status?.name || fetchedOrder.status;
+          setOrderStatus(status);
+
+          // Redirect to Checkout if AwaitingPayment
+          if (status === "AwaitingPayment") {
+            navigate("/checkout", {
+              state: {
+                orderData: {
+                  id: fetchedOrder.id,
+                  total: fetchedOrder.totalPrice,
+                  createdAt: fetchedOrder.createdAt,
+                  guestToken: fetchedOrder.guestToken,
+                },
+              },
+              replace: true, // Replacing history to avoid back loop
+            });
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch order details for timer", error);
+        console.error("Failed to fetch order details", error);
       }
     };
 
     fetchOrderData();
-  }, [orderNumber, location.state]);
-
-  // Retry Payment Handler
-  const handleRetryPayment = async () => {
-    try {
-      // Try catalogService if orderService doesn't have it (based on useCheckOut)
-      const { paymentUrl } = await import("../../services/catalogService").then(
-        (m) => m.default.payOrder(orderNumber),
-      );
-      if (paymentUrl) window.location.href = paymentUrl;
-    } catch (error) {
-      console.error("Failed to retry payment", error);
-    }
-  };
+  }, [orderNumber, location.state, navigate]);
 
   const isFailure =
     orderStatus === "PaymentFailed" || orderStatus === "Cancelled";
+
+  const handleRetryPayment = () => {
+    if (order) {
+      navigate("/checkout", {
+        state: {
+          orderData: {
+            id: order.id,
+            total: order.totalPrice,
+            createdAt: order.createdAt,
+            guestToken: order.guestToken,
+          },
+        },
+      });
+    }
+  };
 
   return (
     <div className="page-wrapper success-page">
@@ -147,26 +166,6 @@ const OrderSuccess = () => {
             <p className="order-number-text">
               Order number: <strong>#{orderNumber}</strong>
             </p>
-          )}
-
-          {/* Payment Timer if AwaitingPayment */}
-          {orderStatus === "AwaitingPayment" && orderDate && (
-            <>
-              <PaymentTimer
-                createdAt={orderDate}
-                onExpire={() => window.location.reload()}
-              />
-              <button
-                className="continue-btn retry-btn"
-                onClick={handleRetryPayment}
-                style={{
-                  marginTop: "1rem",
-                  marginBottom: "1rem",
-                  backgroundColor: "#4CAF50",
-                }}>
-                Pay Now
-              </button>
-            </>
           )}
 
           {isFailure && (

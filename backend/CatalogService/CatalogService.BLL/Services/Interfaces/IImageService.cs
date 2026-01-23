@@ -10,6 +10,7 @@ namespace CatalogService.BLL.Services.Interfaces
     {
         
         Task<string> UploadAsync(byte[] fileBytes, string fileName, string folder);
+        Task<string> UploadAsync(Stream stream, string fileName, string folder);
         Task<bool> DeleteAsync(string publicId);
     }
 }

@@ -50,5 +50,10 @@ namespace CatalogService.DAL.Repositories.Implementations
         {
             return await dbSet.AnyAsync(predicate, cancellationToken);
         }
+
+        public async Task<IEnumerable<T>> GetListAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        {
+            return await dbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
+        }
     }
 }

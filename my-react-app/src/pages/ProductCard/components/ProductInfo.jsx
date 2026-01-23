@@ -20,8 +20,36 @@ const ProductInfo = ({
 
       <div className="info-block">
         <h3>Composition:</h3>
-        <p>{product.composition}</p>
+        <p>{product.compositions?.[selectedSize] || product.composition}</p>
       </div>
+
+      {/* Events Tags */}
+      {product.events && product.events.length > 0 && (
+        <div className="info-block">
+          <h3>Events:</h3>
+          <div className="info-tags">
+            {product.events.map((tag) => (
+              <span key={tag} className="info-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recipients Tags */}
+      {product.recipients && product.recipients.length > 0 && (
+        <div className="info-block">
+          <h3>For Who:</h3>
+          <div className="info-tags">
+            {product.recipients.map((tag) => (
+              <span key={tag} className="info-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Size Selection */}
       <div className="size-section">

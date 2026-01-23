@@ -1,4 +1,5 @@
 ﻿using AggregatorService.Clients.Interfaces;
+using AggregatorService.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AggregatorService.Controllers
@@ -17,16 +18,26 @@ namespace AggregatorService.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<FilterResponse>> GetAllFilters(CancellationToken ct)
+        public async Task<ActionResult<FilterResponseDto>> GetAllFilters(CancellationToken ct)
         {
-            FilterResponse? filters = await filterClient.GetAllFiltersAsync();
-            if (filters == null)
+            try
             {
-                logger.LogWarning("Не вдалося отримати фільтри");
-                return StatusCode(500, "Не вдалося отримати фільтри");
-            }
+                // Client now returns DTO (cached or fetched & mapped)
+                var filters = await filterClient.GetAllFiltersAsync();
+                
+                if (filters == null)
+                {
+                    logger.LogWarning("Не вдалося отримати фільтри");
+                    return StatusCode(500, "Не вдалося отримати фільтри");
+                }
 
-            return Ok(filters);
+                return Ok(filters);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error fetching filters");
+                return StatusCode(500, new { message = "Error fetching filters", details = ex.Message });
+            }
         }
     }
 }

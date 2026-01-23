@@ -75,7 +75,20 @@ const DeliveryInfo = ({
                     checked={selectedAddressId === addr.id}
                     readOnly
                   />
-                  <span>{addr.text}</span>
+                  <span>
+                    {addr.text}
+                    {String(addr.id).startsWith("temp-") && (
+                      <span
+                        style={{
+                          fontSize: "0.85em",
+                          color: "#999",
+                          marginLeft: "6px",
+                          fontStyle: "italic",
+                        }}>
+                        (New)
+                      </span>
+                    )}
+                  </span>
                 </div>
               ))
             ) : (
