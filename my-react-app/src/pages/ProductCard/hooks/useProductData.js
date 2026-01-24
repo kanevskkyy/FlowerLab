@@ -62,15 +62,36 @@ export const useProductData = (id) => {
             return acc;
           }, {}),
           availableSizes: data.sizes.map((s) => s.sizeName),
+          stock: data.sizes.reduce((acc, size) => {
+            acc[size.sizeName] = {
+              max: size.maxAssemblableCount,
+              available: size.isAvailable,
+            };
+            return acc;
+          }, {}),
           events: data.events?.map((e) => e.name) || [],
           recipients: data.recipients?.map((r) => r.name) || [],
         };
 
         setProduct(mappedProduct);
-        // Default to M if available, else first size
-        const defaultSize = mappedProduct.availableSizes.includes("M")
-          ? "M"
-          : mappedProduct.availableSizes[0];
+
+        // Find first available size
+        const firstAvailable = mappedProduct.availableSizes.find(
+          (s) => mappedProduct.stock[s]?.max > 0,
+        );
+
+        // Default to M if available, else first available, else first listed
+        let defaultSize = mappedProduct.availableSizes[0];
+
+        if (
+          mappedProduct.availableSizes.includes("M") &&
+          mappedProduct.stock["M"]?.max > 0
+        ) {
+          defaultSize = "M";
+        } else if (firstAvailable) {
+          defaultSize = firstAvailable;
+        }
+
         setSelectedSize(defaultSize);
       } catch (error) {
         console.error("Failed to fetch product details:", error);
