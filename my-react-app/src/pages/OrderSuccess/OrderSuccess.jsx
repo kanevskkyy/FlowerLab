@@ -32,14 +32,8 @@ const OrderSuccess = () => {
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
-    // Check if we have a pending order ID in localStorage
     const pendingOrderId = localStorage.getItem("pendingOrder");
 
-    // Clear cart if:
-    // 1. We came from our own checkout (state present)
-    // 2. OR The loaded order ID matches the one we just placed (LiqPay callback)
-    // 2. OR The loaded order ID matches the one we just placed (LiqPay callback)
-    // Check for pending order match
     const isMatchingPending =
       pendingOrderId &&
       orderNumber &&
@@ -74,7 +68,6 @@ const OrderSuccess = () => {
           const status = fetchedOrder.status?.name || fetchedOrder.status;
           setOrderStatus(status);
 
-          // Redirect to Checkout if AwaitingPayment
           if (status === "AwaitingPayment") {
             navigate("/checkout", {
               state: {
@@ -85,7 +78,7 @@ const OrderSuccess = () => {
                   guestToken: fetchedOrder.guestToken,
                 },
               },
-              replace: true, // Replacing history to avoid back loop
+              replace: true,
             });
           }
         }
@@ -186,12 +179,6 @@ const OrderSuccess = () => {
           <p className="email-note">
             You will receive an email with the order details.
           </p>
-
-          {orderNumber && (
-            <p className="order-number-text">
-              Order number: <strong>#{orderNumber}</strong>
-            </p>
-          )}
 
           {isFailure && (
             <button
