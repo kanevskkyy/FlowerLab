@@ -4,6 +4,7 @@ using OrderService.BLL.DTOs.OrderDTOs;
 using OrderService.BLL.Services.Interfaces;
 using OrderService.Domain.QueryParams;
 using Microsoft.AspNetCore.Authorization;
+using OrderService.DAL.Helpers;
 
 namespace OrderService.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace OrderService.API.Controllers
         [HttpGet("{id:guid}", Name = "GetOrderById")]
         public async Task<IActionResult> GetById(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
             var role = User.FindFirstValue(ClaimTypes.Role);
 
@@ -44,7 +45,7 @@ namespace OrderService.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] OrderCreateDto dto, CancellationToken cancellationToken)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
             var firstName = User.FindFirstValue(ClaimTypes.GivenName);
             var lastName = User.FindFirstValue(ClaimTypes.Surname);
@@ -69,7 +70,7 @@ namespace OrderService.API.Controllers
         [HttpGet("discount-eligibility")]
         public async Task<IActionResult> CheckDiscountEligibility(CancellationToken cancellationToken)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
             Console.WriteLine($"[CheckDiscount] User ID String: '{userIdString}'"); 
             
             if (string.IsNullOrEmpty(userIdString))
@@ -85,10 +86,18 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("my")]
+        [Authorize]
         public async Task<IActionResult> GetMyOrders([FromQuery] OrderSpecificationParameters parameters, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+                               ?? User.FindFirstValue("sub");
+            
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
+
+            if (userId == null && guestToken == null)
+            {
+                return Ok(new PagedList<OrderSummaryDto>());
+            }
 
             var pagedOrders = await orderService.GetMyOrdersAsync(userId, guestToken, parameters, cancellationToken);
             return Ok(pagedOrders);
@@ -123,7 +132,7 @@ namespace OrderService.API.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
             var role = User.FindFirstValue(ClaimTypes.Role);
 

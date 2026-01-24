@@ -38,6 +38,13 @@
   z-index: 10;
 }
 
+@media (max-width: 768px) {
+  .cabinet-sidebar {
+    top: 60px;
+    height: calc(100vh - 60px);
+  }
+}
+
 .cabinet-nav-item {
   width: 100%;
   border: none;
@@ -266,19 +273,26 @@
 }
 
 /* === ОНОВЛЕНО: МОБІЛЬНА ВЕРСІЯ === */
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .cabinet-shell {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr; /* Фікс для розтягування сайдбару */
+    grid-template-rows: auto 1fr;
   }
 
   .cabinet-sidebar {
+    position: sticky;
+    top: 60px;
+    height: auto;
     flex-direction: row;
-    gap: 8px;
+    gap: 50px;
     overflow-x: auto;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px;
+    justify-content: center;
+    padding: 10px 16px;
+    border-right: none;
+    border-bottom: 1px solid #efe3ea;
+    background: #f7f1f5;
+    z-index: 100;
 
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -295,8 +309,8 @@
 
   .cabinet-nav-item,
   .cabinet-signout {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     padding: 0;
     justify-content: center;
     border-radius: 50%;
@@ -320,6 +334,10 @@
 
   .cabinet-sidebar-spacer {
     display: none;
+  }
+
+  .cabinet-panel {
+    padding: 24px 16px 40px;
   }
 
   .cabinet-grid-2 {
