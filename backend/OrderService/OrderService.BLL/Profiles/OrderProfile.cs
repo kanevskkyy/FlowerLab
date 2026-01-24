@@ -28,7 +28,9 @@ namespace OrderService.BLL.Profiles
 
             CreateMap<Order, OrderSummaryDto>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
-                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
+                .ForMember(dest => dest.OrderGifts, opt => opt.MapFrom(src => src.OrderGifts)) // Map gifts
+                .ForMember(dest => dest.GiftMessage, opt => opt.MapFrom(src => src.GiftMessage));
 
             CreateMap<Order, OrderDetailDto>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))

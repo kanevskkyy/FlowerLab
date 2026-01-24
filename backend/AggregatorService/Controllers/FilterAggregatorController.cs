@@ -22,7 +22,6 @@ namespace AggregatorService.Controllers
         {
             try
             {
-                // Client now returns DTO (cached or fetched & mapped)
                 var filters = await filterClient.GetAllFiltersAsync();
                 
                 if (filters == null)

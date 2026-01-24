@@ -267,7 +267,8 @@ export const useOrderPlacement = () => {
   }, [checkEligibility]);
 
   // === Calculations ===
-  const subtotal = cartItems.reduce((sum, item) => {
+  // === Calculations ===
+  const cartSum = cartItems.reduce((sum, item) => {
     const price =
       typeof item.price === "string"
         ? parseFloat(item.price.replace(/[^\d.]/g, ""))
@@ -276,15 +277,22 @@ export const useOrderPlacement = () => {
     return sum + price * qty;
   }, 0);
 
-  //const deliveryCost = deliveryType === "delivery" ? 100 : 0;
-  const discount = isEligibleForDiscount ? subtotal * 0.1 : 0;
-
   const giftsTotal = selectedGifts.reduce((sum, id) => {
     const gift = gifts.find((g) => g.id === id);
     return sum + (gift?.price || 0);
   }, 0);
+
   const cardFee = isCardAdded ? 50 : 0;
-  const total = subtotal - discount + giftsTotal + cardFee;
+
+  // Exposed "Subtotal" now includes everything
+  const subtotal = cartSum + giftsTotal + cardFee;
+
+  // Discount applies to the total sum (bouquets + gifts + card)
+  const discount = isEligibleForDiscount ? subtotal * 0.1 : 0;
+
+  // Total is Subtotal - Discount
+  // (Delivery is separate usually? There was commented out deliveryCost)
+  const total = subtotal - discount;
 
   // === Handlers ===
   const toggleGift = (giftId) => {
@@ -427,8 +435,8 @@ export const useOrderPlacement = () => {
     try {
       const response = await catalogService.createOrder(finalOrderData);
 
-      // Clear cart immediately as order is created/reserved
-      clearCart();
+      // Save pending order ID to clear cart later on success
+      localStorage.setItem("pendingOrder", response.id);
 
       toast.success("Order confirmed!");
 

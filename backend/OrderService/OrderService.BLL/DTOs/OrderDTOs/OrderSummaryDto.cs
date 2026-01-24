@@ -18,6 +18,8 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public decimal TotalPrice { get; set; }
         public DateTime CreatedAt { get; set; }
         public IEnumerable<OrderItemReadDto> Items { get; set; } = new List<OrderItemReadDto>();
+        public IEnumerable<OrderGiftReadDto> OrderGifts { get; set; } = new List<OrderGiftReadDto>();
+        public string? GiftMessage { get; set; }
         public OrderStatusReadDto Status { get; set; } = null!;
     }
 

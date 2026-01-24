@@ -38,7 +38,6 @@ namespace AggregatorService.Controllers
 
                 var result = await _bouquetService.GetBouquetsAsync(request);
                 
-                // Map Proto to DTO
                 var responseDto = new BouquetListDto
                 {
                     TotalCount = result.TotalCount,
@@ -71,8 +70,6 @@ namespace AggregatorService.Controllers
             }
             catch (Exception ex)
             {
-                // Simple logging if ILogger is not injected (it wasn't in original file). 
-                // Better to return 500 with message.
                 Console.WriteLine($"[Error] GetBouquets failed: {ex.Message}");
                 return StatusCode(500, new { message = "Error fetching bouquets via Aggregator", details = ex.Message });
             }

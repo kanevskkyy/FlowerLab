@@ -145,6 +145,7 @@ namespace OrderService.BLL.Services
                 await orderStatusCacheInvalidator.InvalidateAllAsync();
             }
 
+
             bool isFirstOrder = false;
             if (userId.HasValue)
             {
@@ -311,69 +312,83 @@ namespace OrderService.BLL.Services
                 var paidStatus = await unitOfWork.OrderStatuses.GetByNameAsync("Pending")
                     ?? throw new NotFoundException("Status 'Pending' was not found");
 
-                order.StatusId = paidStatus.Id;
-                order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-
-                foreach (var orderGift in order.OrderGifts)
+                if (order.Status.Name != "Pending")
                 {
-                    var gift = await unitOfWork.Gifts.GetByIdAsync(orderGift.GiftId);
-                    if (gift != null)
-                    {
-                        if (gift.AvailableCount < orderGift.Count)
-                            throw new ValidationException($"Not enough gifts '{gift.Name}' to complete the order.");
+                    order.StatusId = paidStatus.Id;
+                    order.Status = paidStatus;
+                    order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
 
-                        gift.AvailableCount -= orderGift.Count;
-                        gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-                        unitOfWork.Gifts.Update(gift);
-                        await cacheInvalidationService.InvalidateByIdAsync(gift.Id);
-                    }
+                    await FinalizeOrderAsync(order, cancellationToken);
+
+                    unitOfWork.Orders.Update(order);
+                    await unitOfWork.SaveChangesAsync(cancellationToken);
                 }
-
-                foreach (var reservation in order.Reservations)
-                {
-                    reservation.IsActive = false;
-                    unitOfWork.OrderReservations.Update(reservation);
-                }
-
-                foreach (var giftReservation in order.GiftReservations)
-                {
-                    giftReservation.IsActive = false;
-                    unitOfWork.GiftReservations.Update(giftReservation);
-                }
-
-                unitOfWork.Orders.Update(order);
-                await unitOfWork.SaveChangesAsync(cancellationToken);
-
-                var orderCreatedEvent = new OrderCreatedEvent
-                {
-                    OrderId = order.Id,
-                    Bouquets = order.Items.Select(i => new OrderBouquetItem
-                    {
-                        BouquetId = i.BouquetId,
-                        Count = i.Count
-                    }).ToList()
-                };
-                await publishEndpoint.Publish(orderCreatedEvent, cancellationToken);
-
-                TelegramOrderCreatedEvent telegramOrderCreatedEvent = new TelegramOrderCreatedEvent
-                {
-                    CustomerName = $"{order.UserFirstName} {order.UserLastName}",
-                    OrderId = order.Id,
-                    TotalPrice = order.TotalPrice,
-                };
-                await publishEndpoint.Publish(telegramOrderCreatedEvent, cancellationToken);
-
-                if (order.IsDelivery)
-                {
-                    OrderAddressEvent orderAddressEvent = new OrderAddressEvent()
-                    {
-                        Address = order.DeliveryInformation.Address,
-                        UserId = order.UserId.ToString()
-                    };
-                    await publishEndpoint.Publish(orderAddressEvent, cancellationToken);
-                }
-                await cacheInvalidationService.InvalidateAllAsync();
             }
+        }
+
+        private async Task FinalizeOrderAsync(Order order, CancellationToken cancellationToken)
+        {
+            // 1. Deduct Gift Stock
+            foreach (var orderGift in order.OrderGifts)
+            {
+                var gift = await unitOfWork.Gifts.GetByIdAsync(orderGift.GiftId);
+                if (gift != null)
+                {
+                    if (gift.AvailableCount < orderGift.Count)
+                        throw new ValidationException($"Not enough gifts '{gift.Name}' to complete the order.");
+
+                    gift.AvailableCount -= orderGift.Count;
+                    gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+                    unitOfWork.Gifts.Update(gift);
+                    await cacheInvalidationService.InvalidateByIdAsync(gift.Id);
+                }
+            }
+
+            // 2. Deactivate Reservations
+            foreach (var reservation in order.Reservations)
+            {
+                reservation.IsActive = false;
+                unitOfWork.OrderReservations.Update(reservation);
+            }
+
+            foreach (var giftReservation in order.GiftReservations)
+            {
+                giftReservation.IsActive = false;
+                unitOfWork.GiftReservations.Update(giftReservation);
+            }
+
+            // 3. Publish Events (Flower deduction happens in CatalogService consumer)
+            var orderCreatedEvent = new OrderCreatedEvent
+            {
+                OrderId = order.Id,
+                Bouquets = order.Items.Select(i => new OrderBouquetItem
+                {
+                    BouquetId = i.BouquetId,
+                    SizeId = i.SizeId,
+                    Count = i.Count
+                }).ToList()
+            };
+            await publishEndpoint.Publish(orderCreatedEvent, cancellationToken);
+
+            TelegramOrderCreatedEvent telegramOrderCreatedEvent = new TelegramOrderCreatedEvent
+            {
+                CustomerName = $"{order.UserFirstName} {order.UserLastName}",
+                OrderId = order.Id,
+                TotalPrice = order.TotalPrice,
+            };
+            await publishEndpoint.Publish(telegramOrderCreatedEvent, cancellationToken);
+
+            if (order.IsDelivery && order.DeliveryInformation != null)
+            {
+                OrderAddressEvent orderAddressEvent = new OrderAddressEvent()
+                {
+                    Address = order.DeliveryInformation.Address,
+                    UserId = order.UserId.ToString()
+                };
+                await publishEndpoint.Publish(orderAddressEvent, cancellationToken);
+            }
+
+            await cacheInvalidationService.InvalidateAllAsync();
         }
 
         public async Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid? userId, Guid? guestToken, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
@@ -403,7 +418,16 @@ namespace OrderService.BLL.Services
             if (status == null)
                 throw new NotFoundException($"Order status with ID {dto.StatusId} was not found");
 
+            var oldStatusName = order.Status.Name;
             order.StatusId = dto.StatusId;
+            order.Status = status;
+
+            // Trigger stock deduction and events if status changes to Pending (manual payment confirmation)
+            if (oldStatusName != "Pending" && status.Name == "Pending")
+            {
+                await FinalizeOrderAsync(order, cancellationToken);
+            }
+
             unitOfWork.Orders.Update(order);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -432,6 +456,30 @@ namespace OrderService.BLL.Services
             Console.WriteLine($"[CheckDiscount] Has Successful Orders: {hasSuccessfulOrders}. Eligible: {!hasSuccessfulOrders}");
 
             return !hasSuccessfulOrders;
+        }
+
+        public async Task DeleteAsync(Guid orderId, CancellationToken cancellationToken = default)
+        {
+            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
+                ?? throw new NotFoundException($"Order {orderId} was not found");
+
+            // Option 1: Only allow deleting AwaitingPayment orders
+            // if (order.Status.Name != "AwaitingPayment")
+            //     throw new ValidationException("Only unpaid orders can be deleted.");
+
+            foreach (var reservation in order.Reservations)
+            {
+                unitOfWork.OrderReservations.Delete(reservation);
+            }
+
+            foreach (var giftReservation in order.GiftReservations)
+            {
+                unitOfWork.GiftReservations.Delete(giftReservation);
+                await cacheInvalidationService.InvalidateByIdAsync(giftReservation.GiftId);
+            }
+
+            unitOfWork.Orders.Delete(order);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
     }

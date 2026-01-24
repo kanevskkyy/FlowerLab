@@ -102,21 +102,17 @@ namespace CatalogService.BLL.Services.Implementations
                 throw new BadRequestException("Each size can only be specified once.");
             }
 
-            // --- BULK VALIDATION OPTIMIZATION ---
 
-            // 1. Gather all IDs
             var allSizeIds = dto.Sizes.Select(s => s.SizeId).Distinct().ToList();
             var allEventIds = dto.EventIds.Distinct().ToList();
             var allRecipientIds = dto.RecipientIds.Distinct().ToList();
             var allFlowerIds = dto.Sizes.SelectMany(s => s.FlowerIds).Distinct().ToList();
 
-            // 2. Fetch all existing entities in one go
             var existingSizes = await uow.Sizes.GetListAsync(s => allSizeIds.Contains(s.Id), cancellationToken);
             var existingEvents = await uow.Events.GetListAsync(e => allEventIds.Contains(e.Id), cancellationToken);
             var existingRecipients = await uow.Recipients.GetListAsync(r => allRecipientIds.Contains(r.Id), cancellationToken);
             var existingFlowers = await uow.Flowers.GetListAsync(f => allFlowerIds.Contains(f.Id), cancellationToken);
 
-            // 3. Validate existence in memory
             var loadedSizeIds = existingSizes.Select(s => s.Id).ToHashSet();
             foreach (var sId in allSizeIds)
             {
@@ -147,22 +143,14 @@ namespace CatalogService.BLL.Services.Implementations
                     if (!loadedFlowers.TryGetValue(fId, out var flower))
                         throw new NotFoundException($"Flower {fId} not found.");
 
-                    // Note: This logic assumes we consume from the global stock ONE time per size definition,
-                    // or checking availability. Since this is just a catalog definition, checking availability
-                    // against global stock is tricky if multiple sizes use the same flower.
-                    // The original logic checked: flower.Quantity < requestedQty.
-                    // We keep that check.
                     if (flower.Quantity < sizeDto.FlowerQuantities[i])
                     {
-                         // Optional: Provide Size Name if we wanted to be fancy, but we have the ID.
-                         // For speed, simpler error is acceptable, or look up Name from existingSizes.
                          var sizeName = existingSizes.First(s => s.Id == sizeDto.SizeId).Name;
                          throw new BadRequestException($"Not enough '{flower.Name}' flowers for size {sizeName}. Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
                     }
                 }
             }
 
-            // --- END BULK VALIDATION ---
 
             Bouquet bouquet = new Bouquet
             {
@@ -174,7 +162,6 @@ namespace CatalogService.BLL.Services.Implementations
                 BouquetRecipients = new List<BouquetRecipient>()
             };
 
-            // Main Photo Upload (Streamed)
             if (dto.MainPhoto != null)
             {
                 using var stream = dto.MainPhoto.OpenReadStream();
@@ -354,30 +341,24 @@ namespace CatalogService.BLL.Services.Implementations
                 bouquet.MainPhotoUrl = await imageService.UploadAsync(ms.ToArray(), dto.MainPhoto.FileName, "bouquets");
             }
 
-            // 1. Sync Sizes
             var currentSizeIds = dto.Sizes.Select(s => s.SizeId).ToList();
 
-            // Remove sizes not in DTO
             var sizesToRemove = bouquet.BouquetSizes.Where(bs => !currentSizeIds.Contains(bs.SizeId)).ToList();
             foreach (var sizeToRemove in sizesToRemove)
             {
                 bouquet.BouquetSizes.Remove(sizeToRemove);
             }
 
-            // Update or Add sizes
             foreach (var sizeDto in dto.Sizes)
             {
                 var existingSize = bouquet.BouquetSizes.FirstOrDefault(bs => bs.SizeId == sizeDto.SizeId);
 
                 if (existingSize != null)
                 {
-                    // UPDATE existing size
                     existingSize.Price = sizeDto.Price;
 
-                    // Sync Flowers for this size
                     var currentFlowerIds = sizeDto.FlowerIds;
 
-                    // Remove flowers
                     var flowersToRemove = existingSize.BouquetSizeFlowers
                         .Where(bsf => !currentFlowerIds.Contains(bsf.FlowerId)).ToList();
                     foreach (var f in flowersToRemove)
@@ -385,7 +366,6 @@ namespace CatalogService.BLL.Services.Implementations
                         existingSize.BouquetSizeFlowers.Remove(f);
                     }
 
-                    // Add or Update flowers
                     for (int i = 0; i < sizeDto.FlowerIds.Count; i++)
                     {
                         var fId = sizeDto.FlowerIds[i];
@@ -428,12 +408,12 @@ namespace CatalogService.BLL.Services.Implementations
                                     SizeId = sizeDto.SizeId,
                                     ImageUrl = url,
                                     Position = ++maxPos,
-                                    IsMain = false, // Always add as additional
+                                    IsMain = false,
                                     Id = Guid
-                                        .Empty // IMPORTANT: Force "Added" state to override BaseEntity defaults
+                                        .Empty
                                 };
                                 existingSize.BouquetImages.Add(newImg);
-                                uow.Bouquets.AddImage(newImg); // Explicitly track as Added
+                                uow.Bouquets.AddImage(newImg);
                             }
                         }
 
@@ -446,7 +426,7 @@ namespace CatalogService.BLL.Services.Implementations
                             foreach (var img in imagesToDelete)
                             {
                                 existingSize.BouquetImages.Remove(img);
-                                // Optional: Delete from cloud storage if needed
+
                             }
                         }
                     }
@@ -493,7 +473,7 @@ namespace CatalogService.BLL.Services.Implementations
                             ImageUrl = url,
                             Position = 1,
                             IsMain = true,
-                            Id = Guid.Empty 
+                            Id = Guid.Empty
                         });
                     }
 
@@ -513,7 +493,7 @@ namespace CatalogService.BLL.Services.Implementations
                                 ImageUrl = url,
                                 Position = position++,
                                 IsMain = false,
-                                Id = Guid.Empty 
+                                Id = Guid.Empty
                             });
                         }
                     }

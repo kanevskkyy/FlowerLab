@@ -6,7 +6,7 @@ import * as z from "zod";
 import "./Register.css";
 
 // 1. Імпорт API клієнта
-import axiosClient from "../../api/axiosClient";
+import authService from "../../services/authService";
 
 // SVG-іконки
 import logoIcon from "../../assets/icons/logo.svg";
@@ -58,16 +58,31 @@ export default function Register() {
         confirmPassword: data.confirmPassword,
       };
 
-      await axiosClient.post("/api/users/auth/register", payload);
+      const authService = (await import("../../services/authService")).default;
+      await authService.register(payload);
 
       toast.success("Registration successful! Please check your email.");
-      navigate("/email-confirmation-pending");
+      navigate("/email-confirmation-pending", { state: { email: data.email } });
     } catch (error) {
       console.error("Registration error:", error);
 
       let errorMsg = "Registration failed.";
 
-      toast.error(errorMsg);
+      if (error.response?.data) {
+        const data = error.response.data;
+        // Standard DTO/FluentValidation errors object
+        if (data.errors) {
+          const firstKey = Object.keys(data.errors)[0];
+          const firstError = data.errors[firstKey];
+          errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
+        } else {
+          errorMsg = data.error || data.Message || data.message || errorMsg;
+        }
+      }
+
+      toast.error(
+        typeof errorMsg === "string" ? errorMsg : "Registration failed.",
+      );
     }
   };
 

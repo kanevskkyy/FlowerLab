@@ -79,7 +79,9 @@ const Gifts = () => {
             <div className="catalog-grid">
               {gifts.length > 0 ? (
                 gifts.map((item) => (
-                  <div className="catalog-item" key={item.id}>
+                  <div
+                    className={`catalog-item ${item.availableCount === 0 ? "out-of-stock" : ""}`}
+                    key={item.id}>
                     {/* PHOTO */}
                     <div className="item-img">
                       <img
@@ -90,6 +92,15 @@ const Gifts = () => {
                         alt={item.name}
                         loading="lazy"
                       />
+
+                      {/* STOCK BADGES */}
+                      {item.availableCount === 0 ? (
+                        <div className="stock-badge oos">Out of Stock</div>
+                      ) : item.availableCount < 5 ? (
+                        <div className="stock-badge low">
+                          Only {item.availableCount} left
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* BOTTOM */}
@@ -101,8 +112,9 @@ const Gifts = () => {
 
                       <button
                         className="order-btn"
-                        onClick={() => handleAddToCart(item)}>
-                        ORDER
+                        onClick={() => handleAddToCart(item)}
+                        disabled={item.availableCount === 0}>
+                        {item.availableCount === 0 ? "OUT OF STOCK" : "ORDER"}
                       </button>
                     </div>
                   </div>

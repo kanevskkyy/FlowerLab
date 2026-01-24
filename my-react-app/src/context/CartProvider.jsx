@@ -1,9 +1,17 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  useContext,
+} from "react";
+import { toast } from "react-hot-toast";
 import { CartContext } from "./CartContext";
-import { useAuth } from "./useAuth";
+import { AuthContext } from "./authContext";
 
 export const CartProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext) || {};
   const [cartOpen, setCartOpen] = useState(false);
 
   // Helper to generate storage key
@@ -51,10 +59,15 @@ export const CartProvider = ({ children }) => {
   }, [cartItems, user]);
 
   const addToCart = (product, openCart = true) => {
+    if (cartItems.some((item) => item.id === product.id)) {
+      toast.error("This item is already in your cart");
+      return false;
+    }
     setCartItems((prev) => [...prev, product]);
     if (openCart) {
       setCartOpen(true);
     }
+    return true;
   };
 
   const increaseQty = (id) => {
@@ -82,8 +95,11 @@ export const CartProvider = ({ children }) => {
   };
 
   const clearCart = useCallback(() => {
+    const key = getCartKey(user);
+    // Immediately clear storage to prevent race conditions with loadCart
+    localStorage.removeItem(key);
     setCartItems([]);
-  }, []);
+  }, [user]);
 
   const value = useMemo(
     () => ({

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/useAuth";
 import orderService from "../../services/orderService";
 import "./OrderSuccess.css";
 
@@ -10,6 +11,7 @@ const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { clearCart } = useCart();
+  const { user } = useAuth();
   const { orderNumber: stateOrderNumber } = location.state || {};
 
   // Support URL query params for payment callbacks (e.g. ?orderId=...)
@@ -24,13 +26,26 @@ const OrderSuccess = () => {
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
-    // Only clear cart if we came from our own checkout (state present)
-    if (stateOrderNumber) {
+    // Check if we have a pending order ID in localStorage
+    const pendingOrderId = localStorage.getItem("pendingOrder");
+
+    // Clear cart if:
+    // 1. We came from our own checkout (state present)
+    // 2. OR The loaded order ID matches the one we just placed (LiqPay callback)
+    // 2. OR The loaded order ID matches the one we just placed (LiqPay callback)
+    // Check for pending order match
+    const isMatchingPending =
+      pendingOrderId &&
+      orderNumber &&
+      pendingOrderId.toString().toLowerCase() ===
+        orderNumber.toString().toLowerCase();
+
+    if (stateOrderNumber || isMatchingPending) {
       clearCart();
       localStorage.removeItem("order_selectedGifts");
       localStorage.removeItem("order_isCardAdded");
     }
-  }, [clearCart, stateOrderNumber]);
+  }, [clearCart, stateOrderNumber, orderNumber, paramOrderNumber, user]);
 
   useEffect(() => {
     if (location.state?.mockOrder) {
@@ -159,7 +174,9 @@ const OrderSuccess = () => {
               : "Your order has been placed successfully."}
           </p>
 
-          <p className="email-note">You will receive an email with the order details.</p>
+          <p className="email-note">
+            You will receive an email with the order details.
+          </p>
 
           {orderNumber && (
             <p className="order-number-text">

@@ -31,7 +31,7 @@ namespace OrderService.BLL.Services
                 Description = description,
                 OrderId = orderId.ToString(),
                 ServerUrl = settings.ServerUrl,
-                ResultUrl = settings.SuccessUrl,
+                ResultUrl = $"{settings.SuccessUrl}?orderId={orderId}",
                 Language = LiqPayRequestLanguage.UK
             };
 
