@@ -10,7 +10,9 @@ using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
 using OrderService.Domain.QueryParams;
 using shared.cache;
-using shared.events;
+using shared.events.EmailEvents;
+using shared.events.OrderEvents;
+using shared.events.TelegramBotEvent;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -81,11 +83,6 @@ namespace OrderService.BLL.Services
             var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
                 ?? throw new NotFoundException($"Order with ID {orderId} was not found");
 
-            // Validation removed: Authorization is handled in the Controller.
-            // This check was preventing Admins from viewing guest orders because they don't provide a guestToken.
-            // if (order.UserId == null && guestToken != order.GuestToken)
-            //    throw new ValidationException("Invalid token for guest order.");
-
             return mapper.Map<OrderDetailDto>(order);
         }
 
@@ -148,59 +145,9 @@ namespace OrderService.BLL.Services
                 await orderStatusCacheInvalidator.InvalidateAllAsync();
             }
 
-            // === ONE ACTIVE ORDER POLICY ===
-            // Check if user already has orders in 'AwaitingPayment' status.
-            // If so, cancel them to prevent "ghost" unpaid orders accumulating.
-            var existingAwaitingOrders = await unitOfWork.Orders.GetPagedOrdersAsync(
-                new OrderSpecificationParameters
-                {
-                    UserId = userId,
-                    GuestToken = userId == null ? dto.GuestToken : null,
-                    StatusId = awaitingPaymentStatus.Id,
-                    PageSize = 50 // Should be enough to catch all duplicates
-                }, cancellationToken);
-
-            if (existingAwaitingOrders.TotalCount > 0)
-            {
-                var cancelledStatus = await unitOfWork.OrderStatuses.GetByNameAsync("Cancelled");
-                if (cancelledStatus == null)
-                {
-                    // Fallback if status doesn't exist (should not happen usually)
-                    cancelledStatus = new OrderStatus
-                    {
-                        Name = "Cancelled",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    await unitOfWork.OrderStatuses.AddAsync(cancelledStatus);
-                    await orderStatusCacheInvalidator.InvalidateAllAsync();
-                }
-
-                foreach (var oldOrderSummary in existingAwaitingOrders.Items)
-                {
-                    // We need full entity with reservations to cancel them properly
-                    var fullOldOrder = await unitOfWork.Orders.GetByIdWithIncludesAsync(oldOrderSummary.Id, cancellationToken);
-                    
-                    if (fullOldOrder != null)
-                    {
-                        fullOldOrder.StatusId = cancelledStatus.Id;
-                        fullOldOrder.UpdatedAt = DateTime.UtcNow;
-
-                        // Release reservations
-                        foreach (var res in fullOldOrder.Reservations) res.IsActive = false;
-                        foreach (var gRes in fullOldOrder.GiftReservations) gRes.IsActive = false;
-
-                        unitOfWork.Orders.Update(fullOldOrder);
-                    }
-                }
-                // We don't save changes here explicitly, they will be committed at the end of method
-            }
-            // ===============================
-
             bool isFirstOrder = false;
             if (userId.HasValue)
             {
-                // Use the robust eligibility check (whitelist logic) instead of naive count
                 isFirstOrder = await CheckDiscountEligibilityAsync(userId.Value, cancellationToken);
             }
 
@@ -474,13 +421,8 @@ namespace OrderService.BLL.Services
 
             Console.WriteLine($"[CheckDiscount] User {userId} has {pagedOrders.TotalCount} total orders.");
 
-            // if (pagedOrders.TotalCount > 100) return false;
-
-            // Whitelist of statuses that mean the discount was successfully CONSUMED.
-            // Any other status (AwaitingPayment, Failed, Cancelled, New, Draft) means it wasn't used properly yet.
             var consumedStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Completed" };
 
-            // Check if ANY order has a "consumed" status
             bool hasSuccessfulOrders = pagedOrders.Items.Any(o => 
             {
                 Console.WriteLine($"[CheckDiscount] Order {o.Id} Status: {o.Status?.Name}");

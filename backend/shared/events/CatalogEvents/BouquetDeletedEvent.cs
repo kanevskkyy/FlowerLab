@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlowerLab.Shared.Events
+namespace shared.events.Catalog
 {
     public record BouquetDeletedEvent
     {

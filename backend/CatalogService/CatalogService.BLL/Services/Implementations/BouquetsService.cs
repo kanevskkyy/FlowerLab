@@ -6,9 +6,9 @@ using CatalogService.DAL.Helpers;
 using CatalogService.DAL.UnitOfWork;
 using CatalogService.Domain.Entities;
 using CatalogService.Domain.QueryParametrs;
-using FlowerLab.Shared.Events;
 using MassTransit; 
 using shared.cache;
+using shared.events.Catalog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -459,7 +459,6 @@ namespace CatalogService.BLL.Services.Implementations
 
                 else
                 {
-                    // ADD New Size
                     var newSize = new BouquetSize
                     {
                         BouquetId = bouquet.Id,
@@ -494,7 +493,7 @@ namespace CatalogService.BLL.Services.Implementations
                             ImageUrl = url,
                             Position = 1,
                             IsMain = true,
-                            Id = Guid.Empty // Force "Added" state
+                            Id = Guid.Empty 
                         });
                     }
 
@@ -514,7 +513,7 @@ namespace CatalogService.BLL.Services.Implementations
                                 ImageUrl = url,
                                 Position = position++,
                                 IsMain = false,
-                                Id = Guid.Empty // Force "Added" state
+                                Id = Guid.Empty 
                             });
                         }
                     }
@@ -523,7 +522,6 @@ namespace CatalogService.BLL.Services.Implementations
                 }
             }
 
-            // 2. Sync Events
             var eventsToRemove = bouquet.BouquetEvents.Where(be => !dto.EventIds.Contains(be.EventId)).ToList();
             foreach (var e in eventsToRemove) bouquet.BouquetEvents.Remove(e);
 
@@ -535,7 +533,6 @@ namespace CatalogService.BLL.Services.Implementations
                 }
             }
 
-            // 3. Sync Recipients
             var recipientsToRemove = bouquet.BouquetRecipients
                 .Where(br => !dto.RecipientIds.Contains(br.RecipientId)).ToList();
             foreach (var r in recipientsToRemove) bouquet.BouquetRecipients.Remove(r);
@@ -550,8 +547,6 @@ namespace CatalogService.BLL.Services.Implementations
             }
 
             uow.Bouquets.Update(bouquet);
-            // DEFENSIVE FIX: Force all "Modified" BouquetImages to "Unchanged"
-            // We strictly follow "Append-Only" for images. Valid existing images should NOT be updated.
             var modifiedImages = uow.GetChangeTrackerEntries()
                 .Where(e => e.Entity is BouquetImage &&
                             e.State == Microsoft.EntityFrameworkCore.EntityState.Modified);

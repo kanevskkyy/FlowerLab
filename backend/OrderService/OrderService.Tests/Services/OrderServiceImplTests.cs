@@ -17,7 +17,7 @@ using OrderService.DAL.Helpers;
 using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
 using OrderService.Domain.QueryParams;
-using shared.events;
+using shared.events.OrderEvents;
 using Xunit;
 
 namespace OrderService.Tests.Services

@@ -54,16 +54,16 @@ namespace CatalogService.DAL.Context
                 {
                     new Flower { Name = "Red Rose", Quantity = 100 },
                     new Flower { Name = "White Rose", Quantity = 80 },
-                    new Flower {Name = "Pink Rose", Quantity = 75},
-                    new Flower {Name = "Yellow Tulip", Quantity = 60},
-                    new Flower {Name = "Red Tulip", Quantity = 50},
-                    new Flower {Name = "Pink Peony", Quantity = 45},
-                    new Flower {Name = "White Chrysanthemum", Quantity = 70},
-                    new Flower {Name = "Blue Hydrangea", Quantity = 40},
-                    new Flower {Name = "Red Carnation", Quantity = 90},
-                    new Flower {Name = "White Calla Lily", Quantity = 30},
-                    new Flower {Name = "Purple Orchid", Quantity = 25},
-                    new Flower {Name = "Black Rose", Quantity = 20}
+                    new Flower { Name = "Pink Rose", Quantity = 75 },
+                    new Flower { Name = "Yellow Tulip", Quantity = 60 },
+                    new Flower { Name = "Red Tulip", Quantity = 50 },
+                    new Flower { Name = "Pink Peony", Quantity = 45 },
+                    new Flower { Name = "White Chrysanthemum", Quantity = 70 },
+                    new Flower { Name = "Blue Hydrangea", Quantity = 40 },
+                    new Flower { Name = "Red Carnation", Quantity = 90 },
+                    new Flower { Name = "White Calla Lily", Quantity = 30 },
+                    new Flower { Name = "Purple Orchid", Quantity = 25 },
+                    new Flower { Name = "Black Rose", Quantity = 20 }
                 };
                 await context.Flowers.AddRangeAsync(flowers);
                 await context.SaveChangesAsync();
@@ -108,8 +108,8 @@ namespace CatalogService.DAL.Context
                 var birthday = await context.Events.FirstAsync(e => e.Name == "Birthday");
                 var anniversary = await context.Events.FirstAsync(e => e.Name == "Anniversary");
 
-                var bouquets = new List<Bouquet> 
-                { 
+                var bouquets = new List<Bouquet>
+                {
                     new Bouquet
                     {
                         Name = "Romantic Bouquet",
@@ -117,24 +117,9 @@ namespace CatalogService.DAL.Context
                         MainPhotoUrl = "/images/bouquets/romantic_bouquet_main.png",
                         BouquetSizes = new List<BouquetSize>
                         {
-                            new BouquetSize
-                            {
-                                Size = sSize,
-                                Price = 29.99m,
-                                BouquetImages = new List<BouquetImage>
-                                {
-                                    new BouquetImage { ImageUrl = "/images/bouquets/romantic_bouquet_main.png", Position = 1, IsMain = true }
-                                }
-                            },
-                            new BouquetSize
-                            {
-                                Size = mSize,
-                                Price = 39.99m,
-                                BouquetImages = new List<BouquetImage>
-                                {
-                                    new BouquetImage { ImageUrl = "/images/bouquets/romantic_bouquet_main.png", Position = 1, IsMain = true }
-                                }
-                            }
+                            new BouquetSize { Size = sSize, Price = 29.99m },
+                            new BouquetSize { Size = mSize, Price = 39.99m },
+                            new BouquetSize { Size = lSize, Price = 49.99m }
                         },
                         BouquetFlowers = new List<BouquetFlower>
                         {
@@ -160,15 +145,8 @@ namespace CatalogService.DAL.Context
                         MainPhotoUrl = "/images/bouquets/spring_delight_main.png",
                         BouquetSizes = new List<BouquetSize>
                         {
-                            new BouquetSize
-                            {
-                                Size = sSize,
-                                Price = 19.99m,
-                                BouquetImages = new List<BouquetImage>
-                                {
-                                    new BouquetImage { ImageUrl = "/images/bouquets/spring_delight_main.png", Position = 1, IsMain = true }
-                                }
-                            }
+                            new BouquetSize { Size = sSize, Price = 19.99m },
+                            new BouquetSize { Size = mSize, Price = 29.99m }
                         },
                         BouquetFlowers = new List<BouquetFlower>
                         {
@@ -192,15 +170,8 @@ namespace CatalogService.DAL.Context
                         MainPhotoUrl = "/images/bouquets/elegant_mix_main.png",
                         BouquetSizes = new List<BouquetSize>
                         {
-                            new BouquetSize
-                            {
-                                Size = mSize,
-                                Price = 34.99m,
-                                BouquetImages = new List<BouquetImage>
-                                {
-                                    new BouquetImage { ImageUrl = "/images/bouquets/elegant_mix_main.png", Position = 1, IsMain = true }
-                                }
-                            }
+                            new BouquetSize { Size = mSize, Price = 34.99m },
+                            new BouquetSize { Size = lSize, Price = 44.99m }
                         },
                         BouquetFlowers = new List<BouquetFlower>
                         {
@@ -221,49 +192,70 @@ namespace CatalogService.DAL.Context
 
                 await context.Bouquets.AddRangeAsync(bouquets);
                 await context.SaveChangesAsync();
-
             }
 
             if (!await context.BouquetSizeFlowers.AnyAsync())
             {
-                var romanticBouquet = await context.Bouquets.FirstAsync(b => b.Name == "Romantic Bouquet");
-                var springBouquet = await context.Bouquets.FirstAsync(b => b.Name == "Spring Delight");
-                var elegantBouquet = await context.Bouquets.FirstAsync(b => b.Name == "Elegant Mix");
+                var romanticBouquet = await context.Bouquets
+                    .Include(b => b.BouquetSizes)
+                        .ThenInclude(bs => bs.Size)
+                    .FirstAsync(b => b.Name == "Romantic Bouquet");
 
-                var sSize = await context.Sizes.FirstAsync(s => s.Name == "S");
-                var mSize = await context.Sizes.FirstAsync(s => s.Name == "M");
-                var lSize = await context.Sizes.FirstAsync(s => s.Name == "L");
+                var springBouquet = await context.Bouquets
+                    .Include(b => b.BouquetSizes)
+                        .ThenInclude(bs => bs.Size)
+                    .FirstAsync(b => b.Name == "Spring Delight");
+
+                var elegantBouquet = await context.Bouquets
+                    .Include(b => b.BouquetSizes)
+                        .ThenInclude(bs => bs.Size)
+                    .FirstAsync(b => b.Name == "Elegant Mix");
 
                 var redRose = await context.Flowers.FirstAsync(f => f.Name == "Red Rose");
                 var whiteRose = await context.Flowers.FirstAsync(f => f.Name == "White Rose");
                 var pinkPeony = await context.Flowers.FirstAsync(f => f.Name == "Pink Peony");
 
+                var romanticS = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name == "S");
+                var romanticM = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name == "M");
+                var romanticL = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name == "L");
+
+                var springS = springBouquet.BouquetSizes.First(bs => bs.Size.Name == "S");
+                var springM = springBouquet.BouquetSizes.First(bs => bs.Size.Name == "M");
+
+                var elegantM = elegantBouquet.BouquetSizes.First(bs => bs.Size.Name == "M");
+                var elegantL = elegantBouquet.BouquetSizes.First(bs => bs.Size.Name == "L");
+
                 var bouquetSizeFlowers = new List<BouquetSizeFlower>
                 {
-                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = sSize.Id, FlowerId = redRose.Id, Quantity = 3 },
-                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = sSize.Id, FlowerId = pinkPeony.Id, Quantity = 2 },
-                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = mSize.Id, FlowerId = redRose.Id, Quantity = 5 },
-                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = mSize.Id, FlowerId = pinkPeony.Id, Quantity = 3 },
-                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = lSize.Id, FlowerId = redRose.Id, Quantity = 7 },
-                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = lSize.Id, FlowerId = pinkPeony.Id, Quantity = 5 },
+    
+                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticS.SizeId, FlowerId = redRose.Id, Quantity = 3 },
+                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticS.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
+                    
 
-                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = sSize.Id, FlowerId = whiteRose.Id, Quantity = 2 },
-                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = sSize.Id, FlowerId = pinkPeony.Id, Quantity = 1 },
-                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = mSize.Id, FlowerId = whiteRose.Id, Quantity = 4 },
-                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = mSize.Id, FlowerId = pinkPeony.Id, Quantity = 2 },
+                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticM.SizeId, FlowerId = redRose.Id, Quantity = 5 },
+                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticM.SizeId, FlowerId = pinkPeony.Id, Quantity = 3 },
+                    
+                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticL.SizeId, FlowerId = redRose.Id, Quantity = 7 },
+                    new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticL.SizeId, FlowerId = pinkPeony.Id, Quantity = 5 },
 
-                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = mSize.Id, FlowerId = redRose.Id, Quantity = 3 },
-                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = mSize.Id, FlowerId = whiteRose.Id, Quantity = 3 },
-                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = mSize.Id, FlowerId = pinkPeony.Id, Quantity = 2 },
-                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = lSize.Id, FlowerId = redRose.Id, Quantity = 4 },
-                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = lSize.Id, FlowerId = whiteRose.Id, Quantity = 4 },
-                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = lSize.Id, FlowerId = pinkPeony.Id, Quantity = 3 }
+                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springS.SizeId, FlowerId = whiteRose.Id, Quantity = 2 },
+                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springS.SizeId, FlowerId = pinkPeony.Id, Quantity = 1 },
+                    
+                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springM.SizeId, FlowerId = whiteRose.Id, Quantity = 4 },
+                    new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springM.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
+
+                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = redRose.Id, Quantity = 3 },
+                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = whiteRose.Id, Quantity = 3 },
+                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
+                    
+                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = redRose.Id, Quantity = 4 },
+                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = whiteRose.Id, Quantity = 4 },
+                    new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = pinkPeony.Id, Quantity = 3 }
                 };
 
                 await context.BouquetSizeFlowers.AddRangeAsync(bouquetSizeFlowers);
                 await context.SaveChangesAsync();
             }
-
         }
     }
 }

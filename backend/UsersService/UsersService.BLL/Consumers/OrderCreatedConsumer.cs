@@ -1,8 +1,8 @@
 ﻿using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using shared.events;
 using shared.events.EventService;
+using shared.events.OrderEvents;
 using System;
 using System.Collections.Generic;
 using System.Linq;

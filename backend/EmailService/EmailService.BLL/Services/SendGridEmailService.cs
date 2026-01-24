@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using EmailService.BLL.DTO;
+using EmailService.BLL.Service.Interfaces;
+using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
@@ -7,10 +9,8 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
-using UsersService.BLL.EmailService.DTO;
-using UsersService.BLL.EmailService.Interfaces;
 
-namespace UsersService.BLL.EmailService
+namespace EmailService.BLL.Service
 {
     public class SendGridEmailService : IEmailService
     {

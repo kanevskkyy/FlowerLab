@@ -103,11 +103,15 @@ var userService = builder.AddProject<UsersService_API>("users")
     .WithEnvironment("CLOUDINARY_CLOUDNAME", Environment.GetEnvironmentVariable("CLOUDINARY_CLOUDNAME"))
     .WithEnvironment("CLOUDINARY_API_KEY", Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY"))
     .WithEnvironment("CLOUDINARY_API_SECRET", Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET"))
+    .WaitFor(rabbitmq)
+    .WaitFor(postgresUsers);
+
+var emailService = builder.AddProject<EmailService_API>("email")
+    .WithReference(rabbitmq)
     .WithEnvironment("SENDGRID__KEY", Environment.GetEnvironmentVariable("SENDGRID__KEY"))
     .WithEnvironment("SENDGRID__FROM_EMAIL", Environment.GetEnvironmentVariable("SENDGRID__FROM_EMAIL"))
     .WithEnvironment("SENDGRID__FROM_NAME", Environment.GetEnvironmentVariable("SENDGRID__FROM_NAME"))
-    .WaitFor(rabbitmq)
-    .WaitFor(postgresUsers);
+    .WaitFor(rabbitmq);
 
 var gateway = builder.AddProject<Gateway>("gateway")
     .WithReference(catalogService)

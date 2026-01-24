@@ -6,15 +6,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using shared.events.EmailEvents;
 using shared.events.EventService;
+using shared.events.OrderEvents;
+using shared.events.TelegramBotEvent;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using UsersService.API.Helpers;
 using UsersService.API.Middleware;
 using UsersService.BLL;
 using UsersService.BLL.Consumers;
-using UsersService.BLL.EmailService;
-using UsersService.BLL.EmailService.Interfaces;
 using UsersService.BLL.FluentValidation;
 using UsersService.BLL.Helpers;
 using UsersService.BLL.Models.Auth;
@@ -38,15 +39,6 @@ int refreshTokenExpiration = int.Parse(Env.GetString("JWT_REFRESH_TOKEN_EXPIRATI
 string cloudName = Env.GetString("CLOUDINARY_CLOUDNAME") ?? throw new Exception("CLOUDINARY_CLOUDNAME missing!");
 string cloudApiKey = Env.GetString("CLOUDINARY_API_KEY") ?? throw new Exception("CLOUDINARY_API_KEY missing!");
 string cloudApiSecret = Env.GetString("CLOUDINARY_API_SECRET") ?? throw new Exception("CLOUDINARY_API_SECRET missing!");
-
-builder.Services.Configure<EmailProviderOptions>(options =>
-{
-    options.ApiKey = Environment.GetEnvironmentVariable("SENDGRID__KEY");
-    options.FromEmail = Environment.GetEnvironmentVariable("SENDGRID__FROM_EMAIL");
-    options.FromName = Environment.GetEnvironmentVariable("SENDGRID__FROM_NAME");
-});
-
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
@@ -147,6 +139,16 @@ builder.Services.AddMassTransit(x =>
                 s.ExchangeType = "fanout";
             });
         });
+
+        cfg.Message<UserRegisteredEvent>(m =>
+        {
+            m.SetEntityName("send-user-confirm-email-exchange");
+        });
+
+        cfg.Message<UserResetPasswordEvent>(m =>
+        {
+            m.SetEntityName("send-user-reset-password-email-exchange");
+        });
     });
 });
 
@@ -158,7 +160,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);

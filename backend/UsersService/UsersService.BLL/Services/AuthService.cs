@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MassTransit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using SendGrid.Helpers.Errors.Model;
-using System.Linq;
-using System.Threading.Tasks;
-using UsersService.BLL.EmailService;
-using UsersService.BLL.EmailService.DTO;
-using UsersService.BLL.EmailService.Interfaces;
+using shared.events.EmailEvents;
+using UsersService.BLL.Exceptions;
 using UsersService.BLL.Helpers;
 using UsersService.BLL.Models.Auth;
 using UsersService.BLL.Models.Users;
@@ -24,9 +21,8 @@ namespace UsersService.BLL.Services
         private ApplicationDbContext dbContext;
         private JwtSettings jwtSettings;
         private IUserImageService imageService;
-        private IEmailService emailService;
-        private IEmailTemplateService emailTemplate;
         private IConfiguration configuration;
+        private IPublishEndpoint publishEndpoint;
 
         public AuthService(
             UserManager<ApplicationUser> userManager, 
@@ -34,18 +30,16 @@ namespace UsersService.BLL.Services
             ApplicationDbContext dbContext,
             IOptions<JwtSettings> jwtSettings,
             IUserImageService userImageService,
-            IEmailService emailService,
             IConfiguration configuration,
-            IEmailTemplateService emailTemplate)
+            IPublishEndpoint publishEndpoint)
         {
+            this.publishEndpoint = publishEndpoint;
             imageService = userImageService;
             this.userManager = userManager;
             this.jwtService = jwtService;
             this.dbContext = dbContext;
             this.jwtSettings = jwtSettings.Value;
-            this.emailService = emailService;
             this.configuration = configuration;
-            this.emailTemplate = emailTemplate;
         }
 
 
@@ -105,15 +99,14 @@ namespace UsersService.BLL.Services
             string confirmUrl =
                 $"{configuration["Frontend:ConfirmEmailUrl"]}?userId={user.Id}&token={encodedToken}";
 
-            await emailService.SendEmailAsync(new EmailMessageDTO
+            await publishEndpoint.Publish(new UserRegisteredEvent
             {
-                To = user.Email,
-                Subject = "Email Confirmation 📧",
-                HtmlBody = emailTemplate.GetEmailConfirmationTemplate(user.FirstName, confirmUrl)
+                UserFirstName = user.FirstName,
+                UserEmail = user.Email,
+                ConfirmURL = confirmUrl,
             });
 
             return null;
-
         }
 
 
@@ -279,11 +272,11 @@ namespace UsersService.BLL.Services
             string confirmUrl =
                 $"{configuration["Frontend:ConfirmEmailUrl"]}?userId={user.Id}&token={encodedToken}";
 
-            await emailService.SendEmailAsync(new EmailMessageDTO
+            await publishEndpoint.Publish(new UserRegisteredEvent
             {
-                To = user.Email,
-                Subject = "Email Confirmation 📧",
-                HtmlBody = emailTemplate.GetEmailConfirmationTemplate(user.FirstName, confirmUrl)
+                UserFirstName = user.FirstName,
+                UserEmail = user.Email,
+                ConfirmURL = confirmUrl,
             });
         }
 
@@ -298,12 +291,11 @@ namespace UsersService.BLL.Services
 
             string resetUrl = $"{configuration["Frontend:ResetPasswordUrl"]}?userId={user.Id}&token={encodedToken}";
 
-
-            await emailService.SendEmailAsync(new EmailMessageDTO
+            await publishEndpoint.Publish(new UserResetPasswordEvent
             {
-                To = user.Email,
-                Subject = "Password Reset",
-                HtmlBody = emailTemplate.GetPasswordResetTemplate(user.FirstName, resetUrl)
+                FirstName = user.FirstName, 
+                Email = user.Email,
+                ResetPasswordURL = resetUrl
             });
         }
 

@@ -1,8 +1,8 @@
 ﻿using MassTransit;
-using FlowerLab.Shared.Events;
 using ReviewService.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 using shared.events.EventService;
+using shared.events.Catalog;
 
 namespace ReviewService.Application.Consumers
 {

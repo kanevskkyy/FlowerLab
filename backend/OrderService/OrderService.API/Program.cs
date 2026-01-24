@@ -1,6 +1,5 @@
 using CatalogService.API.Middleware;
 using DotNetEnv;
-using FlowerLab.Shared.Events;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MassTransit;
@@ -23,7 +22,9 @@ using OrderService.DAL.UOW;
 using OrderService.Domain.Database;
 using OrderService.Domain.Entities;
 using shared.cache;
-using shared.events;
+using shared.events.EmailEvents;
+using shared.events.OrderEvents;
+using shared.events.TelegramBotEvent;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
