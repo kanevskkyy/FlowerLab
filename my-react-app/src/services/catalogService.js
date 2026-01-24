@@ -126,11 +126,18 @@ const catalogService = {
     return response.data;
   },
 
-  createFlower: async (name) => {
-    // Note: Backend might expect Quantity too, but for simple list management we send 0 or 1
+  createFlower: async (name, quantity = 0) => {
     const response = await axiosClient.post("/api/catalog/flowers", {
       name,
-      quantity: 0,
+      quantity,
+    });
+    return response.data;
+  },
+
+  updateFlower: async (id, name, quantity) => {
+    const response = await axiosClient.put(`/api/catalog/flowers/${id}`, {
+      name,
+      quantity,
     });
     return response.data;
   },

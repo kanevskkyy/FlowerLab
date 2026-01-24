@@ -55,23 +55,72 @@ const ProductInfo = ({
       <div className="size-section">
         <h3>Size</h3>
         <div className="size-buttons">
-          {product.availableSizes.map((size) => (
-            <button
-              key={size}
-              className={`size-btn ${selectedSize === size ? "active" : ""}`}
-              onClick={() => onSizeSelect(size)}>
-              {size}
-            </button>
-          ))}
+          {product.availableSizes.map((size) => {
+            const stock = product.stock?.[size];
+            const isOOS = stock?.max === 0;
+            const isDisabled = isOOS || stock?.available === false;
+
+            return (
+              <button
+                key={size}
+                disabled={isDisabled}
+                className={`size-btn ${selectedSize === size ? "active" : ""} ${isDisabled ? "disabled" : ""}`}
+                onClick={() => !isDisabled && onSizeSelect(size)}
+                title={isOOS ? "Out of Stock" : ""}>
+                {size}
+              </button>
+            );
+          })}
         </div>
+
+        {/* Stock Warning */}
+        {product.stock?.[selectedSize]?.max > 0 &&
+          product.stock?.[selectedSize]?.max < 5 && (
+            <div
+              style={{
+                color: "#d9534f",
+                fontSize: "12px",
+                marginTop: "8px",
+                fontWeight: "500",
+              }}>
+              🔥 Only {product.stock[selectedSize].max} left!
+            </div>
+          )}
+        {product.stock?.[selectedSize]?.max === 0 && (
+          <div
+            style={{
+              color: "#999",
+              fontSize: "12px",
+              marginTop: "8px",
+              fontStyle: "italic",
+            }}>
+            Out of Stock
+          </div>
+        )}
       </div>
 
       {/* Actions */}
       <div className="product-actions">
-        <button className="buy-now-btn" onClick={onBuyNow}>
-          BUY NOW
+        <button
+          className="buy-now-btn"
+          onClick={onBuyNow}
+          disabled={!product.stock?.[selectedSize]?.max}
+          style={
+            !product.stock?.[selectedSize]?.max
+              ? { opacity: 0.5, cursor: "not-allowed" }
+              : {}
+          }>
+          {product.stock?.[selectedSize]?.max === 0 ? "SOLD OUT" : "BUY NOW"}
         </button>
-        <button className="add-cart-btn" onClick={() => onAddToCart(true)}>
+        <button
+          className="add-cart-btn"
+          onClick={() => onAddToCart(true)}
+          disabled={!product.stock?.[selectedSize]?.max}
+          style={
+            !product.stock?.[selectedSize]?.max
+              ? { opacity: 0.5, cursor: "not-allowed" }
+              : {}
+          }>
           ADD TO CART
           <span className="cart-icon">
             <img src={ShoppingBagIcon} alt="Cart" />
