@@ -21,6 +21,7 @@ import Cabinet from "./pages/Cabinet/Cabinet";
 import OrderPlacementRegistered from "./pages/OrderPlacementRegistered/OrderPlacementRegistered";
 import CheckOut from "./pages/CheckOut/CheckOut";
 import OrderSuccess from "./pages/OrderSuccess/OrderSuccess";
+import OrderTrackingPage from "./pages/OrderTrackingPage/OrderTrackingPage";
 
 // admin (створиш/підключиш)
 import AdminPanel from "./pages/AdminPanel/AdminPanel";
@@ -105,6 +106,7 @@ function App() {
                 />
                 <Route path="/checkout" element={<CheckOut />} />
                 <Route path="/order-success" element={<OrderSuccess />} />
+                <Route path="/track-order" element={<OrderTrackingPage />} />
 
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />

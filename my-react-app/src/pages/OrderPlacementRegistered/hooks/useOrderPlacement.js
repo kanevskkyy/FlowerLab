@@ -437,6 +437,26 @@ export const useOrderPlacement = () => {
 
       // Save pending order ID to clear cart later on success
       localStorage.setItem("pendingOrder", response.id);
+      if (response.guestToken) {
+        localStorage.setItem("pendingGuestToken", response.guestToken);
+
+        // Store in a list of guest orders for tracking history
+        try {
+          const existing = JSON.parse(
+            localStorage.getItem("guestOrders") || "[]",
+          );
+          // Check for duplicates
+          if (!existing.some((o) => o.orderId === response.id)) {
+            existing.push({
+              orderId: response.id,
+              guestToken: response.guestToken,
+            });
+            localStorage.setItem("guestOrders", JSON.stringify(existing));
+          }
+        } catch (e) {
+          console.error("Failed to update guestOrders in localStorage", e);
+        }
+      }
 
       toast.success("Order confirmed!");
 
