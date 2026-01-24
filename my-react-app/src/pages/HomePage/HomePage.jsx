@@ -5,7 +5,7 @@ import catalogService from "../../services/catalogService";
 
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import HeroSection from "./components/HeroSection";
 
 // Sub-components
@@ -13,12 +13,15 @@ import IntroSection from "./components/IntroSection";
 import PopularSection from "./components/PopularSection";
 import AboutSection from "./components/AboutSection";
 import ReviewsSection from "./components/ReviewsSection";
+import SEO from "../../components/SEO/SEO";
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { addToCart } = useCart();
 
   const [popularItems, setPopularItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchPopular = async () => {
@@ -48,11 +51,13 @@ export default function HomePage() {
         setPopularItems(mapped);
       } catch (err) {
         console.error("Failed to fetch popular bouquets:", err);
+        setError(true);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchPopular();
   }, []);
-
   const reviewsData = [
     {
       id: 1,
@@ -106,6 +111,11 @@ export default function HomePage() {
 
   return (
     <div className="home-page">
+      <SEO
+        title="FlowerLab Vlada | Flowers Delivery Chernivtsi"
+        description="Premium bouquets, fresh flowers, and gifts with delivery in Chernivtsi. Order online for best quality and service."
+        image="/og-home.jpg"
+      />
       <Header onMenuOpen={() => setMenuOpen(true)} />
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
@@ -115,8 +125,12 @@ export default function HomePage() {
         </div>
 
         <IntroSection />
-
-        <PopularSection items={popularItems} onAddToCart={handleAddToCart} />
+        <PopularSection
+          items={popularItems}
+          onAddToCart={handleAddToCart}
+          isLoading={isLoading}
+          error={error}
+        />
 
         <AboutSection />
 

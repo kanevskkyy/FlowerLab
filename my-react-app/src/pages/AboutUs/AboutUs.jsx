@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AboutUs.css";
 
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 

@@ -18,7 +18,6 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Cabinet from "./pages/Cabinet/Cabinet";
 
-import OrderPlacementPickUp from "./pages/OrderPlacementPickUp/OrderPlacementPickUp";
 import OrderPlacementRegistered from "./pages/OrderPlacementRegistered/OrderPlacementRegistered";
 import CheckOut from "./pages/CheckOut/CheckOut";
 import OrderSuccess from "./pages/OrderSuccess/OrderSuccess";
@@ -99,10 +98,10 @@ function App() {
                 <Route path="/product/:id" element={<ProductCard />} />
                 <Route path="/about" element={<AboutUs />} />
 
-                <Route path="/order" element={<OrderPlacementPickUp />} />
+                <Route path="/order" element={<OrderPlacementRegistered />} />
                 <Route
                   path="/order-registered"
-                  element={<OrderPlacementRegistered />}
+                  element={<Navigate to="/order" replace />}
                 />
                 <Route path="/checkout" element={<CheckOut />} />
                 <Route path="/order-success" element={<OrderSuccess />} />

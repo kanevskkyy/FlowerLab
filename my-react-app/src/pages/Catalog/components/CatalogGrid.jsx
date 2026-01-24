@@ -22,12 +22,24 @@ function CatalogGrid({ products, onOrder, loading }) {
     );
   }
 
+  const optimizeCloudinaryUrl = (url) => {
+    if (!url || !url.includes("cloudinary.com")) return url;
+    if (url.includes("/w_")) return url;
+    const parts = url.split("upload/");
+    if (parts.length < 2) return url;
+    return `${parts[0]}upload/w_400,h_400,c_fill,q_auto,f_auto/${parts[1]}`;
+  };
+
   return (
     <div className="catalog-grid">
       {products.map((p) => (
         <div className="catalog-item" key={p.id}>
           <div className="item-img">
-            <img src={p.img} alt={p.title} />
+            <img
+              src={optimizeCloudinaryUrl(p.img)}
+              alt={p.title}
+              loading="lazy"
+            />
           </div>
 
           <div className="item-bottom">

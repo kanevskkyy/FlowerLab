@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./Catalog.css";
 
 import FilterIcon from "../../assets/icons/FilterIcon.svg";
-import PopupFilterMenu from "../PopupFilterMenu/PopupFilterMenu";
+import PopupFilterMenu from "../../components/PopupFilterMenu/PopupFilterMenu";
 
 // Sub-components
 import CatalogSort from "./components/CatalogSort";
@@ -14,6 +14,8 @@ import CatalogPagination from "./components/CatalogPagination";
 
 // Hooks
 import { useCatalog } from "./hooks/useCatalog";
+
+import SEO from "../../components/SEO/SEO";
 
 const Catalog = () => {
   const navigate = useNavigate();
@@ -45,6 +47,11 @@ const Catalog = () => {
 
   return (
     <div className="page-wrapper catalog-page">
+      <SEO
+        title="Catalog | FlowerLab"
+        description="Browse our wide selection of fresh bouquets and floral arrangements. Filter by price, size, and occasion."
+        image="/og-catalog.jpg"
+      />
       <Header onMenuOpen={() => setMenuOpen(true)} />
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Cabinet.css";
 
 import Header from "../../components/Header/Header";
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import { useAuth } from "../../context/useAuth";
 
 // Sub-components
@@ -38,18 +38,22 @@ export default function Cabinet() {
       <main className="cabinet-main">
         <div className="cabinet-shell">
           {/* SIDEBAR */}
-          <CabinetSidebar 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
-            TABS={TABS} 
-            onSignOut={handleSignOut} 
+          <CabinetSidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            TABS={TABS}
+            onSignOut={handleSignOut}
           />
 
           {/* PANEL CONTENT */}
           <section className="cabinet-panel">
             {activeTab === TABS.PERSONAL && <PersonalTab />}
-            {activeTab === TABS.ORDERS && <OrdersTab activeTab={activeTab} TABS={TABS} />}
-            {activeTab === TABS.ADDRESSES && <AddressesTab activeTab={activeTab} TABS={TABS} />}
+            {activeTab === TABS.ORDERS && (
+              <OrdersTab activeTab={activeTab} TABS={TABS} />
+            )}
+            {activeTab === TABS.ADDRESSES && (
+              <AddressesTab activeTab={activeTab} TABS={TABS} />
+            )}
           </section>
         </div>
       </main>

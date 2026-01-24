@@ -4,16 +4,18 @@ import { useCart } from "../../context/CartContext";
 import { useGifts } from "./hooks/useGifts";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import CatalogPagination from "../Catalog/components/CatalogPagination";
 import ProductSkeleton from "../../components/ProductSkeleton/ProductSkeleton";
 import "./Gifts.css"; // Локальні стилі (копія каталогу)
+import SEO from "../../components/SEO/SEO";
 
 const Gifts = () => {
   const { addToCart } = useCart();
   const {
     gifts,
     loading,
+    error,
     currentPage,
     totalPages,
     handlePageChange,
@@ -37,8 +39,21 @@ const Gifts = () => {
     toast.success(`${item.name} added to cart!`);
   };
 
+  const optimizeCloudinaryUrl = (url) => {
+    if (!url || !url.includes("cloudinary.com")) return url;
+    if (url.includes("/w_")) return url;
+    const parts = url.split("upload/");
+    if (parts.length < 2) return url;
+    return `${parts[0]}upload/w_400,h_400,c_fill,q_auto,f_auto/${parts[1]}`;
+  };
+
   return (
     <div className="page-wrapper gifts-page">
+      <SEO
+        title="Gifts & Extras | FlowerLab"
+        description="Add a special touch with our teddy bears, balloons, and sweets. Perfect additions to any bouquet."
+        image="/og-gifts.jpg"
+      />
       <Header onMenuOpen={() => setMenuOpen(true)} />
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
@@ -49,6 +64,16 @@ const Gifts = () => {
           <div className="catalog-grid">
             <ProductSkeleton count={6} />
           </div>
+        ) : error ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "4rem",
+              color: "#666",
+              fontSize: "1.1rem",
+            }}>
+            Failed to load gifts. Please try again later.
+          </div>
         ) : (
           <>
             <div className="catalog-grid">
@@ -58,8 +83,12 @@ const Gifts = () => {
                     {/* PHOTO */}
                     <div className="item-img">
                       <img
-                        src={item.imageUrl || "/placeholder.png"}
+                        src={
+                          optimizeCloudinaryUrl(item.imageUrl) ||
+                          "/placeholder.png"
+                        }
                         alt={item.name}
+                        loading="lazy"
                       />
                     </div>
 

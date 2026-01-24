@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useCart } from "../../context/CartContext";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import PopupMenu from "../popupMenu/PopupMenu";
+import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import "./ProductCard.css";
 
 import { useProductData } from "./hooks/useProductData";
@@ -18,6 +18,7 @@ import Reviews from "./components/Reviews";
 import GiftModal from "./components/GiftModal";
 import AddReviewModal from "./components/AddReviewModal";
 import ProductDetailSkeleton from "./components/ProductDetailSkeleton";
+import SEO from "../../components/SEO/SEO";
 
 import "./ProductCard.css";
 
@@ -119,8 +120,43 @@ const ProductCardContent = () => {
     navigate("/catalog");
   };
 
+  /* Structured Data for Google (Rich Snippets) */
+  const jsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.title,
+    image: [mainImageToShow],
+    description: `Buy ${product.title} in FlowerLab. Fresh flowers, fast delivery in Chernivtsi.`,
+    sku: `${id}-${selectedSize}`,
+    brand: {
+      "@type": "Brand",
+      name: "FlowerLab Vlada",
+    },
+    offers: {
+      "@type": "Offer",
+      url: window.location.href,
+      priceCurrency: "UAH",
+      price: product.prices[selectedSize],
+      availability: "https://schema.org/InStock",
+      seller: {
+        "@type": "Organization",
+        name: "FlowerLab Vlada",
+      },
+    },
+  };
+
   return (
     <div className="product-page">
+      <SEO
+        title={`${product.title} | FlowerLab`}
+        description={`Buy ${product.title} in FlowerLab. Fresh flowers, fast delivery in Chernivtsi. Price: ${product.prices[selectedSize]} ₴`}
+        image={mainImageToShow}
+        type="product"
+      />
+
+      {/* Inject JSON-LD */}
+      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+
       <Header onMenuOpen={() => setMenuOpen(true)} />
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
