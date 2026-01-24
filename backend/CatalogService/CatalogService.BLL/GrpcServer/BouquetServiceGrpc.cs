@@ -77,9 +77,6 @@ namespace CatalogService.BLL.GrpcServer
                             Quantity = f.Quantity
                         })
                     },
-                    // Images - skipping for simple list if not needed, but Proto has it required? No, repeated.
-                    // If frontend catalog grid needs images on hover, we might need them.
-                    // Assuming list view mainly uses MainPhotoUrl.
                 }));
                 
                 return model;

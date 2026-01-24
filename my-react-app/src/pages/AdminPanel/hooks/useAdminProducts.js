@@ -75,6 +75,7 @@ export function useAdminProducts(active) {
         title: item.name,
         img: optimizeCloudinaryUrl(item.mainPhotoUrl || item.imageUrl), // Handle both
         price: `${item.price} ₴`,
+        stock: item.availableCount, // Added stock
         category: active === "bouquets" ? "Bouquets" : "Gifts",
       }));
 

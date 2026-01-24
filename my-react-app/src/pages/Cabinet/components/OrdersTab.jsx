@@ -1,9 +1,36 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useOrders } from "../hooks/useOrders";
 import OrderIcon from "../../../assets/icons/orders.svg";
+import OrderCard from "./OrderCard";
 
 export default function OrdersTab({ activeTab, TABS }) {
-  const { orders, ordersLoading } = useOrders(activeTab, TABS);
+  const { orders, ordersLoading, hasNextPage, loadMore, isLoadingMore } =
+    useOrders(activeTab, TABS);
+
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    if (!hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !ordersLoading && !isLoadingMore) {
+          loadMore();
+        }
+      },
+      { rootMargin: "100px" }, // Project standard rootMargin
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    return () => {
+      if (sentinelRef.current) {
+        observer.unobserve(sentinelRef.current);
+      }
+    };
+  }, [hasNextPage, ordersLoading, isLoadingMore, loadMore]);
 
   return (
     <div className="cabinet-panel-inner cabinet-orders">
@@ -23,73 +50,27 @@ export default function OrdersTab({ activeTab, TABS }) {
       <div className="orders-list">
         {!ordersLoading && orders.length === 0 && (
           <div className="orders-empty">
-             <img src={OrderIcon} className="orders-empty-icon" alt="" />
-             <span>You haven't placed any orders yet.</span>
+            <img src={OrderIcon} className="orders-empty-icon" alt="" />
+            <span>You haven't placed any orders yet.</span>
           </div>
         )}
 
         {orders.map((order) => (
-          <div key={order.id} className="order-card">
-            <div className="order-meta">
-              <span className="order-meta-id">{order.id}</span>{" "}
-              <span className="order-meta-date">{order.date}</span>
-            </div>
+          <OrderCard key={order.rawId} order={order} />
+        ))}
 
-            {order.type === "single" && order.items?.[0] && (
-              <div className="order-single">
-                <div className="order-single-img">
-                  <img src={order.items[0].img} alt="" />
-                </div>
-
-                <div>
-                  <div className="order-single-title">
-                    {order.items[0].title}
-                  </div>
-                  <div className="order-single-qty">{order.items[0].qty}</div>
-                </div>
-
-                <div className="order-single-right">
-                  <div className="order-status">
-                    Status:{" "}
-                    <span className="order-status-value">{order.status}</span>
-                  </div>
-                  <div className="order-total">
-                    Order Total: {order.total} {order.currency}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {order.type === "multi" && (
-              <>
-                <div className="order-multi-grid">
-                  {order.items?.map((item, i) => (
-                    <div key={i}>
-                      <div className="order-item-img">
-                        {item?.img && <img src={item.img} alt="" />}
-                      </div>
-                      <div className="order-item-title">{item?.title}</div>
-                      <div className="order-item-bottom">
-                        <span>{item?.price} ₴</span>
-                        <span>{item?.qty}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="order-multi-footer">
-                  <div className="order-total">
-                    Order Total: {order.total} {order.currency}
-                  </div>
-                  <div className="order-status">
-                    Status:{" "}
-                    <span className="order-status-value">{order.status}</span>
-                  </div>
-                </div>
-              </>
+        {/* Sentinel for Infinite Scroll (Standard Pattern) */}
+        {hasNextPage && (
+          <div ref={sentinelRef} className="orders-loading-indicator">
+            <div className="ios-spinner"></div>
+            {isLoadingMore && (
+              <span
+                style={{ marginLeft: "10px", fontSize: "12px", color: "#666" }}>
+                Loading more...
+              </span>
             )}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

@@ -79,6 +79,12 @@ function AdminProductList({
                   draggable="false"
                   loading="lazy"
                 />
+                {p.stock !== undefined && (
+                  <div
+                    className={`admin-stock-badge ${p.stock === 0 ? "oos" : p.stock < 5 ? "low" : ""}`}>
+                    Stock: {p.stock}
+                  </div>
+                )}
               </div>
               <div className="admin-card-bottom">
                 <div className="admin-card-title">

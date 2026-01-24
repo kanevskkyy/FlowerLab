@@ -134,7 +134,14 @@ const OrderSummary = ({
         {...register("message")}
       />
 
-      <button type="submit" className="confirm-btn">
+      <button
+        type="submit"
+        className="confirm-btn"
+        disabled={total <= 0}
+        style={{
+          opacity: total <= 0 ? 0.5 : 1,
+          cursor: total <= 0 ? "not-allowed" : "pointer",
+        }}>
         CONFIRM ORDER
       </button>
     </div>

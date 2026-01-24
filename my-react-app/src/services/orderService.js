@@ -8,6 +8,12 @@ const orderService = {
     return response.data;
   },
 
+  // Customer: Get my orders (paged)
+  getMyOrders: async (params) => {
+    const response = await axiosClient.get("/api/orders/my", { params });
+    return response.data;
+  },
+
   // Get single order by ID
   getById: async (id) => {
     const response = await axiosClient.get(`/api/orders/${id}`);
@@ -34,6 +40,12 @@ const orderService = {
       `/api/orders/discount-eligibility?_t=${Date.now()}`,
     );
     return response.data;
+  },
+
+  deleteOrder: async (id, guestToken) => {
+    await axiosClient.delete(`/api/orders/${id}`, {
+      params: { guestToken },
+    });
   },
 };
 

@@ -31,10 +31,6 @@ namespace AggregatorService.Clients
 
         public async Task<FilterResponseDto?> GetAllFiltersAsync()
         {
-            // Note: Changed cache key to force refresh or use different key if structure changed significantly
-            // But since we are changing type from FilterResponse to FilterResponseDto, we should use a new key
-            // or rely on Redis overwritting it (if it doesn't crash on deserialization mismatch).
-            // Using a new key "filters:dto:all" is safer.
             return await _cache.GetOrSetAsync(
                 "filters:dto:all",
                 async () =>
@@ -46,7 +42,6 @@ namespace AggregatorService.Clients
 
                         _logger.LogInformation("Filters fetched from CatalogService via gRPC.");
                         
-                        // Map to DTO
                         return new AggregatorService.DTOs.FilterResponseDto
                         {
                             PriceRange = filters.PriceRange != null ? new AggregatorService.DTOs.FilterPriceRangeDto

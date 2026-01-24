@@ -19,7 +19,7 @@
   grid-template-columns: 260px 1fr;
   /* ✅ ВИПРАВЛЕННЯ: Замість calc() використовуємо flex: 1. 
      Це прибирає відступ зверху і гарантує, що сайдбар торкається хедера */
-  flex: 1; 
+  flex: 1;
   align-items: stretch; /* Сайдбар розтягується на всю висоту */
 }
 
@@ -31,6 +31,11 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* ✅ STICKY SIDEBAR */
+  position: sticky;
+  top: 70px;
+  height: calc(100vh - 70px);
+  z-index: 10;
 }
 
 .cabinet-nav-item {
@@ -94,7 +99,18 @@
 
 .cabinet-panel-inner {
   width: 100%;
-  max-width: 620px;
+  max-width: 1000px; /* Increased from 620px to allow grid */
+}
+
+/* ... existing styles ... */
+
+.orders-list {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(380px, 1fr)
+  ); /* Grid layout */
+  gap: 20px;
 }
 
 .cabinet-title {
@@ -258,16 +274,16 @@
 
   .cabinet-sidebar {
     flex-direction: row;
-    gap: 8px; 
+    gap: 8px;
     overflow-x: auto;
     align-items: center;
     justify-content: space-between;
     padding: 12px 20px;
-    
-    scrollbar-width: none; 
+
+    scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  
+
   .cabinet-sidebar::-webkit-scrollbar {
     display: none;
   }
@@ -295,7 +311,7 @@
     align-items: center;
     justify-content: center;
   }
-  
+
   .cabinet-nav-icon img {
     width: 100%;
     height: 100%;
@@ -371,7 +387,7 @@
 
 .order-meta {
   font-size: 11px;
-  color: rgba(0,0,0,0.65);
+  color: rgba(0, 0, 0, 0.65);
   margin-bottom: 10px;
 }
 
@@ -382,7 +398,7 @@
 }
 
 .order-meta-date {
-  color: rgba(0,0,0,0.55);
+  color: rgba(0, 0, 0, 0.55);
 }
 
 /* ===== SINGLE ORDER ===== */
@@ -398,7 +414,7 @@
   height: 120px;
   border-radius: 16px;
   overflow: hidden;
-  background: #FBECF7;
+  background: #fbecf7;
 }
 
 .order-single-img img {
@@ -417,7 +433,7 @@
 
 .order-single-qty {
   font-size: 12px;
-  color: rgba(0,0,0,0.6);
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .order-single-right {
@@ -456,7 +472,7 @@
   aspect-ratio: 1 / 1;
   border-radius: 16px;
   overflow: hidden;
-  background: #FBECF7;
+  background: #fbecf7;
 }
 
 .order-item-img img {
@@ -477,7 +493,7 @@
   display: flex;
   gap: 12px;
   font-size: 12px;
-  color: rgba(0,0,0,0.8);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .order-multi-footer {
@@ -543,7 +559,6 @@
   border-radius: 18px;
   font-size: 12px;
 }
-
 
 .orders-empty {
   text-align: center;
@@ -621,7 +636,7 @@
   flex: 2;
   padding: 12px;
   border: none;
-  background: #C86AAC;
+  background: #c86aac;
   color: white;
   border-radius: 12px;
   font-weight: 500;
@@ -634,13 +649,23 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* AVATAR SECTION */
@@ -662,7 +687,7 @@
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
-  background: #C86AAC;
+  background: #c86aac;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -720,4 +745,33 @@
   font-size: 13px;
   color: #888;
   margin: 0;
+}
+
+/* Infinite Scroll Styles */
+.loader-sentinel {
+  height: 10px;
+  width: 100%;
+}
+
+.orders-loading-indicator {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  width: 100%;
+  grid-column: 1 / -1; /* For grid layout */
+}
+
+.ios-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(200, 106, 172, 0.2);
+  border-top-color: #c86aac;
+  border-radius: 50%;
+  animation: ios-spin 0.8s linear infinite;
+}
+
+@keyframes ios-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

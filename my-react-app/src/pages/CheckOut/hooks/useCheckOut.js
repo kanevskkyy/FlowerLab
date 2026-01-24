@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConfirm } from "../../../context/ModalProvider";
 import catalogService from "../../../services/catalogService";
+import orderService from "../../../services/orderService";
 import { useCart } from "../../../context/CartContext";
 import toast from "react-hot-toast";
 
@@ -58,11 +59,22 @@ export function useCheckOut({ orderData }) {
   const handleCancelPayment = () => {
     confirm({
       title: "Cancel payment?",
-      message: "Are you sure you want to cancel the payment?",
+      message:
+        "Are you sure you want to cancel the payment? The order will be deleted.",
       confirmText: "Yes, cancel",
       confirmType: "danger",
-      onConfirm: () => {
-        navigate("/order-registered");
+      onConfirm: async () => {
+        try {
+          if (orderData?.id) {
+            await orderService.deleteOrder(orderData.id, orderData.guestToken);
+            toast.success("Order cancelled and deleted.");
+          }
+          navigate("/order-registered");
+        } catch (error) {
+          console.error("Failed to delete order", error);
+          toast.error("Failed to cancel order properly.");
+          navigate("/order-registered");
+        }
       },
     });
   };

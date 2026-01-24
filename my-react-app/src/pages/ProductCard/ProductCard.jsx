@@ -85,8 +85,8 @@ const ProductCardContent = () => {
       img: mainImageToShow,
       qty: 1,
     };
-    addToCart(cartProduct, openCart);
-    if (openCart) {
+    const added = addToCart(cartProduct, openCart);
+    if (added && openCart) {
       toast.success(`${product.title} added to cart!`);
     }
   };

@@ -119,5 +119,24 @@ namespace OrderService.API.Controllers
             var updatedOrder = await orderService.UpdateStatusAsync(id, dto, cancellationToken);
             return Ok(updatedOrder);
         }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
+            var role = User.FindFirstValue(ClaimTypes.Role);
+
+            // We need to fetch order first to check ownership
+            // Optimally, DeleteAsync could handle this check if passed userId/token, but strict layering differs.
+            // For now, let's trust the service or doing a check here.
+            var order = await orderService.GetByIdAsync(id, guestToken, cancellationToken);
+            
+            if (role != "Admin" && order.UserId != userId && order.GuestToken != guestToken)
+                return Forbid();
+
+            await orderService.DeleteAsync(id, cancellationToken);
+            return NoContent();
+        }
     }
 }

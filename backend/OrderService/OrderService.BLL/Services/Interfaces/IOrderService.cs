@@ -20,5 +20,6 @@ namespace OrderService.BLL.Services.Interfaces
         Task<OrderDetailDto> UpdateStatusAsync(Guid orderId, OrderUpdateDto dto, CancellationToken cancellationToken = default);
         Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default);
         Task<bool> CheckDiscountEligibilityAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task DeleteAsync(Guid orderId, CancellationToken cancellationToken = default);
     }
 }

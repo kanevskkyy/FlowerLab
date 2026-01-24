@@ -31,6 +31,11 @@ namespace CatalogService.DAL.Repositories.Implementations
             return await dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
+        public virtual async Task<T?> GetByIdTrackedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await dbSet.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        }
+
         public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
             await dbSet.AddAsync(entity, cancellationToken);

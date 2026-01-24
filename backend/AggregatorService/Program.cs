@@ -6,7 +6,6 @@ using shared.cache;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
@@ -51,8 +50,6 @@ builder.Services.AddMemoryCache(options =>
 });
 builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
 builder.Services.AddScoped<shared.cache.IEntityCacheInvalidationService<AggregatorService.DTOs.FilterResponseDto>, AggregatorService.Redis.FilterCacheInvalidationService>();
-//
-
 
 builder.Services.AddGrpcClient<FilterService.FilterServiceClient>(options =>
 {
@@ -82,7 +79,6 @@ builder.Services.AddGrpcClient<ReviewsByBouquetId.ReviewsByBouquetIdClient>(opti
 var app = builder.Build();
 app.UseCors(MyAllowSpecificOrigins);
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

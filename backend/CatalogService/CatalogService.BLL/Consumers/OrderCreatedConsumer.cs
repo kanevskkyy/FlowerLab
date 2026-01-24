@@ -42,6 +42,9 @@ namespace CatalogService.BLL.Consumers
             var orderEvent = context.Message;
             logger.LogInformation("Processing new order {OrderId}", orderEvent.OrderId);
 
+            var flowerRequirements = new Dictionary<Guid, int>();
+            var bouquetIdsToInvalidate = new HashSet<Guid>();
+
             foreach (var item in orderEvent.Bouquets)
             {
                 var bouquet = await unitOfWork.Bouquets.GetWithDetailsAsync(item.BouquetId);
@@ -51,26 +54,58 @@ namespace CatalogService.BLL.Consumers
                     continue;
                 }
 
-                foreach (var bf in bouquet.BouquetFlowers)
+                bouquetIdsToInvalidate.Add(bouquet.Id);
+
+                var size = bouquet.BouquetSizes.FirstOrDefault(s => s.SizeId == item.SizeId);
+                if (size == null)
                 {
-                    int required = bf.Quantity * item.Count;
-
-                    if (bf.Flower.Quantity < required)
-                    {
-                        var msg = $"Not enough flowers '{bf.Flower.Name}'. " +
-                                  $"Requested {required}, available {bf.Flower.Quantity}.";
-                        logger.LogError("Not enough flowers: {Msg}", msg);
-                        throw new InvalidOperationException(msg);
-                    }
-
-                    bf.Flower.Quantity -= required;
-                    bf.Flower.UpdatedAt = DateTime.UtcNow;
-
-                    unitOfWork.Flowers.Update(bf.Flower);
-
-                    logger.LogInformation("{Count} flowers '{FlowerName}' (ID: {FlowerId}) deducted", required, bf.Flower.Name, bf.Flower.Id);
+                    logger.LogWarning("Size {SizeId} for Bouquet {BouquetId} not found", item.SizeId, item.BouquetId);
+                    continue;
                 }
-                await cacheInvalidation.InvalidateByIdAsync(bouquet.Id);
+
+                foreach (var bsf in size.BouquetSizeFlowers)
+                {
+                    int totalRequired = bsf.Quantity * item.Count;
+                    if (flowerRequirements.TryGetValue(bsf.FlowerId, out int current))
+                    {
+                        flowerRequirements[bsf.FlowerId] = current + totalRequired;
+                    }
+                    else
+                    {
+                        flowerRequirements[bsf.FlowerId] = totalRequired;
+                    }
+                }
+            }
+
+            foreach (var req in flowerRequirements)
+            {
+                
+                var flower = await unitOfWork.Flowers.GetByIdTrackedAsync(req.Key); 
+                
+                if (flower == null)
+                {
+                    logger.LogWarning("Flower {FlowerId} not found during deduction", req.Key);
+                    continue;
+                }
+
+                if (flower.Quantity < req.Value)
+                {
+                    var msg = $"Not enough flowers '{flower.Name}'. Requested {req.Value}, available {flower.Quantity}.";
+                    logger.LogError("Not enough flowers: {Msg}", msg);
+                    throw new InvalidOperationException(msg);
+                }
+
+                flower.Quantity -= req.Value;
+                flower.UpdatedAt = DateTime.UtcNow;
+
+                unitOfWork.Flowers.Update(flower);
+
+                logger.LogInformation("{Count} flowers '{FlowerName}' (ID: {FlowerId}) deducted", req.Value, flower.Name, flower.Id);
+            }
+
+            foreach (var bouquetId in bouquetIdsToInvalidate)
+            {
+                await cacheInvalidation.InvalidateByIdAsync(bouquetId);
             }
 
             await unitOfWork.SaveChangesAsync();

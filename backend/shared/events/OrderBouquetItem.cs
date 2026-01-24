@@ -9,6 +9,7 @@ namespace shared.events
     public class OrderBouquetItem
     {
         public Guid BouquetId { get; set; }
+        public Guid SizeId { get; set; }
         public int Count { get; set; }
     }
 }
