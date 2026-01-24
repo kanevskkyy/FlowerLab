@@ -1,11 +1,11 @@
-﻿using System;
+﻿using EmailService.BLL.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UsersService.BLL.EmailService.DTO;
 
-namespace UsersService.BLL.EmailService.Interfaces
+namespace EmailService.BLL.Service.Interfaces
 {
     public interface IEmailService
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UsersService.BLL.EmailService
+namespace EmailService.BLL.Service
 {
     public class EmailProviderOptions
     {

@@ -10,7 +10,9 @@ using OrderService.DAL.UOW;
 using OrderService.Domain.Entities;
 using OrderService.Domain.QueryParams;
 using shared.cache;
-using shared.events;
+using shared.events.EmailEvents;
+using shared.events.OrderEvents;
+using shared.events.TelegramBotEvent;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -81,11 +83,6 @@ namespace OrderService.BLL.Services
             var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
                 ?? throw new NotFoundException($"Order with ID {orderId} was not found");
 
-            // Validation removed: Authorization is handled in the Controller.
-            // This check was preventing Admins from viewing guest orders because they don't provide a guestToken.
-            // if (order.UserId == null && guestToken != order.GuestToken)
-            //    throw new ValidationException("Invalid token for guest order.");
-
             return mapper.Map<OrderDetailDto>(order);
         }
 
@@ -149,11 +146,9 @@ namespace OrderService.BLL.Services
             }
 
 
-
             bool isFirstOrder = false;
             if (userId.HasValue)
             {
-                // Use the robust eligibility check (whitelist logic) instead of naive count
                 isFirstOrder = await CheckDiscountEligibilityAsync(userId.Value, cancellationToken);
             }
 
@@ -450,13 +445,8 @@ namespace OrderService.BLL.Services
 
             Console.WriteLine($"[CheckDiscount] User {userId} has {pagedOrders.TotalCount} total orders.");
 
-            // if (pagedOrders.TotalCount > 100) return false;
-
-            // Whitelist of statuses that mean the discount was successfully CONSUMED.
-            // Any other status (AwaitingPayment, Failed, Cancelled, New, Draft) means it wasn't used properly yet.
             var consumedStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Completed" };
 
-            // Check if ANY order has a "consumed" status
             bool hasSuccessfulOrders = pagedOrders.Items.Any(o => 
             {
                 Console.WriteLine($"[CheckDiscount] Order {o.Id} Status: {o.Status?.Name}");

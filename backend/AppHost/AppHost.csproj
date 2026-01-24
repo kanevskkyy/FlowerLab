@@ -23,6 +23,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\AggregatorService\AggregatorService.csproj" />
 	  <ProjectReference Include="..\CatalogService\CatalogService.API\CatalogService.API.csproj" />
+	  <ProjectReference Include="..\EmailService\EmailService.API\EmailService.API.csproj" />
 	  <ProjectReference Include="..\Gateway\Gateway.csproj" />
 	  <ProjectReference Include="..\NotificationService\Notify.csproj" />
 	  <ProjectReference Include="..\OrderService\OrderService.API\OrderService.API.csproj" />

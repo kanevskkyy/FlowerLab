@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SendGrid.Helpers.Errors.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UsersService.BLL.Exceptions;
 using UsersService.BLL.Models.Adresess;
 using UsersService.BLL.Models.Auth;
 using UsersService.BLL.Models.Users;

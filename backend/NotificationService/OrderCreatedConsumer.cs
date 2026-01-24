@@ -1,5 +1,5 @@
 ﻿using MassTransit;
-using shared.events;
+using shared.events.TelegramBotEvent;
 using System;
 using System.Collections.Generic;
 using System.Linq;

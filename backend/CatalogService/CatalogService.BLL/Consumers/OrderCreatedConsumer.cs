@@ -3,8 +3,8 @@ using CatalogService.Domain.Entities;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using shared.cache;
-using shared.events;
 using shared.events.EventService;
+using shared.events.OrderEvents;
 using System;
 using System.Threading.Tasks;
 
