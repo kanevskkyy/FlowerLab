@@ -27,7 +27,7 @@ export function useOrders(activeTab, TABS) {
         });
 
         const mappedOrders = (data.items || []).map((order) => {
-          const bouquets = order.items.map((item) => ({
+          const bouquets = (order.items || []).map((item) => ({
             id: item.id,
             title: item.bouquetName,
             qty: `${item.count} pc`,
@@ -37,11 +37,11 @@ export function useOrders(activeTab, TABS) {
             type: "bouquet",
           }));
 
-          const gifts = (order.orderGifts || []).map((g) => ({
+          const gifts = (order.orderGifts || order.gifts || []).map((g) => ({
             id: g.giftId,
             title: g.gift?.name || "Gift",
-            qty: `${g.orderedCount} pc`,
-            img: g.gift?.imageUrls?.[0] || null,
+            qty: `${g.orderedCount || g.count} pc`,
+            img: g.gift?.imageUrls?.[0] || g.gift?.imageUrl || null,
             price: g.gift?.price || 0,
             type: "gift",
           }));

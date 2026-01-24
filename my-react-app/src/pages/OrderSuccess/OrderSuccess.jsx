@@ -20,6 +20,12 @@ const OrderSuccess = () => {
     searchParams.get("orderId") || searchParams.get("orderNumber");
 
   const orderNumber = stateOrderNumber || paramOrderNumber;
+  const pendingGuestToken = localStorage.getItem("pendingGuestToken");
+  const guestToken =
+    location.state?.guestToken ||
+    searchParams.get("token") ||
+    searchParams.get("guestToken") ||
+    pendingGuestToken;
 
   const [orderDate, setOrderDate] = useState(null);
   const [orderStatus, setOrderStatus] = useState(null);
@@ -58,7 +64,10 @@ const OrderSuccess = () => {
 
     const fetchOrderData = async () => {
       try {
-        const fetchedOrder = await orderService.getById(orderNumber);
+        const fetchedOrder = await orderService.getById(
+          orderNumber,
+          guestToken,
+        );
         if (fetchedOrder) {
           setOrder(fetchedOrder);
           setOrderDate(fetchedOrder.createdAt);

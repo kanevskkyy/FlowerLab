@@ -17,7 +17,7 @@ export default function PersonalTab() {
     setIsPasswordModalOpen,
     passwordForm,
     onPasswordChange,
-    handlePasswordChange
+    handlePasswordChange,
   } = usePersonalSettings();
 
   return (
@@ -25,12 +25,19 @@ export default function PersonalTab() {
       <h1 className="cabinet-title">Personal information</h1>
 
       <div className="cabinet-avatar-section">
-        <div className="cabinet-avatar-wrapper" onClick={() => document.getElementById("avatar-input").click()}>
+        <div
+          className="cabinet-avatar-wrapper"
+          onClick={() => document.getElementById("avatar-input").click()}>
           {photoPreview ? (
-            <img src={photoPreview} alt="Avatar" className="cabinet-avatar-img" />
+            <img
+              src={photoPreview}
+              alt="Avatar"
+              className="cabinet-avatar-img"
+            />
           ) : (
             <div className="cabinet-avatar-placeholder">
-              {form.firstName?.charAt(0)}{form.lastName?.charAt(0)}
+              {form.firstName?.charAt(0)}
+              {form.lastName?.charAt(0)}
             </div>
           )}
           <div className="cabinet-avatar-overlay">
@@ -70,7 +77,7 @@ export default function PersonalTab() {
         </div>
       </div>
 
-      <div className="cabinet-grid-1">
+      <div className="cabinet-grid-1 cabinet-grid-single-left">
         <div className="cabinet-field">
           <label>Phone Number</label>
           <input
@@ -96,21 +103,19 @@ export default function PersonalTab() {
             <img src={LockIcon} className="cabinet-pill-icon" alt="" />
             <span className="cabinet-pill-text">Password</span>
           </div>
-          <button 
-            className="cabinet-pill-btn" 
+          <button
+            className="cabinet-pill-btn"
             type="button"
-            onClick={() => setIsPasswordModalOpen(true)}
-          >
+            onClick={() => setIsPasswordModalOpen(true)}>
             Change
           </button>
         </div>
       </div>
 
-      <button 
-        className="cabinet-save" 
+      <button
+        className="cabinet-save"
         type="button"
-        onClick={handleProfileUpdate}
-      >
+        onClick={handleProfileUpdate}>
         Save changes
       </button>
 
@@ -154,11 +159,10 @@ export default function PersonalTab() {
               </div>
 
               <div className="modal-actions">
-                <button 
-                  className="modal-btn-cancel" 
-                  type="button" 
-                  onClick={() => setIsPasswordModalOpen(false)}
-                >
+                <button
+                  className="modal-btn-cancel"
+                  type="button"
+                  onClick={() => setIsPasswordModalOpen(false)}>
                   Cancel
                 </button>
                 <button className="modal-btn-save" type="submit">

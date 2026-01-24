@@ -15,8 +15,9 @@ const orderService = {
   },
 
   // Get single order by ID
-  getById: async (id) => {
-    const response = await axiosClient.get(`/api/orders/${id}`);
+  getById: async (id, guestToken) => {
+    const config = guestToken ? { params: { guestToken } } : {};
+    const response = await axiosClient.get(`/api/orders/${id}`, config);
     return response.data; // Returns full order details
   },
 

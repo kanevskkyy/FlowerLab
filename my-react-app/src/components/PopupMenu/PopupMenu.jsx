@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../context/useSettings";
+import { useAuth } from "../../context/useAuth";
 import "./PopupMenu.css";
 
 export default function PopupMenu({ isOpen, onClose }) {
   const navigate = useNavigate();
   const { lang, toggleLang, currency, toggleCurrency } = useSettings();
+  const { user } = useAuth();
 
   // Стан для відкриття/закриття підменю каталогу
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
@@ -63,6 +65,11 @@ export default function PopupMenu({ isOpen, onClose }) {
           <li className="menu-item" onClick={() => handleNav("/about")}>
             About Us
           </li>
+          {!user && (
+            <li className="menu-item" onClick={() => handleNav("/track-order")}>
+              Track Order
+            </li>
+          )}
         </ul>
 
         {/* Settings */}
