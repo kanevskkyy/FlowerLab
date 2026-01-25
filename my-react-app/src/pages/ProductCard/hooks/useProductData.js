@@ -19,8 +19,6 @@ export const useProductData = (id) => {
   useEffect(() => {
     if (!id) return;
 
-    window.scrollTo(0, 0);
-
     const fetchProductData = async () => {
       setLoading(true);
       try {

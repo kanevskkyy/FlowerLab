@@ -17,11 +17,6 @@ import "./OrderPlacementRegistered.css";
 const OrderPlacement = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Scroll to top on mount
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const {
     methods,
     onSubmit,

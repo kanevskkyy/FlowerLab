@@ -5,6 +5,7 @@ import catalogService from "../../../services/catalogService";
 import orderService from "../../../services/orderService";
 import { useCart } from "../../../context/CartContext";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useCheckOut({ orderData }) {
   const navigate = useNavigate();
@@ -41,16 +42,9 @@ export function useCheckOut({ orderData }) {
       }
     } catch (error) {
       console.error("Order creation failed", error);
-      console.error("Error response:", error.response?.data);
-
-      const errorMessage =
-        typeof error.response?.data === "string"
-          ? error.response.data
-          : error.response?.data?.detail ||
-            error.response?.data?.title ||
-            "Failed to create order. Please try again.";
-
-      toast.error(errorMessage);
+      toast.error(
+        extractErrorMessage(error, "Failed to create order. Please try again."),
+      );
     } finally {
       setLoading(false);
     }

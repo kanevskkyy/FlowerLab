@@ -117,7 +117,6 @@ const ProductCardContent = () => {
   };
 
   const handleBackToCatalog = () => {
-    window.scrollTo(0, 0);
     navigate("/catalog");
   };
 

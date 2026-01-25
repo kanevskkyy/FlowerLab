@@ -36,6 +36,7 @@ import EmailConfirmationPending from "./pages/EmailConfirmation/EmailConfirmatio
 import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
 
 import ModalProvider from "./context/ModalProvider";
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 
 // Global handler for back-navigation reloads
 const BackNavigationHandler = () => {
@@ -70,6 +71,7 @@ const BackNavigationHandler = () => {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <BackNavigationHandler />
       <AuthProvider>
         <CartProvider>
