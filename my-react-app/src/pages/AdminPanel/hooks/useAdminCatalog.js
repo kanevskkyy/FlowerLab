@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminCatalog() {
   const [settings, setSettings] = useState({
@@ -36,7 +37,9 @@ export function useAdminCatalog() {
       });
     } catch (error) {
       console.error("Failed to fetch catalog settings:", error);
-      toast.error("Failed to load catalog settings");
+      toast.error(
+        extractErrorMessage(error, "Failed to load catalog settings"),
+      );
     } finally {
       setLoading(false);
     }

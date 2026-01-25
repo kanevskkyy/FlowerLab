@@ -2,7 +2,7 @@
 using System.Net;
 using OrderService.BLL.Exceptions;
 
-namespace CatalogService.API.Middleware
+namespace OrderService.API.Middleware
 {
     public class RequestLoggingMiddleware
     {
@@ -24,25 +24,6 @@ namespace CatalogService.API.Middleware
             try
             {
                 await _next(context);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled exception while processing request.");
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = ex switch
-                {
-                    NotFoundException => (int)HttpStatusCode.NotFound,
-                    AlreadyExistsException => (int)HttpStatusCode.Conflict,
-                    _ => (int)HttpStatusCode.InternalServerError
-                };
-
-                var response = new
-                {
-                    error = ex.Message,
-                    type = ex.GetType().Name
-                };
-
-                await context.Response.WriteAsJsonAsync(response);
             }
             finally
             {

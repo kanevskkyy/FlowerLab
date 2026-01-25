@@ -4,6 +4,7 @@ import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
 import { useConfirm } from "../../../context/ModalProvider";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 
 // ...
 
@@ -93,7 +94,7 @@ export function useAdminProducts(active) {
       }));
     } catch (error) {
       console.error(`Failed to fetch ${active}:`, error);
-      toast.error(`Failed to load ${active}`);
+      toast.error(extractErrorMessage(error, `Failed to load ${active}`));
     } finally {
       setLoadingProducts(false);
     }
@@ -147,7 +148,7 @@ export function useAdminProducts(active) {
           fetchProducts();
         } catch (error) {
           console.error("Failed to delete item:", error);
-          toast.error("Failed to delete item");
+          toast.error(extractErrorMessage(error, "Failed to delete item"));
         }
       },
     });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import reviewService from "../../../services/reviewService";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminReviews() {
   const [pendingReviews, setPendingReviews] = useState([]);
@@ -45,7 +46,7 @@ export function useAdminReviews() {
       }));
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
-      toast.error("Could not load reviews");
+      toast.error(extractErrorMessage(error, "Could not load reviews"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,7 @@ export function useAdminReviews() {
       toast.success("Review approved!");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to approve review");
+      toast.error(extractErrorMessage(error, "Failed to approve review"));
     }
   };
 
@@ -85,7 +86,7 @@ export function useAdminReviews() {
       toast.success("Review deleted");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to delete review");
+      toast.error(extractErrorMessage(error, "Failed to delete review"));
     }
   };
 

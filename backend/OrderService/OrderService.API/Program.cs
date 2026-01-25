@@ -1,4 +1,4 @@
-using CatalogService.API.Middleware;
+using OrderService.API.Middleware;
 using DotNetEnv;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -240,6 +240,7 @@ using (var scope = app.Services.CreateAsyncScope())
     await OrderSeeder.SeedAsync(db);
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 if (app.Environment.IsDevelopment())
