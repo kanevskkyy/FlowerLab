@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import catalogService from "../../../services/catalogService";
 import { useCart } from "../../../context/CartContext";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 export function useCatalog() {
   const { addToCart } = useCart();
@@ -11,8 +12,34 @@ export function useCatalog() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
-  // --- Derived State from URL ---
-  const searchQuery = searchParams.get("search") || "";
+  // --- Local Search State (for smooth typing) ---
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || "",
+  );
+  const debouncedSearchQuery = useDebounce(searchTerm.trim(), 500);
+
+  // Sync URL -> Local state (e.g. on browser back button)
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    if (urlSearch !== searchTerm) {
+      setSearchTerm(urlSearch);
+    }
+  }, [searchParams]);
+
+  // Sync Local debounced -> URL
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const currentUrlSearch = prev.get("search") || "";
+      if (debouncedSearchQuery !== currentUrlSearch) {
+        if (debouncedSearchQuery) prev.set("search", debouncedSearchQuery);
+        else prev.delete("search");
+        prev.set("page", "1");
+      }
+      return prev;
+    });
+  }, [debouncedSearchQuery]);
+
+  const searchQuery = searchTerm; // For the input value
   const sortBy = searchParams.get("sortBy") || "popularity";
   const currentPageRaw = parseInt(searchParams.get("page") || "1", 10);
   const currentPage = isNaN(currentPageRaw) ? 1 : currentPageRaw;
@@ -56,8 +83,8 @@ export function useCatalog() {
       setLoading(true);
       try {
         const params = {};
-        if (searchQuery && searchQuery.trim() !== "") {
-          params.Name = searchQuery;
+        if (debouncedSearchQuery && debouncedSearchQuery.trim() !== "") {
+          params.Name = debouncedSearchQuery;
         }
         params.SortBy = sortBy;
 
@@ -114,7 +141,6 @@ export function useCatalog() {
           });
 
           setProducts((prev) => {
-
             if (currentPage === 1 || prev.length === 0 || isRestoringAppend) {
               return mappedItems;
             }
@@ -151,17 +177,13 @@ export function useCatalog() {
     };
 
     fetchBouquets();
-  }, [filters, sortBy, currentPage, searchQuery]);
+  }, [filters, sortBy, currentPage, debouncedSearchQuery]);
 
   // --- Actions that update URL ---
 
   const setSearchQuery = (term) => {
-    setSearchParams((prev) => {
-      if (term) prev.set("search", term);
-      else prev.delete("search");
-      prev.set("page", "1");
-      return prev;
-    });
+    setSearchTerm(term);
+    // URL will be updated by the useEffect above once debounced
   };
 
   const setSortBy = (sort) => {

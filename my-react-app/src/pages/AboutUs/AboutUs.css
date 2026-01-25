@@ -338,7 +338,8 @@
 
 /* Анімація іконок телефону та Instagram */
 .footer-phone:has(.footer-link-single:hover) .phone-icon,
-.footer-instagram:has(.footer-link-single:hover) .instagram-icon {
+.footer-instagram:has(.footer-link-single:hover) .instagram-icon,
+.footer-telegram:has(.footer-link-single:hover) .telegram-icon {
   transform: scale(1.15);
 }
 

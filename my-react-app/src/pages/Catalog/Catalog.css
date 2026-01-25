@@ -176,6 +176,31 @@ body,
   gap: 30px;
 }
 
+.catalog-grid.empty {
+  display: block;
+}
+
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  background: #fdfdfd;
+  border-radius: 20px;
+  border: 1px dashed #eee;
+}
+
+.no-results p {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 10px;
+}
+
+.no-results span {
+  font-size: 15px;
+  color: #999;
+}
+
 /* ================== PRODUCT CARD ================== */
 .catalog-page .catalog-item {
   display: flex;

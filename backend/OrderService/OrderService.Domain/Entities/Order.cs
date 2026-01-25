@@ -15,6 +15,7 @@ namespace OrderService.Domain.Entities
         public Guid? UserId { get; set; }
         public string? UserFirstName { get; set; } = null!;
         public string? UserLastName { get; set; } = null!;
+        public string? UserPhotoUrl { get; set; }
         public string? Notes { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();

@@ -68,6 +68,11 @@ function AdminProductList({
       </div>
 
       <div className="admin-grid">
+        {products.length === 0 && (
+          <div className="admin-no-results">
+            <p>Нічого не знайдено за вашим запитом "{q}"</p>
+          </div>
+        )}
         {products.map((p) => {
           const tt = splitTitle(p.title);
           return (

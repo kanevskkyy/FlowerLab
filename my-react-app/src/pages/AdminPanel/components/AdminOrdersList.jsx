@@ -57,7 +57,13 @@ function AdminOrdersList({
               onClick={() => onOrderClick(o.id)}>
               <div className="admin-order-left">
                 <div className="admin-order-avatar">
-                  {o.avatar && <img src={o.avatar} alt="" />}
+                  {o.avatar ? (
+                    <img src={o.avatar} alt="" />
+                  ) : (
+                    <div className="avatar-placeholder">
+                      {o.customer?.charAt(0) || "U"}
+                    </div>
+                  )}
                 </div>
                 <div className="admin-order-mid">
                   <div className="admin-order-title">{o.title}</div>

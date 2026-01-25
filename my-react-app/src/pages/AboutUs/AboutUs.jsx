@@ -9,6 +9,7 @@ import Footer from "../../components/Footer/Footer";
 import LocationIcon from "../../assets/icons/location-icon.svg";
 import PhoneIcon from "../../assets/icons/phone-icon.svg";
 import InstagramIcon from "../../assets/icons/instagram-icon.svg";
+import TelegramIcon from "../../assets/icons/telegram-icon.svg";
 import SparklesIcon from "../../assets/icons/sparkles-icon.svg";
 import FlowerIcon from "../../assets/icons/flower-icon.svg";
 import HandIcon from "../../assets/icons/hand-icon.svg";
@@ -203,6 +204,21 @@ const AboutUs = () => {
                 rel="noopener noreferrer"
                 className="footer-link-single">
                 <p>@flowerlab_vlada</p>
+              </a>
+            </div>
+
+            <div className="info-item footer-telegram">
+              <img
+                src={TelegramIcon}
+                className="footer-icon telegram-icon"
+                alt="Telegram"
+              />
+              <a
+                href="https://t.me/flower_lab_vlada"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link-single">
+                <p>@flower_lab_vlada</p>
               </a>
             </div>
           </div>

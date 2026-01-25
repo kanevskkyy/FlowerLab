@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
 import { useConfirm } from "../../../context/ModalProvider";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 // ...
 
@@ -12,6 +13,7 @@ export function useAdminProducts(active) {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [q, setQ] = useState("");
+  const debouncedQ = useDebounce(q.trim(), 500);
 
   const [pagination, setPagination] = useState({
     pageNumber: 1,
@@ -26,10 +28,9 @@ export function useAdminProducts(active) {
       let data = [];
 
       const params = {
-        pageNumber: isLoadMore ? pagination.pageNumber : 1,
-        pageSize: pagination.pageSize,
-        // Assuming your catalogService methods support params. If not, we might need to update catalogService too.
-        // Based on typical patterns here, they often do or we need to pass query string manually if service is simple.
+        Page: isLoadMore ? pagination.pageNumber : 1,
+        PageSize: pagination.pageSize,
+        Name: debouncedQ || undefined,
       };
 
       // NOTE: We're assuming catalogService.getBouquets() accepts params object.
@@ -100,12 +101,12 @@ export function useAdminProducts(active) {
 
   useEffect(() => {
     if (active === "bouquets" || active === "gifts") {
-      // Reset pagination on tab change
+      // Reset pagination on tab or search change
       setPagination((p) => ({ ...p, pageNumber: 1 }));
     }
-  }, [active]);
+  }, [active, debouncedQ]);
 
-  // Initial fetch when active changes or page number resets to 1
+  // Initial fetch when active changes, page number resets to 1, or search query changes
   useEffect(() => {
     if (
       (active === "bouquets" || active === "gifts") &&
@@ -113,7 +114,7 @@ export function useAdminProducts(active) {
     ) {
       fetchProducts(false);
     }
-  }, [active, pagination.pageNumber === 1]); // Simplified dependency logic
+  }, [active, pagination.pageNumber, debouncedQ]); // Add pagination.pageNumber and debouncedQ to dependencies
 
   const loadMore = () => {
     if (pagination.pageNumber < pagination.totalPages && !loadingProducts) {
@@ -160,16 +161,17 @@ export function useAdminProducts(active) {
     navigate(`/admin/${active}/edit/${product.id}`);
   };
 
-  const filteredProducts = useMemo(() => {
-    let data = products;
-    // Filtering logic would go here if we had distinct API or properties
-    const s = q.trim().toLowerCase();
-    if (!s) return data;
-    return data.filter((b) => b.title.toLowerCase().includes(s));
+  const finalProducts = useMemo(() => {
+    if (active === "gifts") {
+      const s = q.trim().toLowerCase();
+      if (!s) return products;
+      return products.filter((b) => b.title.toLowerCase().includes(s));
+    }
+    return products;
   }, [q, products, active]);
 
   return {
-    products: filteredProducts,
+    products: finalProducts,
     loadingProducts,
     q,
     setQ,

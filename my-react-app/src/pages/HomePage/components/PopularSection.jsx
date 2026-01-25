@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import ShoppingBagIcon from "../../../assets/icons/ShoppingBagIcon.svg";
-import toast from "react-hot-toast";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -54,11 +53,12 @@ function PopularSection({ items, onAddToCart, isLoading, error }) {
 
                     <span
                       className="shopping-bag-icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAddToCart(item);
-                        toast.success(`${item.title} added to cart!`);
-                      }}>
+                      // onClick={(e) => {
+                      //   e.stopPropagation();
+                      //   onAddToCart(item);
+                      //   toast.success(`${item.title} added to cart!`);
+                      // }}
+                    >
                       <img src={ShoppingBagIcon} alt="Cart" />
                     </span>
                   </div>

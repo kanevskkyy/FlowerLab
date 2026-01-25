@@ -100,7 +100,9 @@ export function useAdminOrders() {
             minute: "2-digit",
           }),
           total: `${order.totalPrice} ₴`,
-          avatar: order.items?.[0]?.bouquetImage || null,
+          avatar:
+            order.userPhotoUrl ||
+            "https://res.cloudinary.com/dg9clyn4k/image/upload/v1763712578/order-service/gifts/mpfiss97mfebcqwm6elb.jpg",
           status: order.status, // KEEP OBJECT {id, name}
           rawDate: new Date(
             order.status?.createdAt || order.createdAt || Date.now(),

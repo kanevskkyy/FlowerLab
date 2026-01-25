@@ -4,6 +4,7 @@ import orderService from "../../../services/orderService";
 export function useOrders(activeTab, TABS) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [sort, setSort] = useState("DateDesc");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [pagination, setPagination] = useState({
     pageNumber: 1,
@@ -14,6 +15,8 @@ export function useOrders(activeTab, TABS) {
 
   const fetchOrders = useCallback(
     async (isLoadMore = false) => {
+      const pageToFetch = isLoadMore ? pagination.pageNumber : 1;
+
       if (isLoadMore) {
         setIsLoadingMore(true);
       } else {
@@ -22,8 +25,9 @@ export function useOrders(activeTab, TABS) {
 
       try {
         const data = await orderService.getMyOrders({
-          pageNumber: pagination.pageNumber,
-          pageSize: pagination.pageSize,
+          PageNumber: pageToFetch,
+          PageSize: pagination.pageSize,
+          Sort: sort,
         });
 
         const mappedOrders = (data.items || []).map((order) => {
@@ -82,7 +86,7 @@ export function useOrders(activeTab, TABS) {
         setPagination((prev) => ({
           ...prev,
           totalCount: data.totalCount || 0,
-          totalPages: Math.ceil((data.totalCount || 0) / prev.pageSize),
+          totalPages: data.totalPages || 1,
         }));
       } catch (error) {
         console.error("Failed to fetch orders:", error);
@@ -91,8 +95,13 @@ export function useOrders(activeTab, TABS) {
         setIsLoadingMore(false);
       }
     },
-    [pagination.pageNumber, pagination.pageSize],
+    [pagination.pageNumber, pagination.pageSize, sort],
   );
+
+  // Sync pagination reset when sort changes
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageNumber: 1 }));
+  }, [sort]);
 
   useEffect(() => {
     if (activeTab === TABS.ORDERS) {
@@ -116,5 +125,7 @@ export function useOrders(activeTab, TABS) {
     isLoadingMore,
     hasNextPage: pagination.pageNumber < pagination.totalPages,
     loadMore,
+    sort,
+    setSort,
   };
 }
