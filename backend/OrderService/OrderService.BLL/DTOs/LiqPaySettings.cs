@@ -12,5 +12,6 @@ namespace OrderService.BLL.DTOs
         public string PrivateKey { get; set; } = null!;
         public string ServerUrl { get; set; } = string.Empty;
         public string SuccessUrl { get; set; } = string.Empty;
+        public bool IsSandbox { get; set; }
     }
 }

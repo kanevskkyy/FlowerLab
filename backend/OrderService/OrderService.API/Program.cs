@@ -89,6 +89,7 @@ builder.Services.Configure<LiqPaySettings>(options =>
     options.PrivateKey = liqPayPrivate;
     options.ServerUrl = liqPayServerUrl;
     options.SuccessUrl = liqPaySuccessUrl;
+    options.IsSandbox = bool.Parse(Env.GetString("LIQPAY_IS_SANDBOX") ?? "false");
 });
 
 builder.Services.AddScoped<ILiqPayService, LiqPayService>();

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -14,7 +14,6 @@ const OrderSuccess = () => {
   const { user } = useAuth();
   const { orderNumber: stateOrderNumber } = location.state || {};
 
-  // Support URL query params for payment callbacks (e.g. ?orderId=...)
   const searchParams = new URLSearchParams(location.search);
   const paramOrderNumber =
     searchParams.get("orderId") || searchParams.get("orderNumber");
@@ -30,7 +29,8 @@ const OrderSuccess = () => {
   const [orderDate, setOrderDate] = useState(null);
   const [orderStatus, setOrderStatus] = useState(null);
   const [order, setOrder] = useState(null);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(!!paramOrderNumber);
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
     const pendingOrderId = localStorage.getItem("pendingOrder");
@@ -52,14 +52,18 @@ const OrderSuccess = () => {
     if (location.state?.mockOrder) {
       setOrderDate(location.state.mockOrder.createdAt);
       setOrderStatus(location.state.mockOrder.status);
+      setHasFetched(true);
       return;
     }
 
-    if (!orderNumber) return;
+    if (!orderNumber) {
+      setHasFetched(true);
+      return;
+    }
 
     let pollInterval = null;
     let pollCount = 0;
-    const maxPolls = 5;
+    const maxPolls = 15; // Increased to 45 seconds total (15 * 3s)
 
     const fetchOrderData = async () => {
       try {
@@ -70,36 +74,42 @@ const OrderSuccess = () => {
         if (fetchedOrder) {
           setOrder(fetchedOrder);
           setOrderDate(fetchedOrder.createdAt);
-          const status = fetchedOrder.status?.name || fetchedOrder.status;
-          setOrderStatus(status);
+          const rawStatus = fetchedOrder.status?.name || fetchedOrder.status;
+          const status =
+            typeof rawStatus === "string" ? rawStatus.toLowerCase() : "";
 
-          if (status === "AwaitingPayment") {
-            // Only poll if we have an orderId in URL (likely just redirected from LiqPay)
-            if (paramOrderNumber && pollCount < maxPolls) {
-              setIsVerifying(true);
-              pollCount++;
-              pollInterval = setTimeout(fetchOrderData, 3000);
-            } else {
-              setIsVerifying(false);
-              navigate("/checkout", {
-                state: {
-                  orderData: {
-                    id: fetchedOrder.id,
-                    total: fetchedOrder.totalPrice,
-                    createdAt: fetchedOrder.createdAt,
-                    guestToken: fetchedOrder.guestToken,
-                  },
-                },
-                replace: true,
-              });
-            }
+          setOrderStatus(rawStatus);
+
+          const successState = [
+            "pending",
+            "completed",
+            "processing",
+            "delivering",
+            "wait_accept",
+            "sandbox",
+          ].includes(status);
+
+          if (
+            status === "awaitingpayment" &&
+            paramOrderNumber &&
+            pollCount < maxPolls
+          ) {
+            setIsVerifying(true);
+            pollCount++;
+            pollInterval = setTimeout(fetchOrderData, 3000);
           } else {
             setIsVerifying(false);
+            setHasFetched(true);
             if (pollInterval) clearTimeout(pollInterval);
           }
+        } else {
+          console.warn(`[OrderSuccess] Order not found in API response.`);
+          setHasFetched(true);
+          setIsVerifying(false);
         }
       } catch (error) {
-        console.error("Failed to fetch order details", error);
+        console.error("[OrderSuccess] Error during fetch:", error);
+        setHasFetched(true);
         setIsVerifying(false);
       }
     };
@@ -111,8 +121,31 @@ const OrderSuccess = () => {
     };
   }, [orderNumber, paramOrderNumber, guestToken, navigate]);
 
+  const statusNormalized =
+    typeof orderStatus === "string" ? orderStatus.toLowerCase() : "";
+
   const isFailure =
-    orderStatus === "PaymentFailed" || orderStatus === "Cancelled";
+    hasFetched &&
+    !isVerifying &&
+    (statusNormalized === "paymentfailed" ||
+      statusNormalized === "cancelled" ||
+      statusNormalized === "failure" ||
+      statusNormalized === "error" ||
+      (statusNormalized === "awaitingpayment" && paramOrderNumber));
+
+  const isSuccess =
+    hasFetched &&
+    !isVerifying &&
+    !isFailure &&
+    ([
+      "pending",
+      "completed",
+      "processing",
+      "delivering",
+      "wait_accept",
+      "sandbox",
+    ].includes(statusNormalized) ||
+      !paramOrderNumber);
 
   const handleRetryPayment = () => {
     if (order) {
@@ -196,7 +229,9 @@ const OrderSuccess = () => {
               ? "Verifying Payment..."
               : isFailure
                 ? "Payment Failed"
-                : "Thank You!"}
+                : isSuccess
+                  ? "Thank You!"
+                  : "Processing..."}
           </h1>
 
           <p className="success-message">
@@ -204,16 +239,18 @@ const OrderSuccess = () => {
               ? "We are checking your payment status with the bank. Please wait a moment."
               : isFailure
                 ? "We could not process your payment. Please try again."
-                : "Your order has been placed successfully."}
+                : isSuccess
+                  ? "Your order has been placed successfully."
+                  : "Please wait while we finalize your order."}
           </p>
 
-          {!isVerifying && (
+          {isSuccess && (
             <p className="email-note">
               You will receive an email with the order details.
             </p>
           )}
 
-          {isFailure && !isVerifying && (
+          {isFailure && (
             <button
               className="continue-btn retry-btn"
               onClick={handleRetryPayment}

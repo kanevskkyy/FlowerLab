@@ -18,7 +18,7 @@ namespace OrderService.BLL.Services
         {
             settings = options.Value;
             liqPayClient = new LiqPayClient(settings.PublicKey, settings.PrivateKey);
-            liqPayClient.IsCnbSandbox = true;
+            liqPayClient.IsCnbSandbox = settings.IsSandbox;
         }
 
         public string GeneratePaymentUrl(Guid orderId, decimal amount, string description)
@@ -29,7 +29,7 @@ namespace OrderService.BLL.Services
                 Amount = (double)amount,
                 Currency = "UAH",
                 Description = description,
-                OrderId = orderId.ToString(),
+                OrderId = $"{orderId}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
                 ServerUrl = settings.ServerUrl,
                 ResultUrl = $"{settings.SuccessUrl}?orderId={orderId}",
                 Language = LiqPayRequestLanguage.UK

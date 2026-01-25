@@ -115,6 +115,8 @@ namespace OrderService.API.Controllers
         }
 
 
+
+
         [HttpPost("liqpay-callback")]
         [AllowAnonymous]
         public async Task<IActionResult> LiqPayCallback([FromForm] string data, [FromForm] string signature, CancellationToken cancellationToken)
@@ -138,9 +140,6 @@ namespace OrderService.API.Controllers
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
             var role = User.FindFirstValue(ClaimTypes.Role);
 
-            // We need to fetch order first to check ownership
-            // Optimally, DeleteAsync could handle this check if passed userId/token, but strict layering differs.
-            // For now, let's trust the service or doing a check here.
             var order = await orderService.GetByIdAsync(id, guestToken, cancellationToken);
             
             if (role != "Admin" && order.UserId != userId && order.GuestToken != guestToken)
