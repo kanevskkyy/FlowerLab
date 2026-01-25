@@ -74,13 +74,18 @@ const CartPopup = ({ isOpen, onClose }) => {
                     <div className="qty-controls">
                       <button
                         className="qty-btn"
-                        onClick={() => decreaseQty(item.id)}>
+                        onClick={() => decreaseQty(item.id)}
+                        disabled={item.qty <= 1}>
                         −
                       </button>
                       <span className="qty-value">{item.qty || 1}</span>
                       <button
                         className="qty-btn"
-                        onClick={() => increaseQty(item.id)}>
+                        onClick={() => increaseQty(item.id)}
+                        disabled={
+                          item.maxStock !== undefined &&
+                          item.qty >= item.maxStock
+                        }>
                         +
                       </button>
 
@@ -91,6 +96,18 @@ const CartPopup = ({ isOpen, onClose }) => {
                         <img src={TrashIcon} alt="Remove" />
                       </button>
                     </div>
+                    {item.maxStock !== undefined &&
+                      item.qty >= item.maxStock && (
+                        <p
+                          className="stock-limit-msg"
+                          style={{
+                            fontSize: "12px",
+                            color: "#d46aac",
+                            marginTop: "5px",
+                          }}>
+                          Maximum available quantity reached
+                        </p>
+                      )}
                   </div>
                 </div>
               ))}

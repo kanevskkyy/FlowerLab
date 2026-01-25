@@ -30,6 +30,7 @@ const OrderSuccess = () => {
   const [orderDate, setOrderDate] = useState(null);
   const [orderStatus, setOrderStatus] = useState(null);
   const [order, setOrder] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     const pendingOrderId = localStorage.getItem("pendingOrder");
@@ -45,7 +46,7 @@ const OrderSuccess = () => {
       localStorage.removeItem("order_selectedGifts");
       localStorage.removeItem("order_isCardAdded");
     }
-  }, [clearCart, stateOrderNumber, orderNumber, paramOrderNumber, user]);
+  }, [clearCart, stateOrderNumber, orderNumber, user]);
 
   useEffect(() => {
     if (location.state?.mockOrder) {
@@ -55,6 +56,10 @@ const OrderSuccess = () => {
     }
 
     if (!orderNumber) return;
+
+    let pollInterval = null;
+    let pollCount = 0;
+    const maxPolls = 5;
 
     const fetchOrderData = async () => {
       try {
@@ -69,26 +74,42 @@ const OrderSuccess = () => {
           setOrderStatus(status);
 
           if (status === "AwaitingPayment") {
-            navigate("/checkout", {
-              state: {
-                orderData: {
-                  id: fetchedOrder.id,
-                  total: fetchedOrder.totalPrice,
-                  createdAt: fetchedOrder.createdAt,
-                  guestToken: fetchedOrder.guestToken,
+            // Only poll if we have an orderId in URL (likely just redirected from LiqPay)
+            if (paramOrderNumber && pollCount < maxPolls) {
+              setIsVerifying(true);
+              pollCount++;
+              pollInterval = setTimeout(fetchOrderData, 3000);
+            } else {
+              setIsVerifying(false);
+              navigate("/checkout", {
+                state: {
+                  orderData: {
+                    id: fetchedOrder.id,
+                    total: fetchedOrder.totalPrice,
+                    createdAt: fetchedOrder.createdAt,
+                    guestToken: fetchedOrder.guestToken,
+                  },
                 },
-              },
-              replace: true,
-            });
+                replace: true,
+              });
+            }
+          } else {
+            setIsVerifying(false);
+            if (pollInterval) clearTimeout(pollInterval);
           }
         }
       } catch (error) {
         console.error("Failed to fetch order details", error);
+        setIsVerifying(false);
       }
     };
 
     fetchOrderData();
-  }, [orderNumber, location.state, navigate]);
+
+    return () => {
+      if (pollInterval) clearTimeout(pollInterval);
+    };
+  }, [orderNumber, paramOrderNumber, guestToken, navigate]);
 
   const isFailure =
     orderStatus === "PaymentFailed" || orderStatus === "Cancelled";
@@ -114,7 +135,9 @@ const OrderSuccess = () => {
       <main className="success-content">
         <div className="success-card">
           <div className="icon-container">
-            {isFailure ? (
+            {isVerifying ? (
+              <div className="status-verify-loader"></div>
+            ) : isFailure ? (
               <svg
                 width="80"
                 height="80"
@@ -168,19 +191,29 @@ const OrderSuccess = () => {
             )}
           </div>
 
-          <h1>{isFailure ? "Payment Failed" : "Thank You!"}</h1>
+          <h1>
+            {isVerifying
+              ? "Verifying Payment..."
+              : isFailure
+                ? "Payment Failed"
+                : "Thank You!"}
+          </h1>
 
           <p className="success-message">
-            {isFailure
-              ? "We could not process your payment. Please try again."
-              : "Your order has been placed successfully."}
+            {isVerifying
+              ? "We are checking your payment status with the bank. Please wait a moment."
+              : isFailure
+                ? "We could not process your payment. Please try again."
+                : "Your order has been placed successfully."}
           </p>
 
-          <p className="email-note">
-            You will receive an email with the order details.
-          </p>
+          {!isVerifying && (
+            <p className="email-note">
+              You will receive an email with the order details.
+            </p>
+          )}
 
-          {isFailure && (
+          {isFailure && !isVerifying && (
             <button
               className="continue-btn retry-btn"
               onClick={handleRetryPayment}
@@ -189,12 +222,14 @@ const OrderSuccess = () => {
             </button>
           )}
 
-          <button
-            className="continue-btn"
-            onClick={() => navigate("/")}
-            style={{ marginTop: isFailure ? "1rem" : "0" }}>
-            Continue Shopping
-          </button>
+          {!isVerifying && (
+            <button
+              className="continue-btn"
+              onClick={() => navigate("/")}
+              style={{ marginTop: isFailure ? "1rem" : "0" }}>
+              Continue Shopping
+            </button>
+          )}
         </div>
       </main>
       <Footer />

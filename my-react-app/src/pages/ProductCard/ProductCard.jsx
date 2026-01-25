@@ -84,6 +84,7 @@ const ProductCardContent = () => {
       sizeName: selectedSize,
       img: mainImageToShow,
       qty: 1,
+      maxStock: product.stock[selectedSize]?.max || 0,
     };
     const added = addToCart(cartProduct, openCart);
     if (added && openCart) {
