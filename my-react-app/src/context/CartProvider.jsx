@@ -73,20 +73,23 @@ export const CartProvider = ({ children }) => {
   const increaseQty = (id) => {
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, qty: (item.qty || 1) + 1 } : item,
+        item.id === id
+          ? {
+              ...item,
+              qty: Math.min(item.maxStock || Infinity, (item.qty || 1) + 1),
+            }
+          : item,
       ),
     );
   };
 
   const decreaseQty = (id) => {
     setCartItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, qty: Math.max(1, (item.qty || 1) - 1) }
-            : item,
-        )
-        .filter((item) => item.qty > 0),
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, qty: Math.max(1, (item.qty || 1) - 1) }
+          : item,
+      ),
     );
   };
 
