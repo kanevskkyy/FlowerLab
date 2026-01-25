@@ -70,12 +70,6 @@ namespace OrderService.DAL.Repositories
             int totalCount = await query.CountAsync(cancellationToken);
 
             List<Order> items = await query
-                .Include(o => o.Status)
-                .Include(o => o.Items)
-                    .ThenInclude(i => i.Flowers) 
-                .Include(o => o.OrderGifts)
-                    .ThenInclude(og => og.Gift)
-                .Include(o => o.DeliveryInformation)
                 .Skip((parameters.PageNumber - 1) * parameters.PageSize)
                 .Take(parameters.PageSize)
                 .ToListAsync(cancellationToken);

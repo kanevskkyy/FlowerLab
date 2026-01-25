@@ -4,8 +4,15 @@ import OrderIcon from "../../../assets/icons/orders.svg";
 import OrderCard from "./OrderCard";
 
 export default function OrdersTab({ activeTab, TABS }) {
-  const { orders, ordersLoading, hasNextPage, loadMore, isLoadingMore } =
-    useOrders(activeTab, TABS);
+  const {
+    orders,
+    ordersLoading,
+    hasNextPage,
+    loadMore,
+    isLoadingMore,
+    sort,
+    setSort,
+  } = useOrders(activeTab, TABS);
 
   const sentinelRef = useRef(null);
 
@@ -39,10 +46,15 @@ export default function OrdersTab({ activeTab, TABS }) {
 
         <div className="orders-sort">
           <span className="orders-sort-label">SORT BY</span>
-          <select className="orders-sort-select">
-            <option>Date</option>
-            <option>Status</option>
-            <option>Total</option>
+          <select
+            className="orders-sort-select"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}>
+            <option value="DateDesc">Date (Newest)</option>
+            <option value="DateAsc">Date (Oldest)</option>
+            <option value="TotalDesc">Total (High to Low)</option>
+            <option value="TotalAsc">Total (Low to High)</option>
+            <option value="StatusAsc">Status</option>
           </select>
         </div>
       </div>

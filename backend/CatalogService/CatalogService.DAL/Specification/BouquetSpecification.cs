@@ -2,6 +2,7 @@
 using CatalogService.Domain.QueryParametrs;
 using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace CatalogService.DAL.Specification
 {
@@ -23,8 +24,8 @@ namespace CatalogService.DAL.Specification
                 ) &&
                 (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity))) &&
                 (string.IsNullOrEmpty(parameters.Name) ||
-                    b.Name.ToLower().Contains(parameters.Name.ToLower()) ||
-                    b.BouquetFlowers.Any(bf => bf.Flower.Name.ToLower().Contains(parameters.Name.ToLower()))
+                    EF.Functions.ILike(b.Name, $"%{parameters.Name}%") ||
+                    b.BouquetFlowers.Any(bf => EF.Functions.ILike(bf.Flower.Name, $"%{parameters.Name}%"))
                 )
             )
         {

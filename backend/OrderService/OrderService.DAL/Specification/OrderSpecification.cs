@@ -16,7 +16,9 @@ namespace OrderService.DAL.Specification
         {
             Query.Include(o => o.Status)
                  .Include(o => o.Items)
+                    .ThenInclude(i => i.Flowers)
                  .Include(o => o.OrderGifts)
+                    .ThenInclude(og => og.Gift)
                  .Include(o => o.DeliveryInformation);
 
             if (parameters.UserId.HasValue)
@@ -33,29 +35,48 @@ namespace OrderService.DAL.Specification
                 Query.Where(o => o.Items.Any(i => i.BouquetId == parameters.BouquetId.Value));
             }
 
-
             if (!string.IsNullOrEmpty(parameters.Sort))
             {
-                switch (parameters.Sort)
+                switch (parameters.Sort.ToLower())
                 {
-                    case "DateAsc":
-                        Query.OrderBy(o => o.CreatedAt);
+                    case "dateasc":
+                        Query.OrderBy(o => o.CreatedAt).ThenBy(o => o.Id);
                         break;
-                    case "QtyDesc":
-                        Query.OrderByDescending(o => o.Items.Sum(i => i.Count));
+                    case "datedesc":
+                        Query.OrderByDescending(o => o.CreatedAt).ThenBy(o => o.Id);
                         break;
-                    case "QtyAsc":
-                        Query.OrderBy(o => o.Items.Sum(i => i.Count));
+                    case "totalasc":
+                        Query.OrderBy(o => o.TotalPrice).ThenBy(o => o.Id);
                         break;
-                    case "NameAsc":
-                        Query.OrderBy(o => o.UserFirstName).ThenBy(o => o.UserLastName);
+                    case "totaldesc":
+                        Query.OrderByDescending(o => o.TotalPrice).ThenBy(o => o.Id);
                         break;
-                    case "NameDesc":
-                        Query.OrderByDescending(o => o.UserFirstName).ThenByDescending(o => o.UserLastName);
+                    case "statusasc":
+                        Query.OrderBy(o => o.Status.Name == "AwaitingPayment" ? 0 :
+                                          o.Status.Name == "Pending" ? 1 :
+                                          o.Status.Name == "Processing" ? 2 :
+                                          o.Status.Name == "Shipped" ? 3 :
+                                          o.Status.Name == "Delivered" ? 4 :
+                                          o.Status.Name == "Completed" ? 5 :
+                                          o.Status.Name == "Refunded" ? 6 :
+                                          o.Status.Name == "Cancelled" ? 7 : 10)
+                             .ThenByDescending(o => o.CreatedAt)
+                             .ThenBy(o => o.Id);
                         break;
-                    case "DateDesc":
+                    case "qtydesc":
+                        Query.OrderByDescending(o => o.Items.Sum(i => i.Count)).ThenBy(o => o.Id);
+                        break;
+                    case "qtyasc":
+                        Query.OrderBy(o => o.Items.Sum(i => i.Count)).ThenBy(o => o.Id);
+                        break;
+                    case "nameasc":
+                        Query.OrderBy(o => o.UserFirstName).ThenBy(o => o.UserLastName).ThenBy(o => o.Id);
+                        break;
+                    case "namedesc":
+                        Query.OrderByDescending(o => o.UserFirstName).ThenByDescending(o => o.UserLastName).ThenBy(o => o.Id);
+                        break;
                     default:
-                        Query.OrderByDescending(o => o.CreatedAt);
+                        Query.OrderByDescending(o => o.CreatedAt).ThenBy(o => o.Id);
                         break;
                 }
             }

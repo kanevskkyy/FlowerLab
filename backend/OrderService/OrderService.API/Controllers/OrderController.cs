@@ -49,7 +49,8 @@ namespace OrderService.API.Controllers
             Guid? userId = string.IsNullOrEmpty(userIdString) ? null : Guid.Parse(userIdString);
             var firstName = User.FindFirstValue(ClaimTypes.GivenName);
             var lastName = User.FindFirstValue(ClaimTypes.Surname);
-            var phoneNumber = User.FindFirstValue(ClaimTypes.MobilePhone); 
+            var phoneNumber = User.FindFirstValue(ClaimTypes.MobilePhone);
+            var photoUrl = User.FindFirstValue("PhotoUrl");
 
             dto.FirstName ??= firstName;
             dto.LastName ??= lastName;
@@ -60,6 +61,7 @@ namespace OrderService.API.Controllers
                 firstName,
                 lastName,
                 phoneNumber, 
+                photoUrl,
                 dto,
                 personalDiscount: decimal.Parse(User.FindFirstValue("Discount") ?? "0"),
                 cancellationToken);

@@ -86,7 +86,7 @@ namespace OrderService.BLL.Services
             return mapper.Map<OrderDetailDto>(order);
         }
 
-        public async Task<OrderDetailDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
+        public async Task<OrderDetailDto> CreateAsync(Guid? userId, string? userFirstName, string? userLastName, string? userPhoneNumber, string? userPhotoUrl, OrderCreateDto dto, decimal personalDiscount, CancellationToken cancellationToken = default)
         {
             string? finalFirstName = userFirstName ?? dto.FirstName;
             string? finalLastName = userLastName ?? dto.LastName;
@@ -221,6 +221,7 @@ namespace OrderService.BLL.Services
                 UserId = userId,
                 UserFirstName = finalFirstName,
                 UserLastName = finalLastName,
+                UserPhotoUrl = userPhotoUrl,
                 PickupStoreAddress = dto.PickupStoreAddress,
                 Notes = dto.Notes,
                 PhoneNumber = finalPhoneNumber,

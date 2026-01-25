@@ -14,9 +14,10 @@ function CatalogGrid({ products, onOrder, loading }) {
 
   if (!products || products.length === 0) {
     return (
-      <div className="catalog-grid">
+      <div className="catalog-grid empty">
         <div className="no-results">
-          <p>No products found matching your criteria</p>
+          <p>Нічого не знайдено за вашим запитом</p>
+          <span>Спробуйте змінити фільтри або перевірити правопис</span>
         </div>
       </div>
     );

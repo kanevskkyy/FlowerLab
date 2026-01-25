@@ -1,12 +1,11 @@
 /* ================= FOOTER ================= */
 .footer {
   width: 100%;
-  background: #FBECF7 !important;
-  margin-top: 60px; /* Трохи менше відступ від контенту */
+  background: #fbecf7 !important;
   padding: 40px 60px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* Вирівнювання по верху */
+  align-items: center; /* Вирівнювання по верху */
   gap: 40px;
   border-top: 1px solid #f0e5ed;
 }
@@ -14,19 +13,20 @@
 .footer-col {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  flex: 1;
+  gap: 8px;
 }
 
 .footer-item {
   display: flex;
   justify-content: center;
-  align-items: center; 
+  align-items: center;
   gap: 12px;
 }
 
 /* Іконки */
-.footer-icon, .location-icon {
+.footer-icon,
+.location-icon,
+.telegram-icon {
   width: 24px;
   height: 24px;
   object-fit: contain;
@@ -52,7 +52,11 @@
 /* Hover effects */
 .footer-link-text:hover p,
 .footer-link-single:hover p {
-  color: #C86AAC;
+  color: #c86aac;
+}
+
+.footer-telegram:has(.footer-link-single:hover) .telegram-icon {
+  transform: scale(1.1);
 }
 
 /* ================= RESPONSIVE ================= */
@@ -73,7 +77,7 @@
     padding: 30px 20px;
     gap: 30px;
   }
-  
+
   .footer-col {
     width: 100%;
     gap: 14px;
@@ -82,7 +86,7 @@
   .footer-text p {
     font-size: 13px;
   }
-  
+
   /* Додатково: останній колонці можна дати відступ знизу 0 */
   .footer-col:last-child {
     margin-bottom: 0;

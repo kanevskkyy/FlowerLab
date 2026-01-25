@@ -15,6 +15,7 @@ namespace OrderService.BLL.DTOs.OrderDTOs
         public Guid? GuestToken { get; set; }
         public string UserFirstName { get; set; } = null!;
         public string UserLastName { get; set; } = null!;
+        public string? UserPhotoUrl { get; set; }
         public string? Notes { get; set; }
         public string? GiftMessage { get; set; }
         public string? PhoneNumber { get; set; }
