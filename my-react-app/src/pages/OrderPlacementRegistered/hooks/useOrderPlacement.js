@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 
 import { useCart } from "../../../context/CartContext";
 import { useAuth } from "../../../context/useAuth";
@@ -474,15 +475,7 @@ export const useOrderPlacement = () => {
       });
     } catch (error) {
       console.error("Failed to create order", error);
-
-      const errorMessage =
-        error.response?.data?.detail ||
-        error.response?.data?.title ||
-        (typeof error.response?.data === "string"
-          ? error.response?.data
-          : "Failed to create order");
-
-      toast.error(errorMessage);
+      toast.error(extractErrorMessage(error, "Failed to create order"));
     }
   };
 

@@ -23,10 +23,6 @@ const Gifts = () => {
   } = useGifts();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const handleAddToCart = (item) => {
     addToCart({
       id: item.id,
@@ -34,6 +30,7 @@ const Gifts = () => {
       price: `${item.price} ₴`, // API returns number
       img: item.imageUrl, // API returns 'imageUrl'
       qty: 1,
+      maxStock: item.availableCount,
       isGift: true,
     });
     toast.success(`${item.name} added to cart!`);
