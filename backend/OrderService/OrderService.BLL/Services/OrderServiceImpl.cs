@@ -300,36 +300,77 @@ namespace OrderService.BLL.Services
 
         public async Task ProcessPaymentCallbackAsync(string data, string signature, CancellationToken cancellationToken = default)
         {
-            if (!liqPayService.ValidateCallback(data, signature)) return;
-
-            var response = liqPayService.ParseCallback(data);
-            var orderId = Guid.Parse(response.OrderId);
-
-            var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
-                ?? throw new NotFoundException($"Order {orderId} was not found");
-
-            if (response.Status == LiqPayResponseStatus.Success || response.Status == LiqPayResponseStatus.Sandbox)
+            try
             {
-                var paidStatus = await unitOfWork.OrderStatuses.GetByNameAsync("Pending")
-                    ?? throw new NotFoundException("Status 'Pending' was not found");
-
-                if (order.Status.Name != "Pending")
+                if (!liqPayService.ValidateCallback(data, signature))
                 {
-                    order.StatusId = paidStatus.Id;
-                    order.Status = paidStatus;
-                    order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
-
-                    await FinalizeOrderAsync(order, cancellationToken);
-
-                    unitOfWork.Orders.Update(order);
-                    await unitOfWork.SaveChangesAsync(cancellationToken);
+                    return;
                 }
+
+                var response = liqPayService.ParseCallback(data);
+
+                var parts = response.OrderId.Split('_');
+                if (!Guid.TryParse(parts[0], out var orderId))
+                {
+                    return;
+                }
+
+                var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken);
+                
+                if (order == null)
+                {
+                    throw new NotFoundException($"Order {orderId} was not found in database.");
+                }
+
+                string statusStr = response.Status.ToString().ToLower();
+
+                if (statusStr == "success" || statusStr == "sandbox")
+                {
+                    var paidStatus = await unitOfWork.OrderStatuses.GetByNameAsync("Pending");
+                    if (paidStatus == null)
+                    {
+                        return;
+                    }
+
+                    if (order.Status.Name != "Pending")
+                    {
+                        order.StatusId = paidStatus.Id;
+                        order.Status = paidStatus;
+                        order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+
+                        await FinalizeOrderAsync(order, cancellationToken);
+
+                        unitOfWork.Orders.Update(order);
+                        await unitOfWork.SaveChangesAsync(cancellationToken);
+                    }
+                }
+                else if (statusStr == "failure" || statusStr == "error" || statusStr == "reversed")
+                {
+                    var failedStatus = await unitOfWork.OrderStatuses.GetByNameAsync("PaymentFailed");
+                    if (failedStatus == null)
+                    {
+                        return;
+                    }
+
+                    if (order.Status.Name != "PaymentFailed")
+                    {
+                        order.StatusId = failedStatus.Id;
+                        order.Status = failedStatus;
+                        order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+
+                        unitOfWork.Orders.Update(order);
+                        await unitOfWork.SaveChangesAsync(cancellationToken);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
         private async Task FinalizeOrderAsync(Order order, CancellationToken cancellationToken)
         {
-            // 1. Deduct Gift Stock
             foreach (var orderGift in order.OrderGifts)
             {
                 var gift = await unitOfWork.Gifts.GetByIdAsync(orderGift.GiftId);
@@ -345,7 +386,6 @@ namespace OrderService.BLL.Services
                 }
             }
 
-            // 2. Deactivate Reservations
             foreach (var reservation in order.Reservations)
             {
                 reservation.IsActive = false;
@@ -358,7 +398,6 @@ namespace OrderService.BLL.Services
                 unitOfWork.GiftReservations.Update(giftReservation);
             }
 
-            // 3. Publish Events (Flower deduction happens in CatalogService consumer)
             var orderCreatedEvent = new OrderCreatedEvent
             {
                 OrderId = order.Id,
@@ -423,7 +462,6 @@ namespace OrderService.BLL.Services
             order.StatusId = dto.StatusId;
             order.Status = status;
 
-            // Trigger stock deduction and events if status changes to Pending (manual payment confirmation)
             if (oldStatusName != "Pending" && status.Name == "Pending")
             {
                 await FinalizeOrderAsync(order, cancellationToken);
@@ -464,9 +502,6 @@ namespace OrderService.BLL.Services
             var order = await unitOfWork.Orders.GetByIdWithIncludesAsync(orderId, cancellationToken)
                 ?? throw new NotFoundException($"Order {orderId} was not found");
 
-            // Option 1: Only allow deleting AwaitingPayment orders
-            // if (order.Status.Name != "AwaitingPayment")
-            //     throw new ValidationException("Only unpaid orders can be deleted.");
 
             foreach (var reservation in order.Reservations)
             {

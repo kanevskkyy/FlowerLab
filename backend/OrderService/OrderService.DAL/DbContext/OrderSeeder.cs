@@ -14,18 +14,20 @@ namespace OrderService.DAL.DbContext
         public static async Task SeedAsync(OrderDbContext context)
         {
             // ================= OrderStatuses =================
-            if (!await context.OrderStatuses.AnyAsync())
+            var requiredStatuses = new[] { "Pending", "AwaitingPayment", "Completed", "Delivering", "PaymentFailed", "Cancelled" };
+            foreach (var statusName in requiredStatuses)
             {
-                var statuses = new List<OrderStatus>
+                if (!await context.OrderStatuses.AnyAsync(s => s.Name == statusName))
                 {
-                    new OrderStatus { Name = "Pending", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-                    new OrderStatus { Name = "AwaitingPayment", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-                    new OrderStatus { Name = "Completed", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-                    new OrderStatus { Name = "Delivering", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
-                };
-                await context.OrderStatuses.AddRangeAsync(statuses);
-                await context.SaveChangesAsync();
+                    context.OrderStatuses.Add(new OrderStatus
+                    {
+                        Name = statusName,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
             }
+            await context.SaveChangesAsync();
 
             // ================= Gifts =================
             if (!await context.Gifts.AnyAsync())
