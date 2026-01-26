@@ -204,7 +204,7 @@ export const useOrderPlacement = () => {
         setIsEligibleForDiscount(eligible);
       } catch (error) {
         console.error("Failed to check discount eligibility", error);
-        toast.error("Failed to check discount");
+        toast.error("Не вдалося перевірити знижку");
       }
     }
   }, [user]);
@@ -340,10 +340,10 @@ export const useOrderPlacement = () => {
 
         setNewAddress("");
         setIsAddingAddress(false);
-        toast.success("Address saved successfully!");
+        toast.success("Адресу успішно збережено!");
       } catch (error) {
         console.error("Failed to save address", error);
-        toast.error("Failed to save address (Login required?)");
+        toast.error("Не вдалося зберегти адресу (Необхідна авторизація?)");
       }
     } else {
       // Guest: Add locally to state
@@ -358,7 +358,7 @@ export const useOrderPlacement = () => {
 
       setNewAddress("");
       setIsAddingAddress(false);
-      toast.success("Address added for this order");
+      toast.success("Адресу додано до замовлення");
     }
   };
 
@@ -459,7 +459,7 @@ export const useOrderPlacement = () => {
         }
       }
 
-      toast.success("Order confirmed!");
+      toast.success("Замовлення підтверджено!");
 
       // Pass created order data including ID and createdAt to Checkout
       navigate("/checkout", {
@@ -475,7 +475,7 @@ export const useOrderPlacement = () => {
       });
     } catch (error) {
       console.error("Failed to create order", error);
-      toast.error(extractErrorMessage(error, "Failed to create order"));
+      toast.error(extractErrorMessage(error, "Не вдалося створити замовлення"));
     }
   };
 
@@ -483,7 +483,7 @@ export const useOrderPlacement = () => {
     methods, // Form methods to pass to FormProvider
     onSubmit: handleSubmit(onSubmit, (errors) => {
       console.error("Form Validation Errors:", errors);
-      toast.error("Please fill in all required fields correctly.");
+      toast.error("Будь ласка, заповніть всі обов'язкові поля коректно.");
     }),
 
     // Data

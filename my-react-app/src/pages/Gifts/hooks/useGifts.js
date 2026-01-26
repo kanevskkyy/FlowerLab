@@ -33,7 +33,7 @@ export function useGifts() {
       } catch (error) {
         console.error("Failed to fetch gifts:", error);
         setError(true);
-        toast.error("Failed to load gifts");
+        toast.error("Не вдалося завантажити подарунки");
       } finally {
         setLoading(false);
       }

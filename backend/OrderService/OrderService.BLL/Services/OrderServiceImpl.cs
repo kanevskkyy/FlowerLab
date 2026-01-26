@@ -159,13 +159,22 @@ namespace OrderService.BLL.Services
             List<OrderGift> orderGifts = new();
             if (dto.Gifts != null)
             {
+                // Fetch all active gift reservations to prevent overselling
+                var activeGiftReservations = await unitOfWork.GiftReservations.GetActiveAsync(now, cancellationToken);
+
                 foreach (var giftDto in dto.Gifts)
                 {
                     var gift = await unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId)
                         ?? throw new NotFoundException($"Gift with ID {giftDto.GiftId} was not found");
 
-                    if (gift.AvailableCount < giftDto.Count)
-                        throw new ValidationException($"Not enough gifts '{gift.Name}'. Requested {giftDto.Count}, available {gift.AvailableCount}.", "GIFT_STOCK_INSUFFICIENT");
+                    // Calculate how many are currently reserved by others (active and not expired)
+                    var reservedQty = activeGiftReservations
+                        .Where(r => r.GiftId == gift.Id)
+                        .Sum(r => r.Quantity);
+
+                    // Check availability: (Stock) must be >= (Requested + Reserved)
+                    if (gift.AvailableCount < (giftDto.Count + reservedQty))
+                        throw new ValidationException($"Not enough gifts '{gift.Name}'. Requested {giftDto.Count}, reserved {reservedQty}, available {gift.AvailableCount}.", "GIFT_STOCK_INSUFFICIENT");
 
                     orderGifts.Add(new OrderGift
                     {

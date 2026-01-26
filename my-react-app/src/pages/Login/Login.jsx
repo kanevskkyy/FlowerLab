@@ -54,7 +54,7 @@ export default function Login() {
         // Оновлюємо стан авторизації в контексті
         setAuth(accessToken);
 
-        toast.success("Welcome back!");
+        toast.success("З поверненням!");
         navigate("/cabinet", { replace: true });
       } else {
         // Якщо токен не прийшов (наприклад, null)
@@ -69,9 +69,9 @@ export default function Login() {
         error.response?.data?.error ||
         error.response?.data?.Detail ||
         error.response?.data?.message ||
-        "Login failed. Check your email or password.";
+        "Вхід не вдався. Перевірте email або пароль.";
 
-      toast.error(typeof errorMsg === "string" ? errorMsg : "Login failed.");
+      toast.error(typeof errorMsg === "string" ? errorMsg : "Вхід не вдався.");
     }
   };
 

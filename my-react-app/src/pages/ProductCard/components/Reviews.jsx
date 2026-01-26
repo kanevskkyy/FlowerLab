@@ -11,7 +11,9 @@ const Reviews = ({ reviews, onAddReview }) => {
 
   const handleWriteReview = () => {
     if (!user) {
-      toast.error("Please log in or register to leave a review.");
+      toast.error(
+        "Будь ласка, увійдіть або зареєструйтесь, щоб залишити відгук.",
+      );
       return;
     }
     onAddReview();

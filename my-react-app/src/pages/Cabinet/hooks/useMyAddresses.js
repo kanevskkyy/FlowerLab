@@ -29,11 +29,11 @@ export function useMyAddresses(activeTab, TABS) {
         isDefault: false,
       });
       setNewAddress("");
-      toast.success("Address added successfully!");
+      toast.success("Адресу успішно додано!");
       fetchAddresses();
     } catch (error) {
       console.error("Failed to save address:", error);
-      toast.error("Failed to save address.");
+      toast.error("Не вдалося зберегти адресу.");
     }
   };
 
@@ -46,11 +46,11 @@ export function useMyAddresses(activeTab, TABS) {
       onConfirm: async () => {
         try {
           await axiosClient.delete(`/api/users/me/addresses/${id}`);
-          toast.success("Address deleted!");
+          toast.success("Адресу видалено!");
           fetchAddresses();
         } catch (error) {
           console.error("Failed to delete address:", error);
-          toast.error("Failed to delete address.");
+          toast.error("Не вдалося видалити адресу.");
         }
       },
     });

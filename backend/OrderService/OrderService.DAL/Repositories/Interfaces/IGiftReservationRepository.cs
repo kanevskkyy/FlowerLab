@@ -10,5 +10,6 @@ namespace OrderService.DAL.Repositories.Interfaces
     public interface IGiftReservationRepository : IGenericRepository<GiftReservation>
     {
         Task<List<GiftReservation>> GetActiveByOrderIdAsync(Guid orderId, CancellationToken cancellationToken = default);
+        Task<List<GiftReservation>> GetActiveAsync(DateTime activeAt, CancellationToken cancellationToken = default);
     }
 }

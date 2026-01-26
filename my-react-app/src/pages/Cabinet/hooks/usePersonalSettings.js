@@ -5,7 +5,7 @@ import { useAuth } from "../../../context/useAuth";
 
 export function usePersonalSettings() {
   const { user, login } = useAuth();
-  
+
   const [form, setForm] = useState({
     firstName: user?.name || "",
     lastName: user?.lastName || "",
@@ -40,10 +40,10 @@ export function usePersonalSettings() {
       const formData = new FormData();
       formData.append("FirstName", form.firstName);
       formData.append("LastName", form.lastName);
-      
+
       const cleanPhone = form.phone.replace(/[\s-]/g, "");
       formData.append("PhoneNumber", cleanPhone);
-      
+
       if (selectedFile) {
         formData.append("Photo", selectedFile);
       }
@@ -57,21 +57,27 @@ export function usePersonalSettings() {
         await login(newToken);
       }
 
-      toast.success("Profile updated successfully! ✨");
+      toast.success("Профіль успішно оновлено! ✨");
     } catch (error) {
       console.error("Failed to update profile:", error);
       const responseData = error.response?.data;
       if (responseData?.errors) {
         if (Array.isArray(responseData.errors)) {
           const firstErr = responseData.errors[0];
-          toast.error(firstErr?.error || firstErr?.Error || "Validation error");
-        } else if (typeof responseData.errors === 'object') {
+          toast.error(
+            firstErr?.error || firstErr?.Error || "Помилка валідації",
+          );
+        } else if (typeof responseData.errors === "object") {
           const firstKey = Object.keys(responseData.errors)[0];
           const firstMsg = responseData.errors[firstKey][0];
           toast.error(`${firstKey}: ${firstMsg}`);
         }
       } else {
-        toast.error(responseData?.error || responseData?.message || "Failed to update profile");
+        toast.error(
+          responseData?.error ||
+            responseData?.message ||
+            "Не вдалося оновити профіль",
+        );
       }
     }
   };
@@ -82,7 +88,7 @@ export function usePersonalSettings() {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("New passwords do not match!");
+      toast.error("Нові паролі не співпадають!");
       return;
     }
 
@@ -93,12 +99,16 @@ export function usePersonalSettings() {
         confirmPassword: passwordForm.confirmPassword,
       });
 
-      toast.success("Password changed successfully! 🔐");
+      toast.success("Пароль успішно змінено! 🔐");
       setIsPasswordModalOpen(false);
-      setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordForm({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (error) {
       console.error("Failed to change password:", error);
-      toast.error(error.response?.data?.message || "Failed to change password");
+      toast.error(error.response?.data?.message || "Не вдалося змінити пароль");
     }
   };
 
@@ -109,12 +119,12 @@ export function usePersonalSettings() {
     onChange,
     handleFileChange,
     handleProfileUpdate,
-    
+
     // Password
     isPasswordModalOpen,
     setIsPasswordModalOpen,
     passwordForm,
     onPasswordChange,
-    handlePasswordChange
+    handlePasswordChange,
   };
 }

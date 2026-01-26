@@ -79,12 +79,12 @@ const OrderTrackingPage = () => {
         setOrders(validOrders);
         if (validOrders.length === 0 && stored.length > 0) {
           setError(
-            "Could not find any of your orders. They might have expired or were invalid.",
+            "Не вдалося знайти ваші замовлення. Вони могли застаріти або бути недійсними.",
           );
         }
       } catch (err) {
         console.error("History Fetch Error:", err);
-        setError("Failed to load your order history.");
+        setError("Не вдалося завантажити історію замовлень.");
       } finally {
         setLoading(false);
       }

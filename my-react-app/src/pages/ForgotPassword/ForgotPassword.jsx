@@ -30,13 +30,15 @@ export default function ForgotPassword() {
   const onSubmit = async (data) => {
     try {
       await axiosClient.post("/api/users/auth/forgot-password", data);
-      toast.success("Recovery link sent! Check your email.");
-      
+      toast.success(
+        "Посилання для відновлення надіслано! Перевірте ваш email.",
+      );
+
       // Optional: Navigate to home or stay here
-      // setTimeout(() => navigate("/"), 2000); 
+      // setTimeout(() => navigate("/"), 2000);
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || "Something went wrong.";
+      const msg = error.response?.data?.message || "Щось пішло не так.";
       toast.error(msg);
     }
   };

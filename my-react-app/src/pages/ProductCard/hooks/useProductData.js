@@ -93,7 +93,7 @@ export const useProductData = (id) => {
         setSelectedSize(defaultSize);
       } catch (error) {
         console.error("Failed to fetch product details:", error);
-        toast.error("Product not found");
+        toast.error("Товар не знайдено");
       } finally {
         setLoading(false);
       }

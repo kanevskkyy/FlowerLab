@@ -17,12 +17,12 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
     e.preventDefault();
 
     if (rating === 0) {
-      toast.error("Please select a rating.");
+      toast.error("Будь ласка, оцініть букет.");
       return;
     }
 
     if (!comment.trim()) {
-      toast.error("Please write a comment.");
+      toast.error("Будь ласка, напишіть коментар.");
       return;
     }
 
@@ -35,9 +35,7 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
       };
 
       await reviewService.createReview(reviewData);
-      toast.success(
-        "Review submitted successfully! It will appear after moderation.",
-      );
+      toast.success("Відгук надіслано! Він з'явиться після модерації.");
       onReviewSuccess();
       onClose();
       // Reset form
@@ -46,7 +44,7 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
     } catch (error) {
       console.error("Failed to submit review:", error);
 
-      let errorMessage = "Failed to submit review. Please try again.";
+      let errorMessage = "Не вдалося надіслати відгук. Спробуйте ще раз.";
       const errorResponse = error.response?.data;
       const errorString =
         typeof errorResponse === "string"
@@ -57,13 +55,12 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
         errorString.includes("not ordered") ||
         errorString.includes("forbidden")
       ) {
-        errorMessage =
-          "You can only leave a review for bouquets you have purchased!";
+        errorMessage = "Ви можете залишити відгук лише для придбаних букетів!";
       } else if (
         errorString.includes("already left a review") ||
         errorString.includes("already exists")
       ) {
-        errorMessage = "You have already reviewed this bouquet.";
+        errorMessage = "Ви вже залишили відгук для цього букету.";
       }
 
       toast.error(errorMessage);

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSettings } from "../../context/useSettings";
+
 import { useAuth } from "../../context/useAuth";
 import "./PopupMenu.css";
 
 export default function PopupMenu({ isOpen, onClose }) {
   const navigate = useNavigate();
-  const { lang, toggleLang, currency, toggleCurrency } = useSettings();
+
   const { user } = useAuth();
 
   // Стан для відкриття/закриття підменю каталогу
@@ -71,30 +71,6 @@ export default function PopupMenu({ isOpen, onClose }) {
             </li>
           )}
         </ul>
-
-        {/* Settings */}
-        <div className="popup-settings">
-          <div className="setting-row">
-            <span className="setting-label">Language:</span>
-            <button className="popup-text-btn" onClick={toggleLang}>
-              <span className={lang === "UA" ? "active-text" : ""}>UA</span>/
-              <span className={lang === "ENG" ? "active-text" : ""}>ENG</span>
-            </button>
-          </div>
-
-          <div className="setting-row">
-            <span className="setting-label">Currency:</span>
-            <button className="popup-text-btn" onClick={toggleCurrency}>
-              <span className={currency === "UAH" ? "active-text" : ""}>
-                UAH
-              </span>
-              /
-              <span className={currency === "USD" ? "active-text" : ""}>
-                USD
-              </span>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
