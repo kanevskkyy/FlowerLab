@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 export default function SEO({
   title = "FlowerLab Vlada | Flowers Delivery Chernivtsi",
   description = "FlowerLab Vlada - Premium bouquets, fresh flowers, and gifts with delivery in Chernivtsi. Order online for best quality and service.",
-  image = "/og-default.jpg", // We should ideally add a default OG image to public folder
+  image = "/seo-image.jpg", // We should ideally add a default OG image to public folder
   url,
   type = "website",
 }) {
