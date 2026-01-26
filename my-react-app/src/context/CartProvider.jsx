@@ -9,6 +9,7 @@ import {
 import { toast } from "react-hot-toast";
 import { CartContext } from "./CartContext";
 import { AuthContext } from "./authContext";
+import catalogService from "../services/catalogService";
 
 export const CartProvider = ({ children }) => {
   const { user } = useContext(AuthContext) || {};
@@ -57,6 +58,118 @@ export const CartProvider = ({ children }) => {
       console.error("Failed to save cart to local storage", error);
     }
   }, [cartItems, user]);
+
+  // 3. Validate Cart Stock on Load
+  useEffect(() => {
+    const validateStock = async () => {
+      if (cartItems.length === 0) return;
+
+      let updatedItems = [...cartItems];
+      let hasChanges = false;
+      const messages = [];
+
+      // We use a mapping to avoid fetching the same bouquet multiple times if multiple sizes are in cart
+      // Though usually users buy 1 type. Parallel fetching is fine for now.
+
+      await Promise.all(
+        updatedItems.map(async (item, index) => {
+          try {
+            let maxStock = 0;
+            let itemName = item.title;
+
+            if (item.isGift || (!item.bouquetId && item.id)) {
+              // It's a Gift
+              // item.id is the giftId
+              const giftId = item.id;
+              const giftData = await catalogService.getGiftById(giftId);
+              // Assuming backend returns object with availableCount or similar
+              // In OrderService we saw AvailableCount. Let's assume standard casing from JSON: availableCount
+              maxStock = giftData.availableCount;
+              itemName = giftData.name;
+            } else {
+              // It's a Bouquet
+              const bouquetId = item.bouquetId;
+              const bouquetData =
+                await catalogService.getBouquetById(bouquetId);
+
+              const sizeObj = bouquetData.sizes.find(
+                (s) => s.sizeId === item.sizeId || s.sizeName === item.sizeName,
+              );
+
+              if (sizeObj) {
+                maxStock = sizeObj.maxAssemblableCount;
+              } else {
+                // Size no longer exists?
+                maxStock = 0;
+              }
+              itemName = bouquetData.name;
+            }
+
+            // Update local maxStock knowledge
+            if (updatedItems[index].maxStock !== maxStock) {
+              updatedItems[index] = { ...updatedItems[index], maxStock };
+              hasChanges = true; // Even if qty doesn't change, we want to update maxStock for future + button clicks
+            }
+
+            // Validate Quantity
+            if (item.qty > maxStock) {
+              if (maxStock === 0) {
+                // Mark for deletion
+                updatedItems[index] = null; // Will filter later
+                messages.push(
+                  `"${itemName}" закінчився і був видалений з кошика.`,
+                );
+              } else {
+                updatedItems[index] = {
+                  ...updatedItems[index],
+                  qty: maxStock,
+                  maxStock,
+                };
+                messages.push(
+                  `Кількість "${itemName}" змінено на ${maxStock} через обмежений залишок.`,
+                );
+              }
+              hasChanges = true;
+            }
+          } catch (error) {
+            console.error(
+              `Failed to validate stock for item ${item.id}`,
+              error,
+            );
+            // If 404, maybe remove? For safety, leave as is or assume 0?
+            // If item not found, safest is to assume 0 to prevent broken orders.
+            if (error.response && error.response.status === 404) {
+              updatedItems[index] = null;
+              messages.push(
+                `Товар "${item.title || "item"}" більше не доступний.`,
+              );
+              hasChanges = true;
+            }
+          }
+        }),
+      );
+
+      // Race Condition Check:
+      // If the cart was cleared (e.g. by successful payment) while we were validating,
+      // localStorage will be empty. We should NOT restore the items.
+      // We need to check the CURRENT state in localStorage before applying updates.
+      const currentKey = getCartKey(user);
+      const currentStored = localStorage.getItem(currentKey);
+      if (!currentStored || JSON.parse(currentStored).length === 0) {
+        return;
+      }
+
+      if (hasChanges) {
+        const finalItems = updatedItems.filter(Boolean);
+        setCartItems(finalItems);
+        // Toast messages
+        messages.forEach((msg) => toast(msg, { icon: "⚠️" }));
+      }
+    };
+
+    validateStock();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount
 
   const addToCart = (product, openCart = true) => {
     if (cartItems.some((item) => item.id === product.id)) {
