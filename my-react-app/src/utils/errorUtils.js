@@ -1,11 +1,20 @@
-/**
- * Extracts a human-readable error message from an API error response.
- * Handles standard problem details, custom error objects, and validation dictionaries.
- *
- * @param {any} error The error object (usually from axios catch block)
- * @param {string} defaultMessage Fallback message if nothing specific is found
- * @returns {string} The extracted error message
- */
+const FRIENDLY_ERROR_MESSAGES = {
+  STOCK_INSUFFICIENT: "Вибачте, цей букет вже встигли забронювати.",
+  GIFT_STOCK_INSUFFICIENT:
+    "На жаль, на вибрану кількість подарунків не вистачає на складі.",
+  ORDER_ALREADY_PAID: "Це замовлення вже оплачено.",
+  INTERNAL_SERVER_ERROR: "Сталася технічна помилка. Спробуйте пізніше.",
+  NOT_FOUND: "Замовлення або товар не знайдено.",
+  ALREADY_EXISTS: "Такий запис уже існує.",
+  INVALID_GUEST_TOKEN: "Помилка авторизації гостьового замовлення.",
+  DUPLICATE_GIFTS:
+    "Не можна додавати однакові подарунки декілька разів як окремі позиції.",
+  CATALOG_CHECK_ERROR:
+    "Помилка при перевірці наявності букетів. Спробуйте ще раз.",
+  INVALID_PRICE: "Помилка ціноутворення. Зверніться в підтримку.",
+  VALIDATION_ERROR: "Будь ласка, перевірте правильність заповнення полів.",
+};
+
 export const extractErrorMessage = (
   error,
   defaultMessage = "Something went wrong",
@@ -14,47 +23,58 @@ export const extractErrorMessage = (
 
   const data = error.response?.data;
 
-  // 1. Explicit message field
+  if (data?.code) {
+
+    if (data.code === "VALIDATION_ERROR" && data.errors) {
+
+    } else if (FRIENDLY_ERROR_MESSAGES[data.code]) {
+      return FRIENDLY_ERROR_MESSAGES[data.code];
+    } else if (data.message && typeof data.message === "string") {
+      return data.message;
+    }
+  }
+
   if (data?.message && typeof data.message === "string") {
     return data.message;
   }
 
-  // 2. Problem Detail 'detail' field
+  if (data?.error && typeof data.error === "string") {
+    return data.error;
+  }
+
   if (data?.detail && typeof data.detail === "string") {
     return data.detail;
   }
 
-  // 3. Problem Detail 'title' field
   if (data?.title && typeof data.title === "string") {
-    // If it's a validation error, try to extract specific field error first
     if (data.errors && typeof data.errors === "object") {
       const firstKey = Object.keys(data.errors)[0];
       const firstErr = data.errors[firstKey];
       if (Array.isArray(firstErr) && firstErr.length > 0) {
         return firstErr[0];
       }
-      if (typeof firstErr === "string") {
+      if (typeof firstErr === "string" && firstErr.length > 0) {
         return firstErr;
       }
     }
-    return data.title;
+    if (
+      !data.title.toLowerCase().includes("validation errors") ||
+      !data.errors
+    ) {
+      return data.title;
+    }
   }
 
-  // 4. Raw string response
   if (typeof data === "string" && data.length > 0) {
     return data;
   }
 
-  // 5. Validation error dictionary (older format or ASP.NET Core default)
   if (data?.errors && typeof data.errors === "object") {
-    const firstKey = Object.keys(data.errors)[0];
-    const firstErr = data.errors[firstKey];
-    if (Array.isArray(firstErr) && firstErr.length > 0) {
-      return firstErr[0];
-    }
+    const errorValues = Object.values(data.errors).flat();
+    const firstStringErr = errorValues.find((e) => typeof e === "string");
+    if (firstStringErr) return firstStringErr;
   }
 
-  // 6. Generic Axios error message (e.g. Network Error)
   if (error.message && typeof error.message === "string") {
     return error.message;
   }

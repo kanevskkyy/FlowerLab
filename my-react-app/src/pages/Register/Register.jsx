@@ -61,12 +61,12 @@ export default function Register() {
       const authService = (await import("../../services/authService")).default;
       await authService.register(payload);
 
-      toast.success("Registration successful! Please check your email.");
+      toast.success("Реєстрація успішна! Будь ласка, перевірте ваш email.");
       navigate("/email-confirmation-pending", { state: { email: data.email } });
     } catch (error) {
       console.error("Registration error:", error);
 
-      let errorMsg = "Registration failed.";
+      let errorMsg = "Реєстрація не вдалася.";
 
       if (error.response?.data) {
         const data = error.response.data;
@@ -81,7 +81,7 @@ export default function Register() {
       }
 
       toast.error(
-        typeof errorMsg === "string" ? errorMsg : "Registration failed.",
+        typeof errorMsg === "string" ? errorMsg : "Реєстрація не вдалася.",
       );
     }
   };

@@ -25,18 +25,19 @@ export default function EmailConfirmationPending() {
 
   const handleResend = async () => {
     if (!email) {
-      toast.error("User email not found. Please try to log in.");
+      toast.error("Email користувача не знайдено. Спробуйте увійти.");
       return;
     }
 
     setLoading(true);
     try {
       await authService.resendConfirmationEmail(email);
-      toast.success("New confirmation link sent! 📧");
+      toast.success("Нове посилання для підтвердження надіслано! 📧");
       setCountdown(60);
     } catch (error) {
       console.error("Resend error:", error);
-      const msg = error.response?.data?.Message || "Failed to resend email.";
+      const msg =
+        error.response?.data?.Message || "Не вдалося надіслати email.";
       toast.error(msg);
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ using LiqPay.SDK.Dto.Enums;
 using MassTransit;
 using OrderService.BLL.DTOs.OrderDTOs;
 using OrderService.BLL.Exceptions;
+using ValidationException = OrderService.BLL.Exceptions.ValidationException;
 using OrderService.BLL.Services.Interfaces;
 using OrderService.DAL.Helpers;
 using OrderService.DAL.UOW;
@@ -58,10 +59,10 @@ namespace OrderService.BLL.Services
                 ?? throw new NotFoundException($"Order {orderId} was not found");
 
             if (order.UserId == null && guestToken != order.GuestToken)
-                throw new ValidationException("Invalid token for guest order.");
+                throw new ValidationException("Invalid token for guest order.", "INVALID_GUEST_TOKEN");
 
             if (order.Status.Name != "AwaitingPayment")
-                throw new ValidationException("Order is already paid or not available for payment.");
+                throw new ValidationException("Order is already paid or not available for payment.", "ORDER_ALREADY_PAID");
 
             return liqPayService.GeneratePaymentUrl(
                 order.Id,
@@ -118,7 +119,7 @@ namespace OrderService.BLL.Services
             }
             catch (RpcException ex)
             {
-                throw new ValidationException($"Error checking bouquets: {ex.Status.Detail}");
+                throw new ValidationException($"Error checking bouquets: {ex.Status.Detail}", "CATALOG_CHECK_ERROR");
             }
 
             var invalidItems = catalogResponse.OrderedResponseList_
@@ -129,7 +130,7 @@ namespace OrderService.BLL.Services
             {
                 var errors = string.Join("; ", invalidItems.Select(i =>
                     $"Bouquet '{i.BouquetName}' (size {i.SizeName}): {i.ErrorMessage}"));
-                throw new ValidationException($"Error checking bouquets: {errors}");
+                throw new ValidationException($"Error checking bouquets: {errors}", "STOCK_INSUFFICIENT");
             }
 
             var awaitingPaymentStatus = await unitOfWork.OrderStatuses.GetByNameAsync("AwaitingPayment");
@@ -153,18 +154,27 @@ namespace OrderService.BLL.Services
             }
 
             if (dto.Gifts != null && dto.Gifts.GroupBy(g => g.GiftId).Any(g => g.Count() > 1))
-                throw new ValidationException("Duplicate gifts are not allowed in the order.");
+                throw new ValidationException("Duplicate gifts are not allowed in the order.", "DUPLICATE_GIFTS");
 
             List<OrderGift> orderGifts = new();
             if (dto.Gifts != null)
             {
+                // Fetch all active gift reservations to prevent overselling
+                var activeGiftReservations = await unitOfWork.GiftReservations.GetActiveAsync(now, cancellationToken);
+
                 foreach (var giftDto in dto.Gifts)
                 {
                     var gift = await unitOfWork.Gifts.GetByIdAsync(giftDto.GiftId)
                         ?? throw new NotFoundException($"Gift with ID {giftDto.GiftId} was not found");
 
-                    if (gift.AvailableCount < giftDto.Count)
-                        throw new ValidationException($"Not enough gifts '{gift.Name}'. Requested {giftDto.Count}, available {gift.AvailableCount}.");
+                    // Calculate how many are currently reserved by others (active and not expired)
+                    var reservedQty = activeGiftReservations
+                        .Where(r => r.GiftId == gift.Id)
+                        .Sum(r => r.Quantity);
+
+                    // Check availability: (Stock) must be >= (Requested + Reserved)
+                    if (gift.AvailableCount < (giftDto.Count + reservedQty))
+                        throw new ValidationException($"Not enough gifts '{gift.Name}'. Requested {giftDto.Count}, reserved {reservedQty}, available {gift.AvailableCount}.", "GIFT_STOCK_INSUFFICIENT");
 
                     orderGifts.Add(new OrderGift
                     {
@@ -184,7 +194,7 @@ namespace OrderService.BLL.Services
                 var catalogItem = catalogResponse.OrderedResponseList_[i];
 
                 if (!decimal.TryParse(catalogItem.Price, out decimal price))
-                    throw new ValidationException($"Invalid price for bouquet {catalogItem.BouquetName}");
+                    throw new ValidationException($"Invalid price for bouquet {catalogItem.BouquetName}", "INVALID_PRICE");
 
                 var orderItem = new OrderItem
                 {
@@ -377,7 +387,7 @@ namespace OrderService.BLL.Services
                 if (gift != null)
                 {
                     if (gift.AvailableCount < orderGift.Count)
-                        throw new ValidationException($"Not enough gifts '{gift.Name}' to complete the order.");
+                        throw new ValidationException($"Not enough gifts '{gift.Name}' to complete the order.", "GIFT_STOCK_INSUFFICIENT");
 
                     gift.AvailableCount -= orderGift.Count;
                     gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();

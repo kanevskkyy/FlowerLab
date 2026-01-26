@@ -26,7 +26,7 @@ export function useCheckOut({ orderData }) {
       let guestToken = orderData.guestToken;
 
       if (!orderId) {
-        toast.error("Order ID is missing. Please restart checkout.");
+        toast.error("Номер замовлення відсутній. Перезапустіть оформлення.");
         setLoading(false);
         return;
       }
@@ -38,12 +38,15 @@ export function useCheckOut({ orderData }) {
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-        toast.error("Failed to generate payment link.");
+        toast.error("Не вдалося сформувати посилання на оплату.");
       }
     } catch (error) {
       console.error("Order creation failed", error);
       toast.error(
-        extractErrorMessage(error, "Failed to create order. Please try again."),
+        extractErrorMessage(
+          error,
+          "Не вдалося створити замовлення. Спробуйте ще раз.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -61,12 +64,12 @@ export function useCheckOut({ orderData }) {
         try {
           if (orderData?.id) {
             await orderService.deleteOrder(orderData.id, orderData.guestToken);
-            toast.success("Order cancelled and deleted.");
+            toast.success("Замовлення скасовано та видалено.");
           }
           navigate("/order-registered");
         } catch (error) {
           console.error("Failed to delete order", error);
-          toast.error("Failed to cancel order properly.");
+          toast.error("Не вдалося скасувати замовлення коректно.");
           navigate("/order-registered");
         }
       },

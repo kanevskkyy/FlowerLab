@@ -23,5 +23,12 @@ namespace OrderService.DAL.Repositories
                         .Where(gr => gr.OrderId == orderId && gr.IsActive)
                         .ToListAsync(cancellationToken);
         }
+
+        public async Task<List<GiftReservation>> GetActiveAsync(DateTime activeAt, CancellationToken cancellationToken = default)
+        {
+            return await context.Set<GiftReservation>()
+                .Where(r => r.IsActive && r.ExpiresAt > activeAt)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

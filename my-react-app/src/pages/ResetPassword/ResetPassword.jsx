@@ -51,7 +51,7 @@ export default function ResetPassword() {
     const userId = searchParams.get("userId");
 
     if (!token || !userId) {
-      toast.error("Invalid link parameters.");
+      toast.error("Недійсні параметри посилання.");
       return;
     }
 
@@ -60,14 +60,14 @@ export default function ResetPassword() {
         userId: userId,
         token: token,
         newPassword: data.password,
-        confirmPassword: data.password // Backend requires this for validation
+        confirmPassword: data.password, // Backend requires this for validation
       });
 
-      toast.success("Password successfully changed!");
+      toast.success("Пароль успішно змінено!");
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || "Failed to reset password.";
+      const msg = error.response?.data?.message || "Не вдалося скинути пароль.";
       toast.error(msg);
     }
   };
@@ -154,7 +154,6 @@ export default function ResetPassword() {
               disabled={isSubmitting}>
               {isSubmitting ? "Updating..." : "Set New Password"}
             </button>
-
           </form>
         </div>
       </main>

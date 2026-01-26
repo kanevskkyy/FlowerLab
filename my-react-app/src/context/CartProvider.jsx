@@ -60,7 +60,7 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, openCart = true) => {
     if (cartItems.some((item) => item.id === product.id)) {
-      toast.error("This item is already in your cart");
+      toast.error("Цей товар вже є у вашому кошику");
       return false;
     }
     setCartItems((prev) => [...prev, product]);

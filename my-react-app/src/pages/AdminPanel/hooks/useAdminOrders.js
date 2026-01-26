@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import orderService from "../../../services/orderService";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -123,7 +124,7 @@ export function useAdminOrders() {
         }));
       } catch (error) {
         console.error("Failed to fetch orders:", error);
-        toast.error("Failed to load orders");
+        toast.error(extractErrorMessage(error, "Failed to load orders"));
       } finally {
         setLoading(false);
         setDetailLoading(false);
@@ -178,7 +179,7 @@ export function useAdminOrders() {
       }
     } catch (error) {
       console.error("Failed to update status:", error);
-      toast.error("Failed to update status");
+      toast.error(extractErrorMessage(error, "Failed to update status"));
       // Revert on failure
       setOrders(originalOrders);
     }
