@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Context
@@ -93,20 +94,25 @@ namespace CatalogService.DAL.Context
 
             if (!await context.Bouquets.AnyAsync())
             {
-                var sSize = await context.Sizes.FirstAsync(s => s.Name["en"] == "S");
-                var mSize = await context.Sizes.FirstAsync(s => s.Name["en"] == "M");
-                var lSize = await context.Sizes.FirstAsync(s => s.Name["en"] == "L");
+                var allSizes = await context.Sizes.ToListAsync();
+                var allRecipients = await context.Recipients.ToListAsync();
+                var allFlowers = await context.Flowers.ToListAsync();
+                var allEvents = await context.Events.ToListAsync();
 
-                var mother = await context.Recipients.FirstAsync(r => r.Name["en"] == "For mother");
-                var father = await context.Recipients.FirstAsync(r => r.Name["en"] == "For father");
-                var friend = await context.Recipients.FirstAsync(r => r.Name["en"] == "For friend");
+                var sSize = allSizes.First(s => s.Name["en"] == "S");
+                var mSize = allSizes.First(s => s.Name["en"] == "M");
+                var lSize = allSizes.First(s => s.Name["en"] == "L");
 
-                var redRose = await context.Flowers.FirstAsync(f => f.Name["en"] == "Red Rose");
-                var whiteRose = await context.Flowers.FirstAsync(f => f.Name["en"] == "White Rose");
-                var pinkPeony = await context.Flowers.FirstAsync(f => f.Name["en"] == "Pink Peony");
+                var mother = allRecipients.First(r => r.Name["en"] == "For mother");
+                var father = allRecipients.First(r => r.Name["en"] == "For father");
+                var friend = allRecipients.First(r => r.Name["en"] == "For friend");
 
-                var birthday = await context.Events.FirstAsync(e => e.Name["en"] == "Birthday");
-                var anniversary = await context.Events.FirstAsync(e => e.Name["en"] == "Anniversary");
+                var redRose = allFlowers.First(f => f.Name["en"] == "Red Rose");
+                var whiteRose = allFlowers.First(f => f.Name["en"] == "White Rose");
+                var pinkPeony = allFlowers.First(f => f.Name["en"] == "Pink Peony");
+
+                var birthday = allEvents.First(e => e.Name["en"] == "Birthday");
+                var anniversary = allEvents.First(e => e.Name["en"] == "Anniversary");
 
                 var bouquets = new List<Bouquet>
                 {
@@ -196,24 +202,21 @@ namespace CatalogService.DAL.Context
 
             if (!await context.BouquetSizeFlowers.AnyAsync())
             {
-                var romanticBouquet = await context.Bouquets
+                // Завантажуємо всі букети з розмірами в пам'ять
+                var allBouquets = await context.Bouquets
                     .Include(b => b.BouquetSizes)
                         .ThenInclude(bs => bs.Size)
-                    .FirstAsync(b => b.Name["en"] == "Romantic Bouquet");
+                    .ToListAsync();
 
-                var springBouquet = await context.Bouquets
-                    .Include(b => b.BouquetSizes)
-                        .ThenInclude(bs => bs.Size)
-                    .FirstAsync(b => b.Name["en"] == "Spring Delight");
+                var allFlowers = await context.Flowers.ToListAsync();
 
-                var elegantBouquet = await context.Bouquets
-                    .Include(b => b.BouquetSizes)
-                        .ThenInclude(bs => bs.Size)
-                    .FirstAsync(b => b.Name["en"] == "Elegant Mix");
+                var romanticBouquet = allBouquets.First(b => b.Name["en"] == "Romantic Bouquet");
+                var springBouquet = allBouquets.First(b => b.Name["en"] == "Spring Delight");
+                var elegantBouquet = allBouquets.First(b => b.Name["en"] == "Elegant Mix");
 
-                var redRose = await context.Flowers.FirstAsync(f => f.Name["en"] == "Red Rose");
-                var whiteRose = await context.Flowers.FirstAsync(f => f.Name["en"] == "White Rose");
-                var pinkPeony = await context.Flowers.FirstAsync(f => f.Name["en"] == "Pink Peony");
+                var redRose = allFlowers.First(f => f.Name["en"] == "Red Rose");
+                var whiteRose = allFlowers.First(f => f.Name["en"] == "White Rose");
+                var pinkPeony = allFlowers.First(f => f.Name["en"] == "Pink Peony");
 
                 var romanticS = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "S");
                 var romanticM = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "M");
@@ -227,27 +230,25 @@ namespace CatalogService.DAL.Context
 
                 var bouquetSizeFlowers = new List<BouquetSizeFlower>
                 {
-    
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticS.SizeId, FlowerId = redRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticS.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
-                    
 
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticM.SizeId, FlowerId = redRose.Id, Quantity = 5 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticM.SizeId, FlowerId = pinkPeony.Id, Quantity = 3 },
-                    
+
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticL.SizeId, FlowerId = redRose.Id, Quantity = 7 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticL.SizeId, FlowerId = pinkPeony.Id, Quantity = 5 },
 
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springS.SizeId, FlowerId = whiteRose.Id, Quantity = 2 },
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springS.SizeId, FlowerId = pinkPeony.Id, Quantity = 1 },
-                    
+
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springM.SizeId, FlowerId = whiteRose.Id, Quantity = 4 },
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springM.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
 
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = redRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = whiteRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
-                    
+
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = redRose.Id, Quantity = 4 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = whiteRose.Id, Quantity = 4 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = pinkPeony.Id, Quantity = 3 }

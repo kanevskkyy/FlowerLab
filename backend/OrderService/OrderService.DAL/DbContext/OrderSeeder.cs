@@ -30,8 +30,6 @@ namespace OrderService.DAL.DbContext
             await context.SaveChangesAsync();
 
             // ================= Gifts =================
-            // ================= Gifts =================
-            // Always ensure basic gifts exist and update them if ImageUrl is missing
             var giftsData = new List<Gift>
             {
                 new Gift { Name = new Dictionary<string, string> { { "ua", "Подарунковий пакет" }, { "en", "Gift Bag" } }, ImageUrl = "https://placehold.co/400x400?text=Gift+Bag", AvailableCount = 50, Price = 10.99m },
@@ -41,25 +39,18 @@ namespace OrderService.DAL.DbContext
                 new Gift { Name = new Dictionary<string, string> { { "ua", "М'яка іграшка" }, { "en", "Plush Toy" } }, ImageUrl = "https://placehold.co/400x400?text=Toy", AvailableCount = 40, Price = 12.99m }
             };
 
-            foreach (var giftData in giftsData)
-            {
-                // Just iteration helper, nothing to do here as actual work happens below
-            }
-            
-            // Simplified logic: Load all gifts, iterate and update if name matches. If not exists, add.
+            // Завантажуємо всі подарунки в пам'ять
             var allGifts = await context.Gifts.ToListAsync();
-            
+
             foreach (var giftData in giftsData)
             {
                 var existing = allGifts.FirstOrDefault(g => g.Name != null && g.Name.TryGetValue("ua", out var name) && name == giftData.Name["ua"]);
                 if (existing != null)
                 {
-                    // Update ImageUrl if generic or missing
+                    // Оновлюємо ImageUrl якщо він порожній або містить example.com
                     if (string.IsNullOrEmpty(existing.ImageUrl) || existing.ImageUrl.Contains("example.com"))
                     {
                         existing.ImageUrl = giftData.ImageUrl;
-                        
-                        // Mark as modified
                         context.Update(existing);
                     }
                 }
@@ -73,11 +64,15 @@ namespace OrderService.DAL.DbContext
             // ================= Example Orders =================
             if (!await context.Orders.AnyAsync())
             {
-                var pendingStatus = await context.OrderStatuses.FirstAsync(s => s.Name == "Pending");
-                var completedStatus = await context.OrderStatuses.FirstAsync(s => s.Name == "Completed");
+                // Завантажуємо всі статуси в пам'ять
+                var allStatuses = await context.OrderStatuses.ToListAsync();
+                var pendingStatus = allStatuses.First(s => s.Name == "Pending");
+                var completedStatus = allStatuses.First(s => s.Name == "Completed");
 
-                var giftBag = await context.Gifts.FirstAsync(g => g.Name["ua"] == "Подарунковий пакет");
-                var balloons = await context.Gifts.FirstAsync(g => g.Name["ua"] == "Повітряні кульки");
+                // Перезавантажуємо подарунки після збереження
+                allGifts = await context.Gifts.ToListAsync();
+                var giftBag = allGifts.First(g => g.Name["ua"] == "Подарунковий пакет");
+                var balloons = allGifts.First(g => g.Name["ua"] == "Повітряні кульки");
 
                 var orders = new List<Order>
                 {
