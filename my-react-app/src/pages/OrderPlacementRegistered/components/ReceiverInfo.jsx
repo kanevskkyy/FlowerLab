@@ -1,7 +1,9 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 const ReceiverInfo = () => {
+  const { t } = useTranslation();
   const {
     register,
     watch,
@@ -13,15 +15,15 @@ const ReceiverInfo = () => {
   return (
     <section className="form-section receiver-section-wrapper">
       <div className="receiver-section">
-        <label>Receiver:</label>
+        <label>{t("checkout.receiver_title")}</label>
         <div className="radio-group">
           <label className="radio-label">
             <input type="radio" value="self" {...register("receiverType")} />
-            <span>I am the receiver</span>
+            <span>{t("checkout.receiver_self")}</span>
           </label>
           <label className="radio-label">
             <input type="radio" value="other" {...register("receiverType")} />
-            <span>The receiver is other person</span>
+            <span>{t("checkout.receiver_other")}</span>
           </label>
         </div>
       </div>
@@ -30,10 +32,10 @@ const ReceiverInfo = () => {
       {receiverType === "other" && (
         <div className="receiver-fields fade-in-section">
           <div className="form-group">
-            <label>Receiver Name</label>
+            <label>{t("checkout.receiver_name")}</label>
             <input
               type="text"
-              placeholder="Receiver Name"
+              placeholder={t("checkout.receiver_name")}
               style={
                 errors.receiverName
                   ? {
@@ -48,10 +50,10 @@ const ReceiverInfo = () => {
             )}
           </div>
           <div className="form-group">
-            <label>Receiver Phone</label>
+            <label>{t("checkout.receiver_phone")}</label>
             <input
               type="tel"
-              placeholder="Receiver Phone"
+              placeholder={t("checkout.receiver_phone")}
               style={
                 errors.receiverPhone
                   ? {

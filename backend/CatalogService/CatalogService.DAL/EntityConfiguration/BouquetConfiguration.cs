@@ -18,13 +18,16 @@ namespace CatalogService.DAL.EntityConfiguration
 
             builder.Property(b => b.Name)
                 .IsRequired()
-                .HasMaxLength(100);
-
-            builder.HasIndex(b => b.Name)
-                .IsUnique();
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(v, (System.Text.Json.JsonSerializerOptions)null));
 
             builder.Property(b => b.Description)
-                .HasMaxLength(1000);
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(v, (System.Text.Json.JsonSerializerOptions)null));
 
             builder.Property(b => b.MainPhotoUrl)
                 .HasMaxLength(255)

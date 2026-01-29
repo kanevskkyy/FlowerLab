@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useOrders } from "../hooks/useOrders";
 import OrderIcon from "../../../assets/icons/orders.svg";
 import OrderCard from "./OrderCard";
 
 export default function OrdersTab({ activeTab, TABS }) {
+  const { t } = useTranslation();
   const {
     orders,
     ordersLoading,
@@ -42,19 +44,19 @@ export default function OrdersTab({ activeTab, TABS }) {
   return (
     <div className="cabinet-panel-inner cabinet-orders">
       <div className="orders-top">
-        <h1 className="cabinet-title">Order history</h1>
+        <h1 className="cabinet-title">{t("cabinet.history_title")}</h1>
 
         <div className="orders-sort">
-          <span className="orders-sort-label">SORT BY</span>
+          <span className="orders-sort-label">{t("cabinet.sort_by")}</span>
           <select
             className="orders-sort-select"
             value={sort}
             onChange={(e) => setSort(e.target.value)}>
-            <option value="DateDesc">Date (Newest)</option>
-            <option value="DateAsc">Date (Oldest)</option>
-            <option value="TotalDesc">Total (High to Low)</option>
-            <option value="TotalAsc">Total (Low to High)</option>
-            <option value="StatusAsc">Status</option>
+            <option value="DateDesc">{t("cabinet.date_desc")}</option>
+            <option value="DateAsc">{t("cabinet.date_asc")}</option>
+            <option value="TotalDesc">{t("cabinet.total_desc")}</option>
+            <option value="TotalAsc">{t("cabinet.total_asc")}</option>
+            <option value="StatusAsc">{t("cabinet.status")}</option>
           </select>
         </div>
       </div>
@@ -63,7 +65,7 @@ export default function OrdersTab({ activeTab, TABS }) {
         {!ordersLoading && orders.length === 0 && (
           <div className="orders-empty">
             <img src={OrderIcon} className="orders-empty-icon" alt="" />
-            <span>You haven't placed any orders yet.</span>
+            <span>{t("cabinet.empty_orders")}</span>
           </div>
         )}
 
@@ -78,7 +80,7 @@ export default function OrdersTab({ activeTab, TABS }) {
             {isLoadingMore && (
               <span
                 style={{ marginLeft: "10px", fontSize: "12px", color: "#666" }}>
-                Loading more...
+                {t("cabinet.loading_more")}
               </span>
             )}
           </div>

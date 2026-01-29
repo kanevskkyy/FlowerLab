@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import axiosClient from "../../../api/axiosClient";
 import { useConfirm } from "../../../context/ModalProvider";
+import { useTranslation } from "react-i18next";
 
 export function useMyAddresses(activeTab, TABS) {
+  const { t } = useTranslation();
   const [addressList, setAddressList] = useState([]);
   const [newAddress, setNewAddress] = useState("");
   const confirm = useConfirm();
@@ -29,11 +31,11 @@ export function useMyAddresses(activeTab, TABS) {
         isDefault: false,
       });
       setNewAddress("");
-      toast.success("Адресу успішно додано!");
+      toast.success(t("toasts.address_added"));
       fetchAddresses();
     } catch (error) {
       console.error("Failed to save address:", error);
-      toast.error("Не вдалося зберегти адресу.");
+      toast.error(t("toasts.address_save_failed"));
     }
   };
 
@@ -46,11 +48,11 @@ export function useMyAddresses(activeTab, TABS) {
       onConfirm: async () => {
         try {
           await axiosClient.delete(`/api/users/me/addresses/${id}`);
-          toast.success("Адресу видалено!");
+          toast.success(t("toasts.address_deleted"));
           fetchAddresses();
         } catch (error) {
           console.error("Failed to delete address:", error);
-          toast.error("Не вдалося видалити адресу.");
+          toast.error(t("toasts.address_delete_failed"));
         }
       },
     });

@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import orderService from "../../../services/orderService";
 import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminOrders() {
+  const { t, i18n } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -77,38 +79,53 @@ export function useAdminOrders() {
           setStatuses(results[1]);
         }
 
+        const currentLang = i18n.language === "UA" ? "ua" : "en";
+        const dateLocale = i18n.language === "UA" ? "uk-UA" : "en-US";
+
         // Map API response
-        const mappedOrders = (data.items || []).map((order) => ({
-          id: order.id,
-          title:
-            order.items?.length > 1
-              ? `${order.items[0].bouquetName} + ${order.items.length - 1} more`
-              : order.items?.[0]?.bouquetName || "Unknown Item",
-          qty:
-            order.items?.length > 1
-              ? `${order.items.reduce((acc, i) => acc + i.count, 0)} items`
-              : `${order.items?.[0]?.count || 1} pc`,
-          customer:
-            `${order.userFirstName || order.firstName || ""} ${order.userLastName || order.lastName || ""}`.trim() ||
-            "Guest",
-          date: new Date(
-            order.status?.createdAt || order.createdAt || Date.now(),
-          ).toLocaleString("uk-UA", {
-            day: "numeric",
-            month: "numeric",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          total: `${order.totalPrice} ₴`,
-          avatar:
-            order.userPhotoUrl ||
-            "https://res.cloudinary.com/dg9clyn4k/image/upload/v1763712578/order-service/gifts/mpfiss97mfebcqwm6elb.jpg",
-          status: order.status, // KEEP OBJECT {id, name}
-          rawDate: new Date(
-            order.status?.createdAt || order.createdAt || Date.now(),
-          ),
-        }));
+        const mappedOrders = (data.items || []).map((order) => {
+          const firstItem = order.items?.[0];
+          const bouquetNameObj = firstItem?.bouquetName;
+          const bouquetName =
+            typeof bouquetNameObj === "object"
+              ? bouquetNameObj[currentLang] ||
+                bouquetNameObj.ua ||
+                bouquetNameObj.en ||
+                ""
+              : bouquetNameObj || "Unknown Item";
+
+          return {
+            id: order.id,
+            title:
+              order.items?.length > 1
+                ? `${bouquetName} + ${order.items.length - 1} ${t("admin.orders.more")}`
+                : bouquetName,
+            qty:
+              order.items?.length > 1
+                ? `${order.items.reduce((acc, i) => acc + i.count, 0)} ${t("admin.orders.items_count")}`
+                : `${order.items?.[0]?.count || 1} ${t("admin.orders.item_pc")}`,
+            customer:
+              `${order.userFirstName || order.firstName || ""} ${order.userLastName || order.lastName || ""}`.trim() ||
+              t("admin.orders.guest"),
+            date: new Date(
+              order.status?.createdAt || order.createdAt || Date.now(),
+            ).toLocaleString(dateLocale, {
+              day: "numeric",
+              month: "numeric",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            total: `${order.totalPrice} ₴`,
+            avatar:
+              order.userPhotoUrl ||
+              "https://res.cloudinary.com/dg9clyn4k/image/upload/v1763712578/order-service/gifts/mpfiss97mfebcqwm6elb.jpg",
+            status: order.status, // KEEP OBJECT {id, name}
+            rawDate: new Date(
+              order.status?.createdAt || order.createdAt || Date.now(),
+            ),
+          };
+        });
 
         // If LoadMore -> Append, else -> Replace
         if (isLoadMore) {
@@ -124,7 +141,9 @@ export function useAdminOrders() {
         }));
       } catch (error) {
         console.error("Failed to fetch orders:", error);
-        toast.error(extractErrorMessage(error, "Failed to load orders"));
+        toast.error(
+          extractErrorMessage(error, t("toasts.admin_orders_load_failed")),
+        );
       } finally {
         setLoading(false);
         setDetailLoading(false);
@@ -171,15 +190,19 @@ export function useAdminOrders() {
       await orderService.updateStatus(id, newStatusId);
 
       if (targetStatus.name === "Cancelled") {
-        toast.error(`Order status updated to Cancelled`);
+        toast.error(t("toasts.admin_order_cancelled"));
       } else if (targetStatus.name === "Delivered") {
-        toast.success(`Order delivered! 🎉`);
+        toast.success(t("toasts.admin_order_delivered"));
       } else {
-        toast.success(`Order status updated to ${targetStatus.name}`);
+        toast.success(
+          t("toasts.admin_status_updated", { status: targetStatus.name }),
+        );
       }
     } catch (error) {
       console.error("Failed to update status:", error);
-      toast.error(extractErrorMessage(error, "Failed to update status"));
+      toast.error(
+        extractErrorMessage(error, t("toasts.admin_status_update_failed")),
+      );
       // Revert on failure
       setOrders(originalOrders);
     }

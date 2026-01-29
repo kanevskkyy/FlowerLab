@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/useAuth";
+import { useTranslation } from "react-i18next";
 
 import starIcon from "../../../assets/icons/star.svg";
 import starUnfilledIcon from "../../../assets/icons/star-unfilled.svg";
 
 const Reviews = ({ reviews, onAddReview }) => {
+  const { t } = useTranslation();
   const [visibleCount, setVisibleCount] = useState(3);
   const { user } = useAuth();
 
   const handleWriteReview = () => {
     if (!user) {
       toast.error(
-        "Будь ласка, увійдіть або зареєструйтесь, щоб залишити відгук.",
+        t("auth.review_login_required") ||
+          "Будь ласка, увійдіть або зареєструйтесь, щоб залишити відгук.",
       );
       return;
     }
@@ -37,15 +40,13 @@ const Reviews = ({ reviews, onAddReview }) => {
   if (!reviews || reviews.length === 0) {
     return (
       <section className="pc-reviews-section">
-        <h2 className="section-title">Reviews</h2>
+        <h2 className="section-title">{t("product.reviews")}</h2>
         <div className="pc-review-button-wrapper">
           <button className="pc-write-review-btn" onClick={handleWriteReview}>
-            Write a review
+            {t("product.write_review_btn")}
           </button>
         </div>
-        <p className="no-reviews">
-          No reviews yet. Be the first to share your thoughts!
-        </p>
+        <p className="no-reviews">{t("product.no_reviews_yet")}</p>
       </section>
     );
   }
@@ -63,10 +64,10 @@ const Reviews = ({ reviews, onAddReview }) => {
 
   return (
     <section className="pc-reviews-section">
-      <h2 className="section-title">Reviews</h2>
+      <h2 className="section-title">{t("product.reviews")}</h2>
       <div className="pc-review-button-wrapper">
         <button className="pc-write-review-btn" onClick={handleWriteReview}>
-          Write a review
+          {t("product.write_review_btn")}
         </button>
       </div>
 
@@ -98,7 +99,9 @@ const Reviews = ({ reviews, onAddReview }) => {
       <div className="pc-reviews-actions">
         {reviews.length > 3 && (
           <button className="pc-show-more-btn" onClick={handleShowMore}>
-            {isExpanded ? "Show less" : "Show more reviews"}
+            {isExpanded
+              ? t("product.show_less")
+              : t("product.show_more_reviews")}
           </button>
         )}
       </div>

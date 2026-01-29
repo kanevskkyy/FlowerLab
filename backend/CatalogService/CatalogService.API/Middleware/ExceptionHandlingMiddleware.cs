@@ -48,14 +48,11 @@ namespace CatalogService.API.Middleware
                 case AlreadyExistsException:
                     context.Response.StatusCode = (int)HttpStatusCode.Conflict;
                     break;
-                default:
                     _logger.LogError(exception, "An unhandled exception has occurred.");
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    response = new { message = "An internal server error occurred." };
+                    response = new { message = exception.ToString() }; // DEBUG: Show full exception
                     break;
             }
-
-            // In development, you might want to include stack trace in 500s too, but keep it simple for now.
             // If it's a known exception like BadRequest, the message is safe to show.
             if (context.Response.StatusCode != (int)HttpStatusCode.InternalServerError)
             {

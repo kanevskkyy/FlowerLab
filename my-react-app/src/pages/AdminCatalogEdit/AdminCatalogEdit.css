@@ -210,9 +210,17 @@
 }
 
 /* TABLE STYLES */
+.ace-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  padding-bottom: 8px; /* Space for scrollbar */
+}
+
 .ace-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 600px; /* Ensure table doesn't shrink too much, forcing scroll */
 }
 
 .ace-table th {
@@ -251,9 +259,23 @@
   border-color: #d46aac;
   box-shadow: 0 0 0 2px rgba(212, 106, 172, 0.1);
 }
+.ace-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .ace-table-add-row {
   background-color: #fafafa;
+}
+
+.editing-row {
+  background-color: #fff9fe !important; /* Extremely light pink */
+}
+
+.editing-row td {
+  border-top: 1px solid #fbecf7;
+  border-bottom: 1px solid #fbecf7;
 }
 
 /* ICON BUTTONS */
@@ -294,8 +316,21 @@
   color: #2e7d32;
 }
 
+.ace-icon-btn.save:hover {
+  background-color: #e8f5e9;
+}
+
 .ace-icon-btn.cancel {
   color: #d32f2f;
+}
+
+.ace-icon-btn.cancel:hover {
+  background-color: #ffebee;
+}
+
+.ace-icon-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 .ace-add-btn.small {

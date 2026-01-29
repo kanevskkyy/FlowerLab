@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./AdminPanel.css";
 import logoutIco from "../../assets/icons/exit.svg";
 
@@ -19,9 +20,12 @@ import { useAdminProducts } from "./hooks/useAdminProducts";
 import { useAdminOrders } from "./hooks/useAdminOrders";
 import { useAdminCatalog } from "./hooks/useAdminCatalog";
 import { useAdminReviews } from "./hooks/useAdminReviews";
+import { useSettings } from "../../context/useSettings";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { lang, setLang } = useSettings();
 
   // Tab State
   const [activeTab, setActiveTab] = useState(
@@ -162,7 +166,7 @@ export default function AdminPanel() {
           />
         );
       default:
-        return <div>Select a tab</div>;
+        return <div>{t("admin.select_tab")}</div>;
     }
   };
 
@@ -175,15 +179,29 @@ export default function AdminPanel() {
           <span className="admin-brand-sub">VLADA</span>
         </div>
 
-        <div className="admin-topbar-center">Admin panel</div>
+        <div className="admin-topbar-center">{t("admin.title")}</div>
 
         <div className="admin-topbar-right">
+          <div className="admin-lang-switcher">
+            <span
+              className={lang === "UA" ? "active" : ""}
+              onClick={() => setLang("UA")}>
+              UA
+            </span>
+            <span className="divider">/</span>
+            <span
+              className={lang === "ENG" ? "active" : ""}
+              onClick={() => setLang("ENG")}>
+              ENG
+            </span>
+          </div>
+
           <button
             className="admin-top-logout"
             type="button"
             onClick={handleLogout}>
             <img src={logoutIco} alt="Logout" />
-            <span>Log out</span>
+            <span>{t("admin.logout")}</span>
           </button>
         </div>
       </header>

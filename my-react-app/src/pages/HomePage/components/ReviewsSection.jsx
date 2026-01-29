@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import arrowLeft from "../../../assets/icons/review-arrow-left.svg";
 import arrowRight from "../../../assets/icons/review-arrow-right.svg";
 import star from "../../../assets/icons/star.svg";
 
 function ReviewsSection({ reviews }) {
+  const { t } = useTranslation();
   const [currentReviewIdx, setCurrentReviewIdx] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -53,7 +55,7 @@ function ReviewsSection({ reviews }) {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}>
-      <h2 className="section-title">REVIEWS</h2>
+      <h2 className="section-title">{t("home.sections.reviews")}</h2>
       <div className="home-reviews-wrapper">
         <button className="reviews-arrow" onClick={prevReview}>
           <img src={arrowLeft} alt="arrow-left" />
@@ -70,14 +72,7 @@ function ReviewsSection({ reviews }) {
               </div>
               <div className="home-review-stars">
                 {Array.from({ length: review.stars }).map((_, i) => (
-                  <img
-                    key={i}
-                    src={star}
-                    alt="star"
-                    style={{
-                      
-                    }}
-                  />
+                  <img key={i} src={star} alt="star" style={{}} />
                 ))}
               </div>
               <p className="home-review-text">"{review.text}"</p>

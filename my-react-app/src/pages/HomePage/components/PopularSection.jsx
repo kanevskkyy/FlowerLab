@@ -1,19 +1,21 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ShoppingBagIcon from "../../../assets/icons/ShoppingBagIcon.svg";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 function PopularSection({ items, onAddToCart, isLoading, error }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <section className="popular-section">
-      <h2 className="section-title">POPULAR BOUQUETS / SALES</h2>
+      <h2 className="section-title">{t("home.sections.popular")}</h2>
 
       {error ? (
         <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
-          Failed to load popular bouquets.
+          {t("popular.error")}
         </div>
       ) : (
         <div className="popular-cards">

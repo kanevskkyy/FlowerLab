@@ -8,7 +8,7 @@ namespace CatalogService.BLL.DTO
 {
     public class FlowerCreateUpdateDto
     {
-        public string Name { get; set; } = null!;
+        public Dictionary<string, string> Name { get; set; } = new();
         public int Quantity { get; set; }
     }
 }

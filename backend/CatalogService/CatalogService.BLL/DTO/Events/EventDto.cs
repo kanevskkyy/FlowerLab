@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace CatalogService.BLL.DTO
 {
-    public record EventDto(Guid Id, string Name);
+    public record EventDto
+    {
+        public Guid Id { get; init; }
+        public Dictionary<string, string> Name { get; set; } = new();
+    }
 
 }

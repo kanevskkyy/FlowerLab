@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const GiftModal = ({ isOpen, gift, onClose, onAddToCart }) => {
+  const { t } = useTranslation();
   if (!isOpen || !gift) return null;
 
   return (
@@ -14,13 +16,13 @@ const GiftModal = ({ isOpen, gift, onClose, onAddToCart }) => {
         </div>
         <h3>{gift.title}</h3>
         <p className="modal-price">{gift.price}</p>
-        <p className="modal-question">Add to cart?</p>
+        <p className="modal-question">{t("product.add_to_cart_question")}</p>
         <div className="modal-actions">
           <button className="modal-btn cancel-btn" onClick={onClose}>
-            Cancel
+            {t("product.cancel")}
           </button>
           <button className="modal-btn add-btn" onClick={onAddToCart}>
-            Add to Cart
+            {t("product.add_to_cart")}
           </button>
         </div>
       </div>

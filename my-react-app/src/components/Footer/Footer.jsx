@@ -1,3 +1,5 @@
+import React from "react";
+import { useTranslation } from "react-i18next";
 import LocationIcon from "../../assets/icons/location-icon.svg";
 import PhoneIcon from "../../assets/icons/phone-icon.svg";
 import InstagramIcon from "../../assets/icons/instagram-icon.svg";
@@ -5,6 +7,7 @@ import TelegramIcon from "../../assets/icons/telegram-icon.svg";
 import "./Footer.css";
 
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <footer className="footer">
       <div className="footer-item footer-location">
@@ -19,14 +22,14 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="footer-link-text">
-            <p>м. Чернівці, вул Герцена 2а,</p>
+            <p>{t("footer.address1")}</p>
           </a>
           <a
             href="https://maps.app.goo.gl/myw4J2CtWA9AGVuj6"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-link-text">
-            <p>вул Васіле Александрі, 1</p>
+            <p>{t("footer.address2")}</p>
           </a>
         </div>
       </div>

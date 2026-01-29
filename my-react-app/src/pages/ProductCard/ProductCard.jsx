@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../../context/CartContext";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -28,6 +29,7 @@ const ProductCard = () => {
 };
 
 const ProductCardContent = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -66,7 +68,7 @@ const ProductCardContent = () => {
   }
 
   if (!product) {
-    return <div className="error-screen">Product not found</div>;
+    return <div className="error-screen">{t("product.not_found")}</div>;
   }
 
   // Safe access to current images
@@ -88,7 +90,7 @@ const ProductCardContent = () => {
     };
     const added = addToCart(cartProduct, openCart);
     if (added && openCart) {
-      toast.success(`${product.title} додано до кошика!`);
+      toast.success(t("product.added", { title: product.title }));
     }
   };
 
@@ -126,7 +128,7 @@ const ProductCardContent = () => {
     "@type": "Product",
     name: product.title,
     image: [mainImageToShow],
-    description: `Buy ${product.title} in FlowerLab. Fresh flowers, fast delivery in Chernivtsi.`,
+    description: t("product.seo_buy", { title: product.title }),
     sku: `${id}-${selectedSize}`,
     brand: {
       "@type": "Brand",
@@ -149,7 +151,10 @@ const ProductCardContent = () => {
     <div className="product-page">
       <SEO
         title={`${product.title} | FlowerLab`}
-        description={`Buy ${product.title} in FlowerLab. Fresh flowers, fast delivery in Chernivtsi. Price: ${product.prices[selectedSize]} ₴`}
+        description={
+          t("product.seo_buy", { title: product.title }) +
+          ` ${t("product.price_label")}${product.prices[selectedSize]} ₴`
+        }
         image={mainImageToShow}
         type="product"
       />
@@ -164,7 +169,7 @@ const ProductCardContent = () => {
         {/* Breadcrumbs */}
         <div className="breadcrumbs">
           <span onClick={handleBackToCatalog} className="breadcrumb-link">
-            Catalog
+            {t("nav.catalog")}
           </span>
           <span className="separator">›</span>
           <span className="current">{product.title}</span>
@@ -203,7 +208,7 @@ const ProductCardContent = () => {
 
         <div className="back-button-container">
           <button className="back-to-catalog-btn" onClick={handleBackToCatalog}>
-            BACK TO THE CATALOG
+            {t("product.back")}
           </button>
         </div>
       </div>

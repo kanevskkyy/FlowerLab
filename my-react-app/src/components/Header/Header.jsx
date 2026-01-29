@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
-
+import { useSettings } from "../../context/useSettings";
 import { useAuth } from "../../context/useAuth";
+import { useTranslation } from "react-i18next";
 import CartPopup from "../CartPopup/CartPopup";
 
 import ShoppingBagIcon from "../../assets/icons/ShoppingBagIcon.svg";
@@ -11,10 +12,11 @@ import FlowerLabVladaLogo from "../../assets/icons/FlowerLabVladaLogo.svg";
 import "./Header.css";
 
 const Header = ({ onMenuOpen }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { cartOpen, setCartOpen, cartItems } = useCart();
-
   const { user } = useAuth();
+  const { lang, setLang } = useSettings();
 
   return (
     <>
@@ -26,6 +28,20 @@ const Header = ({ onMenuOpen }) => {
             aria-label="Open menu">
             ☰
           </button>
+
+          <div className="text-btn desktop-only">
+            <span
+              className={lang === "UA" ? "active-text" : ""}
+              onClick={() => setLang("UA")}>
+              UA
+            </span>
+            <span> / </span>
+            <span
+              className={lang === "ENG" ? "active-text" : ""}
+              onClick={() => setLang("ENG")}>
+              ENG
+            </span>
+          </div>
         </div>
 
         <div className="logo-wrapper">
@@ -54,7 +70,7 @@ const Header = ({ onMenuOpen }) => {
               className={`icon ${user?.photoUrl ? "profile-avatar" : ""}`}
             />
             <span className="profile-label">
-              {user ? "Profile" : "Sign up/in"}
+              {user ? t("auth.profile") : t("auth.login")}
             </span>
           </button>
         </div>

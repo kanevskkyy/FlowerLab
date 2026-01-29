@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -10,6 +11,7 @@ import CardIcon from "../../assets/icons/message.svg";
 import "./OrderTrackingPage.css";
 
 const OrderTrackingPage = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -78,13 +80,11 @@ const OrderTrackingPage = () => {
 
         setOrders(validOrders);
         if (validOrders.length === 0 && stored.length > 0) {
-          setError(
-            "Не вдалося знайти ваші замовлення. Вони могли застаріти або бути недійсними.",
-          );
+          setError(t("tracking.find_error"));
         }
       } catch (err) {
         console.error("History Fetch Error:", err);
-        setError("Не вдалося завантажити історію замовлень.");
+        setError(t("tracking.fetch_error"));
       } finally {
         setLoading(false);
       }
@@ -110,8 +110,7 @@ const OrderTrackingPage = () => {
       <Header onMenuOpen={() => setIsMenuOpen(true)} />
       <PopupMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       <main className="tracking-content">
-        <h1 className="tracking-title">Guest Order History</h1>
-
+        <h1 className="tracking-title">{t("tracking.title")}</h1>
         {user && (
           <div className="tracking-card" style={{ marginBottom: "20px" }}>
             <p>
@@ -126,20 +125,17 @@ const OrderTrackingPage = () => {
             </button>
           </div>
         )}
-
         {error && (
           <div className="tracking-card">
             <div className="tracking-error">{error}</div>
           </div>
         )}
-
         {loading && orders.length === 0 && (
           <div className="tracking-card">
             <div className="ios-spinner"></div>
-            <p>Searching for your orders...</p>
+            <p>{t("tracking.searching")}</p>
           </div>
         )}
-
         {/* LIST OF ORDERS */}
         <div
           className="orders-list"
@@ -152,7 +148,7 @@ const OrderTrackingPage = () => {
                   №{order.id.substring(0, 8).toUpperCase()}
                 </span>
                 <span className="history-date">
-                  at{" "}
+                  {t("tracking.at")}{" "}
                   {new Date(order.createdAt).toLocaleString("uk-UA", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -180,11 +176,15 @@ const OrderTrackingPage = () => {
                     <div className="grid-item-info">
                       <span className="grid-title">{item.bouquetName}</span>
                       {item.sizeName && (
-                        <span className="grid-size">Size: {item.sizeName}</span>
+                        <span className="grid-size">
+                          {t("tracking.size")}: {item.sizeName}
+                        </span>
                       )}
                       <div className="grid-price-row">
                         <span className="grid-price">{item.price} ₴</span>
-                        <span className="grid-qty">{item.count} pc</span>
+                        <span className="grid-qty">
+                          {item.count} {t("tracking.pc")}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -206,14 +206,14 @@ const OrderTrackingPage = () => {
                       </div>
                       <div className="grid-item-info">
                         <span className="grid-title">
-                          {gift?.name || "Gift"}
+                          {gift?.name || t("tracking.gift")}
                         </span>
                         <div className="grid-price-row">
                           <span className="grid-price">
                             {gift?.price || 0} ₴
                           </span>
                           <span className="grid-qty">
-                            {g.orderedCount || g.count} pc
+                            {g.orderedCount || g.count} {t("tracking.pc")}
                           </span>
                         </div>
                       </div>
@@ -230,7 +230,9 @@ const OrderTrackingPage = () => {
                         alt="Card"
                         className="card-icon-svg"
                       />
-                      <span className="card-label">POSTCARD</span>
+                      <span className="card-label">
+                        {t("tracking.postcard")}
+                      </span>
                     </div>
                     <div className="grid-card-text">"{order.giftMessage}"</div>
                   </div>
@@ -240,10 +242,10 @@ const OrderTrackingPage = () => {
               {/* FOOTER: Total and Status */}
               <div className="history-footer">
                 <div className="history-total">
-                  Order Total: {order.totalPrice} ₴
+                  {t("tracking.total")}: {order.totalPrice} ₴
                 </div>
                 <div className="history-status">
-                  Status:{" "}
+                  {t("tracking.status")}:{" "}
                   <span
                     className={`status-badge ${(
                       order.status?.name ||
@@ -257,13 +259,12 @@ const OrderTrackingPage = () => {
             </div>
           ))}
         </div>
-
         {/* Empty state */}
         {!loading && orders.length === 0 && (
           <div className="tracking-card">
-            <p>No orders found in your current session.</p>
+            <p>{t("tracking.no_orders")}</p>
             <p style={{ marginTop: "10px", fontSize: "0.9rem", color: "#666" }}>
-              Only orders placed in this browser as a guest are visible here.
+              {t("tracking.guest_only")}
             </p>
           </div>
         )}

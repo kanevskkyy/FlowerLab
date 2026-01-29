@@ -33,6 +33,7 @@ namespace OrderService.BLL.Services
         private ILiqPayService liqPayService;
         private readonly IEntityCacheInvalidationService<Gift> cacheInvalidationService;
         private readonly IEntityCacheInvalidationService<OrderStatus> orderStatusCacheInvalidator;
+        private readonly shared.localization.ILanguageProvider languageProvider;
 
 
         public OrderServiceImpl(
@@ -42,7 +43,8 @@ namespace OrderService.BLL.Services
             IPublishEndpoint publishEndpoint,
             ILiqPayService liqPayService,
             IEntityCacheInvalidationService<Gift> cacheInvalidationService,
-            IEntityCacheInvalidationService<OrderStatus> orderStatusCacheInvalidator)
+            IEntityCacheInvalidationService<OrderStatus> orderStatusCacheInvalidator,
+            shared.localization.ILanguageProvider languageProvider)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
@@ -51,6 +53,7 @@ namespace OrderService.BLL.Services
             this.liqPayService = liqPayService;
             this.cacheInvalidationService = cacheInvalidationService;
             this.orderStatusCacheInvalidator = orderStatusCacheInvalidator;
+            this.languageProvider = languageProvider;
         }
 
         public async Task<string> GeneratePaymentUrlAsync(Guid orderId, Guid? guestToken = null, CancellationToken cancellationToken = default)
@@ -114,8 +117,12 @@ namespace OrderService.BLL.Services
             OrderedResponseList catalogResponse;
             try
             {
+                var headers = new Metadata();
+                var lang = languageProvider.CurrentLanguage ?? "ua";
+                headers.Add("accept-language", lang);
+
                 catalogResponse = await catalogClient.CheckOrderItemsAsync(
-                    grpcRequest, cancellationToken: cancellationToken);
+                    grpcRequest, headers, cancellationToken: cancellationToken);
             }
             catch (RpcException ex)
             {

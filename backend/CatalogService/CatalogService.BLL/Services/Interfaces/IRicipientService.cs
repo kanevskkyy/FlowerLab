@@ -10,8 +10,8 @@ namespace CatalogService.BLL.Services.Interfaces
     {
         Task<IEnumerable<RecipientDto>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<RecipientDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<RecipientDto> CreateAsync(string name, CancellationToken cancellationToken = default);
-        Task<RecipientDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default);
+        Task<RecipientDto> CreateAsync(Dictionary<string, string> name, CancellationToken cancellationToken = default);
+        Task<RecipientDto> UpdateAsync(Guid id, Dictionary<string, string> name, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

@@ -1,5 +1,6 @@
 using AggregatorService.Redis;
 using CatalogService.API.Middleware;
+using shared.localization;
 using CatalogService.BLL.Automapper;
 using CatalogService.BLL.Cache;
 using CatalogService.BLL.Consumers;
@@ -69,6 +70,8 @@ namespace CatalogService.API
                 options.CompactionPercentage = 0.2;
             });
             builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
+            
+            builder.Services.AddScoped<ILanguageProvider, LanguageProvider>();
 
             builder.Services.AddScoped<IEntityCacheInvalidationService<Bouquet>, BouquetCacheInvalidationService>();
             builder.Services.AddScoped<IEntityCacheInvalidationService<FilterResponse>, FilterCacheInvalidationService>();
@@ -111,6 +114,10 @@ namespace CatalogService.API
             builder.Services.AddScoped<IImageService, CloudinaryImageService>();
 
             builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new LocalizedDictionaryConverter());
+                })
                 .ConfigureApplicationPartManager(manager =>
                 {
                     var assembliesToRemove = manager.ApplicationParts
@@ -223,8 +230,9 @@ namespace CatalogService.API
             var app = builder.Build();
             app.UseCors(MyAllowSpecificOrigins);
 
-            app.UseMiddleware<ExceptionHandlingMiddleware>(); // Handling Exceptions First
             app.UseMiddleware<RequestLoggingMiddleware>();
+            app.UseMiddleware<ExceptionHandlingMiddleware>(); // Handling Exceptions First
+            app.UseMiddleware<LocalizationMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

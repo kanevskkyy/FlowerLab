@@ -3,6 +3,7 @@ import { FormProvider } from "react-hook-form";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import PopupMenu from "../../components/PopupMenu/PopupMenu";
+import { useTranslation } from "react-i18next";
 import { useOrderPlacement } from "./hooks/useOrderPlacement";
 
 // Sub-components
@@ -15,6 +16,7 @@ import OrderSummary from "./components/OrderSummary";
 import "./OrderPlacementRegistered.css";
 
 const OrderPlacement = () => {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const {
@@ -47,10 +49,10 @@ const OrderPlacement = () => {
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <main className="order-placement">
-        <h1 className="order-title">ORDER PLACEMENT</h1>
+        <h1 className="order-title">{t("checkout.order_placement")}</h1>
 
         <button className="back-btn" onClick={() => navigate(-1)}>
-          <span>←</span> Back to shopping
+          <span>←</span> {t("checkout.back_to_shopping")}
         </button>
 
         <FormProvider {...methods}>

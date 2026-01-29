@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 function CatalogSort({ isOpen, setIsOpen, onSortChange }) {
   const sortRef = useRef(null);
@@ -20,21 +21,32 @@ function CatalogSort({ isOpen, setIsOpen, onSortChange }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [setIsOpen]);
 
+  const { t } = useTranslation();
+
   return (
     <div
       className="catalog-sort"
       onClick={() => setIsOpen((prev) => !prev)}
-      ref={sortButtonRef}
-    >
-      <span>SORT BY</span>
+      ref={sortButtonRef}>
+      <span>{t("catalog.sort_by")}</span>
 
       {isOpen && (
         <div className="sort-popup" ref={sortRef}>
-          <p onClick={() => onSortChange("date_desc")}>Date: New to old</p>
-          <p onClick={() => onSortChange("date_asc")}>Date: Old to new</p>
-          <p onClick={() => onSortChange("price_desc")}>Price: High to low</p>
-          <p onClick={() => onSortChange("price_asc")}>Price: Low to high</p>
-          <p onClick={() => onSortChange("popularity")}>Popularity</p>
+          <p onClick={() => onSortChange("date_desc")}>
+            {t("catalog.sort_date_desc")}
+          </p>
+          <p onClick={() => onSortChange("date_asc")}>
+            {t("catalog.sort_date_asc")}
+          </p>
+          <p onClick={() => onSortChange("price_desc")}>
+            {t("catalog.sort_price_desc")}
+          </p>
+          <p onClick={() => onSortChange("price_asc")}>
+            {t("catalog.sort_price_asc")}
+          </p>
+          <p onClick={() => onSortChange("popularity")}>
+            {t("catalog.sort_popularity")}
+          </p>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import orderService from "../../services/orderService";
 import "./AdminOrderDetails.css";
@@ -7,6 +8,7 @@ import "./AdminOrderDetails.css";
 export default function AdminOrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [order, setOrder] = useState(null);
   const [statuses, setStatuses] = useState([]); // List of available statuses
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ export default function AdminOrderDetails() {
         setStatuses(statusesData);
       } catch (error) {
         console.error("Failed to load data:", error);
-        toast.error("Failed to load details");
+        toast.error(t("admin.orders.failed_load"));
         navigate("/admin");
       } finally {
         setLoading(false);
@@ -49,22 +51,27 @@ export default function AdminOrderDetails() {
       await orderService.updateStatus(id, newStatusId);
 
       if (targetStatusObj.name === "Cancelled") {
-        toast.error(`Order status updated to Cancelled`);
+        toast.error(t("toasts.admin_order_cancelled"));
       } else if (targetStatusObj.name === "Delivered") {
-        toast.success(`Order delivered! 🎉`);
+        toast.success(t("toasts.admin_order_delivered"));
       } else {
-        toast.success(`Order status updated to ${targetStatusObj.name}`);
+        toast.success(
+          t("toasts.admin_status_updated", { status: targetStatusObj.name }),
+        );
       }
     } catch (error) {
       console.error("Failed to update status:", error);
-      toast.error("Failed to update status");
+      toast.error(t("toasts.admin_status_update_failed"));
       setOrder((prev) => ({ ...prev, status: originalStatus }));
     }
   };
 
   if (loading)
-    return <div className="aod-loading">Loading order details...</div>;
-  if (!order) return <div className="aod-loading">Order not found</div>;
+    return (
+      <div className="aod-loading">{t("admin.orders.loading_details")}</div>
+    );
+  if (!order)
+    return <div className="aod-loading">{t("admin.orders.not_found")}</div>;
 
   // order.status is likely an object { id, name } now from backend
   const currentStatusId = order.status?.id || "";
@@ -77,10 +84,11 @@ export default function AdminOrderDetails() {
         <header className="aod-header">
           <div className="aod-header-left">
             <button className="aod-back-btn" onClick={() => navigate("/admin")}>
-              ← Back to Orders
+              ← {t("admin.orders.back_to_orders")}
             </button>
             <h1 className="aod-title">
-              Order #{order.id.substring(0, 8).toUpperCase()}
+              {t("admin.orders.id")}
+              {order.id.substring(0, 8).toUpperCase()}
             </h1>
             <span className="aod-date">
               {new Date(
@@ -96,7 +104,7 @@ export default function AdminOrderDetails() {
           </div>
 
           <div className="aod-status-wrapper">
-            <label>Status:</label>
+            <label>{t("admin.orders.status")}</label>
             <select
               className={`aod-status-select status-${currentStatusName.toLowerCase()}`}
               value={currentStatusId}
@@ -115,7 +123,7 @@ export default function AdminOrderDetails() {
           <div className="aod-main">
             {/* Products */}
             <section className="aod-card">
-              <h2 className="aod-section-title">Order Items</h2>
+              <h2 className="aod-section-title">{t("admin.orders.items")}</h2>
               <div className="aod-items-list">
                 {order.items?.map((item, idx) => (
                   <div key={`item-${idx}`} className="aod-item">
@@ -131,8 +139,13 @@ export default function AdminOrderDetails() {
                     <div className="aod-item-info">
                       <div className="aod-item-name">{item.bouquetName}</div>
                       <div className="aod-item-meta">
-                        {item.sizeName && <span>Size: {item.sizeName} | </span>}
-                        Qty: {item.count}
+                        {item.sizeName && (
+                          <span>
+                            {t("admin.orders.size", { size: item.sizeName })}{" "}
+                            |{" "}
+                          </span>
+                        )}
+                        {t("admin.orders.qty", { count: item.count })}
                       </div>
                     </div>
                     <div className="aod-item-total-row">
@@ -156,7 +169,9 @@ export default function AdminOrderDetails() {
                         {giftItem.gift?.name || "Unknown Gift"}
                       </div>
                       <div className="aod-item-meta">
-                        Qty: {giftItem.orderedCount}
+                        {t("admin.orders.qty", {
+                          count: giftItem.orderedCount,
+                        })}
                       </div>
                     </div>
                     <div className="aod-item-total-row">
@@ -174,8 +189,12 @@ export default function AdminOrderDetails() {
                   <div className="aod-item">
                     <div className="aod-item-img aod-item-placeholder">💌</div>
                     <div className="aod-item-info">
-                      <div className="aod-item-name">Postcard</div>
-                      <div className="aod-item-meta">Message included</div>
+                      <div className="aod-item-name">
+                        {t("admin.orders.postcard")}
+                      </div>
+                      <div className="aod-item-meta">
+                        {t("admin.orders.postcard_msg")}
+                      </div>
                     </div>
                     <div className="aod-item-total-row">50.00 ₴</div>
                   </div>
@@ -186,7 +205,9 @@ export default function AdminOrderDetails() {
             {/* Comment */}
             {order.notes && (
               <section className="aod-card">
-                <h2 className="aod-section-title">Customer Comment</h2>
+                <h2 className="aod-section-title">
+                  {t("admin.orders.customer_comment")}
+                </h2>
                 <p className="aod-comment">"{order.notes}"</p>
               </section>
             )}
@@ -194,7 +215,9 @@ export default function AdminOrderDetails() {
             {/* Postcard */}
             {order.postcardText && (
               <section className="aod-card">
-                <h2 className="aod-section-title">Postcard Text</h2>
+                <h2 className="aod-section-title">
+                  {t("admin.orders.postcard_text")}
+                </h2>
                 <p className="aod-comment">"{order.postcardText}"</p>
               </section>
             )}
@@ -202,7 +225,9 @@ export default function AdminOrderDetails() {
             {/* Gift Message */}
             {order.giftMessage && (
               <section className="aod-card">
-                <h2 className="aod-section-title">Gift Message</h2>
+                <h2 className="aod-section-title">
+                  {t("admin.orders.gift_message")}
+                </h2>
                 <p className="aod-comment">"{order.giftMessage}"</p>
               </section>
             )}
@@ -212,16 +237,18 @@ export default function AdminOrderDetails() {
           <div className="aod-sidebar">
             {/* Customer Info */}
             <section className="aod-card">
-              <h2 className="aod-section-title">Customer</h2>
+              <h2 className="aod-section-title">
+                {t("admin.orders.customer")}
+              </h2>
               <div className="aod-info-row">
-                <span className="label">Name:</span>
+                <span className="label">{t("admin.orders.name")}</span>
                 <span className="value">
                   {order.userFirstName || order.firstName}{" "}
                   {order.userLastName || order.lastName}
                 </span>
               </div>
               <div className="aod-info-row">
-                <span className="label">Phone:</span>
+                <span className="label">{t("admin.orders.phone")}</span>
                 <span className="value">{order.phoneNumber}</span>
               </div>
             </section>
@@ -229,14 +256,16 @@ export default function AdminOrderDetails() {
             {/* Recipient Info */}
             {order.receiverName && (
               <section className="aod-card">
-                <h2 className="aod-section-title">Recipient</h2>
+                <h2 className="aod-section-title">
+                  {t("admin.orders.recipient")}
+                </h2>
                 <div className="aod-info-row">
-                  <span className="label">Name:</span>
+                  <span className="label">{t("admin.orders.name")}</span>
                   <span className="value">{order.receiverName}</span>
                 </div>
                 {order.receiverPhone && (
                   <div className="aod-info-row">
-                    <span className="label">Phone:</span>
+                    <span className="label">{t("admin.orders.phone")}</span>
                     <span className="value">{order.receiverPhone}</span>
                   </div>
                 )}
@@ -245,9 +274,11 @@ export default function AdminOrderDetails() {
 
             {/* Delivery Info */}
             <section className="aod-card">
-              <h2 className="aod-section-title">Delivery Details</h2>
+              <h2 className="aod-section-title">
+                {t("admin.orders.delivery_details")}
+              </h2>
               <div className="aod-info-block">
-                <div className="label">Address:</div>
+                <div className="label">{t("admin.orders.address")}</div>
                 <div className="value">
                   {order.deliveryInformation?.address ||
                     order.pickupStoreAddress ||
@@ -257,10 +288,12 @@ export default function AdminOrderDetails() {
             </section>
 
             <section className="aod-card aod-summary">
-              <h2 className="aod-section-title">Payment Summary</h2>
+              <h2 className="aod-section-title">
+                {t("admin.orders.payment_summary")}
+              </h2>
 
               <div className="aod-total-row">
-                <span>Total</span>
+                <span>{t("admin.orders.total")}</span>
                 <span>{order.totalPrice} ₴</span>
               </div>
             </section>

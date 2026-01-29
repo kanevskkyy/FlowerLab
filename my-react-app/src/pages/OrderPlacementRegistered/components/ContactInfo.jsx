@@ -1,7 +1,9 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 const ContactInfo = () => {
+  const { t } = useTranslation();
   const {
     register,
     formState: { errors },
@@ -9,13 +11,13 @@ const ContactInfo = () => {
 
   return (
     <section className="form-section">
-      <h2>Your contact information</h2>
+      <h2>{t("checkout.contact_info_title")}</h2>
 
       <div className="form-group">
-        <label>First Name</label>
+        <label>{t("auth.first_name")}</label>
         <input
           type="text"
-          placeholder="First Name"
+          placeholder={t("auth.first_name")}
           style={errors.firstName ? { border: "1px solid #d32f2f" } : {}}
           {...register("firstName")}
         />
@@ -25,10 +27,10 @@ const ContactInfo = () => {
       </div>
 
       <div className="form-group">
-        <label>Last Name</label>
+        <label>{t("auth.last_name")}</label>
         <input
           type="text"
-          placeholder="Last Name"
+          placeholder={t("auth.last_name")}
           style={errors.lastName ? { border: "1px solid #d32f2f" } : {}}
           {...register("lastName")}
         />
@@ -38,7 +40,7 @@ const ContactInfo = () => {
       </div>
 
       <div className="form-group">
-        <label>Phone</label>
+        <label>{t("auth.phone")}</label>
         <input
           type="tel"
           placeholder="+38 066 001 02 03"

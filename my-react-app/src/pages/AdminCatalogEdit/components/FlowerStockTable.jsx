@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import editIcon from "../../../assets/icons/edit.svg";
 import trashIcon from "../../../assets/icons/trash.svg";
 
@@ -12,120 +13,189 @@ const FlowerStockTable = ({
   setEditingFlower,
   onUpdateFlower,
 }) => {
+  const { t, i18n } = useTranslation();
   return (
     <div className="ace-card full-width">
-      <h3 className="ace-card-title">Flower Types & Stock</h3>
+      <h3 className="ace-card-title">{t("admin.catalog.flower_types")}</h3>
 
-      <table className="ace-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th style={{ width: "120px" }}>Quantity</th>
-            <th style={{ width: "140px", textAlign: "right" }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* Add Row */}
-          <tr className="ace-table-add-row">
-            <td>
-              <input
-                type="text"
-                placeholder="New Flower Name..."
-                value={inputs.flowerTypesName}
-                onChange={(e) =>
-                  onInputChange("flowerTypesName", e.target.value)
-                }
-                onKeyDown={(e) => e.key === "Enter" && onAdd("flowerTypes")}
-              />
-            </td>
-            <td>
-              <input
-                type="number"
-                placeholder="0"
-                value={inputs.flowerTypesQuantity}
-                onChange={(e) =>
-                  onInputChange("flowerTypesQuantity", e.target.value)
-                }
-                onKeyDown={(e) => e.key === "Enter" && onAdd("flowerTypes")}
-              />
-            </td>
-            <td style={{ textAlign: "right" }}>
-              <button
-                className="ace-add-btn small"
-                onClick={() => onAdd("flowerTypes")}>
-                Add
-              </button>
-            </td>
-          </tr>
+      <div className="ace-table-wrapper">
+        <table className="ace-table">
+          <thead>
+            <tr>
+              <th>{t("admin.catalog.name")}</th>
+              <th style={{ width: "120px" }}>{t("admin.catalog.quantity")}</th>
+              <th style={{ width: "140px", textAlign: "right" }}>
+                {t("admin.catalog.actions")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Add Row */}
+            <tr className="ace-table-add-row">
+              <td>
+                <div className="ace-input-group">
+                  <input
+                    type="text"
+                    placeholder={t("admin.catalog.ua_placeholder")}
+                    value={inputs.flowerTypesName_ua}
+                    onChange={(e) =>
+                      onInputChange("flowerTypesName_ua", e.target.value)
+                    }
+                  />
+                  <input
+                    type="text"
+                    placeholder={t("admin.catalog.en_placeholder")}
+                    value={inputs.flowerTypesName_en}
+                    onChange={(e) =>
+                      onInputChange("flowerTypesName_en", e.target.value)
+                    }
+                  />
+                </div>
+              </td>
+              <td>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={inputs.flowerTypesQuantity}
+                  onChange={(e) =>
+                    onInputChange("flowerTypesQuantity", e.target.value)
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && onAdd("flowerTypes")}
+                />
+              </td>
+              <td style={{ textAlign: "right" }}>
+                <button
+                  className="ace-add-btn small"
+                  onClick={() => onAdd("flowerTypes")}>
+                  {t("admin.add")}
+                </button>
+              </td>
+            </tr>
 
-          {/* List Rows */}
-          {flowers.map((item) => {
-            const isEditing = editingFlower?.id === item.id;
+            {/* List Rows */}
+            {flowers.map((item) => {
+              const itemId = item.id || item.Id;
+              const editingId = editingFlower?.id || editingFlower?.Id;
+              const isEditing = editingId === itemId;
 
-            if (isEditing) {
+              if (isEditing) {
+                const nameData = editingFlower.name || editingFlower.Name || {};
+                return (
+                  <tr key={itemId} className="editing-row">
+                    <td>
+                      <div className="ace-input-group">
+                        <input
+                          type="text"
+                          placeholder={t("admin.catalog.ua_placeholder")}
+                          value={nameData.ua || ""}
+                          onChange={(e) =>
+                            setEditingFlower({
+                              ...editingFlower,
+                              name: { ...nameData, ua: e.target.value },
+                            })
+                          }
+                        />
+                        <input
+                          type="text"
+                          placeholder={t("admin.catalog.en_placeholder")}
+                          value={nameData.en || ""}
+                          onChange={(e) =>
+                            setEditingFlower({
+                              ...editingFlower,
+                              name: { ...nameData, en: e.target.value },
+                            })
+                          }
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={editingFlower.quantity || editingFlower.Quantity}
+                        onChange={(e) =>
+                          setEditingFlower({
+                            ...editingFlower,
+                            quantity: parseInt(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <button
+                        className="ace-icon-btn save"
+                        onClick={onUpdateFlower}
+                        title={t("admin.save")}>
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </button>
+                      <button
+                        className="ace-icon-btn cancel"
+                        onClick={() => setEditingFlower(null)}
+                        title={t("admin.cancel")}>
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              }
+
+              const currentLang = i18n.language === "UA" ? "ua" : "en";
+              const nameData = item.name || item.Name || {};
+              const quantity = item.quantity ?? item.Quantity;
+              const displayName =
+                typeof nameData === "object"
+                  ? nameData[currentLang] || nameData.ua || nameData.en
+                  : nameData;
+
               return (
-                <tr key={item.id} className="editing-row">
-                  <td>
-                    <input
-                      type="text"
-                      value={editingFlower.name}
-                      onChange={(e) =>
-                        setEditingFlower({
-                          ...editingFlower,
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      value={editingFlower.quantity}
-                      onChange={(e) =>
-                        setEditingFlower({
-                          ...editingFlower,
-                          quantity: parseInt(e.target.value) || 0,
-                        })
-                      }
-                    />
-                  </td>
+                <tr key={itemId}>
+                  <td>{displayName}</td>
+                  <td>{quantity}</td>
                   <td style={{ textAlign: "right" }}>
                     <button
-                      className="ace-icon-btn save"
-                      onClick={onUpdateFlower}>
-                      Save
+                      className="ace-icon-btn edit"
+                      onClick={() => setEditingFlower(item)}>
+                      <img src={editIcon} alt="edit" />
                     </button>
                     <button
-                      className="ace-icon-btn cancel"
-                      onClick={() => setEditingFlower(null)}>
-                      ✕
+                      className="ace-icon-btn delete"
+                      onClick={() => onRemove("flowerTypes", item)}>
+                      <img src={trashIcon} alt="trash" />
                     </button>
                   </td>
                 </tr>
               );
-            }
-
-            return (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{item.quantity}</td>
-                <td style={{ textAlign: "right" }}>
-                  <button
-                    className="ace-icon-btn edit"
-                    onClick={() => setEditingFlower(item)}>
-                    <img src={editIcon} alt="edit" />
-                  </button>
-                  <button
-                    className="ace-icon-btn delete"
-                    onClick={() => onRemove("flowerTypes", item)}>
-                    <img src={trashIcon} alt="trash" />
-                  </button>
+            })}
+            {flowers.length === 0 && (
+              <tr>
+                <td colSpan="3" className="ace-empty">
+                  {t("admin.catalog.no_items")}
                 </td>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

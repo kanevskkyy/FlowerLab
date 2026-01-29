@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 export function useAdminBouquetForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const isEditMode = Boolean(id);
   const isGiftMode = location.pathname.includes("gifts");
@@ -22,8 +24,8 @@ export function useAdminBouquetForm() {
   // ... (Lines 21-262 skipped)
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    name: { ua: "", en: "" },
+    description: { ua: "", en: "" },
     category: isGiftMode ? "Gifts" : "Bouquets",
     events: [],
     forWho: [],
@@ -52,13 +54,15 @@ export function useAdminBouquetForm() {
             catalogService.getSizes(),
           ]);
 
-        setEvents(eventsRes);
-        setRecipients(recipientsRes);
-        setFlowers(flowersRes);
-        setSizes(sizesRes.items || sizesRes);
+        const getItems = (res) => res?.items || res?.Items || res || [];
+
+        setEvents(getItems(eventsRes));
+        setRecipients(getItems(recipientsRes));
+        setFlowers(getItems(flowersRes));
+        setSizes(getItems(sizesRes));
       } catch (error) {
         console.error("Failed to fetch metadata:", error);
-        toast.error("Failed to load form data");
+        toast.error(t("toasts.admin_load_error"));
       } finally {
         setLoading(false);
       }
@@ -76,8 +80,11 @@ export function useAdminBouquetForm() {
             // Fetch Gift
             const data = await catalogService.getGiftById(id);
             setFormData({
-              title: data.name,
-              description: "",
+              name:
+                typeof data.name === "object"
+                  ? data.name
+                  : { ua: data.name, en: data.name },
+              description: { ua: "", en: "" },
               category: "Gifts",
               events: [],
               forWho: [],
@@ -129,8 +136,14 @@ export function useAdminBouquetForm() {
             );
 
             setFormData({
-              title: data.name,
-              description: data.description || "",
+              name:
+                typeof data.name === "object"
+                  ? data.name
+                  : { ua: data.name, en: data.name },
+              description:
+                typeof data.description === "object"
+                  ? data.description
+                  : { ua: data.description || "", en: data.description || "" },
               category: "Bouquets",
               events: data.events.map((e) => e.id),
               forWho: recipientIds,
@@ -144,7 +157,7 @@ export function useAdminBouquetForm() {
           }
         } catch (error) {
           console.error("Failed to fetch data:", error);
-          toast.error("Failed to load data");
+          toast.error(t("toasts.admin_load_error"));
         }
       };
 
@@ -156,6 +169,13 @@ export function useAdminBouquetForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLocalizedChange = (field, lang, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: { ...prev[field], [lang]: value },
+    }));
   };
 
   const handleCheckboxChange = (category, item) => {
@@ -270,36 +290,44 @@ export function useAdminBouquetForm() {
 
     try {
       const data = new FormData();
-      data.append("Name", formData.title);
+      // Multi-language Name
+      data.append("Name[ua]", formData.name.ua);
+      data.append("Name[en]", formData.name.en || formData.name.ua);
 
       if (isGiftMode) {
         data.append("Price", formData.price);
         data.append("AvailableCount", formData.availableCount);
         if (formData.imgFile) data.append("Image", formData.imgFile);
         else if (!isEditMode) {
-          toast.error("Please upload an image");
+          toast.error(t("toasts.admin_image_required"));
           return;
         }
 
         if (isEditMode) await catalogService.updateGift(id, data);
         else await catalogService.createGift(data);
-        toast.success("Gift saved!");
+        toast.success(t("toasts.admin_gift_saved"));
       } else {
         // BOUQUET SUBMISSION
-        data.append("Description", formData.description || "");
+        // Multi-language Description
+        data.append("Description[ua]", formData.description.ua || "");
+        data.append(
+          "Description[en]",
+          formData.description.en || formData.description.ua || "",
+        );
+
         formData.events.forEach((id) => data.append("EventIds", id));
         formData.forWho.forEach((id) => data.append("RecipientIds", id));
 
         // Use formData.flowerTypes only to determine which flowers are "active" for the bouquet context
         // But actual quantities come from size states.
         if (formData.flowerTypes.length === 0) {
-          toast.error("Please select available flowers for this bouquet");
+          toast.error(t("toasts.admin_flowers_required"));
           return;
         }
 
         const enabledSizes = sizes.filter((s) => sizeStates[s.id]?.enabled);
         if (enabledSizes.length === 0) {
-          toast.error("Please select at least one size");
+          toast.error(t("toasts.admin_size_required"));
           return;
         }
 
@@ -307,7 +335,7 @@ export function useAdminBouquetForm() {
         for (const size of enabledSizes) {
           const state = sizeStates[size.id];
           if (!state.price) {
-            toast.error(`Please enter a price for size ${size.name}`);
+            toast.error(t("toasts.admin_price_required", { size: size.name }));
             return;
           }
 
@@ -332,7 +360,7 @@ export function useAdminBouquetForm() {
 
           if (!hasAnyFlower) {
             toast.error(
-              `Please specify flower quantities for size ${size.name}`,
+              t("toasts.admin_flower_qty_required", { size: size.name }),
             );
             return;
           }
@@ -381,16 +409,16 @@ export function useAdminBouquetForm() {
         if (formData.imgFile) {
           data.append("MainPhoto", formData.imgFile);
         } else if (!isEditMode) {
-          toast.error("Please upload a main image");
+          toast.error(t("toasts.admin_main_image_required"));
           return;
         }
 
         if (isEditMode) {
           await catalogService.updateBouquet(id, data);
-          toast.success("Bouquet updated successfully!");
+          toast.success(t("toasts.admin_bouquet_updated"));
         } else {
           await catalogService.createBouquet(data);
-          toast.success("Bouquet created successfully!");
+          toast.success(t("toasts.admin_bouquet_created"));
         }
       }
 
@@ -400,12 +428,14 @@ export function useAdminBouquetForm() {
       console.error("Failed to save item:", error);
       if (error.response && error.response.data) {
         const serverMsg =
+          error.response.data.message ||
+          error.response.data.error ||
           error.response.data.title ||
           JSON.stringify(error.response.data.errors) ||
           error.message;
-        toast.error(`Error: ${serverMsg}`);
+        toast.error(t("toasts.admin_server_error", { msg: serverMsg }));
       } else {
-        toast.error(error.response?.data?.message || "Failed to save item");
+        toast.error(t("toasts.admin_save_failed"));
       }
     } finally {
       setIsSubmitting(false);
@@ -424,6 +454,7 @@ export function useAdminBouquetForm() {
     formData,
     sizeStates,
     handleChange,
+    handleLocalizedChange,
     handleCheckboxChange,
     handleImageUpload,
     handleSizeCheckbox,

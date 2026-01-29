@@ -1,12 +1,13 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 
 // Icons
 import MessageIcon from "../../../assets/icons/message.svg";
 import LockIcon from "../../../assets/icons/lock.svg";
-import TrashIcon from "../../../assets/icons/trash.svg";
 
 export default function PersonalTab() {
+  const { t } = useTranslation();
   const {
     form,
     photoPreview,
@@ -22,7 +23,7 @@ export default function PersonalTab() {
 
   return (
     <div className="cabinet-panel-inner">
-      <h1 className="cabinet-title">Personal information</h1>
+      <h1 className="cabinet-title">{t("cabinet.personal_title")}</h1>
 
       <div className="cabinet-avatar-section">
         <div
@@ -41,7 +42,7 @@ export default function PersonalTab() {
             </div>
           )}
           <div className="cabinet-avatar-overlay">
-            <span>Change Photo</span>
+            <span>{t("cabinet.change_photo")}</span>
           </div>
         </div>
         <input
@@ -52,14 +53,14 @@ export default function PersonalTab() {
           style={{ display: "none" }}
         />
         <div className="cabinet-avatar-info">
-          <h3>Profile Photo</h3>
-          <p>Click to update your avatar</p>
+          <h3>{t("cabinet.profile_photo")}</h3>
+          <p>{t("cabinet.update_avatar")}</p>
         </div>
       </div>
 
       <div className="cabinet-grid-2">
         <div className="cabinet-field">
-          <label>First Name</label>
+          <label>{t("auth.first_name")}</label>
           <input
             value={form.firstName}
             onChange={onChange("firstName")}
@@ -68,7 +69,7 @@ export default function PersonalTab() {
         </div>
 
         <div className="cabinet-field">
-          <label>Last Name</label>
+          <label>{t("auth.last_name")}</label>
           <input
             value={form.lastName}
             onChange={onChange("lastName")}
@@ -79,7 +80,7 @@ export default function PersonalTab() {
 
       <div className="cabinet-grid-1 cabinet-grid-single-left">
         <div className="cabinet-field">
-          <label>Phone Number</label>
+          <label>{t("auth.phone")}</label>
           <input
             value={form.phone}
             onChange={onChange("phone")}
@@ -88,7 +89,7 @@ export default function PersonalTab() {
         </div>
       </div>
 
-      <h2 className="cabinet-subtitle">Account information</h2>
+      <h2 className="cabinet-subtitle">{t("cabinet.account_title")}</h2>
 
       <div className="cabinet-grid-2">
         <div className="cabinet-pill">
@@ -101,13 +102,13 @@ export default function PersonalTab() {
         <div className="cabinet-pill">
           <div className="cabinet-pill-left">
             <img src={LockIcon} className="cabinet-pill-icon" alt="" />
-            <span className="cabinet-pill-text">Password</span>
+            <span className="cabinet-pill-text">{t("auth.password")}</span>
           </div>
           <button
             className="cabinet-pill-btn"
             type="button"
             onClick={() => setIsPasswordModalOpen(true)}>
-            Change
+            {t("cabinet.change")}
           </button>
         </div>
       </div>
@@ -116,17 +117,17 @@ export default function PersonalTab() {
         className="cabinet-save"
         type="button"
         onClick={handleProfileUpdate}>
-        Save changes
+        {t("cabinet.save")}
       </button>
 
       {/* ===== PASSWORD MODAL ===== */}
       {isPasswordModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content cabinet-password-modal">
-            <h2 className="modal-title">Change Password</h2>
+            <h2 className="modal-title">{t("cabinet.change_password")}</h2>
             <form onSubmit={handlePasswordChange}>
               <div className="cabinet-field">
-                <label>Old Password</label>
+                <label>{t("cabinet.old_password")}</label>
                 <input
                   type="password"
                   value={passwordForm.oldPassword}
@@ -137,7 +138,7 @@ export default function PersonalTab() {
               </div>
 
               <div className="cabinet-field">
-                <label>New Password</label>
+                <label>{t("cabinet.new_password")}</label>
                 <input
                   type="password"
                   value={passwordForm.newPassword}
@@ -148,7 +149,7 @@ export default function PersonalTab() {
               </div>
 
               <div className="cabinet-field">
-                <label>Confirm New Password</label>
+                <label>{t("cabinet.confirm_new_password")}</label>
                 <input
                   type="password"
                   value={passwordForm.confirmPassword}
@@ -163,10 +164,10 @@ export default function PersonalTab() {
                   className="modal-btn-cancel"
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}>
-                  Cancel
+                  {t("cabinet.cancel")}
                 </button>
                 <button className="modal-btn-save" type="submit">
-                  Update Password
+                  {t("cabinet.update_password_btn")}
                 </button>
               </div>
             </form>

@@ -8,7 +8,7 @@ namespace CatalogService.Domain.Entities
 {
     public class Event : BaseEntity
     {
-        public string Name { get; set; } = null!;
+        public Dictionary<string, string> Name { get; set; } = new();
         public ICollection<BouquetEvent> BouquetEvents { get; set; } = new List<BouquetEvent>();
     }
 }

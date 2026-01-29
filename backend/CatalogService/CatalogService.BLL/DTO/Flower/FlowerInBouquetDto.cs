@@ -9,7 +9,7 @@ namespace CatalogService.BLL.DTO
     public class FlowerInBouquetDto
     {
         public Guid Id { get; set; }
-        public string? Name { get; set; }
+        public Dictionary<string, string> Name { get; set; } = new();
         public int Quantity { get; set; }
 
         public FlowerInBouquetDto() { }

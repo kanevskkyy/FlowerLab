@@ -8,7 +8,7 @@ namespace CatalogService.BLL.DTO
 {
     public class EventUpdateDto
     {
-        public string Name { get; set; }
+        public Dictionary<string, string> Name { get; set; } = new();
     }
 
 }

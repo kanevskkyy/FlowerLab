@@ -9,7 +9,8 @@ namespace OrderService.BLL.DTOs.GiftsDTOs
 {
     public class GiftUpdateDto
     {
-        public string Name { get; set; } = null!;
+            public Dictionary<string, string> Name { get; set; } = new();
+        public Dictionary<string, string>? Description { get; set; }
         public int AvailableCount { get; set; }
         public decimal Price { get; set; }
         public IFormFile? Image { get; set; } 

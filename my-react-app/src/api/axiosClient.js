@@ -1,4 +1,5 @@
 import axios from "axios";
+import i18n from "../i18n";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
@@ -24,12 +25,27 @@ const axiosClient = axios.create({
   },
 });
 
-// Інтерсептор для додавання Access Token до кожного запиту
+// Інтерсептор для додавання Access Token та локалізації до кожного запиту
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   if (token && token !== "null" && token !== "undefined") {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Налаштування мови
+  const langNormalized = i18n.language ? i18n.language.toLowerCase() : "";
+  const currentLang =
+    langNormalized.startsWith("uk") || langNormalized === "ua" ? "ua" : "en";
+  config.headers["Accept-Language"] = currentLang;
+
+  // Винятково для адмінських редагувань (якщо в URL є /admin або спеціальний прапорець у config)
+  if (
+    config.skipLocalization ||
+    window.location.pathname.startsWith("/admin")
+  ) {
+    config.headers["X-Skip-Localization"] = "true";
+  }
+
   return config;
 });
 

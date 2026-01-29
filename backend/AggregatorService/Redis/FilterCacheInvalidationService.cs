@@ -23,8 +23,8 @@ namespace AggregatorService.Redis
         {
             try
             {
-                await _cache.RemoveAsync(CACHE_KEY);
-                _logger.LogInformation("Cache for filters cleared for specific entity.");
+                await _cache.RemoveByPatternAsync(CACHE_KEY + "*");
+                _logger.LogInformation("Cache for filters cleared (all languages) for specific entity.");
             }
             catch (Exception ex)
             {
@@ -37,8 +37,8 @@ namespace AggregatorService.Redis
         {
             try
             {
-                await _cache.RemoveAsync(CACHE_KEY);
-                _logger.LogInformation("Cache for filters cleared for specific entity (Proto).");
+                await _cache.RemoveByPatternAsync(CACHE_KEY + "*");
+                _logger.LogInformation("Cache for filters cleared (all languages) for specific entity (Proto).");
             }
             catch (Exception ex)
             {

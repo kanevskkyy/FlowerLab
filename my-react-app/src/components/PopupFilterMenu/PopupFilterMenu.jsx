@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import catalogService from "../../services/catalogService";
 import "./PopupFilterMenu.css";
 
 const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
+  const { t, i18n } = useTranslation();
   const [metadata, setMetadata] = useState({
     events: [],
     recipients: [],
@@ -52,11 +54,18 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
       try {
         const data = await catalogService.getFilters();
 
+        const normalize = (items) =>
+          (items || []).map((item) => ({
+            ...item,
+            id: item.id || item.Id,
+            name: item.name || item.Name,
+          }));
+
         setMetadata({
-          events: data.eventResponseList || [],
-          recipients: data.receivmentResponseList || [],
-          flowers: data.flowerResponseList || [],
-          sizes: data.sizeResponseList || [],
+          events: normalize(data.eventResponseList),
+          recipients: normalize(data.receivmentResponseList),
+          flowers: normalize(data.flowerResponseList),
+          sizes: normalize(data.sizeResponseList),
         });
 
         // 1. Try to get price range from filter metadata first
@@ -64,8 +73,8 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
         let gMax = 50000;
 
         if (data.priceRange) {
-          gMin = data.priceRange.minPrice || 0;
-          gMax = data.priceRange.maxPrice || 50000;
+          gMin = data.priceRange.minPrice ?? data.priceRange.MinPrice ?? 0;
+          gMax = data.priceRange.maxPrice ?? data.priceRange.MaxPrice ?? 50000;
         }
 
         // 2. If metadata range seems default or suspicious, verify with direct product queries
@@ -167,6 +176,24 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
     onClose();
   };
 
+  const langNormalized = i18n.language ? i18n.language.toLowerCase() : "";
+  const currentLang =
+    langNormalized.startsWith("uk") || langNormalized === "ua" ? "ua" : "en";
+
+  const renderLabel = (item) => {
+    if (!item) return "";
+    const nameData = item.name || item.Name;
+    if (typeof nameData === "object" && nameData !== null) {
+      return nameData[currentLang] || nameData.ua || nameData.en || "";
+    }
+    return (
+      nameData ||
+      item.name ||
+      item.Name ||
+      (typeof item === "string" ? item : "")
+    );
+  };
+
   return (
     <div className={`filter-overlay ${isOpen ? "open" : ""}`} onClick={onClose}>
       <div className="filter-menu" onClick={(e) => e.stopPropagation()}>
@@ -174,10 +201,10 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
           ✕
         </button>
 
-        <h3 className="filter-title">Filter by:</h3>
+        <h3 className="filter-title">{t("filter.title")}</h3>
 
         {/* PRICE */}
-        <p className="filter-label">Price</p>
+        <p className="filter-label">{t("filter.price")}</p>
 
         <div className="price-inputs">
           <input
@@ -198,11 +225,6 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
         </div>
 
         <div className="range-wrapper">
-          {/* Simple slider controls Max Price for now to avoid complex CSS. 
-              Or we can use two sliders if we overlay them. 
-              For now let's just use one slider for Max Price as it is most common, 
-              but inputs allow full control.
-          */}
           <input
             type="range"
             min={globalMin}
@@ -219,7 +241,7 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
         {/* SIZE + QUANTITY */}
         <div className="two-columns">
           <div>
-            <p className="filter-label">Size</p>
+            <p className="filter-label">{t("filter.size")}</p>
             {metadata.sizes.map((s) => (
               <label key={s.id} className="radio-item">
                 <input
@@ -228,13 +250,13 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
                   checked={selectedSizeId === s.id}
                   onChange={() => setSelectedSizeId(s.id)}
                 />
-                {s.name}
+                {renderLabel(s)}
               </label>
             ))}
           </div>
 
           <div>
-            <p className="filter-label">Quantity</p>
+            <p className="filter-label">{t("filter.quantity")}</p>
             {["51", "101", "201", "501"].map((q) => (
               <label key={q} className="radio-item">
                 <input
@@ -251,7 +273,7 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
 
         <div className="filter-scroll-area">
           {/* EVENT */}
-          <p className="filter-label">Event</p>
+          <p className="filter-label">{t("filter.event")}</p>
           {metadata.events.map((e) => (
             <label key={e.id} className="checkbox-item">
               <input
@@ -261,12 +283,12 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
                   toggleArrayValue(e.id, setSelectedEventIds, selectedEventIds)
                 }
               />
-              {e.name}
+              {renderLabel(e)}
             </label>
           ))}
 
           {/* FOR WHO */}
-          <p className="filter-label">For who</p>
+          <p className="filter-label">{t("filter.recipient")}</p>
           {metadata.recipients.map((r) => (
             <label key={r.id} className="checkbox-item">
               <input
@@ -280,12 +302,12 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
                   )
                 }
               />
-              {r.name}
+              {renderLabel(r)}
             </label>
           ))}
 
           {/* FLOWER TYPE */}
-          <p className="filter-label">Flower type</p>
+          <p className="filter-label">{t("filter.flower_type")}</p>
           {metadata.flowers.map((f) => (
             <label key={f.id} className="checkbox-item">
               <input
@@ -299,16 +321,16 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
                   )
                 }
               />
-              {f.name}
+              {renderLabel(f)}
             </label>
           ))}
         </div>
 
         <button className="reset-btn" onClick={resetFilters}>
-          RESET FILTERS
+          {t("filter.reset")}
         </button>
         <button className="apply-btn" onClick={applyFilters}>
-          APPLY
+          {t("filter.apply")}
         </button>
       </div>
     </div>

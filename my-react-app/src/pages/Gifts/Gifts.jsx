@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../../context/CartContext";
 import { useGifts } from "./hooks/useGifts";
 import Header from "../../components/Header/Header";
@@ -11,6 +12,7 @@ import "./Gifts.css"; // Локальні стилі (копія каталог�
 import SEO from "../../components/SEO/SEO";
 
 const Gifts = () => {
+  const { t } = useTranslation();
   const { addToCart } = useCart();
   const {
     gifts,
@@ -33,7 +35,7 @@ const Gifts = () => {
       maxStock: item.availableCount,
       isGift: true,
     });
-    toast.success(`${item.name} added to cart!`);
+    toast.success(t("gifts.added", { name: item.name }));
   };
 
   const optimizeCloudinaryUrl = (url) => {
@@ -47,15 +49,15 @@ const Gifts = () => {
   return (
     <div className="page-wrapper gifts-page">
       <SEO
-        title="Gifts & Extras | FlowerLab"
-        description="Add a special touch with our teddy bears, balloons, and sweets. Perfect additions to any bouquet."
+        title={t("gifts.seo_title")}
+        description={t("gifts.seo_desc")}
         image="/og-gifts.jpg"
       />
       <Header onMenuOpen={() => setMenuOpen(true)} />
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <main className="catalog">
-        <h1 className="catalog-title">GIFTS & EXTRAS</h1>
+        <h1 className="catalog-title">{t("gifts.title")}</h1>
 
         {loading ? (
           <div className="catalog-grid">
@@ -69,7 +71,7 @@ const Gifts = () => {
               color: "#666",
               fontSize: "1.1rem",
             }}>
-            Failed to load gifts. Please try again later.
+            {t("gifts.error")}
           </div>
         ) : (
           <>
@@ -92,10 +94,10 @@ const Gifts = () => {
 
                       {/* STOCK BADGES */}
                       {item.availableCount === 0 ? (
-                        <div className="stock-badge oos">Out of Stock</div>
+                        <div className="stock-badge oos">{t("gifts.oos")}</div>
                       ) : item.availableCount < 5 ? (
                         <div className="stock-badge low">
-                          Only {item.availableCount} left
+                          {t("gifts.only_left", { count: item.availableCount })}
                         </div>
                       ) : null}
                     </div>
@@ -111,7 +113,9 @@ const Gifts = () => {
                         className="order-btn"
                         onClick={() => handleAddToCart(item)}
                         disabled={item.availableCount === 0}>
-                        {item.availableCount === 0 ? "OUT OF STOCK" : "ORDER"}
+                        {item.availableCount === 0
+                          ? t("gifts.oos")
+                          : t("gifts.order")}
                       </button>
                     </div>
                   </div>
@@ -124,7 +128,7 @@ const Gifts = () => {
                     padding: "2rem",
                     color: "#999",
                   }}>
-                  No gifts found.
+                  {t("gifts.no_gifts")}
                 </div>
               )}
             </div>

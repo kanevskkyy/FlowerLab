@@ -8,8 +8,8 @@ namespace CatalogService.Domain.Entities
 {
     public class Bouquet : BaseEntity
     {
-        public string Name { get; set; } = null!;
-        public string? Description { get; set; }
+        public Dictionary<string, string> Name { get; set; } = new();
+        public Dictionary<string, string>? Description { get; set; }
         public string MainPhotoUrl { get; set; } = null!;
 
         public ICollection<BouquetFlower> BouquetFlowers { get; set; } = new List<BouquetFlower>();

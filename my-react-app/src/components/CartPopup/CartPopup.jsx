@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./CartPopup.css";
 import { useCart } from "../../context/CartContext";
 import TrashIcon from "../../assets/icons/trash-icon.svg";
 import CloseIcon from "../../assets/icons/close-icon.svg";
 
 const CartPopup = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { cartItems, increaseQty, decreaseQty, removeItem } = useCart();
 
@@ -31,19 +33,15 @@ const CartPopup = ({ isOpen, onClose }) => {
           <button className="close-btn" onClick={onClose}>
             <img src={CloseIcon} alt="Close" />
           </button>
-          <h2>YOUR CART</h2>
+          <h2>{t("cart.title")}</h2>
         </div>
 
         {/* EMPTY STATE */}
         {cartItems.length === 0 && (
           <div className="cart-empty">
-            <p className="empty-message">
-              You haven't added any items
-              <br />
-              to the cart yet.
-            </p>
+            <p className="empty-message">{t("cart.empty_msg")}</p>
             <button className="shop-btn" onClick={onClose}>
-              GO SHOPPING
+              {t("cart.go_shopping")}
             </button>
           </div>
         )}
@@ -62,7 +60,9 @@ const CartPopup = ({ isOpen, onClose }) => {
                     </div>
 
                     {item.sizeName && (
-                      <p className="cart-item-size">Size: {item.sizeName}</p>
+                      <p className="cart-item-size">
+                        {t("cart.size")}: {item.sizeName}
+                      </p>
                     )}
 
                     <p className="cart-item-price">
@@ -105,7 +105,7 @@ const CartPopup = ({ isOpen, onClose }) => {
                             color: "#d46aac",
                             marginTop: "5px",
                           }}>
-                          Maximum available quantity reached
+                          {t("cart.max_reached")}
                         </p>
                       )}
                   </div>
@@ -115,16 +115,16 @@ const CartPopup = ({ isOpen, onClose }) => {
 
             <div className="cart-footer">
               <div className="cart-total">
-                <span>TOTAL:</span>
+                <span>{t("cart.total")}:</span>
                 <span className="total-amount">{total.toFixed(2)} ₴</span>
               </div>
 
               <button className="checkout-btn" onClick={handleCheckout}>
-                PROCEED TO CHECKOUT
+                {t("cart.checkout_btn")}
               </button>
 
               <button className="continue-shopping" onClick={onClose}>
-                ‹ Continue Shopping
+                ‹ {t("cart.continue")}
               </button>
             </div>
           </>

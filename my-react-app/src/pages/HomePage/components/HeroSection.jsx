@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // Images
 import heroImg1 from "../../../assets/images/bouquet1L.webp";
@@ -10,6 +11,7 @@ import arrowLeft from "../../../assets/icons/arrow-left.svg";
 import arrowRight from "../../../assets/icons/arrow-right.svg";
 
 const HeroSection = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -80,7 +82,7 @@ const HeroSection = () => {
         </div>
 
         <button className="hero-cta-btn" onClick={() => navigate("/catalog")}>
-          ORDER
+          {t("home.order_btn")}
         </button>
       </div>
 

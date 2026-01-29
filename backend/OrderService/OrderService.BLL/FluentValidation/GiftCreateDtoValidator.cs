@@ -16,8 +16,7 @@ namespace OrderService.BLL.FluentValidation
         public GiftCreateDtoValidator()
         {
             RuleFor(g => g.Name)
-                .NotEmpty().WithMessage("Gift name is required")
-                .MaximumLength(100).WithMessage("Gift name cannot exceed 100 characters");
+                .NotEmpty().WithMessage("Gift name is required");
 
             RuleFor(g => g.AvailableCount)
                 .GreaterThanOrEqualTo(0).WithMessage("Gift count cannot be negative");

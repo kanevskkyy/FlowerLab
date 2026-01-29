@@ -8,7 +8,7 @@ namespace CatalogService.Domain.Entities
 {
     public class Flower : BaseEntity
     {
-        public string Name { get; set; } = null!;
+        public Dictionary<string, string> Name { get; set; } = new();
         public int Quantity { get; set; }  
 
         public ICollection<BouquetFlower> BouquetFlowers { get; set; } = new List<BouquetFlower>();

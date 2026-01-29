@@ -24,8 +24,12 @@ namespace CatalogService.DAL.Specification
                 ) &&
                 (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity))) &&
                 (string.IsNullOrEmpty(parameters.Name) ||
-                    EF.Functions.ILike(b.Name, $"%{parameters.Name}%") ||
-                    b.BouquetFlowers.Any(bf => EF.Functions.ILike(bf.Flower.Name, $"%{parameters.Name}%"))
+                    EF.Functions.ILike(b.Name["ua"], $"%{parameters.Name}%") ||
+                    EF.Functions.ILike(b.Name["en"], $"%{parameters.Name}%") ||
+                    b.BouquetFlowers.Any(bf => 
+                        EF.Functions.ILike(bf.Flower.Name["ua"], $"%{parameters.Name}%") || 
+                        EF.Functions.ILike(bf.Flower.Name["en"], $"%{parameters.Name}%")
+                    )
                 )
             )
         {
@@ -51,11 +55,11 @@ namespace CatalogService.DAL.Specification
                     break;
 
                 case "name_asc":
-                    AddOrderBy(b => b.Name);
+                    AddOrderBy(b => b.Name["ua"]); // Default sort by UA
                     break;
 
                 case "name_desc":
-                    AddOrderByDescending(b => b.Name);
+                    AddOrderByDescending(b => b.Name["ua"]);
                     break;
 
                 case "date_asc":

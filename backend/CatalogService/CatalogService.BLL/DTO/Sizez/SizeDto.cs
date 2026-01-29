@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace CatalogService.BLL.DTO
 {
-    public record SizeDto(Guid Id, string Name);
+    public record SizeDto(Guid Id, Dictionary<string, string> Name);
 
 }

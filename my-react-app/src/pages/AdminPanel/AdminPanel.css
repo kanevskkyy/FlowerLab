@@ -438,6 +438,39 @@
   align-items: center;
   gap: 10px;
 }
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.admin-lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+}
+
+.admin-lang-switcher span {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.admin-lang-switcher span:hover {
+  color: #111;
+}
+
+.admin-lang-switcher span.active {
+  color: #111;
+  font-weight: 700;
+}
+
+.admin-lang-switcher .divider {
+  cursor: default;
+  color: #ddd;
+}
 .admin-order-left {
   display: flex;
   align-items: center;
@@ -589,37 +622,41 @@
   width: 18px;
   height: 18px;
 }
-.admin-catalog-groups {
+.admin-catalog-tables {
   margin-top: 26px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 32px;
+}
+.admin-catalog-table-wrapper {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 .admin-catalog-pill {
   width: 100%;
   background: #f6e2ef;
-  border-radius: 999px;
-  padding: 12px 18px;
+  padding: 14px 22px;
   font-size: 16px;
+  font-weight: 600;
   color: #000;
 }
-.admin-catalog-list {
-  margin: 14px 0 0;
-  padding: 0 0 0 34px;
-  list-style: none;
+.admin-mini-table {
+  width: 100%;
+  border-collapse: collapse;
 }
-.admin-catalog-list li {
-  position: relative;
-  margin: 10px 0;
+.admin-mini-table td {
+  padding: 12px 22px;
   font-size: 14px;
-  color: #000;
+  color: #111;
+  border-bottom: 1px solid #f9f9f9;
 }
-.admin-catalog-list li::before {
-  content: "–";
-  position: absolute;
-  left: -18px;
-  top: 0;
-  opacity: 0.95;
+.admin-mini-table tr:last-child td {
+  border-bottom: none;
+}
+.admin-mini-table tr:hover td {
+  background-color: #fafafa;
 }
 
 /* REVIEWS */

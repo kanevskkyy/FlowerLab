@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 export const useAdminCatalog = (confirm) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
 
   // Data State
@@ -14,9 +16,12 @@ export const useAdminCatalog = (confirm) => {
 
   // Input State
   const [inputs, setInputs] = useState({
-    events: "",
-    forWho: "",
-    flowerTypesName: "",
+    events_ua: "",
+    events_en: "",
+    forWho_ua: "",
+    forWho_en: "",
+    flowerTypesName_ua: "",
+    flowerTypesName_en: "",
     flowerTypesQuantity: "",
   });
 
@@ -33,18 +38,42 @@ export const useAdminCatalog = (confirm) => {
         catalogService.getFlowers(),
       ]);
 
-      const normalize = (res) => res.items || res || [];
+      const normalize = (res) => {
+        if (!res) return [];
+        // Handle both camelCase and PascalCase
+        const items = res.items || res.Items || res;
+        return Array.isArray(items) ? items : [];
+      };
+
+      const eventsData = normalize(events);
+      const recipientsData = normalize(recipients);
+      const flowersData = normalize(flowers);
+
+      console.log("Catalog Debug - Raw Events:", events);
+      console.log("Catalog Debug - Normalized Events:", eventsData);
 
       setData({
-        events: normalize(events),
-        forWho: normalize(recipients),
-        flowerTypes: normalize(flowers).sort((a, b) =>
-          a.name.localeCompare(b.name),
-        ),
+        events: eventsData,
+        forWho: recipientsData,
+        flowerTypes: flowersData.sort((a, b) => {
+          const nameA = (
+            a.name?.ua ||
+            a.Name?.ua ||
+            (typeof a.name === "string" ? a.name : a.Name) ||
+            ""
+          ).toString();
+          const nameB = (
+            b.name?.ua ||
+            b.Name?.ua ||
+            (typeof b.name === "string" ? b.name : b.Name) ||
+            ""
+          ).toString();
+          return nameA.localeCompare(nameB);
+        }),
       });
     } catch (error) {
       console.error("Failed to fetch catalog settings:", error);
-      toast.error("Failed to load settings");
+      toast.error(t("toasts.admin_load_error"));
     } finally {
       setLoading(false);
     }
@@ -61,79 +90,113 @@ export const useAdminCatalog = (confirm) => {
 
   const handleAdd = async (category) => {
     if (category === "flowerTypes") {
-      const name = inputs.flowerTypesName.trim();
+      const nameUa = inputs.flowerTypesName_ua.trim();
+      const nameEn = inputs.flowerTypesName_en.trim();
       const qty = parseInt(inputs.flowerTypesQuantity) || 0;
 
-      if (!name) return;
+      if (!nameUa) {
+        toast.error(t("toasts.admin_ua_name_required"));
+        return;
+      }
 
-      const exists = data.flowerTypes.some(
-        (item) => item.name.toLowerCase() === name.toLowerCase(),
-      );
+      const exists = data.flowerTypes.some((item) => {
+        const iName = typeof item.name === "object" ? item.name.ua : item.name;
+        return iName.toLowerCase() === nameUa.toLowerCase();
+      });
+
       if (exists) {
-        toast.error("This flower type already exists!");
+        toast.error(t("toasts.admin_flower_exists"));
         return;
       }
 
       try {
-        const newItem = await catalogService.createFlower(name, qty);
+        const nameObj = { ua: nameUa, en: nameEn || nameUa };
+        const newItem = await catalogService.createFlower(nameObj, qty);
         setData((prev) => ({
           ...prev,
-          flowerTypes: [...prev.flowerTypes, newItem].sort((a, b) =>
-            a.name.localeCompare(b.name),
-          ),
+          flowerTypes: [...prev.flowerTypes, newItem].sort((a, b) => {
+            const nameA = (
+              a.name?.ua ||
+              a.Name?.ua ||
+              (typeof a.name === "string" ? a.name : a.Name) ||
+              ""
+            ).toString();
+            const nameB = (
+              b.name?.ua ||
+              b.Name?.ua ||
+              (typeof b.name === "string" ? b.name : b.Name) ||
+              ""
+            ).toString();
+            return nameA.localeCompare(nameB);
+          }),
         }));
         setInputs((prev) => ({
           ...prev,
-          flowerTypesName: "",
+          flowerTypesName_ua: "",
+          flowerTypesName_en: "",
           flowerTypesQuantity: "",
         }));
-        toast.success("Flower added successfully");
+        toast.success(t("toasts.admin_flower_added"));
       } catch (error) {
         console.error("Failed to add flower:", error);
-        toast.error("Failed to add flower");
+        toast.error(t("toasts.admin_flower_add_failed"));
       }
       return;
     }
 
     // Generic logic
-    const val = inputs[category]?.trim();
-    if (!val) return;
+    const valUa = inputs[`${category}_ua`]?.trim();
+    const valEn = inputs[`${category}_en`]?.trim();
 
-    const exists = data[category].some(
-      (item) => item.name.toLowerCase() === val.toLowerCase(),
-    );
+    if (!valUa) {
+      toast.error(t("toasts.admin_ua_name_required"));
+      return;
+    }
+
+    const exists = data[category].some((item) => {
+      const iName = typeof item.name === "object" ? item.name.ua : item.name;
+      return iName.toLowerCase() === valUa.toLowerCase();
+    });
+
     if (exists) {
-      toast.error("This item already exists!");
+      toast.error(t("toasts.admin_item_exists"));
       return;
     }
 
     try {
+      const nameObj = { ua: valUa, en: valEn || valUa };
       let newItem;
       switch (category) {
         case "events":
-          newItem = await catalogService.createEvent(val);
+          newItem = await catalogService.createEvent(nameObj);
           break;
         case "forWho":
-          newItem = await catalogService.createRecipient(val);
+          newItem = await catalogService.createRecipient(nameObj);
           break;
         default:
           return;
       }
 
+      console.log("Catalog Debug - Added New Item:", newItem);
+
       setData((prev) => ({
         ...prev,
         [category]: [...prev[category], newItem],
       }));
-      setInputs((prev) => ({ ...prev, [category]: "" }));
-      toast.success("Added successfully");
+      setInputs((prev) => ({
+        ...prev,
+        [`${category}_ua`]: "",
+        [`${category}_en`]: "",
+      }));
+      toast.success(t("toasts.admin_added_success"));
     } catch (error) {
       console.error(`Failed to add ${category}:`, error);
-      toast.error("Failed to add item");
+      toast.error(t("toasts.admin_add_failed"));
     }
   };
 
   const handleUpdateFlower = async () => {
-    if (!editingFlower || !editingFlower.name.trim()) return;
+    if (!editingFlower || !editingFlower.name?.ua?.trim()) return;
 
     try {
       const updated = await catalogService.updateFlower(
@@ -145,20 +208,42 @@ export const useAdminCatalog = (confirm) => {
       setData((prev) => ({
         ...prev,
         flowerTypes: prev.flowerTypes
-          .map((f) => (f.id === editingFlower.id ? updated : f))
-          .sort((a, b) => a.name.localeCompare(b.name)),
+          .map((f) =>
+            (f.id || f.Id) === (editingFlower.id || editingFlower.Id)
+              ? updated
+              : f,
+          )
+          .sort((a, b) => {
+            const nameA = (
+              a.name?.ua ||
+              a.Name?.ua ||
+              (typeof a.name === "string" ? a.name : a.Name) ||
+              ""
+            ).toString();
+            const nameB = (
+              b.name?.ua ||
+              b.Name?.ua ||
+              (typeof b.name === "string" ? b.name : b.Name) ||
+              ""
+            ).toString();
+            return nameA.localeCompare(nameB);
+          }),
       }));
       setEditingFlower(null);
-      toast.success("Flower updated");
+      toast.success(t("toasts.admin_flower_updated"));
     } catch (error) {
       console.error("Failed to update flower:", error);
-      toast.error("Failed to update flower");
+      toast.error(t("toasts.admin_flower_update_failed"));
     }
   };
 
   const handleRemoveClick = (category, item) => {
+    const nameData = item.name || item.Name;
+    const itemName = typeof nameData === "object" ? nameData.ua : nameData;
+    const itemId = item.id || item.Id;
+
     confirm({
-      title: `Delete "${item.name}"?`,
+      title: `Delete "${itemName}"?`,
       message:
         "Are you sure you want to delete this item? This creates potential issues for products using it.",
       confirmText: "Delete",
@@ -167,13 +252,13 @@ export const useAdminCatalog = (confirm) => {
         try {
           switch (category) {
             case "events":
-              await catalogService.deleteEvent(item.id);
+              await catalogService.deleteEvent(itemId);
               break;
             case "forWho":
-              await catalogService.deleteRecipient(item.id);
+              await catalogService.deleteRecipient(itemId);
               break;
             case "flowerTypes":
-              await catalogService.deleteFlower(item.id);
+              await catalogService.deleteFlower(itemId);
               break;
             default:
               return;
@@ -181,12 +266,12 @@ export const useAdminCatalog = (confirm) => {
 
           setData((prev) => ({
             ...prev,
-            [category]: prev[category].filter((i) => i.id !== item.id),
+            [category]: prev[category].filter((i) => (i.id || i.Id) !== itemId),
           }));
-          toast.success("Deleted successfully");
+          toast.success(t("toasts.admin_deleted_success"));
         } catch (error) {
           console.error(`Failed to delete ${category}:`, error);
-          toast.error("Failed to delete item");
+          toast.error(t("toasts.admin_delete_failed"));
         }
       },
     });

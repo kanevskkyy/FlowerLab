@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
 
 export function useGifts() {
+  const { i18n } = useTranslation();
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -33,14 +35,14 @@ export function useGifts() {
       } catch (error) {
         console.error("Failed to fetch gifts:", error);
         setError(true);
-        toast.error("Не вдалося завантажити подарунки");
+        toast.error(t("toasts.gifts_load_failed"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchGifts();
-  }, [currentPage]);
+  }, [currentPage, i18n.language]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);

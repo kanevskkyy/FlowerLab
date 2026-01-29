@@ -47,6 +47,25 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromForm] BouquetCreateDto dto, CancellationToken cancellationToken)
         {
+            // Manual binding for localized fields (Name, Description) to ensure Dictionary binding works with FromForm
+            if (Request.Form.Keys.Any())
+            {
+                foreach (var key in Request.Form.Keys)
+                {
+                    if (key.StartsWith("Name[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(5, key.Length - 6);
+                        dto.Name[lang] = Request.Form[key];
+                    }
+                    if (key.StartsWith("Description[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(12, key.Length - 13);
+                        if (dto.Description == null) dto.Description = new Dictionary<string, string>();
+                        dto.Description[lang] = Request.Form[key];
+                    }
+                }
+            }
+
             if (dto.Sizes != null && Request.Form.Files.Count > 0)
             {
                 var regex = new System.Text.RegularExpressions.Regex(@"(?i)Sizes\[(\d+)\]\.AdditionalImages");
@@ -75,6 +94,25 @@ namespace CatalogService.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromForm] BouquetUpdateDto dto, CancellationToken cancellationToken)
         {
+            // Manual binding for localized fields
+            if (Request.Form.Keys.Any())
+            {
+                foreach (var key in Request.Form.Keys)
+                {
+                    if (key.StartsWith("Name[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(5, key.Length - 6);
+                        dto.Name[lang] = Request.Form[key];
+                    }
+                    if (key.StartsWith("Description[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(12, key.Length - 13);
+                        if (dto.Description == null) dto.Description = new Dictionary<string, string>();
+                        dto.Description[lang] = Request.Form[key];
+                    }
+                }
+            }
+
             // Manual binding for Files (existing logic)
             if (dto.Sizes != null && Request.Form.Files.Count > 0)
             {

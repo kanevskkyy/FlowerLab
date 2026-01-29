@@ -42,8 +42,8 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<FlowerDto> CreateAsync(FlowerCreateUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            if (await uow.Flowers.ExistsWithNameAsync(dto.Name, cancellationToken: cancellationToken))
-                throw new AlreadyExistsException($"Flower '{dto.Name}' already exists.");
+            if (await uow.Flowers.ExistsWithNameAsync(dto.Name.GetValueOrDefault("ua", ""), cancellationToken: cancellationToken))
+                throw new AlreadyExistsException($"Flower '{dto.Name.GetValueOrDefault("ua", "")}' already exists.");
 
             if (dto.Quantity < 0)
                 throw new ArgumentException("Quantity must be non-negative.");
@@ -68,8 +68,8 @@ namespace CatalogService.BLL.Services.Implementations
             if (flower == null)
                 throw new NotFoundException($"Flower with ID {id} not found.");
 
-            if (await uow.Flowers.ExistsWithNameAsync(dto.Name, id, cancellationToken))
-                throw new AlreadyExistsException($"Flower '{dto.Name}' already exists.");
+            if (await uow.Flowers.ExistsWithNameAsync(dto.Name.GetValueOrDefault("ua", ""), id, cancellationToken))
+                throw new AlreadyExistsException($"Flower '{dto.Name.GetValueOrDefault("ua", "")}' already exists.");
 
             if (dto.Quantity < 0)
                 throw new ArgumentException("Quantity must be non-negative.");

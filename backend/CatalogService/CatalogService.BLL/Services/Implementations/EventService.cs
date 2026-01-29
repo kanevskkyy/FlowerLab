@@ -39,10 +39,10 @@ namespace CatalogService.BLL.Services.Implementations
             return mapper.Map<EventDto>(targetEvent);
         }
 
-        public async Task<EventDto> CreateAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<EventDto> CreateAsync(Dictionary<string, string> name, CancellationToken cancellationToken = default)
         {
-            if (await uow.Events.ExistsWithNameAsync(name, cancellationToken: cancellationToken))
-                throw new AlreadyExistsException($"Event '{name}' already exists.");
+            if (await uow.Events.ExistsWithNameAsync(name.GetValueOrDefault("ua", ""), cancellationToken: cancellationToken))
+                throw new AlreadyExistsException($"Event '{name.GetValueOrDefault("ua", "")}' already exists.");
 
             Event entity = new Event { Name = name };
             await uow.Events.AddAsync(entity, cancellationToken);
@@ -53,13 +53,13 @@ namespace CatalogService.BLL.Services.Implementations
             return mapper.Map<EventDto>(entity);
         }
 
-        public async Task<EventDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default)
+        public async Task<EventDto> UpdateAsync(Guid id, Dictionary<string, string> name, CancellationToken cancellationToken = default)
         {
             Event? ev = await uow.Events.GetByIdAsync(id, cancellationToken);
             if (ev == null) throw new NotFoundException($"Event {id} not found");
 
-            if (await uow.Events.ExistsWithNameAsync(name, id, cancellationToken))
-                throw new AlreadyExistsException($"Event '{name}' already exists.");
+            if (await uow.Events.ExistsWithNameAsync(name.GetValueOrDefault("ua", ""), id, cancellationToken))
+                throw new AlreadyExistsException($"Event '{name.GetValueOrDefault("ua", "")}' already exists.");
 
             ev.Name = name;
             uow.Events.Update(ev);

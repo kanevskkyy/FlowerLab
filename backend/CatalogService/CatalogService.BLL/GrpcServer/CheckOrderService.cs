@@ -11,15 +11,32 @@ namespace CatalogService.BLL.GrpcServer
     {
         private IUnitOfWork unitOfWork;
         private ILogger<CheckOrderService> logger;
+        private shared.localization.ILanguageProvider languageProvider;
 
-        public CheckOrderService(IUnitOfWork unitOfWork, ILogger<CheckOrderService> logger)
+        public CheckOrderService(IUnitOfWork unitOfWork, ILogger<CheckOrderService> logger, shared.localization.ILanguageProvider languageProvider)
         {
             this.unitOfWork = unitOfWork;
             this.logger = logger;
+            this.languageProvider = languageProvider;
+        }
+
+        private void SetCurrentLanguage(ServerCallContext context)
+        {
+            var acceptLang = context.RequestHeaders.FirstOrDefault(h => h.Key == "accept-language")?.Value;
+            if (!string.IsNullOrEmpty(acceptLang))
+            {
+                var lang = acceptLang.Split(',')[0].Split(';')[0].Split('-')[0].ToLower();
+                if (lang == "uk" || lang == "ua" || lang == "ukr") lang = "ua";
+                else if (lang == "en" || lang == "eng") lang = "en";
+                else lang = null;
+
+                if (lang != null) languageProvider.CurrentLanguage = lang;
+            }
         }
 
         public override async Task<OrderedResponseList> CheckOrderItems(OrderedBouquetsIdList request, ServerCallContext context)
         {
+            SetCurrentLanguage(context);
             if (request == null)
             {
                 logger.LogWarning("Received empty request");
@@ -27,6 +44,7 @@ namespace CatalogService.BLL.GrpcServer
             }
 
             var responseList = new OrderedResponseList();
+            var currentLang = languageProvider.CurrentLanguage ?? "ua";
 
             foreach (var item in request.OrderedBouquets)
             {
@@ -91,7 +109,7 @@ namespace CatalogService.BLL.GrpcServer
                         {
                             IsValid = false,
                             ErrorMessage = "The specified size is not available for this bouquet",
-                            BouquetName = bouquet.Name,
+                            BouquetName = bouquet.Name.GetValueOrDefault(currentLang, bouquet.Name.GetValueOrDefault("ua", "")),
                             BouquetImage = bouquet.MainPhotoUrl,
                             Price = "0",
                             SizeName = ""
@@ -107,10 +125,10 @@ namespace CatalogService.BLL.GrpcServer
                         {
                             IsValid = false,
                             ErrorMessage = "The bouquet size has no configured flowers",
-                            BouquetName = bouquet.Name,
+                            BouquetName = bouquet.Name.GetValueOrDefault(currentLang, bouquet.Name.GetValueOrDefault("ua", "")),
                             BouquetImage = bouquet.MainPhotoUrl,
                             Price = bouquetSize.Price.ToString("F2"),
-                            SizeName = bouquetSize.Size?.Name ?? ""
+                            SizeName = bouquetSize.Size?.Name.GetValueOrDefault(currentLang, bouquetSize.Size?.Name.GetValueOrDefault("ua", "")) ?? ""
                         });
                         continue;
                     }
@@ -139,14 +157,14 @@ namespace CatalogService.BLL.GrpcServer
                         flowerInfoList.Add(new FlowerInfo
                         {
                             FlowerId = bsf.Flower.Id.ToString(),
-                            FlowerName = bsf.Flower.Name,
+                            FlowerName = bsf.Flower.Name.GetValueOrDefault(currentLang, bsf.Flower.Name.GetValueOrDefault("ua", "")),
                             Quantity = bsf.Quantity
                         });
 
                         if (availableQuantity < requiredQuantity)
                         {
                             enoughStock = false;
-                            stockError = $"Not enough flowers '{bsf.Flower.Name}' in stock. " +
+                            stockError = $"Not enough flowers '{bsf.Flower.Name.GetValueOrDefault(currentLang, bsf.Flower.Name.GetValueOrDefault("ua", ""))}' in stock. " +
                                        $"Required: {requiredQuantity}, available: {availableQuantity}";
                             logger.LogWarning("Not enough flowers: {Error}", stockError);
                             break;
@@ -157,10 +175,10 @@ namespace CatalogService.BLL.GrpcServer
                     {
                         IsValid = enoughStock,
                         ErrorMessage = enoughStock ? "" : stockError,
-                        BouquetName = bouquet.Name,
+                        BouquetName = bouquet.Name.GetValueOrDefault(currentLang, bouquet.Name.GetValueOrDefault("ua", "")),
                         BouquetImage = bouquet.MainPhotoUrl,
                         Price = bouquetSize.Price.ToString("F2"),
-                        SizeName = bouquetSize.Size?.Name ?? ""
+                        SizeName = bouquetSize.Size?.Name.GetValueOrDefault(currentLang, bouquetSize.Size?.Name.GetValueOrDefault("ua", "")) ?? ""
                     };
 
                     response.Flowers.AddRange(flowerInfoList);

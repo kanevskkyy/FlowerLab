@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./AboutUs.css";
 
 import PopupMenu from "../../components/PopupMenu/PopupMenu";
@@ -19,6 +20,7 @@ import Photo1 from "../../assets/images/headerPhoto.svg";
 import Photo2 from "../../assets/images/bouquet1.webp";
 
 const AboutUs = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -49,13 +51,13 @@ const AboutUs = () => {
       {/* Breadcrumbs */}
       <div className="breadcrumbs">
         <span onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-          Main page
+          {t("about_page.main")}
         </span>
         <span className="arrow">›</span>
-        <span className="gray">About us</span>
+        <span className="gray">{t("nav.about")}</span>
       </div>
 
-      <h1 className="page-title">ABOUT US</h1>
+      <h1 className="page-title">{t("about_page.title")}</h1>
 
       {/* ================= SLIDER ================= */}
       <div className="big-image-block">
@@ -69,72 +71,37 @@ const AboutUs = () => {
       {/* TEXT */}
       <div className="about-text">
         <p className="break-line" style={{ lineHeight: "2.0" }}>
-          We are FlowerLab Vlada, a floral design studio.
-          <br />
-          Our team creates premium bouquets and signature floral arrangements
-          with a focus on quality, style, and emotion. Daily deliveries of fresh
-          flowers, a wide selection, and caring service make us the studio
-          people trust in Chernivtsi.
-          <br />
-          We are the first in Ukraine to introduce the format of giant bouquets
-          and large signature box compositions. This has become part of our
-          unique style and brand identity.
-          <br />
-          We continuously grow, learn, and improve our work. We expand our team,
-          introduce new shapes, colors, and arrangements, explore global trends,
-          and adapt them for our clients.
-          <br />
-          Our studio also collaborates with various brands and venues, creating
-          floral solutions for events, gifts, and visual decor.
-          <br />
-          FlowerLab Vlada is quality, style, and service that inspire and leave
-          a lasting impression.
+          {t("about_page.history")}
         </p>
       </div>
 
       {/* WHY */}
-      <h2 className="section-title">WHY CHOOSE US?</h2>
+      <h2 className="section-title">{t("about_page.why_title")}</h2>
 
       <div className="why-grid">
         <div className="why-item">
-          <p>
-            Freshness
-            <br />
-            Guaranteed
-          </p>
+          <p>{t("about_page.freshness")}</p>
           <div className="icon-placeholder">
             <img src={FlowerIcon} className="why-icon" alt="Freshness" />
           </div>
         </div>
 
         <div className="why-item">
-          <p>
-            Handcrafted
-            <br />
-            with Love
-          </p>
+          <p>{t("about_page.handcrafted")}</p>
           <div className="icon-placeholder">
             <img src={HandIcon} className="why-icon" alt="Handcrafted" />
           </div>
         </div>
 
         <div className="why-item">
-          <p>
-            Fast & Reliable
-            <br />
-            Delivery
-          </p>
+          <p>{t("about_page.delivery")}</p>
           <div className="icon-placeholder">
             <img src={TruckIcon} className="why-icon" alt="Delivery" />
           </div>
         </div>
 
         <div className="why-item">
-          <p>
-            Personalized
-            <br />
-            Designs
-          </p>
+          <p>{t("about_page.personalized")}</p>
           <div className="icon-placeholder">
             <img src={SparklesIcon} className="why-icon" alt="Personalized" />
           </div>
@@ -144,7 +111,7 @@ const AboutUs = () => {
       {/* CONTACTS & LOCATIONS */}
       <div className="info-container">
         <div className="info-column">
-          <h2 className="info-title">Our locations:</h2>
+          <h2 className="info-title">{t("about_page.locations")}</h2>
           <div className="info-items">
             <div className="info-item footer-location">
               <img
@@ -179,7 +146,7 @@ const AboutUs = () => {
         </div>
 
         <div className="info-column">
-          <h2 className="info-title">Our contact information:</h2>
+          <h2 className="info-title">{t("about_page.contacts")}</h2>
           <div className="info-items">
             <div className="info-item footer-phone">
               <img

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -18,6 +19,7 @@ import { useCatalog } from "./hooks/useCatalog";
 import SEO from "../../components/SEO/SEO";
 
 const Catalog = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const {
@@ -48,15 +50,15 @@ const Catalog = () => {
   return (
     <div className="page-wrapper catalog-page">
       <SEO
-        title="Catalog | FlowerLab"
-        description="Browse our wide selection of fresh bouquets and floral arrangements. Filter by price, size, and occasion."
+        title={t("catalog.seo_title")}
+        description={t("catalog.seo_desc")}
         image="/og-catalog.jpg"
       />
       <Header onMenuOpen={() => setMenuOpen(true)} />
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <main className="catalog">
-        <h1 className="catalog-title">BOUQUETS</h1>
+        <h1 className="catalog-title">{t("catalog.title")}</h1>
 
         {/* FILTER + SORT */}
         <div className="catalog-top">
@@ -77,7 +79,7 @@ const Catalog = () => {
               <span className="search-icon"></span>
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={t("catalog.search")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -98,7 +100,10 @@ const Catalog = () => {
         {/* Results info */}
         <div className="catalog-info">
           <p>
-            Showing {products.length} of {totalProducts} products
+            {t("catalog.showing", {
+              count: products.length,
+              total: totalProducts,
+            })}
           </p>
         </div>
 

@@ -25,6 +25,7 @@ using shared.cache;
 using shared.events.EmailEvents;
 using shared.events.OrderEvents;
 using shared.events.TelegramBotEvent;
+using shared.localization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -114,6 +115,7 @@ builder.Services.AddMemoryCache(options =>
 builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
 builder.Services.AddScoped<IEntityCacheInvalidationService<Gift>, GiftCacheInvalidationService>();
 builder.Services.AddScoped<IEntityCacheInvalidationService<OrderStatus>, OrderStatusCacheInvalidationService>();
+builder.Services.AddScoped<ILanguageProvider, LanguageProvider>();
 
 builder.Services.AddMassTransit(x =>
 {
@@ -174,7 +176,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new LocalizedDictionaryConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
@@ -241,6 +247,7 @@ using (var scope = app.Services.CreateAsyncScope())
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<LocalizationMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 if (app.Environment.IsDevelopment())

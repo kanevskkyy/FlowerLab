@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import { useCart } from "../../context/CartContext";
@@ -8,6 +9,7 @@ import orderService from "../../services/orderService";
 import "./OrderSuccess.css";
 
 const OrderSuccess = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { clearCart } = useCart();
@@ -226,28 +228,26 @@ const OrderSuccess = () => {
 
           <h1>
             {isVerifying
-              ? "Verifying Payment..."
+              ? t("order_success.verifying")
               : isFailure
-                ? "Payment Failed"
+                ? t("order_success.failed_title")
                 : isSuccess
-                  ? "Thank You!"
-                  : "Processing..."}
+                  ? t("order_success.success_title")
+                  : t("order_success.processing_title")}
           </h1>
 
           <p className="success-message">
             {isVerifying
-              ? "We are checking your payment status with the bank. Please wait a moment."
+              ? t("order_success.verifying_msg")
               : isFailure
-                ? "We could not process your payment. Please try again."
+                ? t("order_success.failed_msg")
                 : isSuccess
-                  ? "Your order has been placed successfully."
-                  : "Please wait while we finalize your order."}
+                  ? t("order_success.success_msg")
+                  : t("order_success.processing_msg")}
           </p>
 
           {isSuccess && (
-            <p className="email-note">
-              You will receive an email with the order details.
-            </p>
+            <p className="email-note">{t("order_success.email_note")}</p>
           )}
 
           {isFailure && (
@@ -255,7 +255,7 @@ const OrderSuccess = () => {
               className="continue-btn retry-btn"
               onClick={handleRetryPayment}
               style={{ marginTop: "1rem", backgroundColor: "#e53935" }}>
-              Retry Payment
+              {t("order_success.retry_btn")}
             </button>
           )}
 
@@ -264,7 +264,7 @@ const OrderSuccess = () => {
               className="continue-btn"
               onClick={() => navigate("/")}
               style={{ marginTop: isFailure ? "1rem" : "0" }}>
-              Continue Shopping
+              {t("order_success.continue_shopping")}
             </button>
           )}
         </div>
