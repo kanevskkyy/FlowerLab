@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import AdminOrdersSort from "./AdminOrdersSort";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 function AdminOrdersList({
   orders,
@@ -38,7 +39,34 @@ function AdminOrdersList({
     };
   }, [loadMore, hasNextPage]);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const getStatusKey = (name) => {
+    if (!name) return "";
+    return name.replace(/\s/g, "").toLowerCase();
+  };
+
+  const getLocalizedStatus = (statusObj) => {
+    if (!statusObj) return "";
+    const name = typeof statusObj === "string" ? statusObj : statusObj.name;
+    const translations = statusObj.translations;
+
+    const localized = getLocalizedValue(translations, i18n.language);
+
+    // Priority 1: Backend localized value (if truly different)
+    if (localized && localized !== name) return localized;
+
+    // Priority 2: Local JSON translation
+    const statusKey = getStatusKey(localized || name);
+    const fromJson = t(`order_status.${statusKey}`);
+
+    if (fromJson && fromJson !== `order_status.${statusKey}`) {
+      return fromJson;
+    }
+
+    // Priority 3: Backend raw value
+    return localized || name;
+  };
 
   return (
     <section className="admin-section admin-orders">
@@ -80,15 +108,13 @@ function AdminOrdersList({
               </div>
               <div className="admin-order-status">
                 <select
-                  className={`status-select status-${statusName.toLowerCase()}`}
+                  className={`status-select status-${getStatusKey(statusName)}`}
                   value={statusId}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => onStatusChange(o.id, e.target.value)}>
                   {(statuses || []).map((s) => (
                     <option key={s.id} value={s.id}>
-                      {t(`admin.orders.status_${s.name.toLowerCase()}`, {
-                        defaultValue: s.name,
-                      })}
+                      {getLocalizedStatus(s)}
                     </option>
                   ))}
                 </select>

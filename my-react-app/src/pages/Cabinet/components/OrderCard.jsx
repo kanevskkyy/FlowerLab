@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import "./OrderCard.css";
 import CardIcon from "../../../assets/icons/message.svg";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 const OrderCard = ({ order }) => {
   const { t, i18n } = useTranslation();
@@ -12,7 +13,7 @@ const OrderCard = ({ order }) => {
       <div className="history-header">
         <span className="history-id">{order.id}</span>
         <span className="history-date">
-          {i18n.language === "UA" ? "о" : "at"} {order.date}
+          {i18n.language === "ua" ? "о" : "at"} {order.date}
         </span>
       </div>
 
@@ -62,9 +63,39 @@ const OrderCard = ({ order }) => {
           {t("admin.orders.total_label")} {order.total} {order.currency}
         </div>
         <div className="history-status">
-          {t("admin.orders.status")}
-          <span className={`status-badge ${order.status.toLowerCase()}`}>
-            {order.status}
+          {t("admin.orders.status")}{" "}
+          <span
+            className={`status-badge ${(() => {
+              const statusObj = order.status;
+              const name =
+                typeof statusObj === "object" ? statusObj.name : statusObj;
+              return (name || "").replace(/\s/g, "").toLowerCase();
+            })()}`}>
+            {(() => {
+              const statusObj = order.status;
+              const name =
+                typeof statusObj === "string" ? statusObj : statusObj?.name;
+              const translations =
+                statusObj?.translations || statusObj?.Translations;
+
+              const localized = getLocalizedValue(translations, i18n.language);
+
+              // Priority 1: Backend localized value (if truly different)
+              if (localized && localized !== name) return localized;
+
+              // Priority 2: Local JSON translation
+              const statusKey = (localized || name)
+                ?.replace(/\s/g, "")
+                .toLowerCase();
+              const fromJson = t(`order_status.${statusKey}`);
+
+              if (fromJson && fromJson !== `order_status.${statusKey}`) {
+                return fromJson;
+              }
+
+              // Priority 3: Backend raw value
+              return localized || name;
+            })()}
           </span>
         </div>
       </div>

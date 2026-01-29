@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import orderService from "../../../services/orderService";
 import { extractErrorMessage } from "../../../utils/errorUtils";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 export function useAdminOrders() {
   const { t, i18n } = useTranslation();
@@ -79,20 +80,21 @@ export function useAdminOrders() {
           setStatuses(results[1]);
         }
 
-        const currentLang = i18n.language === "UA" ? "ua" : "en";
-        const dateLocale = i18n.language === "UA" ? "uk-UA" : "en-US";
+        const currentLang = (i18n.language || "ua")
+          .toLowerCase()
+          .startsWith("u")
+          ? "ua"
+          : "en";
+        const dateLocale = (i18n.language || "ua").toLowerCase().startsWith("u")
+          ? "uk-UA"
+          : "en-US";
 
         // Map API response
         const mappedOrders = (data.items || []).map((order) => {
           const firstItem = order.items?.[0];
-          const bouquetNameObj = firstItem?.bouquetName;
           const bouquetName =
-            typeof bouquetNameObj === "object"
-              ? bouquetNameObj[currentLang] ||
-                bouquetNameObj.ua ||
-                bouquetNameObj.en ||
-                ""
-              : bouquetNameObj || "Unknown Item";
+            getLocalizedValue(firstItem?.bouquetName, i18n.language) ||
+            "Unknown Item";
 
           return {
             id: order.id,
@@ -149,14 +151,22 @@ export function useAdminOrders() {
         setDetailLoading(false);
       }
     },
-    [pagination.pageNumber, pagination.pageSize, sort, statuses.length],
+    [
+      pagination.pageNumber,
+      pagination.pageSize,
+      sort,
+      statuses.length,
+      i18n.language,
+      t,
+    ],
   );
 
-  // Initial Fetch (only when sort changes or first mount)
+  // Initial Fetch (only when sort/language changes or first mount)
   useEffect(() => {
-    // Reset to page 1 when sort changes
+    // Reset to page 1 when sort or language changes
     setPagination((p) => ({ ...p, pageNumber: 1 }));
-  }, [sort]);
+    setOrders([]); // Clear existing
+  }, [sort, i18n.language]);
 
   // Trigger fetch when pageNumber changes
   useEffect(() => {

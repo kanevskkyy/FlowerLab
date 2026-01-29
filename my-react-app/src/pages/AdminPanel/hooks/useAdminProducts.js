@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useConfirm } from "../../../context/ModalProvider";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { extractErrorMessage } from "../../../utils/errorUtils";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 // ...
 
@@ -76,18 +77,9 @@ export function useAdminProducts(active) {
         return `${parts[0]}upload/w_400,h_400,c_fill,q_auto,f_auto/${parts[1]}`;
       };
 
-      const langNormalized = i18n.language ? i18n.language.toLowerCase() : "";
-      const currentLang =
-        langNormalized.startsWith("uk") || langNormalized === "ua"
-          ? "ua"
-          : "en";
-
       const mapped = items.map((item) => ({
         id: item.id,
-        title:
-          typeof item.name === "object"
-            ? item.name[currentLang] || item.name.ua || item.name.en || ""
-            : item.name,
+        title: getLocalizedValue(item.name, i18n.language),
         img: optimizeCloudinaryUrl(
           item.mainPhotoUrl || item.imageUrl || item.ImageUrl,
         ), // Handle all cases
@@ -125,10 +117,11 @@ export function useAdminProducts(active) {
 
   useEffect(() => {
     if (active === "bouquets" || active === "gifts") {
-      // Reset pagination on tab or search change
+      // Reset pagination on tab, search or language change
       setPagination((p) => ({ ...p, pageNumber: 1 }));
+      setProducts([]); // Clear existing
     }
-  }, [active, debouncedQ]);
+  }, [active, debouncedQ, i18n.language]);
 
   // Initial fetch when active changes, page number resets to 1, or search query changes
   useEffect(() => {

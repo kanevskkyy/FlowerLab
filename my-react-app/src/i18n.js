@@ -6,23 +6,33 @@ import translationEN from "./locales/en.json";
 import translationUA from "./locales/ua.json";
 
 const resources = {
-  ENG: {
+  en: {
     translation: translationEN,
   },
-  UA: {
+  ua: {
+    translation: translationUA,
+  },
+  uk: {
     translation: translationUA,
   },
 };
 
-const savedLanguage = localStorage.getItem("appLanguage") || "UA";
+const getNormalizedLanguage = (lang) => {
+  if (!lang) return "ua";
+  const normalized = lang.toLowerCase();
+  return normalized === "ua" || normalized.startsWith("uk") ? "ua" : "en";
+};
+
+const savedLanguage = localStorage.getItem("appLanguage");
+const initialLanguage = getNormalizedLanguage(savedLanguage);
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    lng: savedLanguage,
-    fallbackLng: "UA",
+    lng: initialLanguage,
+    fallbackLng: ["ua", "uk", "en"],
     interpolation: {
       escapeValue: false,
     },

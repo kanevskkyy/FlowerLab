@@ -14,13 +14,14 @@ namespace OrderService.BLL.Profiles
     {
         public OrderProfile()
         {
-            CreateMap<OrderItem, OrderItemReadDto>();
+            CreateMap<OrderItem, OrderItemReadDto>()
+                .ForMember(dest => dest.BouquetName, opt => opt.MapFrom(src => new Dictionary<string, string> { { "en", src.BouquetName }, { "ua", src.BouquetName } }))
+                .ForMember(dest => dest.SizeName, opt => opt.MapFrom(src => new Dictionary<string, string> { { "en", src.SizeName }, { "ua", src.SizeName } }));
             CreateMap<OrderItemCreateDto, OrderItem>();
    
             CreateMap<DeliveryInformation, DeliveryInformationReadDto>();
             CreateMap<DeliveryInformationCreateDto, DeliveryInformation>();
 
-            CreateMap<OrderStatus, OrderStatusReadDto>();
 
             CreateMap<OrderGift, OrderGiftReadDto>()
                 .ForMember(dest => dest.Gift, opt => opt.MapFrom(src => src.Gift))
@@ -33,6 +34,7 @@ namespace OrderService.BLL.Profiles
                 .ForMember(dest => dest.GiftMessage, opt => opt.MapFrom(src => src.GiftMessage));
 
             CreateMap<Order, OrderDetailDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
                 .ForMember(dest => dest.DeliveryInformation, opt => opt.MapFrom(src => src.DeliveryInformation))
                 .ForMember(dest => dest.Gifts, opt => opt.MapFrom(src => src.OrderGifts)) 

@@ -8,10 +8,11 @@ import orderService from "../../services/orderService";
 import { useAuth } from "../../context/useAuth";
 import toast from "react-hot-toast";
 import CardIcon from "../../assets/icons/message.svg";
+import { getLocalizedValue } from "../../utils/localizationUtils";
 import "./OrderTrackingPage.css";
 
 const OrderTrackingPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -28,18 +29,76 @@ const OrderTrackingPage = () => {
   const urlOrderId = searchParams.get("orderId");
   const urlToken = searchParams.get("token") || searchParams.get("guestToken");
 
+  // Helper to map order data for display
+  const mapOrderData = (order) => {
+    const bouquets = (order.items || []).map((item) => ({
+      ...item,
+      localizedName: getLocalizedValue(item.bouquetName, i18n.language),
+      localizedSize: getLocalizedValue(item.sizeName, i18n.language),
+      qtyLabel: `${item.count} ${t("tracking.pc")}`,
+    }));
+
+    const gifts = (order.orderGifts || order.gifts || []).map((g) => {
+      const gift = g.gift;
+      return {
+        ...g,
+        localizedName:
+          getLocalizedValue(gift?.name, i18n.language) || t("tracking.gift"),
+        qtyLabel: `${g.orderedCount || g.count} ${t("tracking.pc")}`,
+        imageUrl: gift?.imageUrls?.[0] || gift?.imageUrl,
+      };
+    });
+
+    const statusObj = order.status;
+    const rawName = typeof statusObj === "object" ? statusObj.name : statusObj;
+    const translations = statusObj?.translations || statusObj?.Translations;
+    const backendLocalized = getLocalizedValue(translations, i18n.language);
+
+    let displayStatus = backendLocalized || rawName;
+
+    // Priority check for local JSON translation if backend didn't provide a specialized one
+    if (!backendLocalized || backendLocalized === rawName) {
+      const statusKey = (rawName || "").replace(/\s/g, "").toLowerCase();
+      const fromJson = t(`order_status.${statusKey}`);
+      if (fromJson && fromJson !== `order_status.${statusKey}`) {
+        displayStatus = fromJson;
+      }
+    }
+
+    const statusClass = (rawName || "").replace(/\s/g, "").toLowerCase();
+
+    return {
+      ...order,
+      displayId: `№${order.id.substring(0, 8).toUpperCase()}`,
+      displayDate: new Date(order.createdAt).toLocaleString(
+        (i18n.language || "ua").toLowerCase().startsWith("u")
+          ? "uk-UA"
+          : "en-US",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+        },
+      ),
+      displayStatus,
+      statusClass,
+      items: bouquets,
+      giftsList: gifts,
+    };
+  };
+
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // 1. Get all guest orders from localStorage
         const stored = JSON.parse(localStorage.getItem("guestOrders") || "[]");
-
-        // 2. Add pending order if not present (legacy/direct redirect support)
         const pendingId = localStorage.getItem("pendingOrder");
         const pendingToken = localStorage.getItem("pendingGuestToken");
+
         if (
           pendingId &&
           pendingToken &&
@@ -48,7 +107,6 @@ const OrderTrackingPage = () => {
           stored.push({ orderId: pendingId, guestToken: pendingToken });
         }
 
-        // 3. Handle URL params (highest priority, ensure it's in the list)
         if (
           urlOrderId &&
           urlToken &&
@@ -62,11 +120,11 @@ const OrderTrackingPage = () => {
           return;
         }
 
-        // 4. Fetch all in parallel
         const results = await Promise.all(
           stored.map(async (o) => {
             try {
-              return await orderService.getById(o.orderId, o.guestToken);
+              const res = await orderService.getById(o.orderId, o.guestToken);
+              return res;
             } catch (err) {
               console.error(`Failed to fetch order ${o.orderId}:`, err);
               return null;
@@ -78,7 +136,9 @@ const OrderTrackingPage = () => {
           .filter(Boolean)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        setOrders(validOrders);
+        // Map data for display immediately
+        setOrders(validOrders.map(mapOrderData));
+
         if (validOrders.length === 0 && stored.length > 0) {
           setError(t("tracking.find_error"));
         }
@@ -91,19 +151,7 @@ const OrderTrackingPage = () => {
     };
 
     fetchHistory();
-  }, [urlOrderId, urlToken]);
-
-  // Helper to format date
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleString("uk-UA", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  }, [urlOrderId, urlToken, i18n.language]); // Dependency on i18n.language ensures re-mapping
 
   return (
     <div className="page-wrapper tracking-page">
@@ -144,82 +192,64 @@ const OrderTrackingPage = () => {
             <div key={order.id} className="history-card">
               {/* HEADER: ID and Date */}
               <div className="history-header">
-                <span className="history-id">
-                  №{order.id.substring(0, 8).toUpperCase()}
-                </span>
+                <span className="history-id">{order.displayId}</span>
                 <span className="history-date">
-                  {t("tracking.at")}{" "}
-                  {new Date(order.createdAt).toLocaleString("uk-UA", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    day: "numeric",
-                    month: "numeric",
-                    year: "numeric",
-                  })}
+                  {i18n.language === "ua" ? "о" : "at"} {order.displayDate}
                 </span>
               </div>
 
               {/* CONTENT: Grid of items */}
               <div className="history-items-grid">
                 {/* Bouquets */}
-                {(order.items || []).map((item, idx) => (
+                {order.items.map((item, idx) => (
                   <div key={`b-${idx}`} className="history-grid-item">
                     <div className="grid-img-wrapper">
                       {item.bouquetImage && (
                         <img
                           src={item.bouquetImage}
-                          alt={item.bouquetName}
+                          alt={item.localizedName}
                           loading="lazy"
                         />
                       )}
                     </div>
                     <div className="grid-item-info">
-                      <span className="grid-title">{item.bouquetName}</span>
-                      {item.sizeName && (
+                      <span className="grid-title">{item.localizedName}</span>
+                      {item.localizedSize && (
                         <span className="grid-size">
-                          {t("tracking.size")}: {item.sizeName}
+                          {t("product.size")}: {item.localizedSize}
                         </span>
                       )}
                       <div className="grid-price-row">
                         <span className="grid-price">{item.price} ₴</span>
-                        <span className="grid-qty">
-                          {item.count} {t("tracking.pc")}
-                        </span>
+                        <span className="grid-qty">{item.qtyLabel}</span>
                       </div>
                     </div>
                   </div>
                 ))}
 
                 {/* Gifts */}
-                {(order.orderGifts || order.gifts || []).map((g, idx) => {
-                  const gift = g.gift;
-                  return (
-                    <div key={`g-${idx}`} className="history-grid-item">
-                      <div className="grid-img-wrapper">
-                        {(gift?.imageUrls?.[0] || gift?.imageUrl) && (
-                          <img
-                            src={gift.imageUrls?.[0] || gift.imageUrl}
-                            alt={gift.name}
-                            loading="lazy"
-                          />
-                        )}
-                      </div>
-                      <div className="grid-item-info">
-                        <span className="grid-title">
-                          {gift?.name || t("tracking.gift")}
+                {order.giftsList.map((g, idx) => (
+                  <div key={`g-${idx}`} className="history-grid-item">
+                    <div className="grid-img-wrapper">
+                      {g.imageUrl && (
+                        <img
+                          src={g.imageUrl}
+                          alt={g.localizedName}
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                    <div className="grid-item-info">
+                      <span className="grid-title">{g.localizedName}</span>
+                      <div className="grid-price-row">
+                        <span className="grid-price">
+                          {g.gift?.price || 0} ₴
                         </span>
-                        <div className="grid-price-row">
-                          <span className="grid-price">
-                            {gift?.price || 0} ₴
-                          </span>
-                          <span className="grid-qty">
-                            {g.orderedCount || g.count} {t("tracking.pc")}
-                          </span>
-                        </div>
+                        <span className="grid-qty">{g.qtyLabel}</span>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
 
                 {/* Postcard Item */}
                 {order.giftMessage && (
@@ -231,7 +261,7 @@ const OrderTrackingPage = () => {
                         className="card-icon-svg"
                       />
                       <span className="card-label">
-                        {t("tracking.postcard")}
+                        {t("admin.orders.postcard").toUpperCase()}
                       </span>
                     </div>
                     <div className="grid-card-text">"{order.giftMessage}"</div>
@@ -242,17 +272,52 @@ const OrderTrackingPage = () => {
               {/* FOOTER: Total and Status */}
               <div className="history-footer">
                 <div className="history-total">
-                  {t("tracking.total")}: {order.totalPrice} ₴
+                  {t("admin.orders.total_label")} {order.totalPrice} ₴
                 </div>
                 <div className="history-status">
-                  {t("tracking.status")}:{" "}
+                  {t("admin.orders.status")}{" "}
                   <span
-                    className={`status-badge ${(
-                      order.status?.name ||
-                      order.status ||
-                      ""
-                    ).toLowerCase()}`}>
-                    {order.status?.name || order.status}
+                    className={`status-badge ${(() => {
+                      const statusObj = order.status;
+                      const name =
+                        typeof statusObj === "object"
+                          ? statusObj.name
+                          : statusObj;
+                      return (name || "").replace(/\s/g, "").toLowerCase();
+                    })()}`}>
+                    {(() => {
+                      const statusObj = order.status;
+                      const name =
+                        typeof statusObj === "string"
+                          ? statusObj
+                          : statusObj?.name;
+                      const translations =
+                        statusObj?.translations || statusObj?.Translations;
+
+                      const localized = getLocalizedValue(
+                        translations,
+                        i18n.language,
+                      );
+
+                      // Priority 1: Backend localized value (if truly different)
+                      if (localized && localized !== name) return localized;
+
+                      // Priority 2: Local JSON translation
+                      const statusKey = (localized || name)
+                        ?.replace(/\s/g, "")
+                        .toLowerCase();
+                      const fromJson = t(`order_status.${statusKey}`);
+
+                      if (
+                        fromJson &&
+                        fromJson !== `order_status.${statusKey}`
+                      ) {
+                        return fromJson;
+                      }
+
+                      // Priority 3: Backend raw value
+                      return localized || name;
+                    })()}
                   </span>
                 </div>
               </div>

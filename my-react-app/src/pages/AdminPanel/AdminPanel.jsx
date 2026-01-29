@@ -184,14 +184,14 @@ export default function AdminPanel() {
         <div className="admin-topbar-right">
           <div className="admin-lang-switcher">
             <span
-              className={lang === "UA" ? "active" : ""}
-              onClick={() => setLang("UA")}>
+              className={lang === "ua" ? "active" : ""}
+              onClick={() => setLang("ua")}>
               UA
             </span>
             <span className="divider">/</span>
             <span
-              className={lang === "ENG" ? "active" : ""}
-              onClick={() => setLang("ENG")}>
+              className={lang === "en" ? "active" : ""}
+              onClick={() => setLang("en")}>
               ENG
             </span>
           </div>

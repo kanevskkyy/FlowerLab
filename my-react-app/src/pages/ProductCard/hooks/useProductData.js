@@ -4,6 +4,7 @@ import reviewService from "../../../services/reviewService";
 import toast from "react-hot-toast";
 
 import { useTranslation } from "react-i18next";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 export const useProductData = (id) => {
   const { i18n } = useTranslation();
@@ -33,8 +34,8 @@ export const useProductData = (id) => {
         // Map backend DTO to frontend structure
         const mappedProduct = {
           id: data.id,
-          title: data.name,
-          description: data.description,
+          title: getLocalizedValue(data.name, i18n.language),
+          description: getLocalizedValue(data.description, i18n.language),
           // Map composition per size
           compositions: data.sizes.reduce((acc, size) => {
             const compStr =
@@ -70,8 +71,13 @@ export const useProductData = (id) => {
             };
             return acc;
           }, {}),
-          events: data.events?.map((e) => e.name) || [],
-          recipients: data.recipients?.map((r) => r.name) || [],
+          events:
+            data.events?.map((e) => getLocalizedValue(e.name, i18n.language)) ||
+            [],
+          recipients:
+            data.recipients?.map((r) =>
+              getLocalizedValue(r.name, i18n.language),
+            ) || [],
         };
 
         setProduct(mappedProduct);
@@ -136,7 +142,7 @@ export const useProductData = (id) => {
             .map((p) => ({
               id: p.id,
               image: p.mainPhotoUrl,
-              title: p.name,
+              title: getLocalizedValue(p.name, i18n.language),
               price: p.price,
             })),
         );

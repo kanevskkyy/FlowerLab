@@ -128,7 +128,9 @@ const ProductInfo = ({
               ? { opacity: 0.5, cursor: "not-allowed" }
               : {}
           }>
-          ADD TO CART
+          {product.stock?.[selectedSize]?.max === 0
+            ? t("product.sold_out")
+            : t("product.add_to_cart")}
           <span className="cart-icon">
             <img src={ShoppingBagIcon} alt="Cart" />
           </span>
