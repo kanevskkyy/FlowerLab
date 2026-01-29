@@ -1,5 +1,6 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 const DeliveryInfo = ({
   deliveryAddresses,
@@ -10,6 +11,7 @@ const DeliveryInfo = ({
   setNewAddress,
   handleAddAddress,
 }) => {
+  const { t } = useTranslation();
   const {
     watch,
     setValue,
@@ -22,7 +24,7 @@ const DeliveryInfo = ({
 
   return (
     <section className="form-section">
-      <h2>Delivery</h2>
+      <h2>{t("checkout.delivery_title")}</h2>
 
       <div className="delivery-tabs">
         <button
@@ -33,7 +35,7 @@ const DeliveryInfo = ({
           onClick={() =>
             setValue("deliveryType", "pickup", { shouldValidate: true })
           }>
-          Pickup at the shop
+          {t("checkout.pickup_tab")}
         </button>
         <button
           type="button"
@@ -45,7 +47,7 @@ const DeliveryInfo = ({
               shouldValidate: true,
             })
           }>
-          Delivery
+          {t("checkout.delivery_tab")}
         </button>
       </div>
 
@@ -85,14 +87,14 @@ const DeliveryInfo = ({
                           marginLeft: "6px",
                           fontStyle: "italic",
                         }}>
-                        (New)
+                        {t("checkout.new_label")}
                       </span>
                     )}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="no-data-text">No saved addresses found.</p>
+              <p className="no-data-text">{t("checkout.no_addresses")}</p>
             )}
           </div>
 
@@ -100,7 +102,7 @@ const DeliveryInfo = ({
             <div className="new-address-form">
               <input
                 type="text"
-                placeholder="Enter new address (City, Street, House, Apt)"
+                placeholder={t("checkout.address_placeholder")}
                 value={newAddress}
                 onChange={(e) => setNewAddress(e.target.value)}
                 className="new-address-input"
@@ -110,7 +112,7 @@ const DeliveryInfo = ({
                   type="button"
                   onClick={handleAddAddress}
                   className="save-address-btn">
-                  Save
+                  {t("cabinet.save")}
                 </button>
                 <button
                   type="button"
@@ -119,7 +121,7 @@ const DeliveryInfo = ({
                     setNewAddress("");
                   }}
                   className="cancel-address-btn">
-                  Cancel
+                  {t("cabinet.cancel")}
                 </button>
               </div>
             </div>
@@ -128,7 +130,7 @@ const DeliveryInfo = ({
               type="button"
               className="add-address-btn"
               onClick={() => setIsAddingAddress(true)}>
-              + Add a new address
+              {t("checkout.add_address")}
             </button>
           )}
         </>

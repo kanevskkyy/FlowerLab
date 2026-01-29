@@ -1,4 +1,5 @@
 import ShoppingBagIcon from "../../../assets/icons/ShoppingBagIcon.svg";
+import { useTranslation } from "react-i18next";
 
 const ProductInfo = ({
   product,
@@ -7,6 +8,7 @@ const ProductInfo = ({
   onBuyNow,
   onAddToCart,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="product-info">
       <h1 className="product-title">{product.title}</h1>
@@ -14,19 +16,19 @@ const ProductInfo = ({
       <p className="product-price">{product.prices[selectedSize]} ₴</p>
 
       <div className="info-block">
-        <h3>Description</h3>
+        <h3>{t("product.description_label")}</h3>
         <p>{product.description}</p>
       </div>
 
       <div className="info-block">
-        <h3>Composition:</h3>
+        <h3>{t("product.composition_label")}</h3>
         <p>{product.compositions?.[selectedSize] || product.composition}</p>
       </div>
 
       {/* Events Tags */}
       {product.events && product.events.length > 0 && (
         <div className="info-block">
-          <h3>Events:</h3>
+          <h3>{t("product.events_label")}</h3>
           <div className="info-tags">
             {product.events.map((tag) => (
               <span key={tag} className="info-tag">
@@ -40,7 +42,7 @@ const ProductInfo = ({
       {/* Recipients Tags */}
       {product.recipients && product.recipients.length > 0 && (
         <div className="info-block">
-          <h3>For Who:</h3>
+          <h3>{t("product.for_who_label")}</h3>
           <div className="info-tags">
             {product.recipients.map((tag) => (
               <span key={tag} className="info-tag">
@@ -53,7 +55,7 @@ const ProductInfo = ({
 
       {/* Size Selection */}
       <div className="size-section">
-        <h3>Size</h3>
+        <h3>{t("product.size")}</h3>
         <div className="size-buttons">
           {product.availableSizes.map((size) => {
             const stock = product.stock?.[size];
@@ -66,7 +68,7 @@ const ProductInfo = ({
                 disabled={isDisabled}
                 className={`size-btn ${selectedSize === size ? "active" : ""} ${isDisabled ? "disabled" : ""}`}
                 onClick={() => !isDisabled && onSizeSelect(size)}
-                title={isOOS ? "Out of Stock" : ""}>
+                title={isOOS ? t("product.out_of_stock") : ""}>
                 {size}
               </button>
             );
@@ -83,7 +85,10 @@ const ProductInfo = ({
                 marginTop: "8px",
                 fontWeight: "500",
               }}>
-              🔥 Only {product.stock[selectedSize].max} left!
+              🔥{" "}
+              {t("product.only_left", {
+                count: product.stock[selectedSize].max,
+              })}
             </div>
           )}
         {product.stock?.[selectedSize]?.max === 0 && (
@@ -94,7 +99,7 @@ const ProductInfo = ({
               marginTop: "8px",
               fontStyle: "italic",
             }}>
-            Out of Stock
+            {t("product.out_of_stock")}
           </div>
         )}
       </div>
@@ -110,7 +115,9 @@ const ProductInfo = ({
               ? { opacity: 0.5, cursor: "not-allowed" }
               : {}
           }>
-          {product.stock?.[selectedSize]?.max === 0 ? "SOLD OUT" : "BUY NOW"}
+          {product.stock?.[selectedSize]?.max === 0
+            ? t("product.sold_out")
+            : t("product.buy_now")}
         </button>
         <button
           className="add-cart-btn"

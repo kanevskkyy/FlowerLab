@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import AdminOrdersSort from "./AdminOrdersSort";
 
 function AdminOrdersList({
@@ -37,9 +38,13 @@ function AdminOrdersList({
     };
   }, [loadMore, hasNextPage]);
 
+  const { t } = useTranslation();
+
   return (
     <section className="admin-section admin-orders">
-      <h2 className="admin-section-title admin-orders-title">Orders</h2>
+      <h2 className="admin-section-title admin-orders-title">
+        {t("admin.orders.title")}
+      </h2>
       <div className="admin-orders-top">
         <div />
         <div className="admin-orders-sort">
@@ -81,14 +86,18 @@ function AdminOrdersList({
                   onChange={(e) => onStatusChange(o.id, e.target.value)}>
                   {(statuses || []).map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.name}
+                      {t(`admin.orders.status_${s.name.toLowerCase()}`, {
+                        defaultValue: s.name,
+                      })}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="admin-order-right">
                 <div className="admin-order-total">
-                  <p className="admin-order-total-title">Order Total:</p>
+                  <p className="admin-order-total-title">
+                    {t("admin.orders.total_label")}
+                  </p>
                   <p className="admin-order-total-value">{o.total}</p>
                 </div>
               </div>
@@ -101,7 +110,7 @@ function AdminOrdersList({
           <div
             ref={sentinelRef}
             style={{ height: "20px", textAlign: "center", color: "#666" }}>
-            {isLoadingMore ? "Loading more..." : ""}
+            {isLoadingMore ? t("admin.loading_more") : ""}
           </div>
         )}
       </div>

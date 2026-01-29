@@ -13,8 +13,7 @@ namespace CatalogService.BLL.Validators.SizeValidation
         public SizeUpdateDtoValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Name is required")
-                .MaximumLength(50).WithMessage("Name must be at most 50 characters long");
+                .NotEmpty().WithMessage("Name is required");
         }
     }
 }

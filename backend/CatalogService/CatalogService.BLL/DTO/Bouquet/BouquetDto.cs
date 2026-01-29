@@ -9,8 +9,8 @@ namespace CatalogService.BLL.DTO
     public class BouquetDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string? Description { get; set; }
+        public Dictionary<string, string> Name { get; set; } = new();
+        public Dictionary<string, string>? Description { get; set; }
         public string MainPhotoUrl { get; set; } = null!;
         public List<BouquetSizeDto> Sizes { get; set; } = new();
         public List<EventDto> Events { get; set; } = new();

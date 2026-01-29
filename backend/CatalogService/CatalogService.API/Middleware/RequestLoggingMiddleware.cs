@@ -27,27 +27,7 @@ namespace CatalogService.API.Middleware
             {
                 await next(context); 
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Unhandled exception caught by middleware.");
-
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = ex switch
-                {
-                    NotFoundException => (int)HttpStatusCode.NotFound,
-                    AlreadyExistsException => (int)HttpStatusCode.BadRequest,
-                    UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
-                    _ => (int)HttpStatusCode.InternalServerError
-                };
-
-                var response = new
-                {
-                    error = ex.Message,
-                    type = ex.GetType().Name
-                };
-
-                await context.Response.WriteAsJsonAsync(response);
-            }
+            // Removed catch block to let ExceptionHandlingMiddleware handle exceptions
             finally
             {
                 stopwatch.Stop();

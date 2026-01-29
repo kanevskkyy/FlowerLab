@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -6,14 +7,15 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 const GiftsSlider = ({ gifts, giftsLoading, selectedGifts, toggleGift }) => {
+  const { t } = useTranslation();
   const [prevEl, setPrevEl] = useState(null);
   const [nextEl, setNextEl] = useState(null);
 
   return (
     <section className="form-section">
-      <h2>Gifts</h2>
+      <h2>{t("nav.gifts")}</h2>
       {giftsLoading ? (
-        <div>Loading gifts...</div>
+        <div>{t("checkout.loading_gifts")}</div>
       ) : (
         <div className="gifts-slider-container">
           {/* External Navigation Buttons */}

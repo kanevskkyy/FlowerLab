@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import reviewService from "../../../services/reviewService";
 import starIcon from "../../../assets/icons/star.svg";
 import starUnfilledIcon from "../../../assets/icons/star-unfilled.svg";
 import "./AddReviewModal.css";
 
 const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
@@ -17,12 +19,12 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
     e.preventDefault();
 
     if (rating === 0) {
-      toast.error("Будь ласка, оцініть букет.");
+      toast.error(t("product.review_rate_error"));
       return;
     }
 
     if (!comment.trim()) {
-      toast.error("Будь ласка, напишіть коментар.");
+      toast.error(t("product.review_comment_error"));
       return;
     }
 
@@ -35,7 +37,7 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
       };
 
       await reviewService.createReview(reviewData);
-      toast.success("Відгук надіслано! Він з'явиться після модерації.");
+      toast.success(t("product.review_success"));
       onReviewSuccess();
       onClose();
       // Reset form
@@ -44,7 +46,7 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
     } catch (error) {
       console.error("Failed to submit review:", error);
 
-      let errorMessage = "Не вдалося надіслати відгук. Спробуйте ще раз.";
+      let errorMessage = t("product.review_generic_error");
       const errorResponse = error.response?.data;
       const errorString =
         typeof errorResponse === "string"
@@ -55,12 +57,12 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
         errorString.includes("not ordered") ||
         errorString.includes("forbidden")
       ) {
-        errorMessage = "Ви можете залишити відгук лише для придбаних букетів!";
+        errorMessage = t("product.review_not_ordered");
       } else if (
         errorString.includes("already left a review") ||
         errorString.includes("already exists")
       ) {
-        errorMessage = "Ви вже залишили відгук для цього букету.";
+        errorMessage = t("product.review_already_left");
       }
 
       toast.error(errorMessage);
@@ -76,10 +78,8 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
           ×
         </button>
 
-        <h3>Leave a Review</h3>
-        <p className="review-modal-subtitle">
-          Share your experience with this bouquet
-        </p>
+        <h3>{t("product.leave_review")}</h3>
+        <p className="review-modal-subtitle">{t("product.review_subtitle")}</p>
 
         <form onSubmit={handleSubmit} className="review-form">
           <div className="star-rating-container">
@@ -101,7 +101,7 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
 
           <textarea
             className="review-textarea"
-            placeholder="Write your review here..."
+            placeholder={t("product.review_placeholder")}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={5}
@@ -113,13 +113,15 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
               className="modal-btn cancel-btn"
               onClick={onClose}
               disabled={submitting}>
-              Cancel
+              {t("product.cancel")}
             </button>
             <button
               type="submit"
               className="modal-btn submit-btn"
               disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit Review"}
+              {submitting
+                ? t("product.submitting")
+                : t("product.submit_review")}
             </button>
           </div>
         </form>

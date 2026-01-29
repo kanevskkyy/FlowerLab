@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { useConfirm } from "../../../context/ModalProvider";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { extractErrorMessage } from "../../../utils/errorUtils";
@@ -9,6 +10,7 @@ import { extractErrorMessage } from "../../../utils/errorUtils";
 // ...
 
 export function useAdminProducts(active) {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const confirm = useConfirm();
   const [products, setProducts] = useState([]);
@@ -47,7 +49,9 @@ export function useAdminProducts(active) {
           list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         }
       } else if (active === "gifts") {
-        data = await catalogService.getGifts(params);
+        data = await catalogService.getGifts(params, {
+          headers: { "X-Skip-Localization": "true" },
+        });
         // Sort by UpdatedAt or CreatedAt Desc (newest or recently edited first)
         if (Array.isArray(data)) {
           data.sort((a, b) => {
@@ -72,13 +76,27 @@ export function useAdminProducts(active) {
         return `${parts[0]}upload/w_400,h_400,c_fill,q_auto,f_auto/${parts[1]}`;
       };
 
+      const langNormalized = i18n.language ? i18n.language.toLowerCase() : "";
+      const currentLang =
+        langNormalized.startsWith("uk") || langNormalized === "ua"
+          ? "ua"
+          : "en";
+
       const mapped = items.map((item) => ({
         id: item.id,
-        title: item.name,
-        img: optimizeCloudinaryUrl(item.mainPhotoUrl || item.imageUrl), // Handle both
+        title:
+          typeof item.name === "object"
+            ? item.name[currentLang] || item.name.ua || item.name.en || ""
+            : item.name,
+        img: optimizeCloudinaryUrl(
+          item.mainPhotoUrl || item.imageUrl || item.ImageUrl,
+        ), // Handle all cases
         price: `${item.price} ₴`,
         stock: item.availableCount, // Added stock
-        category: active === "bouquets" ? "Bouquets" : "Gifts",
+        category:
+          active === "bouquets"
+            ? t("admin.catalog.events")
+            : t("admin.catalog.for_who"), // Just a label placeholder or use actual category if needed
       }));
 
       if (isLoadMore) {
@@ -94,7 +112,12 @@ export function useAdminProducts(active) {
       }));
     } catch (error) {
       console.error(`Failed to fetch ${active}:`, error);
-      toast.error(extractErrorMessage(error, `Failed to load ${active}`));
+      toast.error(
+        extractErrorMessage(
+          error,
+          t("toasts.admin_products_load_failed", { type: active }),
+        ),
+      );
     } finally {
       setLoadingProducts(false);
     }
@@ -144,11 +167,13 @@ export function useAdminProducts(active) {
           } else if (active === "gifts") {
             await catalogService.deleteGift(id);
           }
-          toast.success("Item deleted successfully");
+          toast.success(t("toasts.admin_deleted_success"));
           fetchProducts();
         } catch (error) {
           console.error("Failed to delete item:", error);
-          toast.error(extractErrorMessage(error, "Failed to delete item"));
+          toast.error(
+            extractErrorMessage(error, t("toasts.admin_delete_failed")),
+          );
         }
       },
     });

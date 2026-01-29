@@ -18,7 +18,9 @@ namespace shared.cache
         private const string CLEAR_ALL_MESSAGES = "__CLEAR_ALL__";
         private bool disposed;
 
-        private static readonly JsonSerializerOptions JsonOptions = new()
+        // Use a property to get fresh options or ensure these are isolated from global settings. 
+        // We explicitly avoid adding converters here to prevent side effects like localization during caching.
+        private static JsonSerializerOptions JsonOptions => new()
         {
             PropertyNamingPolicy = null,
             WriteIndented = false,

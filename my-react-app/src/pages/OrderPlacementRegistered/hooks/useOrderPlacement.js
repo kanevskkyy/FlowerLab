@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
@@ -85,6 +86,7 @@ const schema = z
   });
 
 export const useOrderPlacement = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { cartItems, removeItem, clearCart } = useCart();
   const { user } = useAuth();
@@ -204,7 +206,7 @@ export const useOrderPlacement = () => {
         setIsEligibleForDiscount(eligible);
       } catch (error) {
         console.error("Failed to check discount eligibility", error);
-        toast.error("Не вдалося перевірити знижку");
+        toast.error(t("toasts.discount_check_failed"));
       }
     }
   }, [user]);
@@ -340,10 +342,11 @@ export const useOrderPlacement = () => {
 
         setNewAddress("");
         setIsAddingAddress(false);
-        toast.success("Адресу успішно збережено!");
+        setIsAddingAddress(false);
+        toast.success(t("toasts.address_saved"));
       } catch (error) {
         console.error("Failed to save address", error);
-        toast.error("Не вдалося зберегти адресу (Необхідна авторизація?)");
+        toast.error(t("toasts.address_save_auth_error"));
       }
     } else {
       // Guest: Add locally to state
@@ -358,7 +361,7 @@ export const useOrderPlacement = () => {
 
       setNewAddress("");
       setIsAddingAddress(false);
-      toast.success("Адресу додано до замовлення");
+      toast.success(t("toasts.address_added_to_order"));
     }
   };
 
@@ -459,7 +462,7 @@ export const useOrderPlacement = () => {
         }
       }
 
-      toast.success("Замовлення підтверджено!");
+      toast.success(t("toasts.order_confirmed"));
 
       // Pass created order data including ID and createdAt to Checkout
       navigate("/checkout", {
@@ -475,7 +478,9 @@ export const useOrderPlacement = () => {
       });
     } catch (error) {
       console.error("Failed to create order", error);
-      toast.error(extractErrorMessage(error, "Не вдалося створити замовлення"));
+      toast.error(
+        extractErrorMessage(error, t("toasts.order_creation_failed")),
+      );
     }
   };
 
@@ -483,7 +488,7 @@ export const useOrderPlacement = () => {
     methods, // Form methods to pass to FormProvider
     onSubmit: handleSubmit(onSubmit, (errors) => {
       console.error("Form Validation Errors:", errors);
-      toast.error("Будь ласка, заповніть всі обов'язкові поля коректно.");
+      toast.error(t("toasts.fill_required_fields"));
     }),
 
     // Data

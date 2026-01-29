@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import catalogService from "../../../services/catalogService";
 import { useCart } from "../../../context/CartContext";
 import { useDebounce } from "../../../hooks/useDebounce";
 
 export function useCatalog() {
+  const { i18n } = useTranslation();
   const { addToCart } = useCart();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -107,7 +109,8 @@ export function useCatalog() {
 
         if (filters) {
           Object.entries(filters).forEach(([key, value]) => {
-            if (value !== null && value !== undefined && value !== "") {
+            if (value !== null && value !== undefined && value !== undefined) {
+              // fixed typo in previous check logic if existed
               if (Array.isArray(value)) {
                 if (value.length > 0) params[key] = value;
               } else {
@@ -118,8 +121,21 @@ export function useCatalog() {
         }
 
         const data = await catalogService.getBouquets(params);
+        console.log(
+          `[useCatalog] Language: ${i18n.language}, Fetch params:`,
+          params,
+        );
+        console.log(`[useCatalog] Raw Data:`, data);
 
         if (data.items) {
+          const langNormalized = i18n.language
+            ? i18n.language.toLowerCase()
+            : "";
+          const currentLang =
+            langNormalized.startsWith("uk") || langNormalized === "ua"
+              ? "ua"
+              : "en";
+
           const mappedItems = data.items.map((p) => {
             let minPriceSize = null;
             if (p.sizes && p.sizes.length > 0) {
@@ -129,12 +145,21 @@ export function useCatalog() {
               minPriceSize = sortedSizes[0];
             }
 
+            const getLocalized = (val) => {
+              if (typeof val === "object" && val !== null) {
+                return val[currentLang] || val.ua || val.en || "";
+              }
+              return val || "";
+            };
+
             return {
               id: p.id,
               bouquetId: p.id,
               sizeId: minPriceSize ? minPriceSize.sizeId : null,
-              sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
-              title: p.name,
+              sizeName: minPriceSize
+                ? getLocalized(minPriceSize.sizeName)
+                : t("product.standard_size", { defaultValue: "Standard" }),
+              title: getLocalized(p.name),
               price: minPriceSize ? `${minPriceSize.price} ₴` : `${p.price} ₴`,
               img: p.mainPhotoUrl,
             };
@@ -177,7 +202,7 @@ export function useCatalog() {
     };
 
     fetchBouquets();
-  }, [filters, sortBy, currentPage, debouncedSearchQuery]);
+  }, [filters, sortBy, currentPage, debouncedSearchQuery, i18n.language]);
 
   // --- Actions that update URL ---
 

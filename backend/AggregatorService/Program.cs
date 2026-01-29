@@ -3,6 +3,7 @@ using AggregatorService.Clients.Interfaces;
 using AggregatorService.Redis;
 using AggregatorService.DTOs;
 using shared.cache;
+using shared.localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,7 @@ builder.Services.AddMemoryCache(options =>
     options.CompactionPercentage = 0.2;
 });
 builder.Services.AddSingleton<IEntityCacheService, EntityCacheService>();
+builder.Services.AddScoped<ILanguageProvider, LanguageProvider>();
 builder.Services.AddScoped<shared.cache.IEntityCacheInvalidationService<AggregatorService.DTOs.FilterResponseDto>, AggregatorService.Redis.FilterCacheInvalidationService>();
 
 builder.Services.AddGrpcClient<FilterService.FilterServiceClient>(options =>
@@ -86,6 +88,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<LocalizationMiddleware>();
 
 app.UseAuthorization();
 

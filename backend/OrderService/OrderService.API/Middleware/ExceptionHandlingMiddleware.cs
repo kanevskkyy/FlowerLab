@@ -63,6 +63,7 @@ namespace OrderService.API.Middleware
                 default:
                     _logger.LogError(exception, "An unhandled exception has occurred in OrderService.");
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    message = $"DEBUG ERROR: {exception.Message} | Stack: {exception.ToString()}"; // TEMPORARY DEBUG
                     break;
             }
 

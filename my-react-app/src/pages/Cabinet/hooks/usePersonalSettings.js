@@ -2,8 +2,10 @@ import { useState } from "react";
 import { toast } from "react-hot-toast";
 import axiosClient from "../../../api/axiosClient";
 import { useAuth } from "../../../context/useAuth";
+import { useTranslation } from "react-i18next";
 
 export function usePersonalSettings() {
+  const { t } = useTranslation();
   const { user, login } = useAuth();
 
   const [form, setForm] = useState({
@@ -57,7 +59,7 @@ export function usePersonalSettings() {
         await login(newToken);
       }
 
-      toast.success("Профіль успішно оновлено! ✨");
+      toast.success(t("toasts.profile_updated"));
     } catch (error) {
       console.error("Failed to update profile:", error);
       const responseData = error.response?.data;
@@ -65,7 +67,7 @@ export function usePersonalSettings() {
         if (Array.isArray(responseData.errors)) {
           const firstErr = responseData.errors[0];
           toast.error(
-            firstErr?.error || firstErr?.Error || "Помилка валідації",
+            firstErr?.error || firstErr?.Error || t("toasts.validation_error"),
           );
         } else if (typeof responseData.errors === "object") {
           const firstKey = Object.keys(responseData.errors)[0];
@@ -76,7 +78,7 @@ export function usePersonalSettings() {
         toast.error(
           responseData?.error ||
             responseData?.message ||
-            "Не вдалося оновити профіль",
+            t("toasts.profile_update_failed"),
         );
       }
     }
@@ -88,7 +90,7 @@ export function usePersonalSettings() {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("Нові паролі не співпадають!");
+      toast.error(t("toasts.passwords_mismatch"));
       return;
     }
 
@@ -99,7 +101,7 @@ export function usePersonalSettings() {
         confirmPassword: passwordForm.confirmPassword,
       });
 
-      toast.success("Пароль успішно змінено! 🔐");
+      toast.success(t("toasts.password_changed"));
       setIsPasswordModalOpen(false);
       setPasswordForm({
         oldPassword: "",
@@ -108,7 +110,9 @@ export function usePersonalSettings() {
       });
     } catch (error) {
       console.error("Failed to change password:", error);
-      toast.error(error.response?.data?.message || "Не вдалося змінити пароль");
+      toast.error(
+        error.response?.data?.message || t("toasts.password_change_failed"),
+      );
     }
   };
 

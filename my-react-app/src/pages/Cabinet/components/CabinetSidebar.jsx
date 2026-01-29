@@ -1,5 +1,5 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../context/useAuth";
 import UserInfoIcon from "../../../assets/icons/userinfo.svg";
 import OrderIcon from "../../../assets/icons/orders.svg";
@@ -13,6 +13,7 @@ export default function CabinetSidebar({
   TABS,
   onSignOut,
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.role === "Admin";
@@ -26,7 +27,7 @@ export default function CabinetSidebar({
         onClick={() => setActiveTab(TABS.PERSONAL)}
         type="button">
         <img src={UserInfoIcon} className="cabinet-nav-icon" alt="" />
-        <span>Personal information</span>
+        <span>{t("cabinet.personal")}</span>
       </button>
 
       <button
@@ -36,7 +37,7 @@ export default function CabinetSidebar({
         onClick={() => setActiveTab(TABS.ORDERS)}
         type="button">
         <img src={OrderIcon} className="cabinet-nav-icon" alt="" />
-        <span>My orders</span>
+        <span>{t("cabinet.orders")}</span>
       </button>
 
       <button
@@ -46,7 +47,7 @@ export default function CabinetSidebar({
         onClick={() => setActiveTab(TABS.ADDRESSES)}
         type="button">
         <img src={AddressIcon} className="cabinet-nav-icon" alt="" />
-        <span>Saved addresses</span>
+        <span>{t("cabinet.addresses")}</span>
       </button>
 
       <div className="cabinet-sidebar-spacer" />
@@ -57,13 +58,13 @@ export default function CabinetSidebar({
           onClick={() => navigate("/admin")}
           type="button">
           <img src={EditIcon} className="cabinet-nav-icon" alt="" />
-          <span>Admin Dashboard</span>
+          <span>{t("admin.title")}</span>
         </button>
       )}
 
       <button className="cabinet-signout" onClick={onSignOut} type="button">
         <img src={ExitIcon} className="cabinet-nav-icon" alt="" />
-        <span>Sign out</span>
+        <span>{t("cabinet.sign_out")}</span>
       </button>
     </aside>
   );

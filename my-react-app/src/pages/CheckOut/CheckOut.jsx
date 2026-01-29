@@ -6,9 +6,11 @@ import PopupMenu from "../../components/PopupMenu/PopupMenu";
 import PaymentTimer from "../../components/PaymentTimer/PaymentTimer";
 import "./CheckOut.css";
 
+import { useTranslation, Trans } from "react-i18next";
 import { useCheckOut } from "./hooks/useCheckOut";
 
 const CheckOut = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const orderData = location.state?.orderData || {};
   const createdAt = orderData.createdAt;
@@ -39,14 +41,14 @@ const CheckOut = () => {
       <PopupMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <main className="checkout">
-        <h1 className="checkout-title">CHECKOUT</h1>
+        <h1 className="checkout-title">{t("checkout.title")}</h1>
 
         <div className="checkout-container">
           {/* Payment Info Block */}
           <div className="payment-info-block">
             <h2>LIQPAY</h2>
-            <p className="payment-label">Payment Information</p>
-            <p className="order-number">Order Payment Details</p>
+            <p className="payment-label">{t("checkout.payment_info")}</p>
+            <p className="order-number">{t("checkout.order_details")}</p>
 
             {createdAt && (
               <div style={{ marginBottom: "1rem" }}>
@@ -58,7 +60,7 @@ const CheckOut = () => {
             )}
 
             <div className="total-section">
-              <span>Total to Pay:</span>
+              <span>{t("checkout.total_to_pay")}</span>
               <span className="total-amount">{total}.00 UAH</span>
             </div>
           </div>
@@ -67,9 +69,7 @@ const CheckOut = () => {
             className="privat24-info"
             style={{ marginTop: "30px", marginBottom: "30px" }}>
             <p>
-              You will be redirected to the secure <b>LiqPay</b> payment page.
-              <br />
-              Supported methods: Card, Apple Pay, Google Pay, Privat24.
+              <Trans i18nKey="checkout.redirect_msg" />
             </p>
           </div>
 
@@ -82,12 +82,12 @@ const CheckOut = () => {
               opacity: loading ? 0.7 : 1,
               cursor: loading ? "not-allowed" : "pointer",
             }}>
-            {loading ? "Redirecting to LiqPay..." : "Proceed to Secure Payment"}
+            {loading ? t("checkout.redirecting") : t("checkout.proceed_btn")}
           </button>
 
           {/* Cancel Button */}
           <button className="cancel-payment-btn" onClick={handleCancelPayment}>
-            Cancel payment
+            {t("checkout.cancel_btn")}
           </button>
         </div>
       </main>

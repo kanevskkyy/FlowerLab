@@ -8,7 +8,7 @@ namespace CatalogService.Domain.Entities
 {
     public class Size : BaseEntity
     {
-        public string Name { get; set; } = null!;
+        public Dictionary<string, string> Name { get; set; } = new();
         public ICollection<BouquetSize> BouquetSizes { get; set; } = new List<BouquetSize>();
     }
 }

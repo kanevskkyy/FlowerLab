@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import reviewService from "../../../services/reviewService";
 import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminReviews() {
+  const { t } = useTranslation();
   const [pendingReviews, setPendingReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +48,9 @@ export function useAdminReviews() {
       }));
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
-      toast.error(extractErrorMessage(error, "Could not load reviews"));
+      toast.error(
+        extractErrorMessage(error, t("toasts.admin_reviews_load_failed")),
+      );
     } finally {
       setLoading(false);
     }
@@ -72,10 +76,12 @@ export function useAdminReviews() {
     try {
       await reviewService.approveReview(id);
       setPendingReviews((prev) => prev.filter((r) => r.id !== id));
-      toast.success("Review approved!");
+      toast.success(t("toasts.admin_review_approved"));
     } catch (error) {
       console.error(error);
-      toast.error(extractErrorMessage(error, "Failed to approve review"));
+      toast.error(
+        extractErrorMessage(error, t("toasts.admin_review_approve_failed")),
+      );
     }
   };
 
@@ -83,10 +89,12 @@ export function useAdminReviews() {
     try {
       await reviewService.deleteReview(id);
       setPendingReviews((prev) => prev.filter((r) => r.id !== id));
-      toast.success("Review deleted");
+      toast.success(t("toasts.admin_review_deleted"));
     } catch (error) {
       console.error(error);
-      toast.error(extractErrorMessage(error, "Failed to delete review"));
+      toast.error(
+        extractErrorMessage(error, t("toasts.admin_review_delete_failed")),
+      );
     }
   };
 

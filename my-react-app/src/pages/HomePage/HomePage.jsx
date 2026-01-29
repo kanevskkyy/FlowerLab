@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../../context/CartContext";
 import "./HomePage.css";
 import catalogService from "../../services/catalogService";
@@ -16,6 +17,7 @@ import ReviewsSection from "./components/ReviewsSection";
 import SEO from "../../components/SEO/SEO";
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const { addToCart } = useCart();
 
@@ -58,38 +60,7 @@ export default function HomePage() {
     };
     fetchPopular();
   }, []);
-  const reviewsData = [
-    {
-      id: 1,
-      name: "Maria S.",
-      text: "I really like the bouquet and recommend this store. Everything was perfect!",
-      stars: 5,
-    },
-    {
-      id: 2,
-      name: "Alex D.",
-      text: "Fresh flowers and fast delivery. Will order again for sure!",
-      stars: 5,
-    },
-    {
-      id: 3,
-      name: "Elena K.",
-      text: "Beautiful packaging and very polite courier. Thank you!",
-      stars: 5,
-    },
-    {
-      id: 4,
-      name: "Ivan P.",
-      text: "The roses stood for 2 weeks! Amazing quality.",
-      stars: 5,
-    },
-    {
-      id: 5,
-      name: "Oksana M.",
-      text: "Best flower shop in Chernivtsi. Highly recommended!",
-      stars: 5,
-    },
-  ];
+  const reviewsData = t("home.reviews_data", { returnObjects: true }) || [];
 
   const handleAddToCart = (item) => {
     // Safeguard: If sizeId is missing (e.g. backend cache stale), redirect to product page
@@ -112,8 +83,8 @@ export default function HomePage() {
   return (
     <div className="home-page">
       <SEO
-        title="FlowerLab Vlada | Flowers Delivery Chernivtsi"
-        description="Premium bouquets, fresh flowers, and gifts with delivery in Chernivtsi. Order online for best quality and service."
+        title={t("seo.home_title")}
+        description={t("seo.home_desc")}
         image="/og-home.jpg"
       />
       <Header onMenuOpen={() => setMenuOpen(true)} />

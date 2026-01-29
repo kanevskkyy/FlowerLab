@@ -40,10 +40,10 @@ namespace CatalogService.BLL.Services.Implementations
             return mapper.Map<RecipientDto>(recipient);
         }
 
-        public async Task<RecipientDto> CreateAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<RecipientDto> CreateAsync(Dictionary<string, string> name, CancellationToken cancellationToken = default)
         {
-            if (await uow.Recipients.ExistsWithNameAsync(name, cancellationToken: cancellationToken))
-                throw new AlreadyExistsException($"Recipient '{name}' already exists.");
+            if (await uow.Recipients.ExistsWithNameAsync(name.GetValueOrDefault("ua", ""), cancellationToken: cancellationToken))
+                throw new AlreadyExistsException($"Recipient '{name.GetValueOrDefault("ua", "")}' already exists.");
 
             Recipient entity = new Recipient { Name = name };
             await uow.Recipients.AddAsync(entity, cancellationToken);
@@ -54,14 +54,14 @@ namespace CatalogService.BLL.Services.Implementations
             return mapper.Map<RecipientDto>(entity);
         }
 
-        public async Task<RecipientDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default)
+        public async Task<RecipientDto> UpdateAsync(Guid id, Dictionary<string, string> name, CancellationToken cancellationToken = default)
         {
             Recipient? recipient = await uow.Recipients.GetByIdAsync(id, cancellationToken);
             if (recipient == null)
                 throw new NotFoundException($"Recipient with ID {id} not found.");
 
-            if (await uow.Recipients.ExistsWithNameAsync(name, id, cancellationToken))
-                throw new AlreadyExistsException($"Recipient '{name}' already exists.");
+            if (await uow.Recipients.ExistsWithNameAsync(name.GetValueOrDefault("ua", ""), id, cancellationToken))
+                throw new AlreadyExistsException($"Recipient '{name.GetValueOrDefault("ua", "")}' already exists.");
 
             recipient.Name = name;
             uow.Recipients.Update(recipient);

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useConfirm } from "../../context/ModalProvider";
 import { useAdminCatalog } from "./hooks/useAdminCatalog";
 import CatalogSection from "./components/CatalogSection";
@@ -9,6 +10,7 @@ import "./AdminCatalogEdit.css";
 export default function AdminCatalogEdit() {
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { t } = useTranslation();
 
   const {
     loading,
@@ -23,7 +25,7 @@ export default function AdminCatalogEdit() {
   } = useAdminCatalog(confirm);
 
   if (loading) {
-    return <div className="ace-page loading">Loading...</div>;
+    return <div className="ace-page loading">{t("admin.loading")}</div>;
   }
 
   return (
@@ -32,9 +34,9 @@ export default function AdminCatalogEdit() {
         {/* HEADER */}
         <header className="ace-header">
           <button className="ace-back-btn" onClick={() => navigate("/admin")}>
-            ← Back to Admin
+            ← {t("admin.catalog.back_to_admin")}
           </button>
-          <h1 className="ace-title">Edit Catalog Settings</h1>
+          <h1 className="ace-title">{t("admin.catalog.edit_title")}</h1>
           <div style={{ width: 100 }}></div> {/* Spacer to center title */}
         </header>
 
@@ -42,22 +44,22 @@ export default function AdminCatalogEdit() {
         <div className="ace-content">
           <div className="ace-grid-2">
             <CatalogSection
-              title="Events"
+              title={t("admin.catalog.events")}
               items={data.events}
-              inputValue={inputs.events}
-              onInputChange={(val) => handleInputChange("events", val)}
+              inputs={inputs}
+              category="events"
+              onInputChange={handleInputChange}
               onAdd={() => handleAdd("events")}
               onRemove={(item) => handleRemoveClick("events", item)}
-              onKeyDown={(e) => e.key === "Enter" && handleAdd("events")}
             />
             <CatalogSection
-              title="For Who (Recipients)"
+              title={t("admin.catalog.for_who")}
               items={data.forWho}
-              inputValue={inputs.forWho}
-              onInputChange={(val) => handleInputChange("forWho", val)}
+              inputs={inputs}
+              category="forWho"
+              onInputChange={handleInputChange}
               onAdd={() => handleAdd("forWho")}
               onRemove={(item) => handleRemoveClick("forWho", item)}
-              onKeyDown={(e) => e.key === "Enter" && handleAdd("forWho")}
             />
           </div>
 

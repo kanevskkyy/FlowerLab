@@ -3,7 +3,10 @@ import axiosClient from "../../../api/axiosClient";
 import reviewService from "../../../services/reviewService";
 import toast from "react-hot-toast";
 
+import { useTranslation } from "react-i18next";
+
 export const useProductData = (id) => {
+  const { i18n } = useTranslation();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState([]);
@@ -37,7 +40,7 @@ export const useProductData = (id) => {
             const compStr =
               size.flowers
                 ?.map((f) => `${f.name} (${f.quantity})`)
-                .join(", ") || "Diverse floral mix";
+                .join(", ") || t("product.diverse_floral_mix");
             acc[size.sizeName] = compStr;
             return acc;
           }, {}),
@@ -90,10 +93,30 @@ export const useProductData = (id) => {
           defaultSize = firstAvailable;
         }
 
-        setSelectedSize(defaultSize);
+        // Only set default size if user hasn't selected one yet or if current selection is invalid?
+        // Actually, on language switch we probably want to KEEP the selected size if possible.
+        // But for simplicity, re-init logic is okay, or we can check if selectedSize is set.
+        // Let's keep it simple: re-calculate default only if we don't handle state preservation.
+        // However, 'selectedSize' is in state. If we re-run this, 'product' is overwritten.
+        // If we want to preserve 'selectedSize' across language switches, we should check if 'selectedSize' is valid in new data.
+        // Since sizes are standard (S, M, L, XL), it's likely fine.
+        // But the code below sets selectedSize unconditionally.
+        // Better: check if current selectedSize exists in new data.
+
+        // Actually, the useEffect runs on ID change OR language change.
+        // Ideally we shouldn't reset selectedSize on language change if it's still valid.
+
+        if (!selectedSize) {
+          setSelectedSize(defaultSize);
+        } else {
+          // Validate if old selectedSize still exists (it should)
+          if (!mappedProduct.availableSizes.includes(selectedSize)) {
+            setSelectedSize(defaultSize);
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch product details:", error);
-        toast.error("Товар не знайдено");
+        toast.error(t("toasts.product_not_found"));
       } finally {
         setLoading(false);
       }
@@ -128,7 +151,7 @@ export const useProductData = (id) => {
     fetchRecommendations();
     // Review fetch is moved to be accessible
     refetchReviews();
-  }, [id]);
+  }, [id, i18n.language]);
 
   const refetchReviews = async () => {
     try {

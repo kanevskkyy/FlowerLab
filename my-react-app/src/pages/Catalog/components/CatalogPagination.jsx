@@ -1,6 +1,13 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
-function CatalogPagination({ currentPage, totalPages, onPageChange, onLoadMore }) {
+function CatalogPagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  onLoadMore,
+}) {
+  const { t } = useTranslation();
   if (totalPages <= 1) return null;
 
   // Generate page numbers
@@ -12,9 +19,24 @@ function CatalogPagination({ currentPage, totalPages, onPageChange, onLoadMore }
       if (currentPage <= 3) {
         pages.push(1, 2, 3, 4, "...", totalPages);
       } else if (currentPage >= totalPages - 2) {
-        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(
+          1,
+          "...",
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages,
+        );
       } else {
-        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+        pages.push(
+          1,
+          "...",
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          "...",
+          totalPages,
+        );
       }
     }
     return pages;
@@ -24,15 +46,14 @@ function CatalogPagination({ currentPage, totalPages, onPageChange, onLoadMore }
     <div className="pagination">
       {currentPage < totalPages && (
         <button className="load-more-btn" onClick={onLoadMore}>
-          LOAD MORE
+          {t("catalog.load_more")}
         </button>
       )}
 
       <div className="page-numbers">
         <span
           className={currentPage === 1 ? "disabled" : ""}
-          onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-        >
+          onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}>
           {"<"}
         </span>
 
@@ -40,22 +61,18 @@ function CatalogPagination({ currentPage, totalPages, onPageChange, onLoadMore }
           <span
             key={index}
             className={
-              page === currentPage
-                ? "active"
-                : page === "..."
-                ? "dots"
-                : ""
+              page === currentPage ? "active" : page === "..." ? "dots" : ""
             }
-            onClick={() => typeof page === "number" && onPageChange(page)}
-          >
+            onClick={() => typeof page === "number" && onPageChange(page)}>
             {page}
           </span>
         ))}
 
         <span
           className={currentPage === totalPages ? "disabled" : ""}
-          onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-        >
+          onClick={() =>
+            currentPage < totalPages && onPageChange(currentPage + 1)
+          }>
           {">"}
         </span>
       </div>

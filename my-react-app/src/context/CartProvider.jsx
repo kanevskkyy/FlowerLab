@@ -6,12 +6,14 @@ import {
   useRef,
   useContext,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-hot-toast";
 import { CartContext } from "./CartContext";
 import { AuthContext } from "./authContext";
 import catalogService from "../services/catalogService";
 
 export const CartProvider = ({ children }) => {
+  const { t } = useTranslation();
   const { user } = useContext(AuthContext) || {};
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -117,7 +119,7 @@ export const CartProvider = ({ children }) => {
                 // Mark for deletion
                 updatedItems[index] = null; // Will filter later
                 messages.push(
-                  `"${itemName}" закінчився і був видалений з кошика.`,
+                  t("toasts.cart_item_removed", { name: itemName }),
                 );
               } else {
                 updatedItems[index] = {
@@ -126,7 +128,10 @@ export const CartProvider = ({ children }) => {
                   maxStock,
                 };
                 messages.push(
-                  `Кількість "${itemName}" змінено на ${maxStock} через обмежений залишок.`,
+                  t("toasts.cart_qty_adjusted", {
+                    name: itemName,
+                    count: maxStock,
+                  }),
                 );
               }
               hasChanges = true;
@@ -141,7 +146,9 @@ export const CartProvider = ({ children }) => {
             if (error.response && error.response.status === 404) {
               updatedItems[index] = null;
               messages.push(
-                `Товар "${item.title || "item"}" більше не доступний.`,
+                t("toasts.cart_item_unavailable", {
+                  name: item.title || "item",
+                }),
               );
               hasChanges = true;
             }
@@ -173,7 +180,7 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, openCart = true) => {
     if (cartItems.some((item) => item.id === product.id)) {
-      toast.error("Цей товар вже є у вашому кошику");
+      toast.error(t("toasts.item_already_in_cart"));
       return false;
     }
     setCartItems((prev) => [...prev, product]);

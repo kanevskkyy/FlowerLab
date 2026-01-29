@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useAuth } from "../../context/useAuth";
+import { useSettings } from "../../context/useSettings";
+import { useTranslation } from "react-i18next";
 import "./PopupMenu.css";
 
 export default function PopupMenu({ isOpen, onClose }) {
+  const { t } = useTranslation();
+  const { lang, setLang } = useSettings();
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -30,7 +33,7 @@ export default function PopupMenu({ isOpen, onClose }) {
         {/* Menu List */}
         <ul className="menu-list">
           <li className="menu-item" onClick={() => handleNav("/")}>
-            Home
+            {t("nav.home")}
           </li>
 
           {/* CATALOG ACCORDION */}
@@ -38,7 +41,7 @@ export default function PopupMenu({ isOpen, onClose }) {
             <div
               className="menu-item-header"
               onClick={() => setIsCatalogOpen(!isCatalogOpen)}>
-              <span className="menu-item">Catalog</span>
+              <span className="menu-item">{t("nav.catalog")}</span>
               <span className={`menu-arrow ${isCatalogOpen ? "open" : ""}`}>
                 ›
               </span>
@@ -50,27 +53,42 @@ export default function PopupMenu({ isOpen, onClose }) {
                 <li
                   className="submenu-item"
                   onClick={() => handleNav("/catalog")}>
-                  Bouquets
+                  {t("nav.bouquets")}
                 </li>
                 {/* Поки що ведемо на каталог, пізніше можна додати ?category=gifts */}
                 <li
                   className="submenu-item"
                   onClick={() => handleNav("/gifts")}>
-                  Gifts
+                  {t("nav.gifts")}
                 </li>
               </ul>
             </div>
           </li>
 
           <li className="menu-item" onClick={() => handleNav("/about")}>
-            About Us
+            {t("nav.about")}
           </li>
           {!user && (
             <li className="menu-item" onClick={() => handleNav("/track-order")}>
-              Track Order
+              {t("nav.track")}
             </li>
           )}
         </ul>
+
+        {/* Language Switcher - Mobile */}
+        <div className="mobile-lang-switch">
+          <span
+            className={lang === "UA" ? "active-lang" : ""}
+            onClick={() => setLang("UA")}>
+            UA
+          </span>
+          <span className="lang-divider"> / </span>
+          <span
+            className={lang === "ENG" ? "active-lang" : ""}
+            onClick={() => setLang("ENG")}>
+            ENG
+          </span>
+        </div>
       </div>
     </div>
   );

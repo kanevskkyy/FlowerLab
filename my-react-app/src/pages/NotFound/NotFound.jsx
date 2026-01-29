@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./NotFound.css";
 
 const NotFound = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -13,13 +15,10 @@ const NotFound = () => {
 
       <main className="not-found-content">
         <h1 className="not-found-code">404</h1>
-        <h2 className="not-found-title">Oops! Page not found</h2>
-        <p className="not-found-text">
-          The page you are looking for might have been removed, had its name
-          changed, or is temporarily unavailable.
-        </p>
+        <h2 className="not-found-title">{t("not_found_page.title")}</h2>
+        <p className="not-found-text">{t("not_found_page.text")}</p>
         <button className="not-found-btn" onClick={() => navigate("/")}>
-          BACK TO HOMEPAGE
+          {t("not_found_page.button")}
         </button>
       </main>
 

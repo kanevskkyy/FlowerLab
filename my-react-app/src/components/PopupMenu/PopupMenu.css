@@ -5,7 +5,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0);
+  background: rgba(0, 0, 0, 0);
   opacity: 0;
   visibility: hidden;
   transition: 0.35s ease;
@@ -13,7 +13,7 @@
 }
 
 .popup-menu-overlay.open {
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   opacity: 1;
   visibility: visible;
 }
@@ -22,7 +22,7 @@
 .popup-menu {
   width: 300px;
   height: 100%;
-  background: #FBEAF7;
+  background: #fbeaf7;
   padding: 40px 30px;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   position: fixed;
@@ -73,7 +73,7 @@
   cursor: pointer;
   transition: 0.25s ease;
   color: #463641;
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
 }
 
 /* Hover effect */
@@ -99,7 +99,7 @@
 }
 
 /* При наведенні на хедер, текст теж анімується */
-.menu-item-header:hover .menu-item  {
+.menu-item-header:hover .menu-item {
   color: #c05a94;
   transform: translateX(4px);
 }
@@ -123,14 +123,17 @@
 .submenu-wrapper {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    margin 0.3s ease;
   opacity: 0;
 }
 
 .submenu-wrapper.open {
   max-height: 200px;
   opacity: 1;
-  margin-top: 15px; 
+  margin-top: 15px;
 }
 
 /* Список підменю */
@@ -146,7 +149,7 @@
 /* Елементи підменю (Bouquets, Gifts) */
 .submenu-item {
   font-size: 18px;
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   color: #463641;
   cursor: pointer;
   transition: 0.2s ease;
@@ -163,14 +166,14 @@
    ========================================= */
 
 .popup-settings {
-  display: none; 
+  display: none;
 }
 
 @media (max-width: 768px) {
   .popup-settings {
     display: flex;
     flex-direction: column;
-    margin-top: auto; 
+    margin-top: auto;
     margin-bottom: 20px;
     border-top: 1px solid rgba(70, 54, 65, 0.1);
     padding-top: 20px;
@@ -186,7 +189,7 @@
 
 .setting-label {
   font-size: 16px;
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   color: #463641;
 }
 
@@ -195,11 +198,48 @@
   border: none;
   cursor: pointer;
   font-size: 16px;
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   color: #463641;
 }
 
 .active-text {
   font-weight: 700;
   color: #000;
+}
+
+/* LANGUAGE SWITCHER (NEW) */
+.mobile-lang-switch {
+  display: none; /* Hidden by default (Desktop) */
+  margin-top: auto; /* Push to bottom */
+  align-items: center;
+  gap: 10px;
+  font-family: "Manrope", sans-serif;
+  font-size: 18px;
+  color: #463641;
+}
+
+@media (max-width: 768px) {
+  .mobile-lang-switch {
+    display: flex; /* Visible only on Mobile */
+  }
+}
+
+.mobile-lang-switch span {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.mobile-lang-switch span:hover {
+  opacity: 0.7;
+}
+
+.mobile-lang-switch .active-lang {
+  font-weight: 700;
+  color: #000;
+  text-decoration: underline;
+}
+
+.mobile-lang-switch .lang-divider {
+  cursor: default;
+  opacity: 0.5;
 }

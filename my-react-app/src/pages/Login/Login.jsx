@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -23,6 +24,7 @@ const schema = z.object({
 });
 
 export default function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { setAuth } = useAuth(); // Використовуємо метод для оновлення стану
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +56,7 @@ export default function Login() {
         // Оновлюємо стан авторизації в контексті
         setAuth(accessToken);
 
-        toast.success("З поверненням!");
+        toast.success(t("auth.welcome_back"));
         navigate("/cabinet", { replace: true });
       } else {
         // Якщо токен не прийшов (наприклад, null)
@@ -69,9 +71,11 @@ export default function Login() {
         error.response?.data?.error ||
         error.response?.data?.Detail ||
         error.response?.data?.message ||
-        "Вхід не вдався. Перевірте email або пароль.";
+        t("auth.login_failed");
 
-      toast.error(typeof errorMsg === "string" ? errorMsg : "Вхід не вдався.");
+      toast.error(
+        typeof errorMsg === "string" ? errorMsg : t("auth.login_failed"),
+      );
     }
   };
 
@@ -92,12 +96,12 @@ export default function Login() {
 
       <main className="login-content">
         <div className="login-box">
-          <h2 className="login-title">Sign in</h2>
+          <h2 className="login-title">{t("auth.login")}</h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Email Field */}
             <div className="form-field full-width">
-              <label className="field-label">Email</label>
+              <label className="field-label">{t("auth.email")}</label>
               <div className="input-row">
                 <input
                   type="email"
@@ -115,10 +119,9 @@ export default function Login() {
                 <p className="error-text">{errors.email.message}</p>
               )}
             </div>
-
             {/* Password Field */}
             <div className="form-field full-width">
-              <label className="field-label">Password</label>
+              <label className="field-label">{t("auth.password")}</label>
               <div className="input-row">
                 <span className="input-icon left">
                   <img src={lockIcon} alt="lock" className="field-icon" />
@@ -148,31 +151,28 @@ export default function Login() {
                 <p className="error-text">{errors.password.message}</p>
               )}
             </div>
-
             {/* Main Sign In Button */}
             <button
               type="submit"
               className="login-main-btn"
               disabled={isSubmitting}>
-              {isSubmitting ? "Signing in..." : "Sign in"}
+              {isSubmitting ? t("auth.signing_in") : t("auth.login")}
             </button>
-
             {/* Forgot Password Link */}
             <button
               type="button"
               className="forgot-password-link"
               onClick={() => navigate("/forgot-password")}>
-              Forgot your password?
+              {t("auth.forgot_password")}
             </button>
-
             {/* Updated Footer Section */}
             <div className="login-footer">
-              <span>Don't have an account yet?</span>
+              <span>{t("auth.no_account")}</span>
               <button
                 type="button"
                 className="signup-outlined-btn"
                 onClick={() => navigate("/register")}>
-                Sign up
+                {t("auth.signup")}
               </button>
             </div>
           </form>

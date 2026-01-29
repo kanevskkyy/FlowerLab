@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,6 +25,7 @@ const schema = z
   });
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +53,7 @@ export default function ResetPassword() {
     const userId = searchParams.get("userId");
 
     if (!token || !userId) {
-      toast.error("Недійсні параметри посилання.");
+      toast.error(t("toasts.invalid_token"));
       return;
     }
 
@@ -63,11 +65,12 @@ export default function ResetPassword() {
         confirmPassword: data.password, // Backend requires this for validation
       });
 
-      toast.success("Пароль успішно змінено!");
+      toast.success(t("toasts.password_reset_success"));
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || "Не вдалося скинути пароль.";
+      const msg =
+        error.response?.data?.message || t("toasts.password_reset_failed");
       toast.error(msg);
     }
   };

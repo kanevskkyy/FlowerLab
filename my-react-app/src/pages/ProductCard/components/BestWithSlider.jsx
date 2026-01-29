@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -8,11 +9,12 @@ import arrowLeft from "../../../assets/icons/arrow-left.svg";
 import arrowRight from "../../../assets/icons/arrow-right.svg";
 
 const BestWithSlider = ({ gifts, onGiftClick }) => {
+  const { t } = useTranslation();
   if (!gifts || gifts.length === 0) return null;
 
   return (
     <section className="recommendations-section">
-      <h2 className="section-title">Best with</h2>
+      <h2 className="section-title">{t("product.best_with")}</h2>
 
       <div className="recommendations-slider-container">
         <div className="custom-prev">

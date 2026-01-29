@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace CatalogService.BLL.DTO
 {
-    public record RecipientDto(Guid Id, string Name);
+    public record RecipientDto(Guid Id, Dictionary<string, string> Name);
 
 }

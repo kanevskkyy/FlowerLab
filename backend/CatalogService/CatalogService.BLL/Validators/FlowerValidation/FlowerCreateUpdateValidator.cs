@@ -13,8 +13,7 @@ namespace CatalogService.BLL.Validators.FlowerValidation
         public FlowerCreateUpdateValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Name is required.")
-                .MaximumLength(100);
+                .NotEmpty().WithMessage("Name is required.");
 
             RuleFor(x => x.Quantity)
                 .GreaterThanOrEqualTo(0).WithMessage("Quantity cannot be negative.");

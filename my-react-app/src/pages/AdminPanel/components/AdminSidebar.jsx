@@ -1,12 +1,14 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import bouquetsIco from "../../../assets/icons/flowerr.svg";
 import ordersIco from "../../../assets/icons/orders.svg";
 import reviewsIco from "../../../assets/icons/review.svg";
 
 function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
+  const { t } = useTranslation();
   const NAV = [
-    { key: "orders", label: "Orders", icon: ordersIco },
-    { key: "reviews", label: "Reviews", icon: reviewsIco },
+    { key: "orders", label: t("admin.sidebar.orders"), icon: ordersIco },
+    { key: "reviews", label: t("admin.sidebar.reviews"), icon: reviewsIco },
   ];
 
   return (
@@ -24,7 +26,7 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
             }`}
             onClick={() => setIsCatalogOpen(!isCatalogOpen)}>
             <img className="admin-nav-ico" src={bouquetsIco} alt="" />
-            <span style={{ flex: 1 }}>CATALOG</span>
+            <span style={{ flex: 1 }}>{t("admin.sidebar.catalog")}</span>
             {/* Стрілочка (клас у CSS) */}
             <span className={`nav-arrow ${isCatalogOpen ? "open" : ""}`}>
               ›
@@ -41,7 +43,7 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
                   setActive("bouquets");
                   setIsCatalogOpen(false);
                 }}>
-                Bouquets
+                {t("admin.sidebar.bouquets")}
               </button>
               <button
                 className={`admin-sub-item ${
@@ -51,7 +53,7 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
                   setActive("gifts");
                   setIsCatalogOpen(false);
                 }}>
-                Gifts
+                {t("admin.sidebar.gifts")}
               </button>
               <button
                 className={`admin-sub-item ${
@@ -61,7 +63,7 @@ function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
                   setActive("catalog");
                   setIsCatalogOpen(false);
                 }}>
-                Catalog Settings
+                {t("admin.sidebar.catalog_settings")}
               </button>
             </div>
           )}

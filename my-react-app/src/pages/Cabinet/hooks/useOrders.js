@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import orderService from "../../../services/orderService";
 
 export function useOrders(activeTab, TABS) {
+  const { t, i18n } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sort, setSort] = useState("DateDesc");
@@ -12,6 +14,18 @@ export function useOrders(activeTab, TABS) {
     totalCount: 0,
     totalPages: 1,
   });
+
+  const langNormalized = i18n.language ? i18n.language.toLowerCase() : "";
+  const currentLang =
+    langNormalized.startsWith("uk") || langNormalized === "ua" ? "ua" : "en";
+  const dateLocale = currentLang === "ua" ? "uk-UA" : "en-US";
+
+  const getLocalized = (val) => {
+    if (typeof val === "object" && val !== null) {
+      return val[currentLang] || val.ua || val.en || "";
+    }
+    return val || "";
+  };
 
   const fetchOrders = useCallback(
     async (isLoadMore = false) => {
@@ -33,18 +47,18 @@ export function useOrders(activeTab, TABS) {
         const mappedOrders = (data.items || []).map((order) => {
           const bouquets = (order.items || []).map((item) => ({
             id: item.id,
-            title: item.bouquetName,
-            qty: `${item.count} pc`,
+            title: getLocalized(item.bouquetName),
+            qty: `${item.count} ${t("admin.orders.item_pc")}`,
             img: item.bouquetImage || null,
             price: item.price,
-            size: item.sizeName,
+            size: getLocalized(item.sizeName),
             type: "bouquet",
           }));
 
           const gifts = (order.orderGifts || order.gifts || []).map((g) => ({
             id: g.giftId,
-            title: g.gift?.name || "Gift",
-            qty: `${g.orderedCount || g.count} pc`,
+            title: getLocalized(g.gift?.name) || "Gift",
+            qty: `${g.orderedCount || g.count} ${t("admin.orders.item_pc")}`,
             img: g.gift?.imageUrls?.[0] || g.gift?.imageUrl || null,
             price: g.gift?.price || 0,
             type: "gift",
@@ -55,7 +69,7 @@ export function useOrders(activeTab, TABS) {
           return {
             id: `№${order.id.substring(0, 8).toUpperCase()}`,
             rawId: order.id,
-            date: new Date(order.createdAt).toLocaleString("uk-UA", {
+            date: new Date(order.createdAt).toLocaleString(dateLocale, {
               hour: "2-digit",
               minute: "2-digit",
               day: "numeric",
@@ -63,7 +77,10 @@ export function useOrders(activeTab, TABS) {
               year: "numeric",
             }),
             type: allItems.length > 1 ? "multi" : "single",
-            status: order.status.name,
+            status: t(
+              `admin.orders.status_${order.status.name.toLowerCase()}`,
+              { defaultValue: order.status.name },
+            ),
             total: order.totalPrice,
             currency: "₴",
             items: allItems,

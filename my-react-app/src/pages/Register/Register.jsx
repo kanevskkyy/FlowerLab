@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,6 +33,7 @@ const schema = z
   });
 
 export default function Register() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -61,7 +63,7 @@ export default function Register() {
       const authService = (await import("../../services/authService")).default;
       await authService.register(payload);
 
-      toast.success("Реєстрація успішна! Будь ласка, перевірте ваш email.");
+      toast.success(t("auth.registration_success"));
       navigate("/email-confirmation-pending", { state: { email: data.email } });
     } catch (error) {
       console.error("Registration error:", error);
@@ -81,7 +83,7 @@ export default function Register() {
       }
 
       toast.error(
-        typeof errorMsg === "string" ? errorMsg : "Реєстрація не вдалася.",
+        typeof errorMsg === "string" ? errorMsg : t("auth.registration_failed"),
       );
     }
   };
@@ -103,13 +105,13 @@ export default function Register() {
 
       <main className="signup-content">
         <div className="signup-box">
-          <h2 className="signup-title">Registration</h2>
+          <h2 className="signup-title">{t("auth.signup")}</h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="signup-grid">
               {/* First Name */}
               <div className="form-field">
-                <label className="field-label">First Name</label>
+                <label className="field-label">{t("auth.first_name")}</label>
                 <input
                   type="text"
                   className={`input-base ${
@@ -125,7 +127,7 @@ export default function Register() {
 
               {/* Last Name */}
               <div className="form-field">
-                <label className="field-label">Last Name</label>
+                <label className="field-label">{t("auth.last_name")}</label>
                 <input
                   type="text"
                   className={`input-base ${
@@ -141,7 +143,7 @@ export default function Register() {
 
               {/* Phone */}
               <div className="form-field">
-                <label className="field-label">Phone Number</label>
+                <label className="field-label">{t("auth.phone")}</label>
                 <input
                   type="tel"
                   className={`input-base ${errors.phone ? "input-error" : ""}`}
@@ -155,7 +157,7 @@ export default function Register() {
 
               {/* Email */}
               <div className="form-field">
-                <label className="field-label">Email</label>
+                <label className="field-label">{t("auth.email")}</label>
                 <div className="input-row">
                   <input
                     type="email"
@@ -181,7 +183,7 @@ export default function Register() {
 
             {/* Password */}
             <div className="form-field full-width">
-              <label className="field-label">Password</label>
+              <label className="field-label">{t("auth.password")}</label>
               <div className="input-row">
                 <span className="input-icon left">
                   <img src={lockIcon} alt="lock" className="field-icon" />
@@ -212,7 +214,9 @@ export default function Register() {
 
             {/* Confirm Password */}
             <div className="form-field full-width">
-              <label className="field-label">Confirm password</label>
+              <label className="field-label">
+                {t("auth.confirm_password") || "Confirm password"}
+              </label>
               <div className="input-row">
                 <span className="input-icon left">
                   <img src={lockIcon} alt="lock" className="field-icon" />
@@ -247,14 +251,14 @@ export default function Register() {
               type="submit"
               className="signup-main-btn"
               disabled={isSubmitting}>
-              {isSubmitting ? "Signing up..." : "Sign up"}
+              {isSubmitting ? t("auth.creating_account") : t("auth.signup")}
             </button>
 
             <button
               type="button"
               className="back-to-login-btn"
               onClick={() => navigate("/login")}>
-              Back to Sign in
+              {t("auth.back_to_login") || "Back to Sign in"}
             </button>
           </form>
         </div>

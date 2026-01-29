@@ -15,9 +15,7 @@ namespace CatalogService.BLL.Validators.BouquetValidation
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .WithMessage("Bouquet name is required.")
-                .MaximumLength(100)
-                .WithMessage("Bouquet name cannot exceed 100 characters.");
+                .WithMessage("Bouquet name is required.");
 
             RuleFor(x => x.Sizes)
                 .NotEmpty()

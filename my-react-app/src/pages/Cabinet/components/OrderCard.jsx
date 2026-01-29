@@ -1,14 +1,19 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "./OrderCard.css";
 import CardIcon from "../../../assets/icons/message.svg";
 
 const OrderCard = ({ order }) => {
+  const { t, i18n } = useTranslation();
+
   return (
     <div className="history-card">
       {/* HEADER: ID and Date */}
       <div className="history-header">
         <span className="history-id">{order.id}</span>
-        <span className="history-date">at {order.date}</span>
+        <span className="history-date">
+          {i18n.language === "UA" ? "о" : "at"} {order.date}
+        </span>
       </div>
 
       {/* CONTENT: Grid of items */}
@@ -23,7 +28,9 @@ const OrderCard = ({ order }) => {
             <div className="grid-item-info">
               <span className="grid-title">{item.title}</span>
               {item.size && (
-                <span className="grid-size">Size: {item.size}</span>
+                <span className="grid-size">
+                  {t("product.size")}: {item.size}
+                </span>
               )}
               <div className="grid-price-row">
                 <span className="grid-price">
@@ -40,7 +47,9 @@ const OrderCard = ({ order }) => {
           <div className="history-grid-item card-item">
             <div className="grid-card-wrapper">
               <img src={CardIcon} alt="Card" className="card-icon-svg" />
-              <span className="card-label">POSTCARD</span>
+              <span className="card-label">
+                {t("admin.orders.postcard").toUpperCase()}
+              </span>
             </div>
             <div className="grid-card-text">"{order.cardText}"</div>
           </div>
@@ -50,10 +59,10 @@ const OrderCard = ({ order }) => {
       {/* FOOTER: Total and Status */}
       <div className="history-footer">
         <div className="history-total">
-          Order Total: {order.total} {order.currency}
+          {t("admin.orders.total_label")} {order.total} {order.currency}
         </div>
         <div className="history-status">
-          Status:{" "}
+          {t("admin.orders.status")}
           <span className={`status-badge ${order.status.toLowerCase()}`}>
             {order.status}
           </span>

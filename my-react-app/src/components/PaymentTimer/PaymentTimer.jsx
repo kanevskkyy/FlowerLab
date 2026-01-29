@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import "./PaymentTimer.css";
 
 const PaymentTimer = ({ createdAt, onExpire }) => {
   const PAYMENT_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+
+  const { t } = useTranslation();
 
   const calculateTimeLeft = () => {
     const createdTime = new Date(createdAt).getTime();
@@ -50,14 +53,12 @@ const PaymentTimer = ({ createdAt, onExpire }) => {
 
   return (
     <div className="payment-timer">
-      <p className="payment-timer-label">Time left to pay:</p>
+      <p className="payment-timer-label">{t("checkout.timer_label")}</p>
       <div
         className={`payment-timer-value ${timeLeft < 60000 ? "urgent" : ""}`}>
         {formatTime(timeLeft)}
       </div>
-      <p className="payment-timer-hint">
-        Order will be cancelled if not paid within 10 minutes.
-      </p>
+      <p className="payment-timer-hint">{t("checkout.timer_hint")}</p>
     </div>
   );
 };

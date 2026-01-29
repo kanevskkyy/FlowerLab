@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,6 +17,7 @@ const schema = z.object({
 });
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const {
@@ -30,15 +32,13 @@ export default function ForgotPassword() {
   const onSubmit = async (data) => {
     try {
       await axiosClient.post("/api/users/auth/forgot-password", data);
-      toast.success(
-        "Посилання для відновлення надіслано! Перевірте ваш email.",
-      );
+      toast.success(t("toasts.reset_link_sent"));
 
       // Optional: Navigate to home or stay here
       // setTimeout(() => navigate("/"), 2000);
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || "Щось пішло не так.";
+      const msg = error.response?.data?.message || t("toasts.error_default");
       toast.error(msg);
     }
   };

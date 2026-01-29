@@ -1,5 +1,6 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import trash from "../../../assets/icons/trash.svg";
 import message from "../../../assets/icons/message.svg";
 
@@ -15,11 +16,12 @@ const OrderSummary = ({
   isCardAdded,
   toggleCard,
 }) => {
+  const { t } = useTranslation();
   const { register } = useFormContext();
 
   return (
     <div className="order-summary">
-      <h2>YOUR ORDER:</h2>
+      <h2>{t("checkout.your_order")}</h2>
 
       <div className="order-items">
         {cartItems.map((item) => (
@@ -35,7 +37,7 @@ const OrderSummary = ({
                     color: "#888",
                     margin: "-4px 0 4px 0",
                   }}>
-                  Size: {item.sizeName}
+                  {t("cart.size")}: {item.sizeName}
                 </p>
               )}
               <p className="item-price">
@@ -43,7 +45,9 @@ const OrderSummary = ({
                   ? item.price
                   : `${item.price} ₴`}
               </p>
-              <p className="item-quantity">{item.qty || 1} pc</p>
+              <p className="item-quantity">
+                {item.qty || 1} {t("checkout.pc")}
+              </p>
             </div>
             <button
               type="button"
@@ -63,7 +67,7 @@ const OrderSummary = ({
               <div className="item-details">
                 <p className="item-name">{gift.name}</p>
                 <p className="item-price">{gift.price} ₴</p>
-                <p className="item-quantity">1 pc</p>
+                <p className="item-quantity">1 {t("checkout.pc")}</p>
               </div>
               <button
                 type="button"
@@ -83,9 +87,9 @@ const OrderSummary = ({
               className="order-card-icon"
             />
             <div className="item-details">
-              <p className="item-name">Greeting Card</p>
+              <p className="item-name">{t("checkout.greeting_card")}</p>
               <p className="item-price">50 ₴</p>
-              <p className="item-quantity">1 pc</p>
+              <p className="item-quantity">1 {t("checkout.pc")}</p>
             </div>
             <button
               type="button"
@@ -99,22 +103,22 @@ const OrderSummary = ({
 
       <div className="order-calculations">
         <div className="calc-row">
-          <span>Subtotal:</span>
+          <span>{t("checkout.subtotal")}</span>
           <span>{subtotal} ₴</span>
         </div>
         <div className="calc-row discount">
-          <span>Discount:</span>
+          <span>{t("checkout.discount")}</span>
           <span>{discount > 0 ? "10%" : "0%"}</span>
         </div>
         <div className="calc-row total">
-          <span>TOTAL:</span>
+          <span>{t("checkout.total")}</span>
           <span>{total} ₴</span>
         </div>
       </div>
 
       <div className="add-card-section">
         <button type="button" className="add-card-btn" onClick={toggleCard}>
-          {isCardAdded ? "- Remove card" : "+ Add a card"}
+          {isCardAdded ? t("checkout.remove_card") : t("checkout.add_card")}
         </button>
         <span className="card-price">+ 50 ₴</span>
       </div>
@@ -123,14 +127,14 @@ const OrderSummary = ({
         <input
           type="text"
           className="card-message-input"
-          placeholder="Message for the card"
+          placeholder={t("checkout.card_msg_placeholder")}
           {...register("cardMessage")}
         />
       )}
 
       <textarea
         className="message-input"
-        placeholder="Input your message"
+        placeholder={t("checkout.order_msg_placeholder")}
         {...register("message")}
       />
 
@@ -142,7 +146,7 @@ const OrderSummary = ({
           opacity: total <= 0 ? 0.5 : 1,
           cursor: total <= 0 ? "not-allowed" : "pointer",
         }}>
-        CONFIRM ORDER
+        {t("checkout.confirm_btn")}
       </button>
     </div>
   );

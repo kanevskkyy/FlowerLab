@@ -1,8 +1,26 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "./AdminBouquetForm.css";
 import { useAdminBouquetForm } from "./hooks/useAdminBouquetForm";
 
 export default function AdminBouquetForm() {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language === "UA" ? "ua" : "en";
+
+  const renderLabel = (item) => {
+    if (!item) return "";
+    const nameData = item.name || item.Name;
+    if (typeof nameData === "object" && nameData !== null) {
+      return nameData[currentLang] || nameData.ua || nameData.en || "";
+    }
+    return (
+      nameData ||
+      item.name ||
+      item.Name ||
+      (typeof item === "string" ? item : "")
+    );
+  };
+
   const {
     isEditMode,
     isGiftMode,
@@ -16,6 +34,7 @@ export default function AdminBouquetForm() {
     formData,
     sizeStates,
     handleChange,
+    handleLocalizedChange,
     handleCheckboxChange,
     handleImageUpload,
     handleSizeCheckbox,
@@ -31,7 +50,9 @@ export default function AdminBouquetForm() {
     return (
       <div className="abf-page">
         <div className="abf-container">
-          <div style={{ textAlign: "center", padding: "2rem" }}>Loading...</div>
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            {t("admin.loading")}
+          </div>
         </div>
       </div>
     );
@@ -46,19 +67,23 @@ export default function AdminBouquetForm() {
             className="abf-back-btn"
             type="button"
             onClick={() => navigate("/admin")}>
-            ← Cancel
+            ← {t("admin.cancel")}
           </button>
           <h1 className="abf-title">
             {isEditMode
-              ? `Edit ${isGiftMode ? "Gift" : "Bouquet"}`
-              : `New ${isGiftMode ? "Gift" : "Bouquet"}`}
+              ? isGiftMode
+                ? t("admin.form.edit_gift")
+                : t("admin.form.edit_bouquet")
+              : isGiftMode
+                ? t("admin.form.new_gift")
+                : t("admin.form.new_bouquet")}
           </h1>
           <button
             className="abf-save-btn"
             onClick={handleSubmit}
             disabled={isSubmitting}
             style={{ opacity: isSubmitting ? 0.7 : 1 }}>
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? t("admin.saving") : t("admin.save")}
           </button>
         </header>
 
@@ -66,16 +91,18 @@ export default function AdminBouquetForm() {
           {/* LEFT: PHOTO */}
           <div className="abf-left-col">
             <div className="abf-card abf-photo-card">
-              <h3 className="abf-card-title">Photo</h3>
+              <h3 className="abf-card-title">{t("admin.form.photo")}</h3>
               <div className="abf-photo-preview">
                 {formData.img ? (
                   <img src={formData.img} alt="Preview" />
                 ) : (
-                  <div className="abf-photo-placeholder">No Image</div>
+                  <div className="abf-photo-placeholder">
+                    {t("admin.products.no_image")}
+                  </div>
                 )}
               </div>
               <label className="abf-upload-btn">
-                Upload image
+                {t("admin.products.upload_image")}
                 <input
                   type="file"
                   accept="image/*"
@@ -89,18 +116,28 @@ export default function AdminBouquetForm() {
           {/* RIGHT: INFO */}
           <div className="abf-right-col">
             <div className="abf-card">
-              <h3 className="abf-card-title">General Information</h3>
+              <h3 className="abf-card-title">{t("admin.form.general_info")}</h3>
 
               <div className="abf-field">
-                <label>Product Name</label>
+                <label>{t("admin.form.name_ua")}</label>
                 <input
                   type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder={
-                    isGiftMode ? "e.g. Teddy Bear" : "e.g. Velvet Roses"
+                  value={formData.name.ua}
+                  onChange={(e) =>
+                    handleLocalizedChange("name", "ua", e.target.value)
                   }
+                  placeholder={t("admin.form.placeholder_ua")}
+                />
+              </div>
+              <div className="abf-field">
+                <label>{t("admin.form.name_en")}</label>
+                <input
+                  type="text"
+                  value={formData.name.en}
+                  onChange={(e) =>
+                    handleLocalizedChange("name", "en", e.target.value)
+                  }
+                  placeholder={t("admin.form.placeholder_en")}
                 />
               </div>
 
@@ -108,7 +145,7 @@ export default function AdminBouquetForm() {
                 /* GIFTS: Simple Price & Count */
                 <>
                   <div className="abf-field">
-                    <label>Price</label>
+                    <label>{t("admin.form.price")}</label>
                     <div className="abf-size-price">
                       <input
                         type="number"
@@ -121,7 +158,7 @@ export default function AdminBouquetForm() {
                     </div>
                   </div>
                   <div className="abf-field">
-                    <label>Available Count</label>
+                    <label>{t("admin.form.available_count")}</label>
                     <input
                       type="number"
                       name="availableCount"
@@ -135,7 +172,7 @@ export default function AdminBouquetForm() {
                 /* BOUQUETS: Sizes & Description */
                 <>
                   <div className="abf-field">
-                    <label>Sizes & Prices</label>
+                    <label>{t("admin.form.sizes_prices")}</label>
                     <div className="abf-sizes-list">
                       {sizes.length > 0 ? (
                         sizes.map((size) => {
@@ -156,7 +193,7 @@ export default function AdminBouquetForm() {
                                     onChange={() => handleSizeCheckbox(size.id)}
                                   />
                                   <span className="abf-size-name">
-                                    {size.name}
+                                    {renderLabel(size)}
                                   </span>
                                 </div>
 
@@ -164,7 +201,7 @@ export default function AdminBouquetForm() {
                                   <div className="abf-size-price">
                                     <input
                                       type="number"
-                                      placeholder="Price"
+                                      placeholder={t("admin.form.price")}
                                       value={st.price || ""}
                                       onChange={(e) =>
                                         handleSizePriceChange(
@@ -182,7 +219,7 @@ export default function AdminBouquetForm() {
                               {isEnabled && formData.flowerTypes.length > 0 && (
                                 <div className="abf-size-flowers">
                                   <p className="abf-mini-label">
-                                    Flower Composition:
+                                    {t("admin.form.composition")}
                                   </p>
                                   <div className="abf-flower-qtys">
                                     {formData.flowerTypes.map((fId) => {
@@ -197,12 +234,14 @@ export default function AdminBouquetForm() {
                                           key={fId}
                                           className="abf-flower-qty-item">
                                           <span className="abf-fq-name">
-                                            {flower.name}
+                                            {renderLabel(flower)}
                                           </span>
                                           <input
                                             type="number"
                                             min="0"
-                                            placeholder="Qty"
+                                            placeholder={t(
+                                              "admin.catalog.quantity",
+                                            )}
                                             value={qty}
                                             onChange={(e) =>
                                               handleSizeFlowerQuantityChange(
@@ -222,7 +261,7 @@ export default function AdminBouquetForm() {
                               {isEnabled && (
                                 <div className="abf-size-img-section">
                                   <label className="abf-upload-btn-mini">
-                                    📷 Add Photos
+                                    📷 {t("admin.form.add_photos")}
                                     <input
                                       type="file"
                                       accept="image/*"
@@ -259,7 +298,7 @@ export default function AdminBouquetForm() {
                                       ))
                                     ) : (
                                       <span className="abf-no-img-text">
-                                        No photos
+                                        {t("admin.form.no_photos")}
                                       </span>
                                     )}
                                   </div>
@@ -270,20 +309,40 @@ export default function AdminBouquetForm() {
                         })
                       ) : (
                         <div style={{ color: "#999", fontSize: "13px" }}>
-                          No sizes found in catalog.
+                          {t("admin.catalog.no_items")}
                         </div>
                       )}
                     </div>
                   </div>
 
                   <div className="abf-field">
-                    <label>Description</label>
+                    <label>{t("admin.form.description_ua")}</label>
                     <textarea
-                      name="description"
-                      rows="4"
-                      value={formData.description}
-                      onChange={handleChange}
-                      placeholder="Enter description..."
+                      rows="3"
+                      value={formData.description.ua}
+                      onChange={(e) =>
+                        handleLocalizedChange(
+                          "description",
+                          "ua",
+                          e.target.value,
+                        )
+                      }
+                      placeholder={t("admin.form.desc_placeholder_ua")}
+                    />
+                  </div>
+                  <div className="abf-field">
+                    <label>{t("admin.form.description_en")}</label>
+                    <textarea
+                      rows="3"
+                      value={formData.description.en}
+                      onChange={(e) =>
+                        handleLocalizedChange(
+                          "description",
+                          "en",
+                          e.target.value,
+                        )
+                      }
+                      placeholder={t("admin.form.desc_placeholder_en")}
                     />
                   </div>
                 </>
@@ -293,11 +352,11 @@ export default function AdminBouquetForm() {
             {/* CATEGORIES - Only for Bouquets */}
             {!isGiftMode && (
               <div className="abf-card">
-                <h3 className="abf-card-title">Categories</h3>
+                <h3 className="abf-card-title">{t("admin.form.categories")}</h3>
 
                 {/* Events */}
                 <div className="abf-cat-group">
-                  <h4>Events</h4>
+                  <h4>{t("admin.catalog.events")}</h4>
                   <div className="abf-tags">
                     {events.map((item) => (
                       <label
@@ -312,7 +371,7 @@ export default function AdminBouquetForm() {
                             handleCheckboxChange("events", item.id)
                           }
                         />
-                        {item.name}
+                        {renderLabel(item)}
                       </label>
                     ))}
                   </div>
@@ -320,7 +379,7 @@ export default function AdminBouquetForm() {
 
                 {/* For Who */}
                 <div className="abf-cat-group">
-                  <h4>For Who</h4>
+                  <h4>{t("admin.catalog.for_who")}</h4>
                   <div className="abf-tags">
                     {recipients.map((item) => (
                       <label
@@ -335,7 +394,7 @@ export default function AdminBouquetForm() {
                             handleCheckboxChange("forWho", item.id)
                           }
                         />
-                        {item.name}
+                        {renderLabel(item)}
                       </label>
                     ))}
                   </div>
@@ -343,7 +402,7 @@ export default function AdminBouquetForm() {
 
                 {/* Flower Type */}
                 <div className="abf-cat-group">
-                  <h4>Flower Type</h4>
+                  <h4>{t("filter.flower_type")}</h4>
                   <div className="abf-tags">
                     {flowers.map((item) => (
                       <label
@@ -358,7 +417,7 @@ export default function AdminBouquetForm() {
                             handleCheckboxChange("flowerTypes", item.id)
                           }
                         />
-                        {item.name}
+                        {renderLabel(item)}
                       </label>
                     ))}
                   </div>

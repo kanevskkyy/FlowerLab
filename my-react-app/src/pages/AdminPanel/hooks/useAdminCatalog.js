@@ -24,10 +24,13 @@ export function useAdminCatalog() {
       // Assuming API returns arrays directly or { items: [] }
       // Adjust mapping if needed based on real API response
       const mapNames = (data) => {
-        const items = data.items || data || [];
-        // If items are objects { id, name }, map to name. If strings, keep as is.
-        // Usually filters are entities with Names.
-        return items.map((i) => i.name || i);
+        const items = data.items || data.Items || data || [];
+        return items.map((i) => ({
+          ...i,
+          id: i.id || i.Id,
+          name: i.name || i.Name,
+          quantity: i.quantity ?? i.Quantity,
+        }));
       };
 
       setSettings({

@@ -13,7 +13,8 @@ namespace OrderService.BLL.Profiles
     {
         public GiftProfile()
         {
-            CreateMap<Gift, GiftReadDto>();
+            CreateMap<Gift, GiftReadDto>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl));
 
             CreateMap<GiftCreateDto, Gift>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())

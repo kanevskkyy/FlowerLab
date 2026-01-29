@@ -24,7 +24,7 @@ namespace OrderService.DAL.Repositories
             if (ignoreId.HasValue)
                 query = query.Where(g => g.Id != ignoreId.Value);
 
-            return await query.AnyAsync(g => g.Name.ToLower() == name.ToLower(), cancellationToken);
+            return await query.AnyAsync(g => g.Name["ua"].ToLower() == name.ToLower() || g.Name["en"].ToLower() == name.ToLower(), cancellationToken);
         }
     }
 }

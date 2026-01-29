@@ -40,10 +40,10 @@ namespace CatalogService.BLL.Services.Implementations
             return mapper.Map<SizeDto>(size);
         }
 
-        public async Task<SizeDto> CreateAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<SizeDto> CreateAsync(Dictionary<string, string> name, CancellationToken cancellationToken = default)
         {
-            if (await uow.Sizes.ExistsWithNameAsync(name, cancellationToken: cancellationToken))
-                throw new AlreadyExistsException($"Size '{name}' already exists.");
+            if (await uow.Sizes.ExistsWithNameAsync(name.GetValueOrDefault("ua", ""), cancellationToken: cancellationToken))
+                throw new AlreadyExistsException($"Size '{name.GetValueOrDefault("ua", "")}' already exists.");
 
             Size entity = new Size { Name = name };
             await uow.Sizes.AddAsync(entity, cancellationToken);
@@ -54,14 +54,14 @@ namespace CatalogService.BLL.Services.Implementations
             return mapper.Map<SizeDto>(entity);
         }
 
-        public async Task<SizeDto> UpdateAsync(Guid id, string name, CancellationToken cancellationToken = default)
+        public async Task<SizeDto> UpdateAsync(Guid id, Dictionary<string, string> name, CancellationToken cancellationToken = default)
         {
             Size? size = await uow.Sizes.GetByIdAsync(id, cancellationToken);
             if (size == null)
                 throw new NotFoundException($"Size with ID {id} not found.");
 
-            if (await uow.Sizes.ExistsWithNameAsync(name, id, cancellationToken))
-                throw new AlreadyExistsException($"Size '{name}' already exists.");
+            if (await uow.Sizes.ExistsWithNameAsync(name.GetValueOrDefault("ua", ""), id, cancellationToken))
+                throw new AlreadyExistsException($"Size '{name.GetValueOrDefault("ua", "")}' already exists.");
 
             size.Name = name;
             uow.Sizes.Update(size);

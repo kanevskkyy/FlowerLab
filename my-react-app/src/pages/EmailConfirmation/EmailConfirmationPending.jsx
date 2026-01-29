@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import authService from "../../services/authService";
 import toast from "react-hot-toast";
 import "./EmailConfirmation.css";
 
 export default function EmailConfirmationPending() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [countdown, setCountdown] = useState(0);
@@ -25,19 +27,18 @@ export default function EmailConfirmationPending() {
 
   const handleResend = async () => {
     if (!email) {
-      toast.error("Email користувача не знайдено. Спробуйте увійти.");
+      toast.error(t("toasts.email_not_found"));
       return;
     }
 
     setLoading(true);
     try {
       await authService.resendConfirmationEmail(email);
-      toast.success("Нове посилання для підтвердження надіслано! 📧");
+      toast.success(t("toasts.confirmation_resent"));
       setCountdown(60);
     } catch (error) {
       console.error("Resend error:", error);
-      const msg =
-        error.response?.data?.Message || "Не вдалося надіслати email.";
+      const msg = error.response?.data?.Message || t("toasts.resend_failed");
       toast.error(msg);
     } finally {
       setLoading(false);

@@ -5,9 +5,11 @@ import catalogService from "../../../services/catalogService";
 import orderService from "../../../services/orderService";
 import { useCart } from "../../../context/CartContext";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useCheckOut({ orderData }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { clearCart } = useCart();
@@ -26,7 +28,7 @@ export function useCheckOut({ orderData }) {
       let guestToken = orderData.guestToken;
 
       if (!orderId) {
-        toast.error("Номер замовлення відсутній. Перезапустіть оформлення.");
+        toast.error(t("toasts.checkout_no_order"));
         setLoading(false);
         return;
       }
@@ -38,15 +40,12 @@ export function useCheckOut({ orderData }) {
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-        toast.error("Не вдалося сформувати посилання на оплату.");
+        toast.error(t("toasts.payment_url_failed"));
       }
     } catch (error) {
       console.error("Order creation failed", error);
       toast.error(
-        extractErrorMessage(
-          error,
-          "Не вдалося створити замовлення. Спробуйте ще раз.",
-        ),
+        extractErrorMessage(error, t("toasts.order_creation_failed")),
       );
     } finally {
       setLoading(false);
@@ -64,12 +63,12 @@ export function useCheckOut({ orderData }) {
         try {
           if (orderData?.id) {
             await orderService.deleteOrder(orderData.id, orderData.guestToken);
-            toast.success("Замовлення скасовано та видалено.");
+            toast.success(t("toasts.order_cancelled"));
           }
           navigate("/order-registered");
         } catch (error) {
           console.error("Failed to delete order", error);
-          toast.error("Не вдалося скасувати замовлення коректно.");
+          toast.error(t("toasts.order_cancel_failed"));
           navigate("/order-registered");
         }
       },

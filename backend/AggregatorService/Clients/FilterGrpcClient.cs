@@ -3,6 +3,7 @@ using AggregatorService.DTOs;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using shared.cache;
+using shared.localization;
 using System;
 using System.Threading.Tasks;
 
@@ -14,30 +15,36 @@ namespace AggregatorService.Clients
         private ILogger<FilterGrpcClient> _logger;
         private IEntityCacheService _cache;
         private IEntityCacheInvalidationService<FilterResponseDto> _cacheInvalidation;
+        private ILanguageProvider _languageProvider;
 
-        private const string CACHE_KEY = "filters:all";
+        private const string CACHE_KEY_PREFIX = "filters:dto:all";
 
         public FilterGrpcClient(
             FilterService.FilterServiceClient filterServiceClient,
             ILogger<FilterGrpcClient> logger,
             IEntityCacheService cache,
-            IEntityCacheInvalidationService<FilterResponseDto> cacheInvalidation)
+            IEntityCacheInvalidationService<FilterResponseDto> cacheInvalidation,
+            ILanguageProvider languageProvider)
         {
             _filterServiceClient = filterServiceClient;
             _logger = logger;
             _cache = cache;
             _cacheInvalidation = cacheInvalidation;
+            _languageProvider = languageProvider;
         }
 
         public async Task<FilterResponseDto?> GetAllFiltersAsync()
         {
+            var lang = _languageProvider.CurrentLanguage ?? "ua";
+
             return await _cache.GetOrSetAsync(
-                "filters:dto:all",
+                $"{CACHE_KEY_PREFIX}:{lang}",
                 async () =>
                 {
                     try
                     {
-                        var call = _filterServiceClient.GetAllFiltersAsync(new FilterEmptyRequest());
+                        var headers = new Metadata { { "accept-language", lang } };
+                        var call = _filterServiceClient.GetAllFiltersAsync(new FilterEmptyRequest(), headers);
                         FilterResponse filters = await call.ResponseAsync;
 
                         _logger.LogInformation("Filters fetched from CatalogService via gRPC.");

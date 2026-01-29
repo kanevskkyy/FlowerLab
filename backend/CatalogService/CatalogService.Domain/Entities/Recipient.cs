@@ -8,7 +8,7 @@ namespace CatalogService.Domain.Entities
 {
     public class Recipient : BaseEntity
     {
-        public string Name { get; set; } = null!;
+        public Dictionary<string, string> Name { get; set; } = new();
         public ICollection<BouquetRecipient> BouquetRecipients { get; set; } = new List<BouquetRecipient>();
     }
 }

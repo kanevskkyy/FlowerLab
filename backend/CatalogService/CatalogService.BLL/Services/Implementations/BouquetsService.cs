@@ -27,6 +27,7 @@ namespace CatalogService.BLL.Services.Implementations
         private IEntityCacheService cache;
         private IEntityCacheInvalidationService<Bouquet> cacheInvalidation;
         private IEntityCacheInvalidationService<FilterResponse> filterCacheInvalidationService;
+        private shared.localization.ILanguageProvider languageProvider;
 
         public BouquetService(
             IUnitOfWork uow,
@@ -35,7 +36,8 @@ namespace CatalogService.BLL.Services.Implementations
             IPublishEndpoint publishEndpoint,
             IEntityCacheService cache,
             IEntityCacheInvalidationService<Bouquet> cacheInvalidation,
-            IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService)
+            IEntityCacheInvalidationService<FilterResponse> entityCacheInvalidationService,
+            shared.localization.ILanguageProvider languageProvider)
         {
             this.uow = uow;
             this.mapper = mapper;
@@ -45,13 +47,16 @@ namespace CatalogService.BLL.Services.Implementations
             this.cache = cache;
             this.cacheInvalidation = cacheInvalidation;
             this.filterCacheInvalidationService = entityCacheInvalidationService;
+            this.languageProvider = languageProvider;
         }
 
         public async Task<PagedList<BouquetSummaryDto>?> GetAllAsync(BouquetQueryParameters parameters,
             CancellationToken cancellationToken = default)
         {
+            var cacheKey = parameters.ToCacheKey() + $":lang:{languageProvider.CurrentLanguage ?? "default"}";
+            
             return await cache.GetOrSetAsync(
-                parameters.ToCacheKey(),
+                cacheKey,
                 async () => await FetchBouquetsAsync(parameters),
                 memoryExpiration: TimeSpan.FromSeconds(30),
                 redisExpiration: TimeSpan.FromMinutes(5)
@@ -143,11 +148,16 @@ namespace CatalogService.BLL.Services.Implementations
                     if (!loadedFlowers.TryGetValue(fId, out var flower))
                         throw new NotFoundException($"Flower {fId} not found.");
 
-                    if (flower.Quantity < sizeDto.FlowerQuantities[i])
-                    {
-                         var sizeName = existingSizes.First(s => s.Id == sizeDto.SizeId).Name;
-                         throw new BadRequestException($"Not enough '{flower.Name}' flowers for size {sizeName}. Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
-                    }
+                     // Validation removed per user request (allow creating bouquet even if not enough flowers in stock)
+                     /*
+                     if (flower.Quantity < sizeDto.FlowerQuantities[i])
+                     {
+                          var sizeName = existingSizes.First(s => s.Id == sizeDto.SizeId).Name;
+                          var fName = flower.Name.ContainsKey("en") ? flower.Name["en"] : flower.Name.Values.FirstOrDefault() ?? "Unknown";
+                          var sName = sizeName.ContainsKey("en") ? sizeName["en"] : sizeName.Values.FirstOrDefault() ?? "Unknown";
+                          throw new BadRequestException($"Not enough '{fName}' flowers for size {sName}. Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
+                     }
+                     */
                 }
             }
 
@@ -322,12 +332,17 @@ namespace CatalogService.BLL.Services.Implementations
                     if (flower == null)
                         throw new NotFoundException($"Flower {sizeDto.FlowerIds[i]} not found.");
 
+                    // Validation removed per user request
+                    /*
                     if (flower.Quantity < sizeDto.FlowerQuantities[i])
                     {
                         var size = await uow.Sizes.GetByIdAsync(sizeDto.SizeId, cancellationToken);
-                        throw new BadRequestException($"Not enough '{flower.Name}' flowers for size {size.Name}. " +
+                        var fName = flower.Name.ContainsKey("en") ? flower.Name["en"] : flower.Name.Values.FirstOrDefault() ?? "Unknown";
+                        var sName = size.Name.ContainsKey("en") ? size.Name["en"] : size.Name.Values.FirstOrDefault() ?? "Unknown";
+                        throw new BadRequestException($"Not enough '{fName}' flowers for size {sName}. " +
                                                       $"Requested {sizeDto.FlowerQuantities[i]}, available {flower.Quantity}.");
                     }
+                    */
                 }
             }
 

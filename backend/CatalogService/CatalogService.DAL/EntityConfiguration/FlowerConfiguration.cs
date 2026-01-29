@@ -19,10 +19,10 @@ namespace CatalogService.DAL.EntityConfiguration
 
             builder.Property(f => f.Name)
                 .IsRequired()
-                .HasMaxLength(100);
-
-            builder.HasIndex(f => f.Name)
-                .IsUnique();
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(v, (System.Text.Json.JsonSerializerOptions)null));
 
             builder.Property(f => f.Quantity)
                 .IsRequired()

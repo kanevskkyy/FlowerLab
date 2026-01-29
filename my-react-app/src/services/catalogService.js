@@ -57,8 +57,8 @@ const catalogService = {
   },
 
   // Gifts
-  getGifts: async (params = {}) => {
-    const response = await axiosClient.get("/api/gifts", { params });
+  getGifts: async (params = {}, config = {}) => {
+    const response = await axiosClient.get("/api/gifts", { params, ...config });
     return response.data;
   },
 
@@ -92,8 +92,10 @@ const catalogService = {
     return response.data;
   },
 
-  createEvent: async (name) => {
-    const response = await axiosClient.post("/api/catalog/events", { name });
+  createEvent: async (nameObj) => {
+    const response = await axiosClient.post("/api/catalog/events", {
+      name: nameObj,
+    });
     return response.data;
   },
 
@@ -108,9 +110,9 @@ const catalogService = {
     return response.data;
   },
 
-  createRecipient: async (name) => {
+  createRecipient: async (nameObj) => {
     const response = await axiosClient.post("/api/catalog/recipients", {
-      name,
+      name: nameObj,
     });
     return response.data;
   },
@@ -126,17 +128,17 @@ const catalogService = {
     return response.data;
   },
 
-  createFlower: async (name, quantity = 0) => {
+  createFlower: async (nameObj, quantity = 0) => {
     const response = await axiosClient.post("/api/catalog/flowers", {
-      name,
+      name: nameObj,
       quantity,
     });
     return response.data;
   },
 
-  updateFlower: async (id, name, quantity) => {
+  updateFlower: async (id, nameObj, quantity) => {
     const response = await axiosClient.put(`/api/catalog/flowers/${id}`, {
-      name,
+      name: nameObj,
       quantity,
     });
     return response.data;

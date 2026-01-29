@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import searchIco from "../../../assets/icons/search.svg";
 import editIco from "../../../assets/icons/edit.svg";
 import trashIco from "../../../assets/icons/trash.svg";
@@ -16,6 +17,7 @@ function AdminProductList({
   hasNextPage,
   isLoadingMore,
 }) {
+  const { t } = useTranslation();
   const sentinelRef = useRef(null);
 
   useEffect(() => {
@@ -50,19 +52,25 @@ function AdminProductList({
 
   return (
     <section className="admin-section">
-      <h2 className="admin-section-title">{title} management</h2>
+      <h2 className="admin-section-title">
+        {active === "bouquets"
+          ? t("admin.products.bouquets_mgmt")
+          : t("admin.products.gifts_mgmt")}
+      </h2>
       <div className="admin-toolbar">
         <div className="admin-search">
           <img className="admin-search-ico" src={searchIco} alt="" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name"
+            placeholder={t("admin.search_placeholder")}
           />
         </div>
 
         <button className="admin-add-btn" type="button" onClick={onAdd}>
-          Add {title === "Bouquets" ? "bouquet" : "gift"}{" "}
+          {active === "bouquets"
+            ? t("admin.products.add_bouquet")
+            : t("admin.products.add_gift")}{" "}
           <span className="admin-plus">+</span>
         </button>
       </div>
@@ -70,7 +78,7 @@ function AdminProductList({
       <div className="admin-grid">
         {products.length === 0 && (
           <div className="admin-no-results">
-            <p>Нічого не знайдено за вашим запитом "{q}"</p>
+            <p>{t("admin.no_results", { q })}</p>
           </div>
         )}
         {products.map((p) => {
@@ -87,7 +95,7 @@ function AdminProductList({
                 {p.stock !== undefined && (
                   <div
                     className={`admin-stock-badge ${p.stock === 0 ? "oos" : p.stock < 5 ? "low" : ""}`}>
-                    Stock: {p.stock}
+                    {t("admin.products.stock", { count: p.stock })}
                   </div>
                 )}
               </div>
@@ -128,7 +136,7 @@ function AdminProductList({
             marginTop: "20px",
             width: "100%",
           }}>
-          {isLoadingMore ? "Loading more..." : ""}
+          {isLoadingMore ? t("admin.loading") : ""}
         </div>
       )}
     </section>

@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ProductSkeleton from "../../../components/ProductSkeleton/ProductSkeleton";
 
 function CatalogGrid({ products, onOrder, loading }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (loading) {
     return (
@@ -16,8 +18,8 @@ function CatalogGrid({ products, onOrder, loading }) {
     return (
       <div className="catalog-grid empty">
         <div className="no-results">
-          <p>Нічого не знайдено за вашим запитом</p>
-          <span>Спробуйте змінити фільтри або перевірити правопис</span>
+          <p>{t("catalog.no_results")}</p>
+          <span>{t("catalog.no_results_sub")}</span>
         </div>
       </div>
     );
@@ -54,7 +56,7 @@ function CatalogGrid({ products, onOrder, loading }) {
               onClick={() =>
                 onOrder ? onOrder(p) : navigate(`/product/${p.id}`)
               }>
-              ORDER
+              {t("catalog.order_btn")}
             </button>
           </div>
         </div>

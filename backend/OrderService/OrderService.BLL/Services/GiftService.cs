@@ -22,7 +22,7 @@ namespace OrderService.BLL.Services
         private readonly IEntityCacheService cacheService;
         private readonly IEntityCacheInvalidationService<Gift> cacheInvalidationService;
 
-        private const string ALL_GIFTS_KEY = "gifts:all";
+        private const string ALL_GIFTS_KEY = "gifts:all:v3";
         private static readonly TimeSpan MEMORY_TTL_GIFT = TimeSpan.FromHours(1);
         private static readonly TimeSpan REDIS_TTL_GIFT = TimeSpan.FromDays(7);
 
@@ -79,9 +79,9 @@ namespace OrderService.BLL.Services
 
         public async Task<GiftReadDto> CreateAsync(GiftCreateDto dto, CancellationToken cancellationToken = default)
         {
-            bool isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name);
+            bool isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name.GetValueOrDefault("ua", ""));
             if (isDuplicate)
-                throw new AlreadyExistsException($"Gift '{dto.Name}' already exists");
+                throw new AlreadyExistsException($"Gift '{dto.Name.GetValueOrDefault("ua", "")}' already exists");
 
             string imageUrl = await imageService.UploadAsync(dto.Image, "order-service/gifts");
 
@@ -103,9 +103,9 @@ namespace OrderService.BLL.Services
             if (gift == null)
                 throw new NotFoundException($"Gift with ID {id} was not found");
 
-            bool isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name, id);
+            bool isDuplicate = await unitOfWork.Gifts.IsNameDuplicatedAsync(dto.Name.GetValueOrDefault("ua", ""), id);
             if (isDuplicate)
-                throw new AlreadyExistsException($"Gift '{dto.Name}' already exists");
+                throw new AlreadyExistsException($"Gift '{dto.Name.GetValueOrDefault("ua", "")}' already exists");
 
             if (dto.Image != null)
             {

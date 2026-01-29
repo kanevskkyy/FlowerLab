@@ -14,7 +14,8 @@ namespace CatalogService.DAL.Repositories.Implementations
 
         public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default)
         {
-            return await dbSet.AnyAsync(f => f.Name == name && (!excludeId.HasValue || f.Id != excludeId.Value), cancellationToken);
+            var flowers = await dbSet.ToListAsync(cancellationToken);
+            return flowers.Any(f => (f.Name.GetValueOrDefault("ua") == name || f.Name.GetValueOrDefault("en") == name) && (!excludeId.HasValue || f.Id != excludeId.Value));
         }
     }
 }
