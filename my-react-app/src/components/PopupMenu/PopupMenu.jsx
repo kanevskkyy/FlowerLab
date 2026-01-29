@@ -75,17 +75,16 @@ export default function PopupMenu({ isOpen, onClose }) {
           )}
         </ul>
 
-        {/* Language Switcher - Mobile */}
         <div className="mobile-lang-switch">
           <span
-            className={lang === "UA" ? "active-lang" : ""}
-            onClick={() => setLang("UA")}>
+            className={lang === "ua" ? "active-lang" : ""}
+            onClick={() => setLang("ua")}>
             UA
           </span>
           <span className="lang-divider"> / </span>
           <span
-            className={lang === "ENG" ? "active-lang" : ""}
-            onClick={() => setLang("ENG")}>
+            className={lang === "en" ? "active-lang" : ""}
+            onClick={() => setLang("en")}>
             ENG
           </span>
         </div>

@@ -10,10 +10,10 @@ namespace OrderService.BLL.DTOs.OrderDTOs
     {
         public Guid Id { get; set; }
         public Guid BouquetId { get; set; }
-        public string BouquetName { get; set; } = null!;
+        public Dictionary<string, string> BouquetName { get; set; } = new();
         public string BouquetImage { get; set; } = null!;
         public Guid SizeId { get; set; }
-        public string SizeName { get; set; } = null!;
+        public Dictionary<string, string> SizeName { get; set; } = new();
         public decimal Price { get; set; }
         public int Count { get; set; }
     }

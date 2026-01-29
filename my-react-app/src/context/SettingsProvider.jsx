@@ -4,8 +4,10 @@ import i18n from "../i18n";
 
 const SettingsProvider = ({ children }) => {
   const [lang, setLang] = useState(() => {
-    // If no language is saved, default to "UA" for first-time visitors
-    return localStorage.getItem("appLanguage") || "UA";
+    const saved = localStorage.getItem("appLanguage");
+    if (!saved) return "ua";
+    const normalized = saved.toLowerCase();
+    return normalized === "ua" || normalized.startsWith("uk") ? "ua" : "en";
   });
   const [currency, setCurrency] = useState(() => {
     return localStorage.getItem("appCurrency") || "UAH";
@@ -20,7 +22,7 @@ const SettingsProvider = ({ children }) => {
     localStorage.setItem("appCurrency", currency);
   }, [currency]);
 
-  const toggleLang = () => setLang((prev) => (prev === "UA" ? "ENG" : "UA"));
+  const toggleLang = () => setLang((prev) => (prev === "ua" ? "en" : "ua"));
   const toggleCurrency = () =>
     setCurrency((prev) => (prev === "UAH" ? "USD" : "UAH"));
 

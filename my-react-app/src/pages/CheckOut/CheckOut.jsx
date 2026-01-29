@@ -68,9 +68,11 @@ const CheckOut = () => {
           <div
             className="privat24-info"
             style={{ marginTop: "30px", marginBottom: "30px" }}>
-            <p>
-              <Trans i18nKey="checkout.redirect_msg" />
-            </p>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: t("checkout.redirect_msg"),
+              }}
+            />
           </div>
 
           {/* Complete Payment Button */}

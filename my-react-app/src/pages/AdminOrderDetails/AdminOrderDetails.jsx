@@ -3,12 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import orderService from "../../services/orderService";
+import { getLocalizedValue } from "../../utils/localizationUtils";
 import "./AdminOrderDetails.css";
 
 export default function AdminOrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [order, setOrder] = useState(null);
   const [statuses, setStatuses] = useState([]); // List of available statuses
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,8 @@ export default function AdminOrderDetails() {
         ]);
         setOrder(orderData);
         setStatuses(statusesData);
+        console.log("Statuses from API:", statusesData);
+        console.log("Current i18n language:", i18n.language);
       } catch (error) {
         console.error("Failed to load data:", error);
         toast.error(t("admin.orders.failed_load"));
@@ -55,8 +58,9 @@ export default function AdminOrderDetails() {
       } else if (targetStatusObj.name === "Delivered") {
         toast.success(t("toasts.admin_order_delivered"));
       } else {
+        const localizedStatusName = getLocalizedStatus(targetStatusObj);
         toast.success(
-          t("toasts.admin_status_updated", { status: targetStatusObj.name }),
+          t("toasts.admin_status_updated", { status: localizedStatusName }),
         );
       }
     } catch (error) {
@@ -64,6 +68,24 @@ export default function AdminOrderDetails() {
       toast.error(t("toasts.admin_status_update_failed"));
       setOrder((prev) => ({ ...prev, status: originalStatus }));
     }
+  };
+
+  const getStatusKey = (name) => {
+    if (!name) return "";
+    return name.replace(/\s/g, "").toLowerCase();
+  };
+
+  const getLocalizedStatus = (statusObj) => {
+    if (!statusObj) return "";
+    const name = typeof statusObj === "string" ? statusObj : statusObj.name;
+    const translations = statusObj.translations;
+
+    const localized = getLocalizedValue(translations, i18n.language);
+    if (localized) return localized;
+
+    return t(`order_status.${getStatusKey(name)}`, {
+      defaultValue: name,
+    });
   };
 
   if (loading)
@@ -106,12 +128,12 @@ export default function AdminOrderDetails() {
           <div className="aod-status-wrapper">
             <label>{t("admin.orders.status")}</label>
             <select
-              className={`aod-status-select status-${currentStatusName.toLowerCase()}`}
+              className={`aod-status-select status-${getStatusKey(currentStatusName)}`}
               value={currentStatusId}
               onChange={(e) => handleStatusChange(e.target.value)}>
               {statuses.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name}
+                  {getLocalizedStatus(s)}
                 </option>
               ))}
             </select>
@@ -137,7 +159,10 @@ export default function AdminOrderDetails() {
                       )}
                     </div>
                     <div className="aod-item-info">
-                      <div className="aod-item-name">{item.bouquetName}</div>
+                      <div className="aod-item-name">
+                        {getLocalizedValue(item.bouquetName, i18n.language) ||
+                          "Unknown Bouquet"}
+                      </div>
                       <div className="aod-item-meta">
                         {item.sizeName && (
                           <span>
@@ -166,7 +191,10 @@ export default function AdminOrderDetails() {
                     </div>
                     <div className="aod-item-info">
                       <div className="aod-item-name">
-                        {giftItem.gift?.name || "Unknown Gift"}
+                        {getLocalizedValue(
+                          giftItem.gift?.name,
+                          i18n.language,
+                        ) || "Unknown Gift"}
                       </div>
                       <div className="aod-item-meta">
                         {t("admin.orders.qty", {

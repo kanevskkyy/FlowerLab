@@ -31,14 +31,14 @@ const Header = ({ onMenuOpen }) => {
 
           <div className="text-btn desktop-only">
             <span
-              className={lang === "UA" ? "active-text" : ""}
-              onClick={() => setLang("UA")}>
+              className={lang === "ua" ? "active-text" : ""}
+              onClick={() => setLang("ua")}>
               UA
             </span>
             <span> / </span>
             <span
-              className={lang === "ENG" ? "active-text" : ""}
-              onClick={() => setLang("ENG")}>
+              className={lang === "en" ? "active-text" : ""}
+              onClick={() => setLang("en")}>
               ENG
             </span>
           </div>

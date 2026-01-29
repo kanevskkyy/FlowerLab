@@ -5,7 +5,7 @@ import reviewService from "../../../services/reviewService";
 import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminReviews() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [pendingReviews, setPendingReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -57,8 +57,11 @@ export function useAdminReviews() {
   };
 
   useEffect(() => {
-    fetchReviews();
-  }, []);
+    // Reset on language change to ensure fresh translations
+    setPagination((p) => ({ ...p, pageNumber: 1 }));
+    setPendingReviews([]);
+    fetchReviews(false);
+  }, [i18n.language]);
 
   const loadMore = () => {
     if (pagination.pageNumber < pagination.totalPages && !loading) {

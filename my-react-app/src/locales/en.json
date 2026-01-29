@@ -490,5 +490,26 @@
     "title": "Oops! Page not found",
     "text": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
     "button": "BACK TO HOMEPAGE"
+  },
+  "order_status": {
+    "new": "New",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "awaitingpayment": "Awaiting Payment",
+    "paymentfailed": "Payment Failed",
+    "wait_accept": "Wait Accept",
+    "waitaccept": "Wait Accept",
+    "pending": "Pending",
+    "completed": "Completed",
+    "indelivery": "In Delivery",
+    "delivering": "Delivering",
+    "confirmed": "Confirmed",
+    "очікуєвиконання": "Pending",
+    "очікуєоплати": "Awaiting Payment",
+    "вобробці": "Processing",
+    "скасовано": "Cancelled",
+    "виконано": "Completed"
   }
 }
