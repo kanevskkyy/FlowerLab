@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
 import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminCatalog() {
+  const { i18n } = useTranslation();
   const [settings, setSettings] = useState({
     events: [],
     forWho: [],
@@ -50,7 +52,7 @@ export function useAdminCatalog() {
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [i18n.language]);
 
   const handleEdit = () => {
     toast("Edit feature coming soon!");

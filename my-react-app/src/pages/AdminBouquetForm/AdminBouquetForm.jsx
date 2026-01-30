@@ -5,7 +5,7 @@ import { useAdminBouquetForm } from "./hooks/useAdminBouquetForm";
 
 export default function AdminBouquetForm() {
   const { t, i18n } = useTranslation();
-  const currentLang = i18n.language === "UA" ? "ua" : "en";
+  const currentLang = i18n.language.toLowerCase().includes("ua") ? "ua" : "en";
 
   const renderLabel = (item) => {
     if (!item) return "";

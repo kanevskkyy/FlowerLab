@@ -37,6 +37,32 @@ namespace OrderService.API.Controllers
             [FromForm] GiftCreateDto dto,
             CancellationToken cancellationToken)
         {
+            if (Request.Form.Keys.Any())
+            {
+                foreach (var key in Request.Form.Keys)
+                {
+                    if (key.StartsWith("Name[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(5, key.Length - 6);
+                        dto.Name[lang] = Request.Form[key]!;
+                    }
+                    if (key.StartsWith("Description[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(12, key.Length - 13);
+                        if (dto.Description == null) dto.Description = new Dictionary<string, string>();
+                        dto.Description[lang] = Request.Form[key]!;
+                    }
+                    if (key == "Price")
+                    {
+                        if (decimal.TryParse(Request.Form[key], out var price)) dto.Price = price;
+                    }
+                    if (key == "AvailableCount")
+                    {
+                        if (int.TryParse(Request.Form[key], out var count)) dto.AvailableCount = count;
+                    }
+                }
+            }
+
             var createdGift = await giftService.CreateAsync(dto, cancellationToken);
             return CreatedAtRoute("GetGiftById", new { id = createdGift.Id }, createdGift);
         }
@@ -48,6 +74,32 @@ namespace OrderService.API.Controllers
             [FromForm] GiftUpdateDto dto,
             CancellationToken cancellationToken)
         {
+            if (Request.Form.Keys.Any())
+            {
+                foreach (var key in Request.Form.Keys)
+                {
+                    if (key.StartsWith("Name[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(5, key.Length - 6);
+                        dto.Name[lang] = Request.Form[key]!;
+                    }
+                    if (key.StartsWith("Description[") && key.EndsWith("]"))
+                    {
+                        var lang = key.Substring(12, key.Length - 13);
+                        if (dto.Description == null) dto.Description = new Dictionary<string, string>();
+                        dto.Description[lang] = Request.Form[key]!;
+                    }
+                    if (key == "Price")
+                    {
+                        if (decimal.TryParse(Request.Form[key], out var price)) dto.Price = price;
+                    }
+                    if (key == "AvailableCount")
+                    {
+                        if (int.TryParse(Request.Form[key], out var count)) dto.AvailableCount = count;
+                    }
+                }
+            }
+
             var updatedGift = await giftService.UpdateAsync(id, dto, cancellationToken);
             return Ok(updatedGift);
         }
