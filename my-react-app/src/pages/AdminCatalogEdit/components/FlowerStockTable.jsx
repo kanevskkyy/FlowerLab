@@ -159,7 +159,9 @@ const FlowerStockTable = ({
                 );
               }
 
-              const currentLang = i18n.language === "UA" ? "ua" : "en";
+              const currentLang = i18n.language.toLowerCase().includes("ua")
+                ? "ua"
+                : "en";
               const nameData = item.name || item.Name || {};
               const quantity = item.quantity ?? item.Quantity;
               const displayName =

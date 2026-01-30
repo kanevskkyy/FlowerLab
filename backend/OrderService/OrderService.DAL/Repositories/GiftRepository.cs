@@ -19,12 +19,14 @@ namespace OrderService.DAL.Repositories
 
         public async Task<bool> IsNameDuplicatedAsync(string name, Guid? ignoreId = null, CancellationToken cancellationToken = default)
         {
-            var query = dbSet.AsQueryable();
+            // Fetch names to avoid LINQ translation issues with JSONB dictionary indexers and .ToLower()
+            var gifts = await dbSet
+                .AsNoTracking()
+                .Where(g => ignoreId == null || g.Id != ignoreId)
+                .Select(g => g.Name)
+                .ToListAsync(cancellationToken);
 
-            if (ignoreId.HasValue)
-                query = query.Where(g => g.Id != ignoreId.Value);
-
-            return await query.AnyAsync(g => g.Name["ua"].ToLower() == name.ToLower() || g.Name["en"].ToLower() == name.ToLower(), cancellationToken);
+            return gifts.Any(n => n.Values.Any(v => v != null && v.Trim().Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)));
         }
     }
 }

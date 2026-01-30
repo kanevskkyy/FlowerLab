@@ -46,36 +46,38 @@ const GiftsSlider = ({ gifts, giftsLoading, selectedGifts, toggleGift }) => {
               },
             }}
             className="gifts-swiper">
-            {gifts.map((gift) => (
-              <SwiperSlide key={gift.id}>
-                <div className="gift-card">
-                  <div className="gift-image">
-                    <img
-                      src={
-                        gift.price
-                          ? gift.imageUrl || gift.img || "/placeholder.png"
-                          : gift.img
-                      }
-                      alt={gift.name}
-                    />
-                  </div>
-                  <div className="gift-bottom">
-                    <div className="gift-info">
-                      <p className="gift-name">{gift.name}</p>
-                      <p className="gift-price">{gift.price} ₴</p>
+            {gifts
+              .filter((gift) => gift.availableCount > 0)
+              .map((gift) => (
+                <SwiperSlide key={gift.id}>
+                  <div className="gift-card">
+                    <div className="gift-image">
+                      <img
+                        src={
+                          gift.price
+                            ? gift.imageUrl || gift.img || "/placeholder.png"
+                            : gift.img
+                        }
+                        alt={gift.name}
+                      />
                     </div>
-                    <button
-                      type="button"
-                      className={`add-gift-btn ${
-                        selectedGifts.includes(gift.id) ? "active" : ""
-                      }`}
-                      onClick={() => toggleGift(gift.id)}>
-                      +
-                    </button>
+                    <div className="gift-bottom">
+                      <div className="gift-info">
+                        <p className="gift-name">{gift.name}</p>
+                        <p className="gift-price">{gift.price} ₴</p>
+                      </div>
+                      <button
+                        type="button"
+                        className={`add-gift-btn ${
+                          selectedGifts.includes(gift.id) ? "active" : ""
+                        }`}
+                        onClick={() => toggleGift(gift.id)}>
+                        {selectedGifts.includes(gift.id) ? "" : "+"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              ))}
           </Swiper>
         </div>
       )}

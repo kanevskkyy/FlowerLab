@@ -299,6 +299,14 @@ export const useOrderPlacement = () => {
 
   // === Handlers ===
   const toggleGift = (giftId) => {
+    const gift = gifts.find((g) => g.id === giftId);
+    if (!gift) return;
+
+    if (gift.availableCount <= 0 && !selectedGifts.includes(giftId)) {
+      toast.error(t("toasts.cart_item_unavailable", { name: gift.name }));
+      return;
+    }
+
     setSelectedGifts((prev) =>
       prev.includes(giftId)
         ? prev.filter((id) => id !== giftId)

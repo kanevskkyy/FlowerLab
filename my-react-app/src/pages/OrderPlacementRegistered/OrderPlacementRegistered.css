@@ -731,6 +731,18 @@
   transform: rotate(45deg);
 }
 
+.add-gift-btn.disabled {
+  background: #f0f0f0;
+  border-color: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+  font-size: 10px;
+  width: auto;
+  min-width: 60px;
+  padding: 0 8px;
+  border-radius: 12px;
+}
+
 /* Custom Navigation Colors & Sizing */
 /* ================= SWIPER SLIDER STYLES ================= */
 .gifts-slider-container {

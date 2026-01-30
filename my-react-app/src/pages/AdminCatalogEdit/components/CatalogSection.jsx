@@ -21,7 +21,9 @@ const CatalogSection = ({
           const key = item.id || item.Id || `category-${index}`;
           const nameData = item.name || item.Name;
 
-          const currentLang = i18n.language === "UA" ? "ua" : "en";
+          const currentLang = i18n.language.toLowerCase().includes("ua")
+            ? "ua"
+            : "en";
           const label =
             typeof nameData === "object"
               ? nameData[currentLang] || nameData.ua || nameData.en

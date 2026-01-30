@@ -98,14 +98,13 @@ export default function AdminPanel() {
       case "bouquets":
         return (
           <AdminProductList
-            title="Bouquets"
+            active={activeTab}
             products={products}
             loading={productsLoading}
             q={q}
             setQ={setQ}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
-            activeTab={activeTab}
             onAdd={handleAddProduct}
             onEdit={handleEditProduct}
             loadMore={loadProducts}
@@ -116,7 +115,7 @@ export default function AdminPanel() {
       case "gifts":
         return (
           <AdminProductList
-            title="Gifts"
+            active={activeTab}
             products={products}
             loading={productsLoading}
             q={q}
@@ -125,7 +124,6 @@ export default function AdminPanel() {
             setSelectedCategory={setSelectedCategory}
             categories={categories}
             onDelete={handleDeleteProduct}
-            activeTab={activeTab}
             onAdd={handleAddProduct}
             onEdit={handleEditProduct}
             loadMore={loadProducts}

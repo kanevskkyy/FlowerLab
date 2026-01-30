@@ -21,8 +21,13 @@ const GiftModal = ({ isOpen, gift, onClose, onAddToCart }) => {
           <button className="modal-btn cancel-btn" onClick={onClose}>
             {t("product.cancel")}
           </button>
-          <button className="modal-btn add-btn" onClick={onAddToCart}>
-            {t("product.add_to_cart")}
+          <button
+            className={`modal-btn add-btn ${gift.availableCount <= 0 ? "disabled" : ""}`}
+            onClick={onAddToCart}
+            disabled={gift.availableCount <= 0}>
+            {gift.availableCount <= 0
+              ? t("gifts.oos")
+              : t("product.add_to_cart")}
           </button>
         </div>
       </div>

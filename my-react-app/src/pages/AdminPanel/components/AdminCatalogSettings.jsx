@@ -4,7 +4,7 @@ import editIco from "../../../assets/icons/edit.svg";
 
 function AdminCatalogSettings({ settings, onEdit }) {
   const { t, i18n } = useTranslation();
-  const currentLang = i18n.language === "UA" ? "ua" : "en";
+  const currentLang = i18n.language.toLowerCase().includes("ua") ? "ua" : "en";
 
   const renderLabel = (item) => {
     if (!item) return "";

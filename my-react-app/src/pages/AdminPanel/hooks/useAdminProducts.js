@@ -131,7 +131,7 @@ export function useAdminProducts(active) {
     ) {
       fetchProducts(false);
     }
-  }, [active, pagination.pageNumber, debouncedQ]); // Add pagination.pageNumber and debouncedQ to dependencies
+  }, [active, pagination.pageNumber, debouncedQ, i18n.language]); // Add pagination.pageNumber, debouncedQ and i18n.language to dependencies
 
   const loadMore = () => {
     if (pagination.pageNumber < pagination.totalPages && !loadingProducts) {

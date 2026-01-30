@@ -55,12 +55,15 @@ const ProductCardContent = () => {
   const { gifts: fetchedGifts } = useGifts();
 
   const gifts = useMemo(() => {
-    return fetchedGifts.map((g) => ({
-      id: g.id,
-      image: g.imageUrl || "/placeholder.png",
-      title: g.name,
-      price: `${g.price} ₴`,
-    }));
+    return fetchedGifts
+      .filter((g) => g.availableCount > 0)
+      .map((g) => ({
+        id: g.id,
+        image: g.imageUrl || "/placeholder.png",
+        title: g.name,
+        price: `${g.price} ₴`,
+        availableCount: g.availableCount,
+      }));
   }, [fetchedGifts]);
 
   if (loading) {
@@ -111,6 +114,7 @@ const ProductCardContent = () => {
       price: selectedGift.price,
       img: selectedGift.image,
       qty: 1,
+      maxStock: selectedGift.availableCount,
       isGift: true,
     };
     addToCart(giftProduct);
