@@ -322,10 +322,10 @@
     top: 60px;
     height: auto;
     flex-direction: row;
-    gap: 50px;
+    gap: 20px;
     overflow-x: auto;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
     padding: 10px 16px;
     border-right: none;
     border-bottom: 1px solid #efe3ea;

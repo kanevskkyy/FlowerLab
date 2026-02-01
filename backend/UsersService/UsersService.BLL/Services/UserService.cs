@@ -37,7 +37,8 @@ namespace UsersService.BLL.Services
                 .Include(u => u.Addresses)
                 .FirstOrDefaultAsync(u => u.Id == userId)
                 ?? throw new NotFoundException("User not found");
-
+            var roles = await userManager.GetRolesAsync(user);
+            
             return new UserResponseDto
             {
                 Id = user.Id,
@@ -47,6 +48,7 @@ namespace UsersService.BLL.Services
                 PhoneNumber = user.PhoneNumber,
                 PhotoUrl = user.PhotoUrl,
                 PersonalDiscountPercentage = user.PersonalDiscountPercentage,
+                Roles = roles.ToList(),
                 Addresses = user.Addresses.Select(a => new AddressDto
                 {
                     Id = a.Id,

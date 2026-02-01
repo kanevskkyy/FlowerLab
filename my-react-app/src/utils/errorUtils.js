@@ -20,13 +20,12 @@ export const extractErrorMessage = (
   defaultMessage = "Something went wrong",
 ) => {
   if (!error) return defaultMessage;
+  if (error.response?.status === 401) return null;
 
   const data = error.response?.data;
 
   if (data?.code) {
-
     if (data.code === "VALIDATION_ERROR" && data.errors) {
-
     } else if (FRIENDLY_ERROR_MESSAGES[data.code]) {
       return FRIENDLY_ERROR_MESSAGES[data.code];
     } else if (data.message && typeof data.message === "string") {

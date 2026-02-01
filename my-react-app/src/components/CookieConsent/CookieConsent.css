@@ -1,0 +1,123 @@
+.cookie-consent-overlay {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.cookie-consent-banner {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid #fbecf7;
+  border-radius: 20px;
+  padding: 24px 30px;
+  max-width: 800px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(200, 106, 172, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  pointer-events: all;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.cookie-content p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  font-family: var(--font-caption);
+}
+
+.cookie-policy-link {
+  color: #c86aac;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.cookie-policy-link:hover {
+  border-bottom-color: #c86aac;
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.cookie-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-title);
+  letter-spacing: 0.5px;
+}
+
+.cookie-btn.decline {
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.cookie-btn.decline:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.cookie-btn.accept {
+  background: #c86aac;
+  border: 1px solid #c86aac;
+  color: white;
+}
+
+.cookie-btn.accept:hover {
+  background: #b55a9a;
+  box-shadow: 0 4px 15px rgba(200, 106, 172, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cookie-consent-overlay {
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .cookie-consent-banner {
+    flex-direction: column;
+    text-align: center;
+    border-radius: 20px 20px 0 0;
+    padding: 25px 20px;
+    gap: 20px;
+  }
+
+  .cookie-actions {
+    width: 100%;
+  }
+
+  .cookie-btn {
+    flex: 1;
+    padding: 14px 20px;
+  }
+}

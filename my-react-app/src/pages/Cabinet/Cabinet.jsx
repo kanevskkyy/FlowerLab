@@ -27,7 +27,6 @@ export default function Cabinet() {
 
   const handleSignOut = () => {
     logout();
-    navigate("/login", { replace: true });
   };
 
   return (

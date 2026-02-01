@@ -17,11 +17,7 @@ const authService = {
     return response.data;
   },
 
-  logout: () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("adminActiveTab");
-  },
+  // Logout and token cleanup are now handled via AuthProvider and Backend cookies
 
   refreshToken: async (refreshToken) => {
     const response = await axiosClient.post("/api/users/auth/refresh", {

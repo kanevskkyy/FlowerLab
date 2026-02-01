@@ -14,12 +14,6 @@ export function useAdminUsers(activeTab) {
 
   const fetchUsers = useCallback(
     async (pageNum = 1, isLoadMore = false) => {
-      console.log("fetchUsers called", {
-        pageNum,
-        isLoadMore,
-        q: debouncedSearchTerm,
-        activeTab,
-      });
       if (activeTab !== "users") return;
 
       if (isLoadMore) setIsLoadingMore(true);
@@ -31,9 +25,8 @@ export function useAdminUsers(activeTab) {
           PageNumber: pageNum,
           PageSize: 10,
         };
-        console.log("Requesting users with params:", params);
+
         const data = await adminService.getUsers(params);
-        console.log("Received users data:", data);
 
         let newItems = [];
         let hasNext = false;

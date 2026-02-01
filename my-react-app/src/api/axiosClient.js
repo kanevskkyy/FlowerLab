@@ -5,6 +5,7 @@ const baseURL = import.meta.env.VITE_API_URL;
 
 const axiosClient = axios.create({
   baseURL: baseURL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -27,18 +28,13 @@ const axiosClient = axios.create({
 
 // Інтерсептор для додавання Access Token та локалізації до кожного запиту
 axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-  if (token && token !== "null" && token !== "undefined") {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
   // Налаштування мови
   const langNormalized = i18n.language ? i18n.language.toLowerCase() : "";
   const currentLang =
     langNormalized.startsWith("uk") || langNormalized === "ua" ? "ua" : "en";
   config.headers["Accept-Language"] = currentLang;
 
-  // Винятково для адмінських редагувань (якщо в URL є /admin або спеціальний прапорець у config)
+  // Винятково для адмінських редагувань
   if (
     config.skipLocalization ||
     window.location.pathname.startsWith("/admin")
@@ -78,13 +74,8 @@ axiosClient.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
-            resolve: (token) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(axiosClient(originalRequest));
-            },
-            reject: (err) => {
-              reject(err);
-            },
+            resolve: () => resolve(axiosClient(originalRequest)),
+            reject: (err) => reject(err),
           });
         });
       }
@@ -93,30 +84,28 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) throw new Error("No refresh token");
+        // Кличемо refresh без тіла, бо токен у куках
+        await axios.post(
+          `${baseURL}/api/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
 
-        // Використовуємо повний URL або інстанс axios з baseURL
-        const response = await axios.post(`${baseURL}/api/users/auth/refresh`, {
-          refreshToken,
-        });
-
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
-
-        processQueue(null, accessToken);
-
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        processQueue(null);
         return axiosClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        console.error("Session expired:", refreshError);
+
+        // Очищаємо залишки
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        localStorage.removeItem("adminActiveTab");
-        window.location.href = "/login";
+
+        if (
+          !originalRequest.skipAuthRedirect &&
+          !window.location.pathname.includes("/login")
+        ) {
+          window.location.href = "/login";
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

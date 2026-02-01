@@ -23,11 +23,13 @@ import { useAdminCatalog } from "./hooks/useAdminCatalog";
 import { useAdminReviews } from "./hooks/useAdminReviews";
 import { useAdminUsers } from "./hooks/useAdminUsers";
 import { useSettings } from "../../context/useSettings";
+import { useAuth } from "../../context/useAuth";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { lang, setLang } = useSettings();
+  const { logout } = useAuth();
 
   // Tab State
   const [activeTab, setActiveTab] = useState(
@@ -45,8 +47,7 @@ export default function AdminPanel() {
   };
 
   const handleLogout = () => {
-    authService.logout();
-    navigate("/login");
+    logout();
   };
 
   // --- HOOKS ---
