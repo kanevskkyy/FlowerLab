@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import orderService from "../../services/orderService";
+import { extractErrorMessage } from "../../utils/errorUtils";
 import {
   getLocalizedValue,
   getLocalizedStatus,
@@ -27,11 +28,8 @@ export default function AdminOrderDetails() {
         ]);
         setOrder(orderData);
         setStatuses(statusesData);
-        console.log("Statuses from API:", statusesData);
-        console.log("Current i18n language:", i18n.language);
-      } catch (error) {
-        console.error("Failed to load data:", error);
-        toast.error(t("admin.orders.failed_load"));
+        const msg = extractErrorMessage(error, t("admin.orders.failed_load"));
+        if (msg) toast.error(msg);
         navigate("/admin");
       } finally {
         setLoading(false);
@@ -73,7 +71,11 @@ export default function AdminOrderDetails() {
       }
     } catch (error) {
       console.error("Failed to update status:", error);
-      toast.error(t("toasts.admin_status_update_failed"));
+      const msg = extractErrorMessage(
+        error,
+        t("toasts.admin_status_update_failed"),
+      );
+      if (msg) toast.error(msg);
       setOrder((prev) => ({ ...prev, status: originalStatus }));
     }
   };

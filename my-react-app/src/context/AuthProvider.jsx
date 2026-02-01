@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import { AuthContext } from "./authContext";
 import { jwtDecode } from "jwt-decode";
 import userService from "../services/userService";
+import axiosClient from "../api/axiosClient";
 
 export default function AuthProvider({ children }) {
   // Допоміжна функція
@@ -48,70 +49,81 @@ export default function AuthProvider({ children }) {
       };
     } catch (e) {
       console.error("Invalid token:", e);
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
       return null;
     }
   };
 
-  // Читаємо токен при старті
-  const [user, setUser] = useState(() => {
-    const token = localStorage.getItem("accessToken");
-    return token ? decodeToken(token) : null;
-  });
-
-  const [loading, setLoading] = useState(false);
+  // Читаємо токен при старті - ТЕПЕР ПУСТО, чекаємо API
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Експортуємо setAuth як login, щоб не ламати твій код в Login.jsx
-  const setAuth = useCallback(async (token) => {
-    localStorage.setItem("accessToken", token);
-    const userData = decodeToken(token);
-    setUser(userData);
+  const setAuth = useCallback(
+    async (token) => {
+      // Ми більше не зберігаємо токен у localStorage вручну (він у Cookies)
+      const userData = token ? decodeToken(token) : null;
+      setUser(userData);
 
-    // Одразу підтягуємо повний профіль зі знижкою
+      if (!token) return;
+
+      // Одразу підтягуємо повний профіль зі знижкою
+      try {
+        const fullProfile = await userService.getProfile();
+        setUser((prev) => ({
+          ...prev,
+          ...userData, // Впевнюємося що маємо ID та Email
+          name: fullProfile.firstName,
+          lastName: fullProfile.lastName,
+          phone: fullProfile.phoneNumber,
+          photoUrl: fullProfile.photoUrl,
+          discount: fullProfile.personalDiscountPercentage || 0,
+          role: Array.isArray(fullProfile.roles)
+            ? fullProfile.roles[0] || ""
+            : fullProfile.roles || "",
+        }));
+      } catch (e) {
+        console.error("Sync profile error (non-fatal):", e);
+      }
+    },
+    [decodeToken],
+  );
+
+  const logout = useCallback(async () => {
     try {
-      const fullProfile = await userService.getProfile();
-      setUser((prev) => ({
-        ...prev,
-        name: fullProfile.firstName,
-        lastName: fullProfile.lastName,
-        phone: fullProfile.phoneNumber,
-        photoUrl: fullProfile.photoUrl,
-        discount: fullProfile.personalDiscountPercentage || 0,
-      }));
+      // Кличемо бекенд щоб він затер кукі
+      await axiosClient.post("/api/auth/logout");
     } catch (e) {
-      console.error("Sync profile error:", e);
+      console.error("Logout error:", e);
     }
-  }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
     setUser(null);
     window.location.href = "/login";
   }, []);
 
-  // Синхронізація при старті та зміні мови/сесії
+  // Синхронізація при старті
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      const syncProfile = async () => {
-        try {
-          const fp = await userService.getProfile();
-          setUser((prev) => ({
-            ...prev,
-            name: fp.firstName,
-            lastName: fp.lastName,
-            phone: fp.phoneNumber,
-            photoUrl: fp.photoUrl,
-            discount: fp.personalDiscountPercentage || 0,
-          }));
-        } catch (e) {
-          console.error("Initial profile sync failed:", e);
-        }
-      };
-      syncProfile();
-    }
+    const checkAuth = async () => {
+      setLoading(true);
+      try {
+        // Ми додаємо skipAuthRedirect: true, щоб axios не викидав гостя на сторінку логіну
+        const fp = await userService.getProfile({ skipAuthRedirect: true });
+        setUser({
+          id: fp.id,
+          email: fp.email,
+          name: fp.firstName,
+          lastName: fp.lastName,
+          phone: fp.phoneNumber,
+          photoUrl: fp.photoUrl,
+          discount: fp.personalDiscountPercentage || 0,
+          role: Array.isArray(fp.roles) ? fp.roles[0] || "" : fp.roles || "",
+        });
+      } catch (e) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
   }, []);
 
   const value = useMemo(

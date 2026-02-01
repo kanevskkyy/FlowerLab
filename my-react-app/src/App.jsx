@@ -38,6 +38,8 @@ import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
 
 import ModalProvider from "./context/ModalProvider";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
+import CookieConsent from "./components/CookieConsent/CookieConsent";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
 
 // Global handler for back-navigation reloads
 const BackNavigationHandler = () => {
@@ -101,6 +103,7 @@ function App() {
                 <Route path="/gifts" element={<Gifts />} />
                 <Route path="/product/:id" element={<ProductCard />} />
                 <Route path="/about" element={<AboutUs />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
                 <Route path="/order" element={<OrderPlacementRegistered />} />
                 <Route
@@ -195,6 +198,7 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <CookieConsent />
             </ModalProvider>
           </SettingsProvider>
         </CartProvider>

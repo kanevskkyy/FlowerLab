@@ -1,9 +1,9 @@
 import axiosClient from "../api/axiosClient";
 
 const userService = {
-  getProfile: async () => {
+  getProfile: async (config = {}) => {
     // Adjust endpoint based on User Service API
-    const response = await axiosClient.get("/api/users/me");
+    const response = await axiosClient.get("/api/users/me", config);
     return response.data;
   },
 

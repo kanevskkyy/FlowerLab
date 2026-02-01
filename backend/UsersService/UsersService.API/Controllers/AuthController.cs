@@ -58,23 +58,34 @@ namespace UsersService.API.Controllers
                 return Unauthorized(new { Message = "Неправильний email або пароль." });
             }
 
+            SetTokensInCookies(result.AccessToken, result.RefreshToken);
+
             return Ok(result);
         }
 
         [HttpPost("refresh")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenResponseDto))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto model)
+        public async Task<IActionResult> RefreshToken([FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)] RefreshTokenRequestDto? model = null)
         {
-            var result = await authService.RefreshTokenAsync(model.RefreshToken);
+            // Allow refresh even if body is empty, if we use cookies
+            var token = model?.RefreshToken ?? Request.Cookies["refreshToken"];
+            
+            if (string.IsNullOrEmpty(token))
+            {
+                return Unauthorized(new { Message = "Refresh token missing." });
+            }
+
+            var result = await authService.RefreshTokenAsync(token);
 
             if (result == null)
             {
                 return Unauthorized(new { Message = "Неправильний або прострочений refresh token." });
             }
 
-            return Ok(result);
+            SetTokensInCookies(result.AccessToken, result.RefreshToken);
 
+            return Ok(result);
         }
 
         [HttpPost("resend-confirm-email")]
@@ -127,11 +138,61 @@ namespace UsersService.API.Controllers
 
 
         [HttpPost("logout")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto model)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto? model = null)
         {
-            await authService.LogoutAsync(model.RefreshToken);
-            return NoContent();
+            try
+            {
+                var token = model?.RefreshToken ?? Request.Cookies["refreshToken"];
+                if (!string.IsNullOrEmpty(token))
+                {
+                    await authService.LogoutAsync(token);
+                }
+            }
+            catch
+            {
+                // Ignore revocation errors on logout
+            }
+            finally
+            {
+                ClearTokensCookies();
+            }
+            
+            return Ok(new { Message = "Logged out successfully" });
+        }
+
+        private void SetTokensInCookies(string accessToken, string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Must be true for SameSite=None
+                SameSite = SameSiteMode.None, // Required for cross-site (http -> https)
+                Path = "/", // Access from any path
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append("accessToken", accessToken, cookieOptions);
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
+
+        private void ClearTokensCookies()
+        {
+            var options = new CookieOptions 
+            { 
+                Path = "/",
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(-1)
+            };
+
+            Response.Cookies.Append("accessToken", "", options);
+            Response.Cookies.Append("refreshToken", "", options);
+            
+            Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+            Response.Headers.Append("Pragma", "no-cache");
+            Response.Headers.Append("Expires", "0");
         }
     }
 }

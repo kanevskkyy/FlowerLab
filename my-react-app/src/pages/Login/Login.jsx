@@ -52,11 +52,7 @@ export default function Login() {
         loginResponse.refreshToken || loginResponse.RefreshToken;
 
       if (accessToken) {
-        // Зберігаємо токени
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-
-        // Оновлюємо стан авторизації в контексті
+        // Оновлюємо стан авторизації в контексті (токени вже в Cookie)
         setAuth(accessToken);
 
         toast.success(t("auth.welcome_back"));

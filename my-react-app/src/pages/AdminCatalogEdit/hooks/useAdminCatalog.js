@@ -50,9 +50,6 @@ export const useAdminCatalog = (confirm) => {
       const recipientsData = normalize(recipients);
       const flowersData = normalize(flowers);
 
-      console.log("Catalog Debug - Raw Events:", events);
-      console.log("Catalog Debug - Normalized Events:", eventsData);
-
       setData({
         events: eventsData,
         forWho: recipientsData,
@@ -177,8 +174,6 @@ export const useAdminCatalog = (confirm) => {
         default:
           return;
       }
-
-      console.log("Catalog Debug - Added New Item:", newItem);
 
       setData((prev) => ({
         ...prev,

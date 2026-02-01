@@ -12,8 +12,6 @@ namespace UsersService.BLL.FluentValidation
     {
         public RefreshTokenRequestDtoValidator()
         {
-            RuleFor(x => x.RefreshToken)
-                .NotEmpty().WithMessage("Refresh token cannot be empty.");
         }
     }
 }

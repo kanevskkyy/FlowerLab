@@ -121,11 +121,6 @@ export function useCatalog() {
         }
 
         const data = await catalogService.getBouquets(params);
-        console.log(
-          `[useCatalog] Language: ${i18n.language}, Fetch params:`,
-          params,
-        );
-        console.log(`[useCatalog] Raw Data:`, data);
 
         if (data.items) {
           const langNormalized = i18n.language

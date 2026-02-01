@@ -37,22 +37,18 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="footer-col">
-        <div className="footer-item footer-phone">
-          <div className="footer-icon-wrapper">
-            <img
-              src={PhoneIcon}
-              alt="Phone"
-              className="footer-icon phone-icon"
-            />
-          </div>
-          <a href="tel:+380501591912" className="footer-link-single">
-            <div className="footer-text">
-              <p>+38 050 159 19 12</p>
-            </div>
-          </a>
+      <div className="footer-item footer-phone">
+        <div className="footer-icon-wrapper">
+          <img src={PhoneIcon} alt="Phone" className="footer-icon phone-icon" />
         </div>
+        <a href="tel:+380501591912" className="footer-link-single">
+          <div className="footer-text">
+            <p>+38 050 159 19 12</p>
+          </div>
+        </a>
+      </div>
 
+      <div className="footer-col footer-socials">
         <div className="footer-item footer-instagram">
           <div className="footer-icon-wrapper">
             <img

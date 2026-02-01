@@ -579,5 +579,38 @@
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm"
+  },
+  "cookies": {
+    "banner_text": "We use cookies to improve your experience on our site. You can learn more in our ",
+    "policy_link": "Privacy Policy",
+    "accept_btn": "ACCEPT",
+    "decline_btn": "DECLINE"
+  },
+  "privacy_policy": {
+    "title": "PRIVACY POLICY",
+    "last_updated": "Last updated: February 1, 2026",
+    "intro": "At FlowerLab Vlada, we take the protection of your personal data seriously. Since we are in the business of delivering emotions in the form of flowers, it's important to us that you feel safe leaving your data on our website.",
+    "sections": [
+      {
+        "title": "1. What information do we collect?",
+        "content": "To place an order, we need: your name, phone number, and email. Also, to carry out delivery in Chernivtsi and the region, we collect recipient data: name, address, and contact phone number."
+      },
+      {
+        "title": "2. How do we use your data?",
+        "content": "We use your data exclusively for: processing and delivering orders, contacting you (including via Viber/WhatsApp/Telegram to clarify details), and providing access to your personal account."
+      },
+      {
+        "title": "3. Payments and Security",
+        "content": "Payment for orders is carried out through the secure payment gateway LiqPay. FlowerLab Vlada does not collect or store your bank card data. The entire transaction takes place on the side of the payment infrastructure according to global security standards. For your authorization on the site, we use protected HttpOnly Cookies."
+      },
+      {
+        "title": "4. Cookies",
+        "content": "We use cookies so that your cart does not disappear when you close the page and so that you remain authorized in your account. You can manage your consent to the use of cookies through our banner."
+      },
+      {
+        "title": "5. Your Rights and Data Deletion",
+        "content": "You have full control over your data. You can change your information in your personal account or completely delete your account along with the entire history through the 'Settings' section. We do not transfer your data to third parties, except for cases necessary for order delivery (courier service)."
+      }
+    ]
   }
 }
