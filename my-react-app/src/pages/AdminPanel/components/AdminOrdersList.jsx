@@ -1,11 +1,18 @@
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import AdminOrdersSort from "./AdminOrdersSort";
-import { getLocalizedValue } from "../../../utils/localizationUtils";
+import {
+  getLocalizedValue,
+  getLocalizedStatus,
+  getStatusKey,
+} from "../../../utils/localizationUtils";
+import searchIcon from "../../../assets/icons/search.svg";
 
 function AdminOrdersList({
   orders,
   statuses,
+  q,
+  setQ,
   sort,
   setSort,
   onStatusChange,
@@ -41,40 +48,23 @@ function AdminOrdersList({
 
   const { t, i18n } = useTranslation();
 
-  const getStatusKey = (name) => {
-    if (!name) return "";
-    return name.replace(/\s/g, "").toLowerCase();
-  };
-
-  const getLocalizedStatus = (statusObj) => {
-    if (!statusObj) return "";
-    const name = typeof statusObj === "string" ? statusObj : statusObj.name;
-    const translations = statusObj.translations;
-
-    const localized = getLocalizedValue(translations, i18n.language);
-
-    // Priority 1: Backend localized value (if truly different)
-    if (localized && localized !== name) return localized;
-
-    // Priority 2: Local JSON translation
-    const statusKey = getStatusKey(localized || name);
-    const fromJson = t(`order_status.${statusKey}`);
-
-    if (fromJson && fromJson !== `order_status.${statusKey}`) {
-      return fromJson;
-    }
-
-    // Priority 3: Backend raw value
-    return localized || name;
-  };
-
   return (
     <section className="admin-section admin-orders">
       <h2 className="admin-section-title admin-orders-title">
         {t("admin.orders.title")}
       </h2>
       <div className="admin-orders-top">
-        <div />
+        <div className="admin-toolbar">
+          <div className="admin-search">
+            <img className="admin-search-ico" src={searchIcon} alt="" />
+            <input
+              type="text"
+              placeholder={t("admin.orders.search_placeholder")}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+        </div>
         <div className="admin-orders-sort">
           <AdminOrdersSort sort={sort} onSortChange={setSort} />
         </div>
@@ -114,7 +104,7 @@ function AdminOrdersList({
                   onChange={(e) => onStatusChange(o.id, e.target.value)}>
                   {(statuses || []).map((s) => (
                     <option key={s.id} value={s.id}>
-                      {getLocalizedStatus(s)}
+                      {getLocalizedStatus(s, i18n.language, t)}
                     </option>
                   ))}
                 </select>

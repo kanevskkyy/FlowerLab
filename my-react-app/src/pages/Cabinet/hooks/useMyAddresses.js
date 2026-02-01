@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import axiosClient from "../../../api/axiosClient";
 import { useConfirm } from "../../../context/ModalProvider";
 import { useTranslation } from "react-i18next";
+import userService from "../../../services/userService";
 
 export function useMyAddresses(activeTab, TABS) {
   const { t } = useTranslation();
@@ -12,7 +13,7 @@ export function useMyAddresses(activeTab, TABS) {
 
   const fetchAddresses = async () => {
     try {
-      const { data } = await axiosClient.get("/api/users/me/addresses");
+      const data = await userService.getAddresses();
       setAddressList(data);
     } catch (error) {
       console.error("Failed to fetch addresses:", error);
@@ -26,7 +27,7 @@ export function useMyAddresses(activeTab, TABS) {
   const handleSaveAddress = async () => {
     if (!newAddress.trim()) return;
     try {
-      await axiosClient.post("/api/users/me/addresses", {
+      await userService.addAddress({
         address: newAddress,
         isDefault: false,
       });
@@ -47,7 +48,7 @@ export function useMyAddresses(activeTab, TABS) {
       confirmType: "danger",
       onConfirm: async () => {
         try {
-          await axiosClient.delete(`/api/users/me/addresses/${id}`);
+          await userService.deleteAddress(id);
           toast.success(t("toasts.address_deleted"));
           fetchAddresses();
         } catch (error) {

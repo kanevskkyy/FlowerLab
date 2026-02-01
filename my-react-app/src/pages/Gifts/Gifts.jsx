@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../../context/CartContext";
 import { useGifts } from "./hooks/useGifts";
+import { getLocalizedValue } from "../../utils/localizationUtils";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import PopupMenu from "../../components/PopupMenu/PopupMenu";
@@ -12,7 +13,7 @@ import "./Gifts.css"; // Локальні стилі (копія каталог�
 import SEO from "../../components/SEO/SEO";
 
 const Gifts = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { addToCart } = useCart();
   const {
     gifts,
@@ -26,16 +27,17 @@ const Gifts = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleAddToCart = (item) => {
+    const localizedName = getLocalizedValue(item.name, i18n.language);
     addToCart({
       id: item.id,
-      title: item.name, // API returns 'name'
-      price: `${item.price} ₴`, // API returns number
-      img: item.imageUrl, // API returns 'imageUrl'
+      title: localizedName,
+      price: `${item.price} ₴`,
+      img: item.imageUrl,
       qty: 1,
       maxStock: item.availableCount,
       isGift: true,
     });
-    toast.success(t("gifts.added", { name: item.name }));
+    toast.success(t("gifts.added", { name: localizedName }));
   };
 
   const optimizeCloudinaryUrl = (url) => {
@@ -105,7 +107,7 @@ const Gifts = () => {
                     {/* BOTTOM */}
                     <div className="item-bottom">
                       <div className="item-text">
-                        <p>{item.name}</p>
+                        <p>{getLocalizedValue(item.name, i18n.language)}</p>
                         <p>{item.price} ₴</p>
                       </div>
 

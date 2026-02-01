@@ -24,6 +24,7 @@ namespace OrderService.Domain.QueryParams
         public Guid? StatusId { get; set; }
         public Guid? BouquetId { get; set; }
         public string? Sort { get; set; }
+        public string? SearchTerm { get; set; }
 
     }
 }

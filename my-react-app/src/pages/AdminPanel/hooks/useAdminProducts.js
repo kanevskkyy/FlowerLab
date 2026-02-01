@@ -148,10 +148,9 @@ export function useAdminProducts(active) {
 
   const handleDeleteProduct = (id) => {
     confirm({
-      title: "Delete item?",
-      message:
-        "Are you sure you want to delete this item? This action cannot be undone.",
-      confirmText: "Delete",
+      title: t("admin.products.confirm_delete_title"),
+      message: t("admin.products.confirm_delete_msg"),
+      confirmText: t("admin.delete"),
       confirmType: "danger",
       onConfirm: async () => {
         try {

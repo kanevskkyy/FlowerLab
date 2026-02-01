@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 import "./EmailConfirmation.css";
 
 export default function EmailConfirmation() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // loading, success, error
@@ -28,7 +31,7 @@ export default function EmailConfirmation() {
 
   const handleResend = async () => {
     if (!resendEmail) {
-      alert("Please enter your email to resend confirmation.");
+      toast.error(t("auth.email_required"));
       return;
     }
 
@@ -37,11 +40,11 @@ export default function EmailConfirmation() {
       await axiosClient.post("/api/users/auth/resend-confirm-email", {
         email: resendEmail,
       });
-      alert("A new confirmation email has been sent! 📧");
+      toast.success(t("toasts.confirmation_resent"));
       setCountdown(60);
     } catch (error) {
       console.error("Resend error:", error);
-      alert(error.response?.data?.Message || "Failed to resend email.");
+      toast.error(error.response?.data?.Message || t("toasts.resend_failed"));
     } finally {
       setResendLoading(false);
     }
@@ -50,7 +53,7 @@ export default function EmailConfirmation() {
   useEffect(() => {
     if (!userId || !token) {
       setStatus("error");
-      setMessage("Invalid link parameters.");
+      setMessage(t("toasts.invalid_token"));
       return;
     }
 
@@ -61,49 +64,51 @@ export default function EmailConfirmation() {
         });
 
         setStatus("success");
-        setMessage("Email confirmed successfully! You can now log in.");
+        setMessage(t("auth.verification_success_msg"));
       } catch (error) {
         console.error("Confirmation error:", error);
         setStatus("error");
         setMessage(
           error.response?.data?.Message ||
             error.response?.data?.error ||
-            "Failed to confirm email.",
+            t("auth.verification_error_default"),
         );
       }
     };
 
     confirmEmail();
-  }, [userId, token]);
+  }, [userId, token, t]);
 
   return (
     <div className="confirmation-page">
       <div className="confirmation-box">
         {status === "loading" && (
-          <h2 className="confirmation-title">Verifying...</h2>
+          <h2 className="confirmation-title">{t("auth.verifying")}</h2>
         )}
 
         {status === "success" && (
           <>
-            <h2 className="confirmation-title">Success! 🎉</h2>
+            <h2 className="confirmation-title">
+              {t("auth.verification_success")}
+            </h2>
             <p className="confirmation-text">{message}</p>
             <button
               className="confirmation-btn"
               onClick={() => navigate("/login")}>
-              Go to Login
+              {t("auth.go_to_login")}
             </button>
           </>
         )}
 
         {status === "error" && (
           <>
-            <h2 className="confirmation-title error">Error ⚠️</h2>
+            <h2 className="confirmation-title error">
+              {t("auth.verification_error")}
+            </h2>
             <p className="confirmation-text">{message}</p>
 
             <div className="resend-section">
-              <p className="resend-hint">
-                Enter your email to receive a new link:
-              </p>
+              <p className="resend-hint">{t("auth.resend_hint")}</p>
               <input
                 type="email"
                 className="resend-input"
@@ -116,17 +121,17 @@ export default function EmailConfirmation() {
                 onClick={handleResend}
                 disabled={resendLoading || countdown > 0}>
                 {resendLoading
-                  ? "Sending..."
+                  ? t("auth.sending")
                   : countdown > 0
-                    ? `Resend in ${countdown}s`
-                    : "Resend Confirmation Email"}
+                    ? t("auth.resend_in", { count: countdown })
+                    : t("auth.resend_btn")}
               </button>
             </div>
 
             <button
               className="confirmation-btn outline"
               onClick={() => navigate("/login")}>
-              Go to Login
+              {t("auth.go_to_login")}
             </button>
           </>
         )}

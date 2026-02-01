@@ -1,14 +1,14 @@
 :root {
-  --text-dark: #463641;     
-  --primary-pink: #F4BCE5;
-  --light-pink: #FBEAF7;
-  --extra-light-pink: #FCF3F8;
-  --bg-white: #FDFBFB;
-  --white: #FFFFFF;
-  
-  --font-heading: 'Jomolhari', serif;
-  --font-body: 'Manrope', sans-serif;
-  --font-caption: 'Jaldi', sans-serif;
+  --text-dark: #463641;
+  --primary-pink: #f4bce5;
+  --light-pink: #fbeaf7;
+  --extra-light-pink: #fcf3f8;
+  --bg-white: #fdfbfb;
+  --white: #ffffff;
+
+  --font-heading: "Jomolhari", serif;
+  --font-body: "Manrope", sans-serif;
+  --font-caption: "Jaldi", sans-serif;
 }
 
 * {
@@ -23,6 +23,7 @@ body {
   background-color: var(--bg-white);
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 button {

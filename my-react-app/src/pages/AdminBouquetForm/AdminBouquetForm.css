@@ -34,6 +34,14 @@
   cursor: pointer;
   font-weight: 500;
   padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.abf-back-arrow {
+  font-size: 18px;
+  line-height: 1;
 }
 
 .abf-back-btn:hover {
@@ -261,6 +269,24 @@
 
   .abf-size-row {
     padding: 12px; /* Compact rows */
+  }
+
+  .abf-back-text {
+    display: none; /* Hide 'Cancel' text on mobile */
+  }
+
+  .abf-title {
+    font-size: 18px;
+    max-width: 160px; /* Prevent it from pushing buttons too much */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .abf-save-btn {
+    padding: 8px 14px;
+    font-size: 13px;
   }
 }
 

@@ -42,9 +42,7 @@ export function useAdminCatalog() {
       });
     } catch (error) {
       console.error("Failed to fetch catalog settings:", error);
-      toast.error(
-        extractErrorMessage(error, "Failed to load catalog settings"),
-      );
+      toast.error(extractErrorMessage(error, t("toasts.admin_load_error")));
     } finally {
       setLoading(false);
     }
@@ -55,7 +53,7 @@ export function useAdminCatalog() {
   }, [i18n.language]);
 
   const handleEdit = () => {
-    toast("Edit feature coming soon!");
+    toast(t("toasts.admin_edit_coming_soon"));
   };
 
   return {

@@ -27,3 +27,27 @@ export const getLocalizedValue = (field, currentLang = "ua") => {
 
   return field;
 };
+
+/**
+ * Normalizes a status name into a translation key.
+ */
+export const getStatusKey = (name) => {
+  if (!name) return "";
+  return name.replace(/\s/g, "").toLowerCase();
+};
+
+/**
+ * Localizes a status object or name using translations or fallback to i18next keys.
+ */
+export const getLocalizedStatus = (statusObj, currentLang, t) => {
+  if (!statusObj) return "";
+  const name = typeof statusObj === "string" ? statusObj : statusObj.name;
+  const translations = statusObj.translations;
+
+  const localized = getLocalizedValue(translations, currentLang);
+  if (localized) return localized;
+
+  return t(`order_status.${getStatusKey(name)}`, {
+    defaultValue: name,
+  });
+};

@@ -54,10 +54,10 @@ export function useCheckOut({ orderData }) {
 
   const handleCancelPayment = () => {
     confirm({
-      title: "Cancel payment?",
-      message:
-        "Are you sure you want to cancel the payment? The order will be deleted.",
-      confirmText: "Yes, cancel",
+      title: t("checkout.cancel_modal.title"),
+      message: t("checkout.cancel_modal.message"),
+      confirmText: t("checkout.cancel_modal.confirm"),
+      cancelText: t("common.cancel"),
       confirmType: "danger",
       onConfirm: async () => {
         try {

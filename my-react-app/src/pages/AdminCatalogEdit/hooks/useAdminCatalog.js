@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import catalogService from "../../../services/catalogService";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 export const useAdminCatalog = (confirm) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
 
   // Data State
@@ -239,14 +240,13 @@ export const useAdminCatalog = (confirm) => {
 
   const handleRemoveClick = (category, item) => {
     const nameData = item.name || item.Name;
-    const itemName = typeof nameData === "object" ? nameData.ua : nameData;
+    const itemName = getLocalizedValue(nameData, i18n.language) || "Item";
     const itemId = item.id || item.Id;
 
     confirm({
-      title: `Delete "${itemName}"?`,
-      message:
-        "Are you sure you want to delete this item? This creates potential issues for products using it.",
-      confirmText: "Delete",
+      title: t("admin.catalog.confirm_delete_title", { name: itemName }),
+      message: t("admin.catalog.confirm_delete_msg"),
+      confirmText: t("admin.delete"),
       confirmType: "danger",
       onConfirm: async () => {
         try {

@@ -28,6 +28,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("{id:guid}", Name = "GetOrderById")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
@@ -43,6 +44,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] OrderCreateDto dto, CancellationToken cancellationToken)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
@@ -70,6 +72,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("discount-eligibility")]
+        [AllowAnonymous]
         public async Task<IActionResult> CheckDiscountEligibility(CancellationToken cancellationToken)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
@@ -88,7 +91,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpGet("my")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetMyOrders([FromQuery] OrderSpecificationParameters parameters, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) 
@@ -107,6 +110,7 @@ namespace OrderService.API.Controllers
 
 
         [HttpPost("{id:guid}/pay")]
+        [AllowAnonymous]
         public async Task<IActionResult> Pay(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
             var paymentUrl = await orderService.GeneratePaymentUrlAsync(id, guestToken, cancellationToken);
@@ -134,6 +138,7 @@ namespace OrderService.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid? guestToken, CancellationToken cancellationToken)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");

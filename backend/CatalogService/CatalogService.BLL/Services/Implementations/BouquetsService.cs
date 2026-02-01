@@ -92,9 +92,9 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<BouquetDto> CreateAsync(BouquetCreateDto dto, CancellationToken cancellationToken = default)
         {
-            if (await uow.Bouquets.ExistsAsync(b => b.Name == dto.Name, cancellationToken))
+            if (await uow.Bouquets.ExistsWithNameAsync(dto.Name.GetValueOrDefault("ua", ""), cancellationToken: cancellationToken))
             {
-                throw new AlreadyExistsException($"Bouquet with name '{dto.Name}' already exists.");
+                throw new AlreadyExistsException($"Bouquet with name '{dto.Name.GetValueOrDefault("ua", "")}' already exists.");
             }
 
             if (!dto.Sizes.Any())
@@ -289,8 +289,8 @@ namespace CatalogService.BLL.Services.Implementations
             if (bouquet == null)
                 throw new NotFoundException($"Bouquet {id} not found.");
 
-            if (bouquet.Name != dto.Name && await uow.Bouquets.ExistsAsync(b => b.Name == dto.Name, cancellationToken))
-                throw new AlreadyExistsException($"Bouquet with name '{dto.Name}' already exists.");
+            if (bouquet.Name.GetValueOrDefault("ua") != dto.Name.GetValueOrDefault("ua") && await uow.Bouquets.ExistsWithNameAsync(dto.Name.GetValueOrDefault("ua", ""), cancellationToken: cancellationToken))
+                throw new AlreadyExistsException($"Bouquet with name '{dto.Name.GetValueOrDefault("ua", "")}' already exists.");
 
             if (!dto.Sizes.Any())
                 throw new BadRequestException("At least one size must be specified.");

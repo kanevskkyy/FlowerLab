@@ -8,7 +8,9 @@ function AboutSection() {
       <h2 className="section-title">{t("home.sections.about_title")}</h2>
       <div className="about-content">
         <div className="about-text">
-          <p>{t("home.sections.about_desc")}</p>
+          <p>{t("about.p1")}</p>
+          <p>{t("about.p2")}</p>
+          <p>{t("about.p3")}</p>
         </div>
         <div className="about-image">
           <img

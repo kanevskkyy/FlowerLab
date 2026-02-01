@@ -3,12 +3,14 @@ import { useTranslation } from "react-i18next";
 import bouquetsIco from "../../../assets/icons/flowerr.svg";
 import ordersIco from "../../../assets/icons/orders.svg";
 import reviewsIco from "../../../assets/icons/review.svg";
+import usersIco from "../../../assets/icons/userinfo.svg";
 
 function AdminSidebar({ active, setActive, isCatalogOpen, setIsCatalogOpen }) {
   const { t } = useTranslation();
   const NAV = [
     { key: "orders", label: t("admin.sidebar.orders"), icon: ordersIco },
     { key: "reviews", label: t("admin.sidebar.reviews"), icon: reviewsIco },
+    { key: "users", label: t("admin.sidebar.users"), icon: usersIco },
   ];
 
   return (
