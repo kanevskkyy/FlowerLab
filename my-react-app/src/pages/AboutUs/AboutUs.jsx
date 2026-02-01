@@ -11,6 +11,7 @@ import LocationIcon from "../../assets/icons/location-icon.svg";
 import PhoneIcon from "../../assets/icons/phone-icon.svg";
 import InstagramIcon from "../../assets/icons/instagram-icon.svg";
 import TelegramIcon from "../../assets/icons/telegram-icon.svg";
+import ViberIcon from "../../assets/icons/viber-icon.svg";
 import SparklesIcon from "../../assets/icons/sparkles-icon.svg";
 import FlowerIcon from "../../assets/icons/flower-icon.svg";
 import HandIcon from "../../assets/icons/hand-icon.svg";
@@ -114,11 +115,13 @@ const AboutUs = () => {
           <h2 className="info-title">{t("about_page.locations")}</h2>
           <div className="info-items">
             <div className="info-item footer-location">
-              <img
-                src={LocationIcon}
-                className="footer-icon location-icon"
-                alt="Location"
-              />
+              <div className="footer-icon-wrapper">
+                <img
+                  src={LocationIcon}
+                  className="footer-icon location-icon"
+                  alt="Location"
+                />
+              </div>
               <a
                 href="https://maps.app.goo.gl/myw4J2CtWA9AGVuj6"
                 target="_blank"
@@ -129,11 +132,13 @@ const AboutUs = () => {
             </div>
 
             <div className="info-item footer-location">
-              <img
-                src={LocationIcon}
-                className="footer-icon location-icon"
-                alt="Location"
-              />
+              <div className="footer-icon-wrapper">
+                <img
+                  src={LocationIcon}
+                  className="footer-icon location-icon"
+                  alt="Location"
+                />
+              </div>
               <a
                 href="https://maps.app.goo.gl/11uTt4nTxqpv2K3w5"
                 target="_blank"
@@ -149,22 +154,26 @@ const AboutUs = () => {
           <h2 className="info-title">{t("about_page.contacts")}</h2>
           <div className="info-items">
             <div className="info-item footer-phone">
-              <img
-                src={PhoneIcon}
-                className="footer-icon phone-icon"
-                alt="Phone"
-              />
+              <div className="footer-icon-wrapper">
+                <img
+                  src={PhoneIcon}
+                  className="footer-icon phone-icon"
+                  alt="Phone"
+                />
+              </div>
               <a href="tel:+380501591912" className="footer-link-single">
                 <p>+38 050 159 19 12</p>
               </a>
             </div>
 
             <div className="info-item footer-instagram">
-              <img
-                src={InstagramIcon}
-                className="footer-icon instagram-icon"
-                alt="Instagram"
-              />
+              <div className="footer-icon-wrapper">
+                <img
+                  src={InstagramIcon}
+                  className="footer-icon instagram-icon"
+                  alt="Instagram"
+                />
+              </div>
               <a
                 href="https://www.instagram.com/flowerlab_vlada/"
                 target="_blank"
@@ -175,17 +184,34 @@ const AboutUs = () => {
             </div>
 
             <div className="info-item footer-telegram">
-              <img
-                src={TelegramIcon}
-                className="footer-icon telegram-icon"
-                alt="Telegram"
-              />
+              <div className="footer-icon-wrapper">
+                <img
+                  src={TelegramIcon}
+                  className="footer-icon telegram-icon"
+                  alt="Telegram"
+                />
+              </div>
               <a
                 href="https://t.me/flower_lab_vlada"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-link-single">
-                <p>@flower_lab_vlada</p>
+                <p>@flowerlab_vlada</p>
+              </a>
+            </div>
+
+            <div className="info-item footer-viber">
+              <div className="footer-icon-wrapper">
+                <img
+                  src={ViberIcon}
+                  alt="Viber"
+                  className="footer-icon viber-icon"
+                />
+              </div>
+              <a
+                href="viber://chat?number=0501591912"
+                className="footer-link-single">
+                <p>@flowerlab_vlada</p>
               </a>
             </div>
           </div>

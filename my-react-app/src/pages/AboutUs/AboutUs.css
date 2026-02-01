@@ -225,6 +225,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  align-items: flex-start;
 }
 
 .info-items .footer-item {
@@ -239,20 +240,22 @@
   min-height: 28px;
 }
 
-.footer-icon {
-  width: 28px;
-  height: 28px;
+/* Специфічні іконки для блоку INFO (About Us) */
+.about-page .info-items .footer-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   flex-shrink: 0;
-  object-fit: contain;
-  transition: transform 0.3s ease;
-  pointer-events: none;
 }
 
-.location-icon,
-.phone-icon,
-.instagram-icon {
-  width: 32px !important;
-  height: 32px !important;
+.about-page .info-items .footer-icon {
+  width: auto;
+  height: auto;
+  max-width: 32px;
+  max-height: 32px;
+  object-fit: contain;
 }
 
 /* Стилі для текстових посилань (адреси) */
@@ -336,10 +339,10 @@
   width: 100%;
 }
 
-/* Анімація іконок телефону та Instagram */
-.footer-phone:has(.footer-link-single:hover) .phone-icon,
-.footer-instagram:has(.footer-link-single:hover) .instagram-icon,
-.footer-telegram:has(.footer-link-single:hover) .telegram-icon {
+.info-items .footer-phone:has(.footer-link-single:hover) .phone-icon,
+.info-items .footer-instagram:has(.footer-link-single:hover) .instagram-icon,
+.info-items .footer-telegram:has(.footer-link-single:hover) .telegram-icon,
+.info-items .footer-viber:has(.footer-link-single:hover) .viber-icon {
   transform: scale(1.15);
 }
 
@@ -381,7 +384,7 @@
   }
 
   .info-items {
-    align-items: center; /* Center items */
+    align-items: flex-start;
   }
 }
 
@@ -442,31 +445,21 @@
     text-align: center;
   }
 
-  .info-items {
+  .about-page .info-items {
     gap: 18px;
-    align-items: flex-start; /* Align left again for readability or keep center? Let's align left for mobile lists usually look better */
-    width: 100%;
-    max-width: 320px; /* Limit width */
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
     margin: 0 auto;
   }
 
-  .info-column {
-    align-items: center; /* Center the column wrapper */
+  .about-page .footer-icon-wrapper {
+    width: 28px;
+    height: 28px;
   }
 
-  .info-item {
-    width: 100%;
-  }
-
-  .footer-icon {
-    width: 24px;
-    height: 24px;
-  }
-
-  .location-icon,
-  .phone-icon,
-  .instagram-icon {
-    width: 28px !important;
-    height: 28px !important;
+  .about-page .footer-icon {
+    max-width: 24px;
+    max-height: 24px;
   }
 }

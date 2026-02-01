@@ -18,20 +18,27 @@
 
 .footer-item {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
 }
-
-/* Іконки */
-.footer-icon,
-.location-icon,
-.telegram-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
+/* Контейнери іконок у футері */
+.footer .footer-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   flex-shrink: 0;
-  margin-top: 2px; /* Вирівнюємо відносно першого рядка тексту */
+}
+
+.footer .footer-icon {
+  width: auto;
+  height: auto;
+  max-width: 24px;
+  max-height: 24px;
+  object-fit: contain;
+  display: block;
 }
 
 /* Текст */
@@ -55,7 +62,8 @@
   color: #c86aac;
 }
 
-.footer-telegram:has(.footer-link-single:hover) .telegram-icon {
+.footer-telegram:has(.footer-link-single:hover) .telegram-icon,
+.footer-viber:has(.footer-link-single:hover) .viber-icon {
   transform: scale(1.1);
 }
 
@@ -81,14 +89,26 @@
   .footer-col {
     width: 100%;
     gap: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the whole column */
   }
 
-  .footer-text p {
-    font-size: 13px;
+  .footer-item {
+    width: 100%;
+    max-width: 260px; /* Limit width to align icons in a column */
+    justify-content: flex-start;
+    margin: 0 auto;
+    padding-left: 20px; /* Optional: adjust to taste */
   }
 
-  /* Додатково: останній колонці можна дати відступ знизу 0 */
-  .footer-col:last-child {
-    margin-bottom: 0;
+  .footer .footer-icon-wrapper {
+    width: 28px;
+    height: 28px;
+  }
+
+  .footer .footer-icon {
+    max-width: 22px;
+    max-height: 22px;
   }
 }
