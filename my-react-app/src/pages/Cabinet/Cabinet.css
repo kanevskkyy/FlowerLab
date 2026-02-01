@@ -13,12 +13,9 @@
   flex-direction: column;
 }
 
-/* layout like screenshot */
 .cabinet-shell {
   display: grid;
   grid-template-columns: 260px 1fr;
-  /* ✅ ВИПРАВЛЕННЯ: Замість calc() використовуємо flex: 1. 
-     Це прибирає відступ зверху і гарантує, що сайдбар торкається хедера */
   flex: 1;
   align-items: stretch; /* Сайдбар розтягується на всю висоту */
 }
@@ -36,6 +33,35 @@
   top: 70px;
   height: calc(100vh - 70px);
   z-index: 10;
+}
+
+.cabinet-discount-badge {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #f4bce5 0%, #ed9cd3 100%);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  width: fit-content;
+  box-shadow: 0 4px 12px rgba(244, 188, 229, 0.3);
+}
+
+.discount-value {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cabinet-grid-mobile-single {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .cabinet-grid-mobile-single {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -172,6 +198,18 @@
 
 .cabinet-field input:focus {
   border-color: rgba(200, 106, 172, 0.7);
+}
+
+.cabinet-field.has-error input {
+  border-color: #ff4d4f;
+}
+
+.cabinet-error-text {
+  display: block;
+  font-size: 10px;
+  color: #ff4d4f;
+  margin-top: 4px;
+  margin-left: 12px;
 }
 
 /* subtitle */
@@ -621,6 +659,10 @@
   animation: slideUp 0.3s ease;
 }
 
+.cabinet-password-modal .cabinet-field {
+  margin-bottom: 18px;
+}
+
 .modal-title {
   font-size: 20px;
   font-weight: 600;
@@ -792,4 +834,80 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.cabinet-danger-zone {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #efe3ea;
+}
+
+.cabinet-account-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 1.5px solid #d3d3d3;
+  color: #333;
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cabinet-account-delete-btn:hover {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: white;
+}
+
+.cabinet-account-delete-btn:hover .cabinet-account-delete-icon {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+.cabinet-account-delete-icon {
+  width: 18px;
+  height: auto;
+  opacity: 0.8;
+}
+
+/* Original simple delete button for addresses */
+.cabinet-delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.cabinet-delete-btn:hover {
+  opacity: 0.7;
+}
+
+.modal-text {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.modal-btn-delete {
+  flex: 2;
+  padding: 12px;
+  border: none;
+  background: #ff4d4f;
+  color: white;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.modal-btn-delete:hover {
+  opacity: 0.9;
 }

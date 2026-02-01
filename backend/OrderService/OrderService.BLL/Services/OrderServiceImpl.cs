@@ -271,7 +271,7 @@ namespace OrderService.BLL.Services
 
             if (!string.IsNullOrWhiteSpace(order.GiftMessage)) itemsTotal += 50m;
             if (isFirstOrder) itemsTotal *= 0.9m;
-            if (personalDiscount > 0) itemsTotal *= 1 - personalDiscount;
+            if (personalDiscount > 0) itemsTotal *= (1 - personalDiscount / 100m);
 
             order.TotalPrice = itemsTotal;
 

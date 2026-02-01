@@ -12,13 +12,16 @@ import axiosClient from "../../api/axiosClient";
 import logoIcon from "../../assets/icons/logo.svg";
 import messageIcon from "../../assets/icons/message.svg";
 
-const schema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email format"),
-});
-
 export default function ForgotPassword() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const schema = z.object({
+    email: z
+      .string()
+      .min(1, t("validation.email_required"))
+      .email(t("validation.email_invalid")),
+  });
 
   const {
     register,
@@ -61,12 +64,14 @@ export default function ForgotPassword() {
 
       <main className="fp-content">
         <div className="fp-box">
-          <h2 className="fp-title">Password recovery</h2>
+          <h2 className="fp-title">
+            {t("auth.recovery_title") || "Password recovery"}
+          </h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Input Field */}
             <div className="form-field full-width">
-              <label className="field-label">Your Email</label>
+              <label className="field-label">{t("auth.email")}</label>
               <div className="input-row">
                 <input
                   type="email"
@@ -87,13 +92,11 @@ export default function ForgotPassword() {
 
             {/* Submit Button */}
             <button type="submit" className="fp-main-btn">
-              Send code
+              {t("auth.send_code")}
             </button>
 
             {/* Description Text (moved below button per design) */}
-            <p className="fp-description">
-              A password recovery email will be sent to you.
-            </p>
+            <p className="fp-description">{t("auth.recovery_desc")}</p>
           </form>
         </div>
       </main>

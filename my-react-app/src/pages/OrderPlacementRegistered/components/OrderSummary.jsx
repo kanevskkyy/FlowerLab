@@ -12,6 +12,7 @@ const OrderSummary = ({
   toggleGift,
   subtotal,
   discount,
+  discountPercentage,
   total,
   isCardAdded,
   toggleCard,
@@ -108,7 +109,7 @@ const OrderSummary = ({
         </div>
         <div className="calc-row discount">
           <span>{t("checkout.discount")}</span>
-          <span>{discount > 0 ? "10%" : "0%"}</span>
+          <span>{discountPercentage}%</span>
         </div>
         <div className="calc-row total">
           <span>{t("checkout.total")}</span>

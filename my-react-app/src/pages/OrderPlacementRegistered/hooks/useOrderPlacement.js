@@ -290,12 +290,23 @@ export const useOrderPlacement = () => {
   // Exposed "Subtotal" now includes everything
   const subtotal = cartSum + giftsTotal + cardFee;
 
-  // Discount applies to the total sum (bouquets + gifts + card)
-  const discount = isEligibleForDiscount ? subtotal * 0.1 : 0;
+  // 1. First order discount (10%)
+  const firstOrderDiscount = isEligibleForDiscount ? subtotal * 0.1 : 0;
+  const remainingAfterFirst = subtotal - firstOrderDiscount;
 
-  // Total is Subtotal - Discount
-  // (Delivery is separate usually? There was commented out deliveryCost)
-  const total = subtotal - discount;
+  // 2. Personal discount from user profile (JWT)
+  const personalDiscountRate = (user?.discount || 0) / 100;
+  const personalDiscountAmount = remainingAfterFirst * personalDiscountRate;
+
+  const totalDiscount = firstOrderDiscount + personalDiscountAmount;
+
+  // Total is Subtotal - Discounts
+  const total = subtotal - totalDiscount;
+
+  // Final count for display
+  const discount = totalDiscount;
+  const discountPercentage =
+    subtotal > 0 ? Math.round((totalDiscount / subtotal) * 100) : 0;
 
   // === Handlers ===
   const toggleGift = (giftId) => {
@@ -517,6 +528,7 @@ export const useOrderPlacement = () => {
     // Calculated Values
     subtotal,
     discount,
+    discountPercentage,
     total,
 
     // Handlers

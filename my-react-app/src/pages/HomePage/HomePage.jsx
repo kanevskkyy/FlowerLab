@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useCart } from "../../context/CartContext";
 import "./HomePage.css";
 import catalogService from "../../services/catalogService";
+import { getLocalizedValue } from "../../utils/localizationUtils";
 
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -17,7 +18,7 @@ import ReviewsSection from "./components/ReviewsSection";
 import SEO from "../../components/SEO/SEO";
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const { addToCart } = useCart();
 
@@ -43,8 +44,10 @@ export default function HomePage() {
             id: b.id, // This is productId
             bouquetId: b.id, // Distinct for clarity
             sizeId: minPriceSize ? minPriceSize.sizeId : null,
-            sizeName: minPriceSize ? minPriceSize.sizeName : "Standard",
-            title: b.name,
+            sizeName: minPriceSize
+              ? getLocalizedValue(minPriceSize.sizeName, i18n.language)
+              : "Standard",
+            title: getLocalizedValue(b.name, i18n.language),
             img: b.mainPhotoUrl,
             // Fallback Price Strategy
             price: minPriceSize ? `${minPriceSize.price} ₴` : `${b.price} ₴`,
@@ -59,7 +62,7 @@ export default function HomePage() {
       }
     };
     fetchPopular();
-  }, []);
+  }, [i18n.language]);
   const reviewsData = t("home.reviews_data", { returnObjects: true }) || [];
 
   const handleAddToCart = (item) => {

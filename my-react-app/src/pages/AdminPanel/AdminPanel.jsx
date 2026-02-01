@@ -11,6 +11,7 @@ import AdminProductList from "./components/AdminProductList";
 import AdminOrdersList from "./components/AdminOrdersList";
 import AdminCatalogSettings from "./components/AdminCatalogSettings";
 import AdminReviewsList from "./components/AdminReviewsList";
+import AdminUsersList from "./components/AdminUsersList";
 
 // Services
 import authService from "../../services/authService";
@@ -20,6 +21,7 @@ import { useAdminProducts } from "./hooks/useAdminProducts";
 import { useAdminOrders } from "./hooks/useAdminOrders";
 import { useAdminCatalog } from "./hooks/useAdminCatalog";
 import { useAdminReviews } from "./hooks/useAdminReviews";
+import { useAdminUsers } from "./hooks/useAdminUsers";
 import { useSettings } from "../../context/useSettings";
 
 export default function AdminPanel() {
@@ -70,6 +72,8 @@ export default function AdminPanel() {
   const {
     orders,
     statuses, // New
+    q: orderQ,
+    setQ: setOrderQ,
     sort,
     setSort,
     handleStatusChange,
@@ -89,6 +93,18 @@ export default function AdminPanel() {
     isLoadingMore: isLoadingReviews,
   } = useAdminReviews();
 
+  // Users
+  const {
+    users,
+    loading: usersLoading,
+    q: userQ,
+    setQ: setUserQ,
+    loadMore: loadUsers,
+    hasNextPage: hasNextUsers,
+    isLoadingMore: isLoadingUsers,
+    handleUpdateDiscount,
+  } = useAdminUsers(activeTab);
+
   // Catalog Settings
   const { settings, handleEdit } = useAdminCatalog();
 
@@ -105,6 +121,7 @@ export default function AdminPanel() {
             setQ={setQ}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
+            onDelete={handleDeleteProduct}
             onAdd={handleAddProduct}
             onEdit={handleEditProduct}
             loadMore={loadProducts}
@@ -136,6 +153,8 @@ export default function AdminPanel() {
           <AdminOrdersList
             orders={orders}
             statuses={statuses}
+            q={orderQ}
+            setQ={setOrderQ}
             sort={sort}
             setSort={setSort}
             onStatusChange={handleStatusChange}
@@ -156,11 +175,25 @@ export default function AdminPanel() {
         return (
           <AdminReviewsList
             reviews={reviews}
-            onPost={handleApproveReview}
+            onApprove={handleApproveReview}
+            onReject={handleRejectReview}
             onDelete={handleDeleteReview}
             loadMore={loadReviews}
             hasNextPage={hasNextReviews}
             isLoadingMore={isLoadingReviews}
+          />
+        );
+      case "users":
+        return (
+          <AdminUsersList
+            users={users}
+            loading={usersLoading}
+            q={userQ}
+            setQ={setUserQ}
+            onUpdateDiscount={handleUpdateDiscount}
+            loadMore={loadUsers}
+            hasNextPage={hasNextUsers}
+            isLoadingMore={isLoadingUsers}
           />
         );
       default:
@@ -174,7 +207,10 @@ export default function AdminPanel() {
       <header className="admin-topbar">
         <div className="admin-brand" onClick={() => navigate("/")}>
           <h2 className="admin-brand-top">FLOWER LAB</h2>
-          <span className="admin-brand-sub">VLADA</span>
+          <div className="admin-brand-bottom-box">
+            <span className="admin-brand-sub">VLADA</span>
+            <span className="admin-brand-tag">ADMIN</span>
+          </div>
         </div>
 
         <div className="admin-topbar-center">{t("admin.title")}</div>

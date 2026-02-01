@@ -1,6 +1,7 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { AuthContext } from "./authContext";
 import { jwtDecode } from "jwt-decode";
+import userService from "../services/userService";
 
 export default function AuthProvider({ children }) {
   // Допоміжна функція
@@ -43,6 +44,7 @@ export default function AuthProvider({ children }) {
           ] ||
           "",
         photoUrl: decoded.PhotoUrl || "",
+        discount: parseInt(decoded.Discount) || 0,
       };
     } catch (e) {
       console.error("Invalid token:", e);
@@ -60,11 +62,26 @@ export default function AuthProvider({ children }) {
 
   const [loading, setLoading] = useState(false);
 
-  // Цю функцію викликає Login.jsx після успішного запиту
-  const setAuth = useCallback((token) => {
+  // Експортуємо setAuth як login, щоб не ламати твій код в Login.jsx
+  const setAuth = useCallback(async (token) => {
     localStorage.setItem("accessToken", token);
     const userData = decodeToken(token);
     setUser(userData);
+
+    // Одразу підтягуємо повний профіль зі знижкою
+    try {
+      const fullProfile = await userService.getProfile();
+      setUser((prev) => ({
+        ...prev,
+        name: fullProfile.firstName,
+        lastName: fullProfile.lastName,
+        phone: fullProfile.phoneNumber,
+        photoUrl: fullProfile.photoUrl,
+        discount: fullProfile.personalDiscountPercentage || 0,
+      }));
+    } catch (e) {
+      console.error("Sync profile error:", e);
+    }
   }, []);
 
   const logout = useCallback(() => {
@@ -74,7 +91,29 @@ export default function AuthProvider({ children }) {
     window.location.href = "/login";
   }, []);
 
-  // Експортуємо setAuth як login, щоб не ламати твій код в Login.jsx
+  // Синхронізація при старті та зміні мови/сесії
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      const syncProfile = async () => {
+        try {
+          const fp = await userService.getProfile();
+          setUser((prev) => ({
+            ...prev,
+            name: fp.firstName,
+            lastName: fp.lastName,
+            phone: fp.phoneNumber,
+            photoUrl: fp.photoUrl,
+            discount: fp.personalDiscountPercentage || 0,
+          }));
+        } catch (e) {
+          console.error("Initial profile sync failed:", e);
+        }
+      };
+      syncProfile();
+    }
+  }, []);
+
   const value = useMemo(
     () => ({ user, login: setAuth, setAuth, logout, loading }),
     [user, setAuth, logout, loading],

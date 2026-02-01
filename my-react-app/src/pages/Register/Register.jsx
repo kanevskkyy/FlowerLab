@@ -18,25 +18,30 @@ import messageIcon from "../../assets/icons/message.svg";
 import toast from "react-hot-toast";
 
 // Схема валідації
-const schema = z
-  .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    phone: z.string().regex(/^\+380\d{9}$/, "Format: +380XXXXXXXXX"),
-    email: z.string().min(1, "Email is required").email("Invalid email"),
-    password: z.string().min(8, "Min 8 characters"),
-    confirmPassword: z.string().min(1, "Confirm password is required"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
 export default function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const schema = z
+    .object({
+      firstName: z.string().min(1, t("validation.first_name_required")),
+      lastName: z.string().min(1, t("validation.last_name_required")),
+      phone: z.string().regex(/^\+380\d{9}$/, t("validation.phone_format")),
+      email: z
+        .string()
+        .min(1, t("validation.email_required"))
+        .email(t("validation.email_invalid")),
+      password: z.string().min(8, t("validation.password_min")),
+      confirmPassword: z
+        .string()
+        .min(1, t("validation.confirm_password_required")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.passwords_mismatch"),
+      path: ["confirmPassword"],
+    });
 
   const {
     register,
@@ -63,12 +68,12 @@ export default function Register() {
       const authService = (await import("../../services/authService")).default;
       await authService.register(payload);
 
-      toast.success(t("auth.registration_success"));
+      toast.success(t("toasts.registration_success"));
       navigate("/email-confirmation-pending", { state: { email: data.email } });
     } catch (error) {
       console.error("Registration error:", error);
 
-      let errorMsg = "Реєстрація не вдалася.";
+      let errorMsg = t("toasts.registration_failed");
 
       if (error.response?.data) {
         const data = error.response.data;
@@ -83,7 +88,9 @@ export default function Register() {
       }
 
       toast.error(
-        typeof errorMsg === "string" ? errorMsg : t("auth.registration_failed"),
+        typeof errorMsg === "string"
+          ? errorMsg
+          : t("toasts.registration_failed"),
       );
     }
   };

@@ -3,12 +3,19 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import orderService from "../../../services/orderService";
 import { extractErrorMessage } from "../../../utils/errorUtils";
-import { getLocalizedValue } from "../../../utils/localizationUtils";
+import {
+  getLocalizedValue,
+  getLocalizedStatus,
+} from "../../../utils/localizationUtils";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 export function useAdminOrders() {
   const { t, i18n } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [q, setQ] = useState("");
+  const debouncedSearchTerm = useDebounce(q, 500);
+
   const [pagination, setPagination] = useState({
     pageNumber: 1,
     pageSize: 10,
@@ -66,6 +73,7 @@ export function useAdminOrders() {
             pageNumber: pagination.pageNumber,
             pageSize: pagination.pageSize,
             sort: sortParam,
+            SearchTerm: debouncedSearchTerm,
           }),
         ];
 
@@ -155,18 +163,19 @@ export function useAdminOrders() {
       pagination.pageNumber,
       pagination.pageSize,
       sort,
+      debouncedSearchTerm,
       statuses.length,
       i18n.language,
       t,
     ],
   );
 
-  // Initial Fetch (only when sort/language changes or first mount)
+  // Initial Fetch (only when sort/language/search changes or first mount)
   useEffect(() => {
-    // Reset to page 1 when sort or language changes
+    // Reset to page 1 when sort, language, or search changes
     setPagination((p) => ({ ...p, pageNumber: 1 }));
     setOrders([]); // Clear existing
-  }, [sort, i18n.language]);
+  }, [sort, i18n.language, debouncedSearchTerm]);
 
   // Trigger fetch when pageNumber changes
   useEffect(() => {
@@ -204,8 +213,13 @@ export function useAdminOrders() {
       } else if (targetStatus.name === "Delivered") {
         toast.success(t("toasts.admin_order_delivered"));
       } else {
+        const localizedStatus = getLocalizedStatus(
+          targetStatus,
+          i18n.language,
+          t,
+        );
         toast.success(
-          t("toasts.admin_status_updated", { status: targetStatus.name }),
+          t("toasts.admin_status_updated", { status: localizedStatus }),
         );
       }
     } catch (error) {
@@ -228,6 +242,8 @@ export function useAdminOrders() {
     orders,
     statuses, // Expose statuses
     loading,
+    q,
+    setQ,
     sort,
     setSort,
     pagination,

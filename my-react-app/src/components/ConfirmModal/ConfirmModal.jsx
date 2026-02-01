@@ -8,6 +8,7 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
   confirmText = "Delete",
+  cancelText = "Cancel",
   confirmType = "danger", // danger | nice
 }) {
   if (!isOpen) return null;
@@ -28,7 +29,7 @@ export default function ConfirmModal({
         <p className="cm-text">{message}</p>
         <div className="cm-actions">
           <button className="cm-btn cm-btn-cancel" onClick={onCancel}>
-            Cancel
+            {cancelText}
           </button>
           <button
             className={`cm-btn cm-btn-${confirmType}`}

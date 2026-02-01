@@ -10,6 +10,7 @@ import "./ProductCard.css";
 
 import { useProductData } from "./hooks/useProductData";
 import { useGifts } from "../Gifts/hooks/useGifts";
+import { getLocalizedValue } from "../../utils/localizationUtils";
 
 import ProductImages from "./components/ProductImages";
 import ProductInfo from "./components/ProductInfo";
@@ -29,7 +30,7 @@ const ProductCard = () => {
 };
 
 const ProductCardContent = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -60,11 +61,11 @@ const ProductCardContent = () => {
       .map((g) => ({
         id: g.id,
         image: g.imageUrl || "/placeholder.png",
-        title: g.name,
+        title: getLocalizedValue(g.name, i18n.language),
         price: `${g.price} ₴`,
         availableCount: g.availableCount,
       }));
-  }, [fetchedGifts]);
+  }, [fetchedGifts, i18n.language]);
 
   if (loading) {
     return <ProductDetailSkeleton />;

@@ -10,6 +10,7 @@ namespace UsersService.BLL.Models.Users
         public string? Email { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? PhotoUrl { get; set; }
         public int PersonalDiscountPercentage { get; set; }
         public string? Role { get; set; }

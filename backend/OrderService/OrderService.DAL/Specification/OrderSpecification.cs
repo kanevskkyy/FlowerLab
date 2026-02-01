@@ -35,6 +35,20 @@ namespace OrderService.DAL.Specification
                 Query.Where(o => o.Items.Any(i => i.BouquetId == parameters.BouquetId.Value));
             }
 
+            if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+            {
+                var term = parameters.SearchTerm.ToLower();
+                Query.Where(o =>
+                    (o.UserFirstName != null && o.UserFirstName.ToLower().Contains(term)) ||
+                    (o.UserLastName != null && o.UserLastName.ToLower().Contains(term)) ||
+                    ((o.UserFirstName != null && o.UserLastName != null) && (o.UserFirstName.ToLower() + " " + o.UserLastName.ToLower()).Contains(term)) ||
+                    (o.PhoneNumber != null && o.PhoneNumber.Contains(term)) ||
+                    (o.ReceiverName != null && o.ReceiverName.ToLower().Contains(term)) ||
+                    (o.ReceiverPhone != null && o.ReceiverPhone.Contains(term)) ||
+                    o.Id.ToString().ToLower().Contains(term)
+                );
+            }
+
             if (!string.IsNullOrEmpty(parameters.Sort))
             {
                 switch (parameters.Sort.ToLower())

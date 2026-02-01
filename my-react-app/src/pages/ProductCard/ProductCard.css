@@ -9,12 +9,12 @@
   width: 90%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 40px 20px 80px;
+  padding: 0 20px 80px;
 }
 
 /* ================= BREADCRUMBS ================= */
-.breadcrumbs {
-  margin: 20px 0 40px;
+.product-card .breadcrumbs {
+  margin: 20px 0 ;
   font-size: 14px;
   display: flex;
   align-items: center;
@@ -728,7 +728,7 @@
 /* ================= RESPONSIVE — TABLET ================= */
 @media (max-width: 1199px) {
   .product-card {
-    padding: 30px 20px 60px;
+    padding: 0 20px 60px;
   }
 
   .product-content {
@@ -749,7 +749,7 @@
 /* ================= RESPONSIVE — MOBILE ================= */
 @media (max-width: 767px) {
   .product-card {
-    padding: 20px 15px 40px;
+    padding: 0 15px 40px;
   }
 
   .breadcrumbs {

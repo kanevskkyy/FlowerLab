@@ -67,7 +67,8 @@ export default function AdminBouquetForm() {
             className="abf-back-btn"
             type="button"
             onClick={() => navigate("/admin")}>
-            ← {t("admin.cancel")}
+            <span className="abf-back-arrow">←</span>
+            <span className="abf-back-text">{t("admin.cancel")}</span>
           </button>
           <h1 className="abf-title">
             {isEditMode

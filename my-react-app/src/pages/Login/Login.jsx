@@ -18,16 +18,19 @@ import showIcon from "../../assets/icons/show.svg";
 import messageIcon from "../../assets/icons/message.svg";
 import toast from "react-hot-toast";
 
-const schema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email format"),
-  password: z.string().min(1, "Password is required"),
-});
-
 export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { setAuth } = useAuth(); // Використовуємо метод для оновлення стану
   const [showPassword, setShowPassword] = useState(false);
+
+  const schema = z.object({
+    email: z
+      .string()
+      .min(1, t("validation.email_required"))
+      .email(t("validation.email_invalid")),
+    password: z.string().min(1, t("validation.password_required")),
+  });
 
   const {
     register,

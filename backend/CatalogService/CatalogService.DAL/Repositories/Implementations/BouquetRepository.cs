@@ -86,6 +86,12 @@ namespace CatalogService.DAL.Repositories.Implementations
             return (minPrice, maxPrice);
         }
 
+        public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default)
+        {
+            var bouquets = await dbSet.AsNoTracking().ToListAsync(cancellationToken);
+            return bouquets.Any(b => (b.Name.GetValueOrDefault("ua") == name || b.Name.GetValueOrDefault("en") == name) && (!excludeId.HasValue || b.Id != excludeId.Value));
+        }
+
         public void DeleteImages(IEnumerable<BouquetImage> images)
         {
             context.BouquetImages.RemoveRange(images);

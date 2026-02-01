@@ -120,21 +120,34 @@ const OrderTrackingPage = () => {
           return;
         }
 
+        // Optimization: Group by token. Most users will have only one token.
+        const tokens = [...new Set(stored.map((o) => o.guestToken))];
+
         const results = await Promise.all(
-          stored.map(async (o) => {
+          tokens.map(async (token) => {
             try {
-              const res = await orderService.getById(o.orderId, o.guestToken);
-              return res;
+              // Fetch all orders for this token in one go
+              const res = await orderService.getMyOrders({
+                guestToken: token,
+                pageSize: 100, // Fetch plenty since it's history
+              });
+              return res.items || [];
             } catch (err) {
-              console.error(`Failed to fetch order ${o.orderId}:`, err);
-              return null;
+              console.error(`Failed to fetch orders for token ${token}:`, err);
+              return [];
             }
           }),
         );
 
-        const validOrders = results
-          .filter(Boolean)
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Flatten results and remove duplicates if any (though tokens should separate them)
+        const allOrders = results.flat();
+        const uniqueOrders = Array.from(
+          new Map(allOrders.map((o) => [o.id, o])).values(),
+        );
+
+        const validOrders = uniqueOrders.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        );
 
         // Map data for display immediately
         setOrders(validOrders.map(mapOrderData));
@@ -151,7 +164,7 @@ const OrderTrackingPage = () => {
     };
 
     fetchHistory();
-  }, [urlOrderId, urlToken, i18n.language]); // Dependency on i18n.language ensures re-mapping
+  }, [urlOrderId, urlToken, t, i18n.language]);
 
   return (
     <div className="page-wrapper tracking-page">

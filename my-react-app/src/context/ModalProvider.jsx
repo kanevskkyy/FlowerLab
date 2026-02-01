@@ -11,6 +11,7 @@ export default function ModalProvider({ children }) {
     title: "",
     message: "",
     confirmText: "Delete",
+    cancelText: "Cancel",
     confirmType: "danger",
     onConfirm: () => {},
     onCancel: () => {},
@@ -21,6 +22,7 @@ export default function ModalProvider({ children }) {
       title = "Are you sure?",
       message = "This action cannot be undone.",
       confirmText = "Delete",
+      cancelText = "Cancel",
       confirmType = "danger",
       onConfirm,
       onCancel,
@@ -30,6 +32,7 @@ export default function ModalProvider({ children }) {
         title,
         message,
         confirmText,
+        cancelText,
         confirmType,
         onConfirm: () => {
           if (onConfirm) onConfirm();
@@ -56,6 +59,7 @@ export default function ModalProvider({ children }) {
         title={modalState.title}
         message={modalState.message}
         confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
         confirmType={modalState.confirmType}
         onConfirm={modalState.onConfirm}
         onCancel={modalState.onCancel}

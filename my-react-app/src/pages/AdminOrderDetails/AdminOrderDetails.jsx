@@ -3,7 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import orderService from "../../services/orderService";
-import { getLocalizedValue } from "../../utils/localizationUtils";
+import {
+  getLocalizedValue,
+  getLocalizedStatus,
+  getStatusKey,
+} from "../../utils/localizationUtils";
 import "./AdminOrderDetails.css";
 
 export default function AdminOrderDetails() {
@@ -58,7 +62,11 @@ export default function AdminOrderDetails() {
       } else if (targetStatusObj.name === "Delivered") {
         toast.success(t("toasts.admin_order_delivered"));
       } else {
-        const localizedStatusName = getLocalizedStatus(targetStatusObj);
+        const localizedStatusName = getLocalizedStatus(
+          targetStatusObj,
+          i18n.language,
+          t,
+        );
         toast.success(
           t("toasts.admin_status_updated", { status: localizedStatusName }),
         );
@@ -68,24 +76,6 @@ export default function AdminOrderDetails() {
       toast.error(t("toasts.admin_status_update_failed"));
       setOrder((prev) => ({ ...prev, status: originalStatus }));
     }
-  };
-
-  const getStatusKey = (name) => {
-    if (!name) return "";
-    return name.replace(/\s/g, "").toLowerCase();
-  };
-
-  const getLocalizedStatus = (statusObj) => {
-    if (!statusObj) return "";
-    const name = typeof statusObj === "string" ? statusObj : statusObj.name;
-    const translations = statusObj.translations;
-
-    const localized = getLocalizedValue(translations, i18n.language);
-    if (localized) return localized;
-
-    return t(`order_status.${getStatusKey(name)}`, {
-      defaultValue: name,
-    });
   };
 
   if (loading)
@@ -133,7 +123,7 @@ export default function AdminOrderDetails() {
               onChange={(e) => handleStatusChange(e.target.value)}>
               {statuses.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {getLocalizedStatus(s)}
+                  {getLocalizedStatus(s, i18n.language, t)}
                 </option>
               ))}
             </select>
@@ -166,7 +156,12 @@ export default function AdminOrderDetails() {
                       <div className="aod-item-meta">
                         {item.sizeName && (
                           <span>
-                            {t("admin.orders.size", { size: item.sizeName })}{" "}
+                            {t("admin.orders.size", {
+                              size: getLocalizedValue(
+                                item.sizeName,
+                                i18n.language,
+                              ),
+                            })}{" "}
                             |{" "}
                           </span>
                         )}

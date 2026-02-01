@@ -39,7 +39,9 @@ namespace UsersService.BLL.Services
                 var term = filter.SearchTerm.ToLower();
                 query = query.Where(u =>
                     (u.FirstName != null && u.FirstName.ToLower().Contains(term)) ||
-                    (u.LastName != null && u.LastName.ToLower().Contains(term)));
+                    (u.LastName != null && u.LastName.ToLower().Contains(term)) ||
+                    ((u.FirstName != null && u.LastName != null) && (u.FirstName.ToLower() + " " + u.LastName.ToLower()).Contains(term)) ||
+                    (u.Email != null && u.Email.ToLower().Contains(term)));
             }
 
             var users = await query.ToListAsync();
