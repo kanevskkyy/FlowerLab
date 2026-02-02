@@ -88,8 +88,14 @@ namespace CatalogService.DAL.Repositories.Implementations
 
         public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            var lowercaseName = name.Trim().ToLower();
+            
             var bouquets = await dbSet.AsNoTracking().ToListAsync(cancellationToken);
-            return bouquets.Any(b => (b.Name.GetValueOrDefault("ua") == name || b.Name.GetValueOrDefault("en") == name) && (!excludeId.HasValue || b.Id != excludeId.Value));
+            
+            return bouquets.AsEnumerable().Any(b => 
+                (b.Name != null && b.Name.Values.Any(v => v != null && v.Trim().ToLower() == lowercaseName)) && 
+                (!excludeId.HasValue || b.Id != excludeId.Value));
         }
 
         public void DeleteImages(IEnumerable<BouquetImage> images)

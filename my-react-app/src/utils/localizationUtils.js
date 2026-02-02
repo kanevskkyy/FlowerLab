@@ -13,15 +13,28 @@ export const getLocalizedValue = (field, currentLang = "ua") => {
       : "en";
 
   if (typeof field === "object" && field !== null) {
-    const val = field[lang] || field.ua || field.en;
-    if (val) return val;
-
     const normalizedField = {};
     Object.keys(field).forEach((k) => {
       normalizedField[k.toLowerCase()] = field[k];
     });
+
+    // Strategy for Ukrainian
+    if (lang === "ua") {
+      return (
+        normalizedField.ua ||
+        normalizedField.uk ||
+        normalizedField.ukr ||
+        normalizedField.en ||
+        null
+      );
+    }
+    // Strategy for English
     return (
-      normalizedField[lang] || normalizedField.ua || normalizedField.en || null
+      normalizedField.en ||
+      normalizedField.eng ||
+      normalizedField.ua ||
+      normalizedField.uk ||
+      null
     );
   }
 

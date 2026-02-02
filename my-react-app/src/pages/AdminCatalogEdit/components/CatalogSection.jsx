@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 const CatalogSection = ({
   title,
@@ -21,17 +22,9 @@ const CatalogSection = ({
           const key = item.id || item.Id || `category-${index}`;
           const nameData = item.name || item.Name;
 
-          const currentLang = i18n.language.toLowerCase().includes("ua")
-            ? "ua"
-            : "en";
           const label =
-            typeof nameData === "object"
-              ? nameData[currentLang] || nameData.ua || nameData.en
-              : typeof nameData === "string"
-                ? nameData
-                : typeof item === "string"
-                  ? item
-                  : nameData || "Unknown";
+            getLocalizedValue(item.name || item.Name, i18n.language) ||
+            (typeof item === "string" ? item : t("admin.catalog.unnamed_item"));
 
           return (
             <div key={key} className="ace-tag">

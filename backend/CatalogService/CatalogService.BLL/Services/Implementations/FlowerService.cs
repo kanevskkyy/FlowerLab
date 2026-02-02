@@ -42,15 +42,19 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<FlowerDto> CreateAsync(FlowerCreateUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            if (await uow.Flowers.ExistsWithNameAsync(dto.Name.GetValueOrDefault("ua", ""), cancellationToken: cancellationToken))
-                throw new AlreadyExistsException($"Flower '{dto.Name.GetValueOrDefault("ua", "")}' already exists.");
+            var uaName = dto.Name?.GetValueOrDefault("ua") ?? "";
+            if (string.IsNullOrWhiteSpace(uaName))
+                throw new ArgumentException("Ukrainian name is required.");
+
+            if (await uow.Flowers.ExistsWithNameAsync(uaName, cancellationToken: cancellationToken))
+                throw new AlreadyExistsException($"Flower '{uaName}' already exists.");
 
             if (dto.Quantity < 0)
                 throw new ArgumentException("Quantity must be non-negative.");
 
             Flower flower = new Flower
             {
-                Name = dto.Name,
+                Name = dto.Name ?? new Dictionary<string, string>(),
                 Quantity = dto.Quantity
             };
 
@@ -64,20 +68,25 @@ namespace CatalogService.BLL.Services.Implementations
 
         public async Task<FlowerDto> UpdateAsync(Guid id, FlowerCreateUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            Flower? flower = await uow.Flowers.GetByIdAsync(id, cancellationToken);
+            // Use tracked entity for reliable updates
+            Flower? flower = await uow.Flowers.GetByIdTrackedAsync(id, cancellationToken);
             if (flower == null)
                 throw new NotFoundException($"Flower with ID {id} not found.");
 
-            if (await uow.Flowers.ExistsWithNameAsync(dto.Name.GetValueOrDefault("ua", ""), id, cancellationToken))
-                throw new AlreadyExistsException($"Flower '{dto.Name.GetValueOrDefault("ua", "")}' already exists.");
+            var newUaName = dto.Name?.GetValueOrDefault("ua") ?? "";
+            if (string.IsNullOrWhiteSpace(newUaName))
+                throw new ArgumentException("Ukrainian name is required.");
+
+            if (await uow.Flowers.ExistsWithNameAsync(newUaName, id, cancellationToken))
+                throw new AlreadyExistsException($"Flower '{newUaName}' already exists.");
 
             if (dto.Quantity < 0)
                 throw new ArgumentException("Quantity must be non-negative.");
 
-            flower.Name = dto.Name;
+            flower.Name = dto.Name ?? flower.Name;
             flower.Quantity = dto.Quantity;
 
-            uow.Flowers.Update(flower);
+            // No need to call Update() explicitly if tracked, but SaveChanges is required
             await uow.SaveChangesAsync(cancellationToken);
 
             await entityCacheInvalidationService.InvalidateAllAsync();

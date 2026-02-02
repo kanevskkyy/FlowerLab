@@ -29,6 +29,42 @@ export const useAdminCatalog = (confirm) => {
   // Editing State
   const [editingFlower, setEditingFlower] = useState(null);
 
+  // Helper to normalize any catalog item
+  const normalizeItem = useCallback((item) => {
+    if (!item || typeof item !== "object") return null;
+
+    // Aggressive ID search
+    const id =
+      item.id ||
+      item.Id ||
+      item.ID ||
+      item.itemId ||
+      item.flowerId ||
+      item.eventId ||
+      item.recipientId;
+
+    // Aggressive Name search
+    const name = item.name || item.Name || item.title || item.Title || {};
+
+    // Aggressive Quantity search
+    const quantity =
+      item.quantity ?? item.Quantity ?? item.qty ?? item.Qty ?? 0;
+
+    return { id, name, quantity };
+  }, []);
+
+  // Helper to sort flowers by name (UA first)
+  const sortFlowers = useCallback(
+    (list) => {
+      return [...list].sort((a, b) => {
+        const nameA = getLocalizedValue(a.name, i18n.language) || "";
+        const nameB = getLocalizedValue(b.name, i18n.language) || "";
+        return nameA.localeCompare(nameB);
+      });
+    },
+    [i18n.language],
+  );
+
   // Fetch Data
   const fetchData = useCallback(async () => {
     try {
@@ -46,28 +82,14 @@ export const useAdminCatalog = (confirm) => {
         return Array.isArray(items) ? items : [];
       };
 
-      const eventsData = normalize(events);
-      const recipientsData = normalize(recipients);
-      const flowersData = normalize(flowers);
+      const eventsData = normalize(events).map(normalizeItem);
+      const recipientsData = normalize(recipients).map(normalizeItem);
+      const flowersData = normalize(flowers).map(normalizeItem);
 
       setData({
         events: eventsData,
         forWho: recipientsData,
-        flowerTypes: flowersData.sort((a, b) => {
-          const nameA = (
-            a.name?.ua ||
-            a.Name?.ua ||
-            (typeof a.name === "string" ? a.name : a.Name) ||
-            ""
-          ).toString();
-          const nameB = (
-            b.name?.ua ||
-            b.Name?.ua ||
-            (typeof b.name === "string" ? b.name : b.Name) ||
-            ""
-          ).toString();
-          return nameA.localeCompare(nameB);
-        }),
+        flowerTypes: sortFlowers(flowersData),
       });
     } catch (error) {
       console.error("Failed to fetch catalog settings:", error);
@@ -109,24 +131,12 @@ export const useAdminCatalog = (confirm) => {
 
       try {
         const nameObj = { ua: nameUa, en: nameEn || nameUa };
-        const newItem = await catalogService.createFlower(nameObj, qty);
+        const res = await catalogService.createFlower(nameObj, qty);
+        const newItem = normalizeItem(res);
+
         setData((prev) => ({
           ...prev,
-          flowerTypes: [...prev.flowerTypes, newItem].sort((a, b) => {
-            const nameA = (
-              a.name?.ua ||
-              a.Name?.ua ||
-              (typeof a.name === "string" ? a.name : a.Name) ||
-              ""
-            ).toString();
-            const nameB = (
-              b.name?.ua ||
-              b.Name?.ua ||
-              (typeof b.name === "string" ? b.name : b.Name) ||
-              ""
-            ).toString();
-            return nameA.localeCompare(nameB);
-          }),
+          flowerTypes: sortFlowers([...prev.flowerTypes, newItem]),
         }));
         setInputs((prev) => ({
           ...prev,
@@ -163,18 +173,19 @@ export const useAdminCatalog = (confirm) => {
 
     try {
       const nameObj = { ua: valUa, en: valEn || valUa };
-      let newItem;
+      let res;
       switch (category) {
         case "events":
-          newItem = await catalogService.createEvent(nameObj);
+          res = await catalogService.createEvent(nameObj);
           break;
         case "forWho":
-          newItem = await catalogService.createRecipient(nameObj);
+          res = await catalogService.createRecipient(nameObj);
           break;
         default:
           return;
       }
 
+      const newItem = normalizeItem(res);
       setData((prev) => ({
         ...prev,
         [category]: [...prev[category], newItem],
@@ -192,45 +203,56 @@ export const useAdminCatalog = (confirm) => {
   };
 
   const handleUpdateFlower = async () => {
-    if (!editingFlower || !editingFlower.name?.ua?.trim()) return;
+    if (!editingFlower) return;
+    const id = editingFlower.id || editingFlower.Id;
+    const nameData = editingFlower.name || editingFlower.Name;
 
-    try {
-      const updated = await catalogService.updateFlower(
-        editingFlower.id,
-        editingFlower.name,
-        editingFlower.quantity,
-      );
-
-      setData((prev) => ({
-        ...prev,
-        flowerTypes: prev.flowerTypes
-          .map((f) =>
-            (f.id || f.Id) === (editingFlower.id || editingFlower.Id)
-              ? updated
-              : f,
-          )
-          .sort((a, b) => {
-            const nameA = (
-              a.name?.ua ||
-              a.Name?.ua ||
-              (typeof a.name === "string" ? a.name : a.Name) ||
-              ""
-            ).toString();
-            const nameB = (
-              b.name?.ua ||
-              b.Name?.ua ||
-              (typeof b.name === "string" ? b.name : b.Name) ||
-              ""
-            ).toString();
-            return nameA.localeCompare(nameB);
-          }),
-      }));
-      setEditingFlower(null);
-      toast.success(t("toasts.admin_flower_updated"));
-    } catch (error) {
-      console.error("Failed to update flower:", error);
-      toast.error(t("toasts.admin_flower_update_failed"));
+    // Fallback validation
+    const uaName = getLocalizedValue(nameData, "ua");
+    if (!uaName?.trim()) {
+      toast.error(t("toasts.admin_ua_name_required"));
+      return;
     }
+
+    const updatePromise = catalogService.updateFlower(
+      id,
+      nameData,
+      editingFlower.quantity ?? editingFlower.Quantity,
+    );
+
+    toast.promise(updatePromise, {
+      loading: t("admin.saving"),
+      success: (res) => {
+        let updated = normalizeItem(res);
+
+        // Safety Merge: if backend returns hollow data, preserve existing state
+        if (!updated || !updated.id || !getLocalizedValue(updated.name, "ua")) {
+          console.warn("Partial data from backend, merging with state", res);
+          updated = {
+            ...editingFlower,
+            ...(updated || {}),
+            id: id,
+            name:
+              updated && getLocalizedValue(updated.name, "ua")
+                ? updated.name
+                : nameData,
+          };
+        }
+
+        setData((prev) => ({
+          ...prev,
+          flowerTypes: sortFlowers(
+            prev.flowerTypes.map((f) => ((f.id || f.Id) === id ? updated : f)),
+          ),
+        }));
+        setEditingFlower(null);
+        return t("toasts.admin_flower_updated");
+      },
+      error: (err) => {
+        console.error("Update Failed:", err);
+        return t("toasts.admin_flower_update_failed");
+      },
+    });
   };
 
   const handleRemoveClick = (category, item) => {

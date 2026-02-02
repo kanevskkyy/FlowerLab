@@ -3,6 +3,8 @@ using CatalogService.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CatalogService.Domain.Entities;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +16,14 @@ namespace CatalogService.DAL.Repositories.Implementations
 
         public async Task<bool> ExistsWithNameAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default)
         {
-            return await dbSet.AnyAsync(s => (s.Name["ua"] == name || s.Name["en"] == name) && (!excludeId.HasValue || s.Id != excludeId.Value), cancellationToken);
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            var lowercaseName = name.Trim().ToLower();
+            
+            var items = await dbSet.AsNoTracking().ToListAsync(cancellationToken);
+            
+            return items.Any(s => 
+                (s.Name != null && s.Name.Values.Any(v => v != null && v.Trim().ToLower() == lowercaseName)) && 
+                (!excludeId.HasValue || s.Id != excludeId.Value));
         }
     }
 }

@@ -465,6 +465,7 @@
       "ua_placeholder": "UA Name...",
       "en_placeholder": "EN Name...",
       "no_items": "No items yet",
+      "unnamed_item": "Unnamed",
       "confirm_delete_title": "Delete \"{{name}}\"?",
       "confirm_delete_msg": "Are you sure you want to delete this item? This may cause issues for products using it."
     },
