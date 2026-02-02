@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import editIcon from "../../../assets/icons/edit.svg";
 import trashIcon from "../../../assets/icons/trash.svg";
+import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 const FlowerStockTable = ({
   flowers,
@@ -73,15 +74,19 @@ const FlowerStockTable = ({
             </tr>
 
             {/* List Rows */}
-            {flowers.map((item) => {
-              const itemId = item.id || item.Id;
+            {flowers.map((item, index) => {
+              const itemId = item.id || item.Id || `flower-${index}`;
               const editingId = editingFlower?.id || editingFlower?.Id;
-              const isEditing = editingId === itemId;
+              const isEditing = editingFlower && editingId === itemId;
 
               if (isEditing) {
-                const nameData = editingFlower.name || editingFlower.Name || {};
+                let nameData = editingFlower.name || editingFlower.Name || {};
+                // If name is just a string, convert to object
+                if (typeof nameData === "string") {
+                  nameData = { ua: nameData, en: nameData };
+                }
                 return (
-                  <tr key={itemId} className="editing-row">
+                  <tr key={itemId} className="ace-editing-row">
                     <td>
                       <div className="ace-input-group">
                         <input
@@ -111,7 +116,9 @@ const FlowerStockTable = ({
                     <td>
                       <input
                         type="number"
-                        value={editingFlower.quantity || editingFlower.Quantity}
+                        value={
+                          editingFlower.quantity ?? editingFlower.Quantity ?? ""
+                        }
                         onChange={(e) =>
                           setEditingFlower({
                             ...editingFlower,
@@ -159,15 +166,12 @@ const FlowerStockTable = ({
                 );
               }
 
-              const currentLang = i18n.language.toLowerCase().includes("ua")
-                ? "ua"
-                : "en";
-              const nameData = item.name || item.Name || {};
-              const quantity = item.quantity ?? item.Quantity;
+              const nameData = item.name || item.Name;
               const displayName =
-                typeof nameData === "object"
-                  ? nameData[currentLang] || nameData.ua || nameData.en
-                  : nameData;
+                getLocalizedValue(nameData, i18n.language) ||
+                (typeof nameData === "string" ? nameData : "") ||
+                t("admin.catalog.unnamed_item");
+              const quantity = item.quantity ?? item.Quantity ?? 0;
 
               return (
                 <tr key={itemId}>
