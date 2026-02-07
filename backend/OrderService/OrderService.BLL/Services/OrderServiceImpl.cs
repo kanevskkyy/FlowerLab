@@ -273,6 +273,8 @@ namespace OrderService.BLL.Services
             if (isFirstOrder) itemsTotal *= 0.9m;
             if (personalDiscount > 0) itemsTotal *= (1 - personalDiscount / 100m);
 
+            if (order.IsDelivery) itemsTotal += 300m;
+
             order.TotalPrice = itemsTotal;
 
             now = DateTime.UtcNow;
@@ -488,7 +490,6 @@ namespace OrderService.BLL.Services
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             var dtoResult = mapper.Map<OrderDetailDto>(order);
-            dtoResult.TotalPrice = order.Items.Sum(i => i.Price * i.Count);
 
             return dtoResult;
         }

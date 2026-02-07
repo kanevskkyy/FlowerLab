@@ -72,7 +72,7 @@ const GiftsSlider = ({ gifts, giftsLoading, selectedGifts, toggleGift }) => {
                           selectedGifts.includes(gift.id) ? "active" : ""
                         }`}
                         onClick={() => toggleGift(gift.id)}>
-                        {selectedGifts.includes(gift.id) ? "" : "+"}
+                        +
                       </button>
                     </div>
                   </div>

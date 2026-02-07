@@ -14,6 +14,8 @@ import catalogService from "../../../services/catalogService";
 import orderService from "../../../services/orderService";
 import axiosClient from "../../../api/axiosClient";
 
+const DELIVERY_FEE = 300;
+
 // === Schema ===
 const schema = z
   .object({
@@ -300,8 +302,9 @@ export const useOrderPlacement = () => {
 
   const totalDiscount = firstOrderDiscount + personalDiscountAmount;
 
-  // Total is Subtotal - Discounts
-  const total = subtotal - totalDiscount;
+  // Total is Subtotal - Discounts + Delivery Fee
+  const deliveryFee = deliveryType === "delivery" ? DELIVERY_FEE : 0;
+  const total = subtotal - totalDiscount + deliveryFee;
 
   // Final count for display
   const discount = totalDiscount;
@@ -529,6 +532,8 @@ export const useOrderPlacement = () => {
     subtotal,
     discount,
     discountPercentage,
+    deliveryFee,
+    deliveryType,
     total,
 
     // Handlers

@@ -36,6 +36,8 @@ const OrderPlacement = () => {
     subtotal,
     discount,
     discountPercentage,
+    deliveryFee,
+    deliveryType,
     total,
     toggleGift,
     toggleCard,
@@ -92,6 +94,8 @@ const OrderPlacement = () => {
               subtotal={subtotal}
               discount={discount}
               discountPercentage={discountPercentage}
+              deliveryFee={deliveryFee}
+              deliveryType={deliveryType}
               total={total}
               isCardAdded={isCardAdded}
               toggleCard={toggleCard}

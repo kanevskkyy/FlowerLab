@@ -510,6 +510,8 @@
   outline: none;
   margin-bottom: 20px;
   transition: all 0.2s;
+  resize: none;
+  min-height: 80px;
 }
 
 .card-message-input:focus {

@@ -1,10 +1,10 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import LocationIcon from "../../assets/icons/location-icon.svg";
 import PhoneIcon from "../../assets/icons/phone-icon.svg";
 import InstagramIcon from "../../assets/icons/instagram-icon.svg";
 import TelegramIcon from "../../assets/icons/telegram-icon.svg";
 import ViberIcon from "../../assets/icons/viber-icon.svg";
+import WhatsappIcon from "../../assets/icons/whatsapp-icon.svg";
 import "./Footer.css";
 
 const Footer = () => {
@@ -41,65 +41,78 @@ const Footer = () => {
         <div className="footer-icon-wrapper">
           <img src={PhoneIcon} alt="Phone" className="footer-icon phone-icon" />
         </div>
-        <a href="tel:+380501591912" className="footer-link-single">
-          <div className="footer-text">
-            <p>+38 050 159 19 12</p>
-          </div>
-        </a>
+        <div className="contacts-numbers">
+          <a href="tel:+380501591912" className="footer-link-single">
+            <div className="footer-text">
+              <p>+380 50 159 19 12</p>
+            </div>
+          </a>
+          <a href="tel:+380976200144" className="footer-link-single">
+            <div className="footer-text">
+              <p>+380 97 620 01 44</p>
+            </div>
+          </a>
+        </div>
       </div>
 
       <div className="footer-col footer-socials">
         <div className="footer-item footer-instagram">
-          <div className="footer-icon-wrapper">
-            <img
-              src={InstagramIcon}
-              alt="Instagram"
-              className="footer-icon instagram-icon"
-            />
-          </div>
           <a
             href="https://www.instagram.com/flowerlab_vlada/"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-link-single">
-            <div className="footer-text">
-              <p>@flowerlab_vlada</p>
+            <div className="footer-icon-wrapper">
+              <img
+                src={InstagramIcon}
+                alt="Instagram"
+                className="footer-icon instagram-icon"
+              />
             </div>
           </a>
         </div>
 
         <div className="footer-item footer-telegram">
-          <div className="footer-icon-wrapper">
-            <img
-              src={TelegramIcon}
-              alt="Telegram"
-              className="footer-icon telegram-icon"
-            />
-          </div>
           <a
             href="https://t.me/flower_lab_vlada"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-link-single">
-            <div className="footer-text">
-              <p>@flowerlab_vlada</p>
+            <div className="footer-icon-wrapper">
+              <img
+                src={TelegramIcon}
+                alt="Telegram"
+                className="footer-icon telegram-icon"
+              />
             </div>
           </a>
         </div>
 
         <div className="footer-item footer-viber">
-          <div className="footer-icon-wrapper">
-            <img
-              src={ViberIcon}
-              alt="Viber"
-              className="footer-icon viber-icon"
-            />
-          </div>
           <a
-            href="viber://chat?number=0501591912"
+            href="viber://chat?number=0976200144"
             className="footer-link-single">
-            <div className="footer-text">
-              <p>@flowerlab_vlada</p>
+            <div className="footer-icon-wrapper">
+              <img
+                src={ViberIcon}
+                alt="Viber"
+                className="footer-icon viber-icon"
+              />
+            </div>
+          </a>
+        </div>
+        <div className="footer-item footer-whatsapp">
+          <a
+            href="https://wa.me/380501591912"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link-single">
+            <div className="footer-icon-wrapper">
+              <img
+                src={WhatsappIcon}
+                alt="WhatsApp"
+                className="footer-icon whatsapp-icon"
+              />
             </div>
           </a>
         </div>

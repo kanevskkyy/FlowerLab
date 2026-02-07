@@ -89,7 +89,7 @@
     "load_more": "LOAD MORE",
     "no_results": "Nothing found for your request",
     "no_results_sub": "Try changing filters or checking the spelling",
-    "order_btn": "ORDER"
+    "order_btn": "More details"
   },
   "product": {
     "not_found": "Product not found",
@@ -142,7 +142,8 @@
     "delivery": "Fast & Reliable Delivery",
     "personalized": "Personalized Designs",
     "locations": "Our locations:",
-    "contacts": "Our contact information:"
+    "contacts": "Our contact information:",
+    "social_media": "Social media"
   },
   "gifts": {
     "title": "GIFTS & EXTRAS",
@@ -525,6 +526,7 @@
     "your_order": "YOUR ORDER:",
     "subtotal": "Subtotal:",
     "discount": "Discount:",
+    "delivery_fee": "Delivery:",
     "total": "TOTAL:",
     "add_card": "+ Add a card",
     "remove_card": "- Remove card",
