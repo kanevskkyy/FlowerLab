@@ -13,6 +13,8 @@ const OrderSummary = ({
   subtotal,
   discount,
   discountPercentage,
+  deliveryFee,
+  deliveryType,
   total,
   isCardAdded,
   toggleCard,
@@ -111,6 +113,12 @@ const OrderSummary = ({
           <span>{t("checkout.discount")}</span>
           <span>{discountPercentage}%</span>
         </div>
+        {deliveryType === "delivery" && (
+          <div className="calc-row">
+            <span>{t("checkout.delivery_fee")}</span>
+            <span>{deliveryFee} ₴</span>
+          </div>
+        )}
         <div className="calc-row total">
           <span>{t("checkout.total")}</span>
           <span>{total} ₴</span>
@@ -125,8 +133,7 @@ const OrderSummary = ({
       </div>
 
       {isCardAdded && (
-        <input
-          type="text"
+        <textarea
           className="card-message-input"
           placeholder={t("checkout.card_msg_placeholder")}
           {...register("cardMessage")}

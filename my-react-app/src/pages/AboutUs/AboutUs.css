@@ -228,6 +228,12 @@
   align-items: flex-start;
 }
 
+.contacts-numbers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .info-items .footer-item {
   min-height: auto;
 }
@@ -251,11 +257,13 @@
 }
 
 .about-page .info-items .footer-icon {
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
   max-width: 32px;
   max-height: 32px;
   object-fit: contain;
+  display: block;
+  transition: transform 0.3s ease;
 }
 
 /* Стилі для текстових посилань (адреси) */
@@ -270,7 +278,7 @@
 .footer-link-text p {
   margin: 0;
   font-size: 13px;
-  color: #333;
+  color: var(--text-dark);
   line-height: 1.4;
   transition: color 0.3s ease;
   position: relative;
@@ -296,8 +304,9 @@
   width: 100%;
 }
 
-/* Анімація іконки локації при наведенні на адресу */
-.footer-location:has(.footer-link-text:hover) .location-icon {
+/* Анімація іконок при наведенні */
+.footer-location:has(.footer-link-text:hover) .location-icon,
+.footer-phone:has(.footer-link-single:hover) .phone-icon {
   transform: scale(1.15);
 }
 
@@ -313,7 +322,7 @@
 .footer-link-single p {
   margin: 0;
   font-size: 13px;
-  color: #333;
+  color: var(--text-dark);
   line-height: 1.4;
   transition: color 0.3s ease;
   position: relative;
@@ -339,11 +348,31 @@
   width: 100%;
 }
 
-.info-items .footer-phone:has(.footer-link-single:hover) .phone-icon,
-.info-items .footer-instagram:has(.footer-link-single:hover) .instagram-icon,
-.info-items .footer-telegram:has(.footer-link-single:hover) .telegram-icon,
-.info-items .footer-viber:has(.footer-link-single:hover) .viber-icon {
+.social-links-label {
+  font-family: var(--font-caption);
+  font-size: 14px;
+  font-weight: 500;
+  color: #999;
+  margin: 20px 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.social-links-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  justify-content: flex-start;
+}
+
+.social-links-row .footer-link-single:hover .footer-icon {
   transform: scale(1.15);
+}
+
+.social-links-row .footer-icon {
+  transition: transform 0.3s ease;
 }
 
 /* ===================================================

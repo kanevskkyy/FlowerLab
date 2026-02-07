@@ -16,7 +16,7 @@ const Stars = ({ value }) => {
 
 function AdminReviewsList({
   reviews,
-  onPost,
+  onApprove,
   onDelete,
   loadMore,
   hasNextPage,
@@ -82,7 +82,7 @@ function AdminReviewsList({
                   <button
                     type="button"
                     className="review-icon-btn ok"
-                    onClick={() => onPost(r.id)}>
+                    onClick={() => onApprove(r.id)}>
                     ✓
                   </button>
                   <button

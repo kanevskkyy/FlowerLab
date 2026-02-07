@@ -12,6 +12,7 @@ import PhoneIcon from "../../assets/icons/phone-icon.svg";
 import InstagramIcon from "../../assets/icons/instagram-icon.svg";
 import TelegramIcon from "../../assets/icons/telegram-icon.svg";
 import ViberIcon from "../../assets/icons/viber-icon.svg";
+import WhatsappIcon from "../../assets/icons/whatsapp-icon.svg";
 import SparklesIcon from "../../assets/icons/sparkles-icon.svg";
 import FlowerIcon from "../../assets/icons/flower-icon.svg";
 import HandIcon from "../../assets/icons/hand-icon.svg";
@@ -161,58 +162,72 @@ const AboutUs = () => {
                   alt="Phone"
                 />
               </div>
-              <a href="tel:+380501591912" className="footer-link-single">
-                <p>+38 050 159 19 12</p>
-              </a>
+              <div className="contacts-numbers">
+                <a href="tel:+380501591912" className="footer-link-single">
+                  <p>+380 50 159 19 12</p>
+                </a>
+                <a href="tel:+380976200144" className="footer-link-single">
+                  <p>+380 97 620 01 44</p>
+                </a>
+              </div>
             </div>
 
-            <div className="info-item footer-instagram">
-              <div className="footer-icon-wrapper">
-                <img
-                  src={InstagramIcon}
-                  className="footer-icon instagram-icon"
-                  alt="Instagram"
-                />
-              </div>
-              <a
-                href="https://www.instagram.com/flowerlab_vlada/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-link-single">
-                <p>@flowerlab_vlada</p>
-              </a>
-            </div>
+            <div className="social-links-container">
+              <h3 className="info-title">{t("about_page.social_media")}</h3>
+              <div className="social-links-row">
+                <a
+                  href="https://www.instagram.com/flowerlab_vlada/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-link-single">
+                  <div className="footer-icon-wrapper">
+                    <img
+                      src={InstagramIcon}
+                      className="footer-icon instagram-icon"
+                      alt="Instagram"
+                    />
+                  </div>
+                </a>
 
-            <div className="info-item footer-telegram">
-              <div className="footer-icon-wrapper">
-                <img
-                  src={TelegramIcon}
-                  className="footer-icon telegram-icon"
-                  alt="Telegram"
-                />
-              </div>
-              <a
-                href="https://t.me/flower_lab_vlada"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-link-single">
-                <p>@flowerlab_vlada</p>
-              </a>
-            </div>
+                <a
+                  href="https://t.me/flower_lab_vlada"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-link-single">
+                  <div className="footer-icon-wrapper">
+                    <img
+                      src={TelegramIcon}
+                      className="footer-icon telegram-icon"
+                      alt="Telegram"
+                    />
+                  </div>
+                </a>
 
-            <div className="info-item footer-viber">
-              <div className="footer-icon-wrapper">
-                <img
-                  src={ViberIcon}
-                  alt="Viber"
-                  className="footer-icon viber-icon"
-                />
+                <a
+                  href="viber://chat?number=0976200144"
+                  className="footer-link-single">
+                  <div className="footer-icon-wrapper">
+                    <img
+                      src={ViberIcon}
+                      alt="Viber"
+                      className="footer-icon viber-icon"
+                    />
+                  </div>
+                </a>
+                <a
+                  href="https://wa.me/380501591912"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-link-single">
+                  <div className="footer-icon-wrapper">
+                    <img
+                      src={WhatsappIcon}
+                      alt="WhatsApp"
+                      className="footer-icon whatsapp-icon"
+                    />
+                  </div>
+                </a>
               </div>
-              <a
-                href="viber://chat?number=0501591912"
-                className="footer-link-single">
-                <p>@flowerlab_vlada</p>
-              </a>
             </div>
           </div>
         </div>

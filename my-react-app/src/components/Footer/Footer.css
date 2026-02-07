@@ -39,6 +39,7 @@
   max-height: 24px;
   object-fit: contain;
   display: block;
+  transition: transform 0.3s ease;
 }
 
 /* Текст */
@@ -56,15 +57,31 @@
   transition: color 0.3s;
 }
 
+.footer-socials {
+  flex-direction: row !important;
+  gap: 8px;
+}
+
+.footer-socials .footer-item {
+  width: auto !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0;
+}
+
 /* Hover effects */
-.footer-link-text:hover p,
-.footer-link-single:hover p {
+.footer-link-text:hover p {
   color: #c86aac;
 }
 
-.footer-telegram:has(.footer-link-single:hover) .telegram-icon,
-.footer-viber:has(.footer-link-single:hover) .viber-icon {
-  transform: scale(1.1);
+.footer-socials .footer-icon {
+  transition: transform 0.3s;
+}
+
+.footer-socials .footer-link-single:hover .footer-icon,
+.footer-phone:has(.footer-link-single:hover) .phone-icon {
+  transform: scale(1.15);
 }
 
 /* ================= RESPONSIVE ================= */
@@ -88,10 +105,19 @@
 
   .footer-col {
     width: 100%;
-    gap: 14px;
+    gap: 20px;
     display: flex;
     flex-direction: column;
     align-items: center; /* Center the whole column */
+  }
+
+  .footer-socials {
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto;
+    padding-left: 20px; /* Adjusted to align icons precisely */
+    gap: 34px;
   }
 
   .footer-item {
