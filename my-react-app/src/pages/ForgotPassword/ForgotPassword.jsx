@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../utils/errorUtils";
 import "./ForgotPassword.css";
 import axiosClient from "../../api/axiosClient";
 
@@ -41,8 +42,7 @@ export default function ForgotPassword() {
       // setTimeout(() => navigate("/"), 2000);
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || t("toasts.error_default");
-      toast.error(msg);
+      toast.error(t(extractErrorMessage(error, "toasts.error_default")));
     }
   };
 

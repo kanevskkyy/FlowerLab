@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import axiosClient from "../../../api/axiosClient";
 import { useAuth } from "../../../context/useAuth";
 import { useTranslation } from "react-i18next";
 import userService from "../../../services/userService";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function usePersonalSettings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, login } = useAuth();
 
   const [form, setForm] = useState({
@@ -38,23 +39,26 @@ export function usePersonalSettings() {
     }
   }, [user]);
 
-  const validateProfile = (data) => {
-    const errs = {};
-    if (!data.firstName?.trim())
-      errs.firstName = t("cabinet.error_first_name_required");
-    if (!data.lastName?.trim())
-      errs.lastName = t("cabinet.error_last_name_required");
+  const validateProfile = useCallback(
+    (data) => {
+      const errs = {};
+      if (!data.firstName?.trim())
+        errs.firstName = t("cabinet.error_first_name_required");
+      if (!data.lastName?.trim())
+        errs.lastName = t("cabinet.error_last_name_required");
 
-    const cleanPhone = data.phone?.replace(/[\s-]/g, "") || "";
-    if (!cleanPhone) {
-      errs.phone = t("cabinet.error_phone_required");
-    } else if (!/^\+380\d{9}$/.test(cleanPhone)) {
-      errs.phone = t("cabinet.error_phone_invalid");
-    }
+      const cleanPhone = data.phone?.replace(/[\s-]/g, "") || "";
+      if (!cleanPhone) {
+        errs.phone = t("cabinet.error_phone_required");
+      } else if (!/^\+380\d{9}$/.test(cleanPhone)) {
+        errs.phone = t("cabinet.error_phone_invalid");
+      }
 
-    setFormErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
+      setFormErrors(errs);
+      return Object.keys(errs).length === 0;
+    },
+    [t],
+  );
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -80,21 +84,37 @@ export function usePersonalSettings() {
     }
   };
 
-  const validatePassword = (form) => {
-    const errs = {};
-    if (!form.oldPassword)
-      errs.oldPassword = t("cabinet.error_old_password_required");
-    if (!form.newPassword) {
-      errs.newPassword = t("cabinet.error_new_password_required");
-    } else if (form.newPassword.length < 8) {
-      errs.newPassword = t("cabinet.error_password_min_length");
+  const validatePassword = useCallback(
+    (form) => {
+      const errs = {};
+      if (!form.oldPassword)
+        errs.oldPassword = t("cabinet.error_old_password_required");
+      if (!form.newPassword) {
+        errs.newPassword = t("cabinet.error_new_password_required");
+      } else if (form.newPassword.length < 8) {
+        errs.newPassword = t("cabinet.error_password_min_length");
+      }
+      if (form.confirmPassword !== form.newPassword) {
+        errs.confirmPassword = t("cabinet.error_passwords_mismatch");
+      }
+      setPasswordErrors(errs);
+      return Object.keys(errs).length === 0;
+    },
+    [t],
+  );
+
+  // Re-validate on language change
+  useEffect(() => {
+    if (Object.keys(formErrors).length > 0) {
+      validateProfile(form);
     }
-    if (form.confirmPassword !== form.newPassword) {
-      errs.confirmPassword = t("cabinet.error_passwords_mismatch");
+  }, [i18n.language, validateProfile]);
+
+  useEffect(() => {
+    if (Object.keys(passwordErrors).length > 0) {
+      validatePassword(passwordForm);
     }
-    setPasswordErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
+  }, [i18n.language, validatePassword]);
 
   const onChange = (key) => (e) =>
     setForm((p) => ({ ...p, [key]: e.target.value }));
@@ -130,29 +150,12 @@ export function usePersonalSettings() {
       if (newToken) {
         await login(newToken);
       }
-
       toast.success(t("toasts.profile_updated"));
     } catch (error) {
       console.error("Failed to update profile:", error);
-      const responseData = error.response?.data;
-      if (responseData?.errors) {
-        if (Array.isArray(responseData.errors)) {
-          const firstErr = responseData.errors[0];
-          toast.error(
-            firstErr?.error || firstErr?.Error || t("toasts.validation_error"),
-          );
-        } else if (typeof responseData.errors === "object") {
-          const firstKey = Object.keys(responseData.errors)[0];
-          const firstMsg = responseData.errors[firstKey][0];
-          toast.error(`${firstKey}: ${firstMsg}`);
-        }
-      } else {
-        toast.error(
-          responseData?.error ||
-            responseData?.message ||
-            t("toasts.profile_update_failed"),
-        );
-      }
+      toast.error(
+        t(extractErrorMessage(error, "toasts.profile_update_failed")),
+      );
     }
   };
 
@@ -182,9 +185,9 @@ export function usePersonalSettings() {
       setPasswordErrors({});
     } catch (error) {
       console.error("Failed to change password:", error);
-      const msg =
-        error.response?.data?.message || t("toasts.password_change_failed");
-      toast.error(msg);
+      toast.error(
+        t(extractErrorMessage(error, "toasts.password_change_failed")),
+      );
 
       // If it's a validation error from server, we could potentially map it,
       // but for now, the toast is sufficient for the "Old password incorrect" case.

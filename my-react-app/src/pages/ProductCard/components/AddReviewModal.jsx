@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import reviewService from "../../../services/reviewService";
 import starIcon from "../../../assets/icons/star.svg";
 import starUnfilledIcon from "../../../assets/icons/star-unfilled.svg";
+import { extractErrorMessage } from "../../../utils/errorUtils";
 import "./AddReviewModal.css";
 
 const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
@@ -46,7 +47,9 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
     } catch (error) {
       console.error("Failed to submit review:", error);
 
+      const errorKey = extractErrorMessage(error);
       let errorMessage = t("product.review_generic_error");
+
       const errorResponse = error.response?.data;
       const errorString =
         typeof errorResponse === "string"
@@ -60,9 +63,12 @@ const AddReviewModal = ({ isOpen, onClose, bouquetId, onReviewSuccess }) => {
         errorMessage = t("product.review_not_ordered");
       } else if (
         errorString.includes("already left a review") ||
-        errorString.includes("already exists")
+        errorString.includes("already exists") ||
+        errorKey === "toasts.backend_errors.ALREADY_EXISTS"
       ) {
         errorMessage = t("product.review_already_left");
+      } else if (errorKey && errorKey.startsWith("toasts.")) {
+        errorMessage = t(errorKey);
       }
 
       toast.error(errorMessage);

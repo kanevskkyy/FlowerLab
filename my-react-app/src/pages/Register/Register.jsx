@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -19,38 +19,50 @@ import toast from "react-hot-toast";
 
 // Схема валідації
 export default function Register() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const schema = z
-    .object({
-      firstName: z.string().min(1, t("validation.first_name_required")),
-      lastName: z.string().min(1, t("validation.last_name_required")),
-      phone: z.string().regex(/^\+380\d{9}$/, t("validation.phone_format")),
-      email: z
-        .string()
-        .min(1, t("validation.email_required"))
-        .email(t("validation.email_invalid")),
-      password: z.string().min(8, t("validation.password_min")),
-      confirmPassword: z
-        .string()
-        .min(1, t("validation.confirm_password_required")),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: t("validation.passwords_mismatch"),
-      path: ["confirmPassword"],
-    });
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          firstName: z.string().min(1, t("validation.first_name_required")),
+          lastName: z.string().min(1, t("validation.last_name_required")),
+          phone: z.string().regex(/^\+380\d{9}$/, t("validation.phone_format")),
+          email: z
+            .string()
+            .min(1, t("validation.email_required"))
+            .email(t("validation.email_invalid")),
+          password: z.string().min(8, t("validation.password_min")),
+          confirmPassword: z
+            .string()
+            .min(1, t("validation.confirm_password_required")),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: t("validation.passwords_mismatch"),
+          path: ["confirmPassword"],
+        }),
+    [t],
+  );
 
   const {
     register,
     handleSubmit,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
     mode: "onBlur",
   });
+
+  // Re-validate when language changes
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      trigger();
+    }
+  }, [i18n.language, trigger]);
 
   // 2. Оновлена функція відправки на Бекенд
   const onSubmit = async (data) => {
@@ -73,25 +85,7 @@ export default function Register() {
     } catch (error) {
       console.error("Registration error:", error);
 
-      let errorMsg = t("toasts.registration_failed");
-
-      if (error.response?.data) {
-        const data = error.response.data;
-        // Standard DTO/FluentValidation errors object
-        if (data.errors) {
-          const firstKey = Object.keys(data.errors)[0];
-          const firstError = data.errors[firstKey];
-          errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
-        } else {
-          errorMsg = data.error || data.Message || data.message || errorMsg;
-        }
-      }
-
-      toast.error(
-        typeof errorMsg === "string"
-          ? errorMsg
-          : t("toasts.registration_failed"),
-      );
+      toast.error(t(extractErrorMessage(error, "toasts.registration_failed")));
     }
   };
 

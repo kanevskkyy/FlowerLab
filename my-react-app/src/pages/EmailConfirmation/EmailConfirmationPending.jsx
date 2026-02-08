@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import authService from "../../services/authService";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../utils/errorUtils";
 import "./EmailConfirmation.css";
 
 export default function EmailConfirmationPending() {
@@ -38,8 +39,7 @@ export default function EmailConfirmationPending() {
       setCountdown(60);
     } catch (error) {
       console.error("Resend error:", error);
-      const msg = error.response?.data?.Message || t("toasts.resend_failed");
-      toast.error(msg);
+      toast.error(t(extractErrorMessage(error, "toasts.resend_failed")));
     } finally {
       setLoading(false);
     }
@@ -48,32 +48,29 @@ export default function EmailConfirmationPending() {
   return (
     <div className="confirmation-page">
       <div className="confirmation-box">
-        <h2 className="confirmation-title">Registration Successful! 🎉</h2>
+        <h2 className="confirmation-title">{t("auth.registration_success")}</h2>
         <p className="confirmation-text">
-          We have sent a confirmation link to{" "}
-          <strong>{email || "your email"}</strong>.
-          <br />
-          Please check your inbox and click the link to activate your account.
+          {t("auth.verification_success_msg")}
         </p>
 
         <div className="resend-section">
-          <p className="resend-hint">Didn't receive the email?</p>
+          <p className="resend-hint">{t("auth.resend_hint")}</p>
           <button
             className="confirmation-btn resend-btn"
             onClick={handleResend}
             disabled={loading || countdown > 0}>
             {loading
-              ? "Sending..."
+              ? t("auth.sending")
               : countdown > 0
-                ? `Resend in ${countdown}s`
-                : "Resend Link"}
+                ? t("auth.resend_in", { count: countdown })
+                : t("auth.resend_btn")}
           </button>
         </div>
 
         <button
           className="confirmation-btn outline"
           onClick={() => navigate("/login")}>
-          Back to Login
+          {t("auth.back_to_login")}
         </button>
       </div>
     </div>

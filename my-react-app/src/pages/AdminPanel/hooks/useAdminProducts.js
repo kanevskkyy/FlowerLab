@@ -104,11 +104,9 @@ export function useAdminProducts(active) {
       }));
     } catch (error) {
       console.error(`Failed to fetch ${active}:`, error);
-      const msg = extractErrorMessage(
-        error,
-        t("toasts.admin_products_load_failed", { type: active }),
+      toast.error(
+        t(extractErrorMessage(error, "toasts.admin_products_load_failed")),
       );
-      if (msg) toast.error(msg);
     } finally {
       setLoadingProducts(false);
     }
@@ -162,11 +160,9 @@ export function useAdminProducts(active) {
           fetchProducts();
         } catch (error) {
           console.error("Failed to delete item:", error);
-          const msg = extractErrorMessage(
-            error,
-            t("toasts.admin_delete_failed"),
+          toast.error(
+            t(extractErrorMessage(error, "toasts.admin_delete_failed")),
           );
-          if (msg) toast.error(msg);
         }
       },
     });

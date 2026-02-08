@@ -179,11 +179,17 @@
     "password_required": "Пароль обов'язковий",
     "first_name_required": "Ім'я обов'язкове",
     "last_name_required": "Прізвище обов'язкове",
-    "phone_format": "Формат: +380XXXXXXXXX",
+    "phone_required": "Телефон обов'язковий",
+    "phone_format": "Невірний формат телефону",
     "password_min": "Мінімум 8 символів",
     "confirm_password_required": "Підтвердження паролю обов'язкове",
     "passwords_mismatch": "Паролі не співпадають",
-    "password_mismatch_path": "Паролі повинні співпадати"
+    "password_mismatch_path": "Паролі повинні співпадати",
+    "delivery_address_required": "Будь ласка, оберіть адресу доставки",
+    "shop_required": "Будь ласка, оберіть магазин",
+    "card_message_required": "Будь ласка, введіть текст для листівки",
+    "receiver_name_required": "Ім'я отримувача обов'язкове",
+    "receiver_phone_required": "Телефон отримувача обов'язковий"
   },
   "auth": {
     "login": "Увійти",
@@ -223,9 +229,30 @@
     "review_login_required": "Будь ласка, увійдіть або зареєструйтесь, щоб залишити відгук.",
     "recovery_title": "Відновлення паролю",
     "send_code": "Надіслати код",
-    "recovery_desc": "Лист з інструкціями буде надіслано вам на пошту."
+    "recovery_desc": "Лист з інструкціями буде надіслано вам на пошту.",
+    "new_password": "Новий пароль",
+    "updating": "Оновлення...",
+    "set_new_password": "Встановити новий пароль"
   },
   "toasts": {
+    "backend_errors": {
+      "STOCK_INSUFFICIENT": "Вибачте, цей букет вже встигли забронювати.",
+      "GIFT_STOCK_INSUFFICIENT": "На жаль, на вибрану кількість подарунків не вистачає на складі.",
+      "ORDER_ALREADY_PAID": "Це замовлення вже оплачено.",
+      "INTERNAL_SERVER_ERROR": "Сталася технічна помилка. Спробуйте пізніше.",
+      "NOT_FOUND": "Замовлення або товар не знайдено.",
+      "ALREADY_EXISTS": "Такий запис уже існує.",
+      "INVALID_GUEST_TOKEN": "Помилка авторизації гостьового замовлення.",
+      "DUPLICATE_GIFTS": "Не можна додавати однакові подарунки декілька разів як окремі позиції.",
+      "CATALOG_CHECK_ERROR": "Помилка при перевірці наявності букетів. Спробуйте ще раз.",
+      "INVALID_PRICE": "Помилка ціноутворення. Зверніться в підтримку.",
+      "VALIDATION_ERROR": "Будь ласка, перевірте правильність заповнення полів.",
+      "INVALID_CREDENTIALS": "Невірний пароль або email.",
+      "EMAIL_ALREADY_EXISTS": "Акаунт з таким email вже існує.",
+      "EMAIL_NOT_CONFIRMED": "Email не підтверджено. Перевірте пошту.",
+      "ACCOUNT_LOCKED": "Акаунт тимчасово заблоковано через забагато невдалих спроб входу.",
+      "USER_NOT_FOUND": "Користувача з таким email не знайдено."
+    },
     "registration_success": "Реєстрація успішна! Перевірте пошту.",
     "registration_failed": "Не вдалося зареєструватися",
     "reset_link_sent": "Посилання для скидання надіслано!",
@@ -347,7 +374,9 @@
     "delete_address": "Видалити адресу",
     "add_new_address": "Додати нову адресу",
     "enter_address_placeholder": "Введіть нову адресу...",
-    "add_address_btn": "Додати адресу"
+    "add_address_btn": "Додати адресу",
+    "delete_address_confirm": "Ви впевнені, що хочете видалити цю адресу?",
+    "delete_confirm_btn": "Видалити"
   },
   "filter": {
     "title": "Фільтрувати за:",

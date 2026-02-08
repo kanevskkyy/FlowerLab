@@ -45,7 +45,7 @@ export function useCheckOut({ orderData }) {
     } catch (error) {
       console.error("Order creation failed", error);
       toast.error(
-        extractErrorMessage(error, t("toasts.order_creation_failed")),
+        t(extractErrorMessage(error, "toasts.order_creation_failed")),
       );
     } finally {
       setLoading(false);
