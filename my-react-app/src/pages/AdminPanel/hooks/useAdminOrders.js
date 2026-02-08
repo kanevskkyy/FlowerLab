@@ -151,11 +151,9 @@ export function useAdminOrders() {
         }));
       } catch (error) {
         console.error("Failed to fetch orders:", error);
-        const msg = extractErrorMessage(
-          error,
-          t("toasts.admin_orders_load_failed"),
+        toast.error(
+          t(extractErrorMessage(error, "toasts.admin_orders_load_failed")),
         );
-        if (msg) toast.error(msg);
       } finally {
         setLoading(false);
         setDetailLoading(false);
@@ -226,11 +224,9 @@ export function useAdminOrders() {
       }
     } catch (error) {
       console.error("Failed to update status:", error);
-      const msg = extractErrorMessage(
-        error,
-        t("toasts.admin_status_update_failed"),
+      toast.error(
+        t(extractErrorMessage(error, "toasts.admin_status_update_failed")),
       );
-      if (msg) toast.error(msg);
       // Revert on failure
       setOrders(originalOrders);
     }

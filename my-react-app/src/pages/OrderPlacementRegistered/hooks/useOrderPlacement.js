@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,83 +16,89 @@ import axiosClient from "../../../api/axiosClient";
 
 const DELIVERY_FEE = 300;
 
-// === Schema ===
-const schema = z
-  .object({
-    firstName: z.string().min(1, "First Name is required"),
-    lastName: z.string().min(1, "Last Name is required"),
-    phone: z.string().regex(/^\+?[0-9]{10,12}$/, "Invalid phone format"),
-    receiverType: z.enum(["self", "other"]),
-
-    // Conditional Receiver Fields
-    receiverName: z.string().optional(),
-    receiverPhone: z.string().optional(),
-
-    deliveryType: z.enum(["pickup", "delivery"]),
-    message: z.string().optional(),
-    cardMessage: z.string().optional(),
-    noCall: z.boolean().optional(),
-    isCardAdded: z.boolean().optional(),
-    selectedAddressId: z.union([z.string(), z.number()]).optional(),
-    selectedShopId: z.union([z.string(), z.number()]).optional(),
-  })
-  .superRefine((data, ctx) => {
-    // Delivery Validation
-    if (data.deliveryType === "delivery" && !data.selectedAddressId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Please select a delivery address",
-        path: ["deliveryType"],
-      });
-    }
-    if (data.deliveryType === "pickup" && !data.selectedShopId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Please select a shop",
-        path: ["deliveryType"],
-      });
-    }
-
-    // Card Validation
-    if (
-      data.isCardAdded &&
-      (!data.cardMessage || data.cardMessage.trim().length === 0)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Please enter a message for the card",
-        path: ["cardMessage"],
-      });
-    }
-
-    // Receiver Validation
-    if (data.receiverType === "other") {
-      if (!data.receiverName || data.receiverName.length < 1) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Receiver Name is required",
-          path: ["receiverName"],
-        });
-      }
-      if (
-        !data.receiverPhone ||
-        !/^\+?[0-9]{10,12}$/.test(data.receiverPhone)
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Valid Receiver Phone is required",
-          path: ["receiverPhone"],
-        });
-      }
-    }
-  });
-
 export const useOrderPlacement = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { cartItems, removeItem, clearCart } = useCart();
   const { user } = useAuth();
   const { gifts, loading: giftsLoading } = useGifts();
+
+  // === Schema ===
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          firstName: z.string().min(1, t("validation.first_name_required")),
+          lastName: z.string().min(1, t("validation.last_name_required")),
+          phone: z
+            .string()
+            .regex(/^\+?[0-9]{10,12}$/, t("validation.phone_format")),
+          receiverType: z.enum(["self", "other"]),
+
+          // Conditional Receiver Fields
+          receiverName: z.string().optional(),
+          receiverPhone: z.string().optional(),
+
+          deliveryType: z.enum(["pickup", "delivery"]),
+          message: z.string().optional(),
+          cardMessage: z.string().optional(),
+          noCall: z.boolean().optional(),
+          isCardAdded: z.boolean().optional(),
+          selectedAddressId: z.union([z.string(), z.number()]).optional(),
+          selectedShopId: z.union([z.string(), z.number()]).optional(),
+        })
+        .superRefine((data, ctx) => {
+          // Delivery Validation
+          if (data.deliveryType === "delivery" && !data.selectedAddressId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("validation.delivery_address_required"),
+              path: ["deliveryType"],
+            });
+          }
+          if (data.deliveryType === "pickup" && !data.selectedShopId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("validation.shop_required"),
+              path: ["deliveryType"],
+            });
+          }
+
+          // Card Validation
+          if (
+            data.isCardAdded &&
+            (!data.cardMessage || data.cardMessage.trim().length === 0)
+          ) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("validation.card_message_required"),
+              path: ["cardMessage"],
+            });
+          }
+
+          // Receiver Validation
+          if (data.receiverType === "other") {
+            if (!data.receiverName || data.receiverName.length < 1) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("validation.receiver_name_required"),
+                path: ["receiverName"],
+              });
+            }
+            if (
+              !data.receiverPhone ||
+              !/^\+?[0-9]{10,12}$/.test(data.receiverPhone)
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("validation.receiver_phone_required"),
+                path: ["receiverPhone"],
+              });
+            }
+          }
+        }),
+    [t],
+  );
 
   // Local UI state
   const [isAddingAddress, setIsAddingAddress] = useState(false);
@@ -129,11 +135,14 @@ export const useOrderPlacement = () => {
 
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
 
-  // Mock Shop Addresses
-  const shopAddresses = [
-    { id: 1, text: "м. Чернівці, вул Герцена 2а" },
-    { id: 2, text: "вул Васіле Александрі, 1" },
-  ];
+  // Shop Addresses (Translated)
+  const shopAddresses = useMemo(
+    () => [
+      { id: 1, text: t("footer.address1") },
+      { id: 2, text: t("footer.address2") },
+    ],
+    [t],
+  );
 
   // === Form Setup ===
   const methods = useForm({
@@ -155,7 +164,14 @@ export const useOrderPlacement = () => {
     },
   });
 
-  const { handleSubmit, setValue, watch } = methods;
+  const { handleSubmit, setValue, watch, trigger, formState } = methods;
+
+  // React to language changes by re-triggering validation if errors exist
+  useEffect(() => {
+    if (formState.submitCount > 0 || Object.keys(formState.errors).length > 0) {
+      trigger();
+    }
+  }, [i18n.language, trigger]);
 
   const deliveryType = watch("deliveryType");
 
@@ -501,7 +517,7 @@ export const useOrderPlacement = () => {
     } catch (error) {
       console.error("Failed to create order", error);
       toast.error(
-        extractErrorMessage(error, t("toasts.order_creation_failed")),
+        t(extractErrorMessage(error, "toasts.order_creation_failed")),
       );
     }
   };

@@ -42,9 +42,9 @@ export function useMyAddresses(activeTab, TABS) {
 
   const handleDeleteAddress = (id) => {
     confirm({
-      title: "Delete address?",
-      message: "Are you sure you want to delete this address?",
-      confirmText: "Delete",
+      title: t("cabinet.delete_address"),
+      message: t("cabinet.delete_address_confirm"),
+      confirmText: t("cabinet.delete_confirm_btn"),
       confirmType: "danger",
       onConfirm: async () => {
         try {

@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
+import { extractErrorMessage } from "../../utils/errorUtils";
 import "./EmailConfirmation.css";
 
 export default function EmailConfirmation() {
@@ -44,7 +45,7 @@ export default function EmailConfirmation() {
       setCountdown(60);
     } catch (error) {
       console.error("Resend error:", error);
-      toast.error(error.response?.data?.Message || t("toasts.resend_failed"));
+      toast.error(t(extractErrorMessage(error, "toasts.resend_failed")));
     } finally {
       setResendLoading(false);
     }
@@ -69,9 +70,7 @@ export default function EmailConfirmation() {
         console.error("Confirmation error:", error);
         setStatus("error");
         setMessage(
-          error.response?.data?.Message ||
-            error.response?.data?.error ||
-            t("auth.verification_error_default"),
+          t(extractErrorMessage(error, "auth.verification_error_default")),
         );
       }
     };

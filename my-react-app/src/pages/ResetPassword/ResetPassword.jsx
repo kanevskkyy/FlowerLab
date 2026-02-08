@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../utils/errorUtils";
 import axiosClient from "../../api/axiosClient";
 import "./ResetPassword.css";
 
@@ -69,9 +70,9 @@ export default function ResetPassword() {
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       console.error(error);
-      const msg =
-        error.response?.data?.message || t("toasts.password_reset_failed");
-      toast.error(msg);
+      toast.error(
+        t(extractErrorMessage(error, "toasts.password_reset_failed")),
+      );
     }
   };
 
@@ -92,19 +93,19 @@ export default function ResetPassword() {
 
       <main className="rp-content">
         <div className="rp-box">
-          <h2 className="rp-title">Password recovery</h2>
+          <h2 className="rp-title">{t("auth.recovery_title")}</h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Set New Password */}
             <div className="form-field full-width">
-              <label className="field-label">Set New Password</label>
+              <label className="field-label">{t("auth.new_password")}</label>
               <div className="input-row">
                 <input
                   type={showPassword ? "text" : "password"}
                   className={`input-base with-right-icon ${
                     errors.password ? "input-error" : ""
                   }`}
-                  placeholder="Password"
+                  placeholder="••••••••"
                   {...register("password")}
                 />
                 <button
@@ -125,14 +126,16 @@ export default function ResetPassword() {
 
             {/* Confirm Password */}
             <div className="form-field full-width">
-              <label className="field-label">Confirm Password</label>
+              <label className="field-label">
+                {t("auth.confirm_password")}
+              </label>
               <div className="input-row">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   className={`input-base with-right-icon ${
                     errors.confirmPassword ? "input-error" : ""
                   }`}
-                  placeholder="................"
+                  placeholder="••••••••"
                   {...register("confirmPassword")}
                 />
                 <button
@@ -155,7 +158,7 @@ export default function ResetPassword() {
               type="submit"
               className="rp-main-btn"
               disabled={isSubmitting}>
-              {isSubmitting ? "Updating..." : "Set New Password"}
+              {isSubmitting ? t("auth.updating") : t("auth.set_new_password")}
             </button>
           </form>
         </div>

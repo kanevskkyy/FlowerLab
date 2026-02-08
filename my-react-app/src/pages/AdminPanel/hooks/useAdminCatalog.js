@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { extractErrorMessage } from "../../../utils/errorUtils";
 
 export function useAdminCatalog() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [settings, setSettings] = useState({
     events: [],
     forWho: [],
@@ -42,7 +42,7 @@ export function useAdminCatalog() {
       });
     } catch (error) {
       console.error("Failed to fetch catalog settings:", error);
-      toast.error(extractErrorMessage(error, t("toasts.admin_load_error")));
+      toast.error(t(extractErrorMessage(error, "toasts.admin_load_error")));
     } finally {
       setLoading(false);
     }

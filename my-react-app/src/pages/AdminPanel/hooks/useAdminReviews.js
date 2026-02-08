@@ -49,7 +49,7 @@ export function useAdminReviews() {
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
       toast.error(
-        extractErrorMessage(error, t("toasts.admin_reviews_load_failed")),
+        t(extractErrorMessage(error, "toasts.admin_reviews_load_failed")),
       );
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export function useAdminReviews() {
     } catch (error) {
       console.error(error);
       toast.error(
-        extractErrorMessage(error, t("toasts.admin_review_approve_failed")),
+        t(extractErrorMessage(error, "toasts.admin_review_approve_failed")),
       );
     }
   };
@@ -96,7 +96,7 @@ export function useAdminReviews() {
     } catch (error) {
       console.error(error);
       toast.error(
-        extractErrorMessage(error, t("toasts.admin_review_delete_failed")),
+        t(extractErrorMessage(error, "toasts.admin_review_delete_failed")),
       );
     }
   };

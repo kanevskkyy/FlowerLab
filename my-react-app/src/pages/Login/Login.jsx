@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -17,29 +17,42 @@ import hideIcon from "../../assets/icons/hide.svg";
 import showIcon from "../../assets/icons/show.svg";
 import messageIcon from "../../assets/icons/message.svg";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../utils/errorUtils";
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { setAuth } = useAuth(); // Використовуємо метод для оновлення стану
   const [showPassword, setShowPassword] = useState(false);
 
-  const schema = z.object({
-    email: z
-      .string()
-      .min(1, t("validation.email_required"))
-      .email(t("validation.email_invalid")),
-    password: z.string().min(1, t("validation.password_required")),
-  });
+  const schema = useMemo(
+    () =>
+      z.object({
+        email: z
+          .string()
+          .min(1, t("validation.email_required"))
+          .email(t("validation.email_invalid")),
+        password: z.string().min(1, t("validation.password_required")),
+      }),
+    [t],
+  );
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }, // Додав isSubmitting
+    trigger,
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
     mode: "onBlur",
   });
+
+  // Re-validate when language changes
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      trigger();
+    }
+  }, [i18n.language, trigger]);
 
   // 2. Оновлена логіка входу
   const onSubmit = async (data) => {
@@ -66,15 +79,7 @@ export default function Login() {
 
       // Обробка помилок від бекенду
       // ExceptionHandlingMiddleware повертає { error: "message", type: "..." }
-      const errorMsg =
-        error.response?.data?.error ||
-        error.response?.data?.Detail ||
-        error.response?.data?.message ||
-        t("auth.login_failed");
-
-      toast.error(
-        typeof errorMsg === "string" ? errorMsg : t("auth.login_failed"),
-      );
+      toast.error(t(extractErrorMessage(error, "auth.login_failed")));
     }
   };
 

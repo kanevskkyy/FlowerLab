@@ -426,17 +426,7 @@ export function useAdminBouquetForm() {
       navigate("/admin");
     } catch (error) {
       console.error("Failed to save item:", error);
-      if (error.response && error.response.data) {
-        const serverMsg =
-          error.response.data.message ||
-          error.response.data.error ||
-          error.response.data.title ||
-          JSON.stringify(error.response.data.errors) ||
-          error.message;
-        toast.error(t("toasts.admin_server_error", { msg: serverMsg }));
-      } else {
-        toast.error(t("toasts.admin_save_failed"));
-      }
+      toast.error(t(extractErrorMessage(error, "toasts.admin_save_failed")));
     } finally {
       setIsSubmitting(false);
     }

@@ -28,8 +28,9 @@ export default function AdminOrderDetails() {
         ]);
         setOrder(orderData);
         setStatuses(statusesData);
-        const msg = extractErrorMessage(error, t("admin.orders.failed_load"));
-        if (msg) toast.error(msg);
+      } catch (error) {
+        console.error("Failed to load order:", error);
+        toast.error(t(extractErrorMessage(error, "admin.orders.failed_load")));
         navigate("/admin");
       } finally {
         setLoading(false);
@@ -71,11 +72,9 @@ export default function AdminOrderDetails() {
       }
     } catch (error) {
       console.error("Failed to update status:", error);
-      const msg = extractErrorMessage(
-        error,
-        t("toasts.admin_status_update_failed"),
+      toast.error(
+        t(extractErrorMessage(error, "toasts.admin_status_update_failed")),
       );
-      if (msg) toast.error(msg);
       setOrder((prev) => ({ ...prev, status: originalStatus }));
     }
   };

@@ -179,11 +179,17 @@
     "password_required": "Password is required",
     "first_name_required": "First name is required",
     "last_name_required": "Last name is required",
-    "phone_format": "Format: +380XXXXXXXXX",
+    "phone_required": "Phone is required",
+    "phone_format": "Invalid phone format",
     "password_min": "Min 8 characters",
     "confirm_password_required": "Confirm password is required",
     "passwords_mismatch": "Passwords do not match",
-    "password_mismatch_path": "Passwords must match"
+    "password_mismatch_path": "Passwords must match",
+    "delivery_address_required": "Please select a delivery address",
+    "shop_required": "Please select a shop",
+    "card_message_required": "Please enter a message for the card",
+    "receiver_name_required": "Receiver name is required",
+    "receiver_phone_required": "Receiver phone is required"
   },
   "auth": {
     "login": "Sign in",
@@ -213,7 +219,10 @@
     "review_login_required": "Please sign in or register to leave a review.",
     "recovery_title": "Password Recovery",
     "send_code": "Send code",
-    "recovery_desc": "A password recovery email will be sent to you."
+    "recovery_desc": "A password recovery email will be sent to you.",
+    "new_password": "New Password",
+    "updating": "Updating...",
+    "set_new_password": "Set New Password"
   },
   "cabinet": {
     "title": "My Account",
@@ -261,7 +270,9 @@
     "delete_address": "Delete address",
     "add_new_address": "Add new address",
     "enter_address_placeholder": "Enter new address...",
-    "add_address_btn": "Add Address"
+    "add_address_btn": "Add Address",
+    "delete_address_confirm": "Are you sure you want to delete this address?",
+    "delete_confirm_btn": "Delete"
   },
   "filter": {
     "title": "Filter by:",
@@ -275,6 +286,24 @@
     "apply": "APPLY"
   },
   "toasts": {
+    "backend_errors": {
+      "STOCK_INSUFFICIENT": "Sorry, this bouquet has already been booked.",
+      "GIFT_STOCK_INSUFFICIENT": "Unfortunately, there is not enough stock for the selected number of gifts.",
+      "ORDER_ALREADY_PAID": "This order has already been paid.",
+      "INTERNAL_SERVER_ERROR": "A technical error occurred. Please try again later.",
+      "NOT_FOUND": "Order or product not found.",
+      "ALREADY_EXISTS": "This record already exists.",
+      "INVALID_GUEST_TOKEN": "Guest order authorization error.",
+      "DUPLICATE_GIFTS": "You cannot add the same gifts multiple times as separate items.",
+      "CATALOG_CHECK_ERROR": "Error checking bouquet availability. Please try again.",
+      "INVALID_PRICE": "Pricing error. Please contact support.",
+      "VALIDATION_ERROR": "Please check the correctness of the fields.",
+      "INVALID_CREDENTIALS": "Invalid password or email.",
+      "EMAIL_ALREADY_EXISTS": "An account with this email already exists.",
+      "EMAIL_NOT_CONFIRMED": "Email not confirmed. Please check your inbox.",
+      "ACCOUNT_LOCKED": "Account is temporarily locked due to too many failed login attempts.",
+      "USER_NOT_FOUND": "User with this email does not exist."
+    },
     "error_default": "Something went wrong",
     "validation_error": "Validation error",
     "invalid_token": "Invalid link parameters",
