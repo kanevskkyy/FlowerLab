@@ -38,6 +38,10 @@ namespace CatalogService.API
     {
         public static async Task Main(string[] args)
         {
+#pragma warning disable CS0618
+            Npgsql.NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+#pragma warning restore CS0618
+
             var builder = WebApplication.CreateBuilder(args);
 
 

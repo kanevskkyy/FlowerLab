@@ -52,10 +52,12 @@ namespace CatalogService.DAL.Repositories.Implementations
             var query = SpecificationEvaluator<Bouquet>.GetQuery(dbSet.AsQueryable(), spec);
 
             // Restoring necessary Includes that might not be handled by the simple Specification Evaluator
+            // Consolidate includes to avoid redundancy and improve performance
             query = query
                 .Include(b => b.BouquetFlowers).ThenInclude(bf => bf.Flower)
                 .Include(b => b.BouquetSizes).ThenInclude(bs => bs.Size)
                 .Include(b => b.BouquetSizes).ThenInclude(bs => bs.BouquetSizeFlowers).ThenInclude(bsf => bsf.Flower)
+                .Include(b => b.BouquetSizes).ThenInclude(bs => bs.BouquetImages)
                 .Include(b => b.BouquetEvents).ThenInclude(be => be.Event)
                 .Include(b => b.BouquetRecipients).ThenInclude(br => br.Recipient);
             

@@ -232,6 +232,15 @@ const AboutUs = () => {
           </div>
         </div>
       </div>
+      <div className="business-rules-container">
+        <a
+          href="/Бізнес_правила_для_інтернет_магазину_Flower_Lab_Vlada_docx.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="business-rules-link">
+          {t("about_page.business_rules")}
+        </a>
+      </div>
 
       <Footer />
     </div>

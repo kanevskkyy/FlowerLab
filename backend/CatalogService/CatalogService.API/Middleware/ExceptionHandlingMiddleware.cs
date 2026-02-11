@@ -48,6 +48,7 @@ namespace CatalogService.API.Middleware
                 case AlreadyExistsException:
                     context.Response.StatusCode = (int)HttpStatusCode.Conflict;
                     break;
+                default:
                     _logger.LogError(exception, "An unhandled exception has occurred.");
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     response = new { message = exception.ToString() }; // DEBUG: Show full exception

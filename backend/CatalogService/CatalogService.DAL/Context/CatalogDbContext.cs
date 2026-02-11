@@ -34,8 +34,18 @@ namespace CatalogService.DAL.Context
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);
 
+            modelBuilder.HasDbFunction(typeof(CatalogDbContext).GetMethod(nameof(JsonExtractPathText), new[] { typeof(Dictionary<string, string>), typeof(string) })!)
+                .HasName("jsonb_extract_path_text");
+
+            modelBuilder.HasDbFunction(typeof(CatalogDbContext).GetMethod(nameof(JsonExists), new[] { typeof(Dictionary<string, string>), typeof(string) })!)
+                .HasName("jsonb_exists");
+
             base.OnModelCreating(modelBuilder);
         }
+
+        public static string JsonExtractPathText(Dictionary<string, string> json, string path) => throw new NotSupportedException();
+
+        public static bool JsonExists(Dictionary<string, string> json, string key) => throw new NotSupportedException();
 
         public override int SaveChanges()
         {
