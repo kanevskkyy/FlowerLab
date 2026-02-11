@@ -1,8 +1,12 @@
 ﻿using CatalogService.Domain.Entities;
 using CatalogService.Domain.QueryParametrs;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+using CatalogService.DAL.Context;
 
 namespace CatalogService.DAL.Specification
 {
@@ -24,11 +28,11 @@ namespace CatalogService.DAL.Specification
                 ) &&
                 (!parameters.Quantities.Any() || parameters.Quantities.Contains(b.BouquetFlowers.Sum(bf => bf.Quantity))) &&
                 (string.IsNullOrEmpty(parameters.Name) ||
-                    EF.Functions.ILike(b.Name["ua"], $"%{parameters.Name}%") ||
-                    EF.Functions.ILike(b.Name["en"], $"%{parameters.Name}%") ||
+                    (CatalogDbContext.JsonExists(b.Name, "ua") && EF.Functions.ILike(CatalogDbContext.JsonExtractPathText(b.Name, "ua"), $"%{parameters.Name}%")) ||
+                    (CatalogDbContext.JsonExists(b.Name, "en") && EF.Functions.ILike(CatalogDbContext.JsonExtractPathText(b.Name, "en"), $"%{parameters.Name}%")) ||
                     b.BouquetFlowers.Any(bf => 
-                        EF.Functions.ILike(bf.Flower.Name["ua"], $"%{parameters.Name}%") || 
-                        EF.Functions.ILike(bf.Flower.Name["en"], $"%{parameters.Name}%")
+                        (CatalogDbContext.JsonExists(bf.Flower.Name, "ua") && EF.Functions.ILike(CatalogDbContext.JsonExtractPathText(bf.Flower.Name, "ua"), $"%{parameters.Name}%")) || 
+                        (CatalogDbContext.JsonExists(bf.Flower.Name, "en") && EF.Functions.ILike(CatalogDbContext.JsonExtractPathText(bf.Flower.Name, "en"), $"%{parameters.Name}%"))
                     )
                 )
             )
@@ -37,7 +41,6 @@ namespace CatalogService.DAL.Specification
             AddInclude(b => b.BouquetSizes);
             AddInclude(b => b.BouquetEvents);
             AddInclude(b => b.BouquetRecipients);
-            AddInclude(b => b.BouquetSizes);
 
             ApplySorting(parameters.SortBy);
         }
@@ -55,11 +58,11 @@ namespace CatalogService.DAL.Specification
                     break;
 
                 case "name_asc":
-                    AddOrderBy(b => b.Name["ua"]); // Default sort by UA
+                    AddOrderBy(b => CatalogDbContext.JsonExtractPathText(b.Name, "ua")); // Default sort by UA
                     break;
 
                 case "name_desc":
-                    AddOrderByDescending(b => b.Name["ua"]);
+                    AddOrderByDescending(b => CatalogDbContext.JsonExtractPathText(b.Name, "ua"));
                     break;
 
                 case "date_asc":
@@ -67,6 +70,7 @@ namespace CatalogService.DAL.Specification
                     break;
 
                 case "date_desc":
+                case "popularity": // Map popularity to date_desc for now
                 case null:
                 case "":
                     AddOrderByDescending(b => b.CreatedAt);

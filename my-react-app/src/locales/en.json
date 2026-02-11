@@ -136,6 +136,7 @@
     "main": "Main page",
     "title": "ABOUT US",
     "history": "We are FlowerLab Vlada, a floral design studio. Our team creates premium bouquets and signature floral arrangements with a focus on quality, style, and emotion. Daily deliveries of fresh flowers, a wide selection, and caring service make us the studio people trust in Chernivtsi. We are the first in Ukraine to introduce the format of giant bouquets and large signature box compositions. This has become part of our unique style and brand identity. We continuously grow, learn, and improve our work. We expand our team, introduce new shapes, colors, and arrangements, explore global trends, and adapt them for our clients. Our studio also collaborates with various brands and venues, creating floral solutions for events, gifts, and visual decor. FlowerLab Vlada is quality, style, and service that inspire and leave a lasting impression.",
+    "business_rules": "Business rules of \"FlowerLab Vlada\" flower studio",
     "why_title": "WHY CHOOSE US?",
     "freshness": "Freshness Guaranteed",
     "handcrafted": "Handcrafted with Love",
@@ -143,7 +144,7 @@
     "personalized": "Personalized Designs",
     "locations": "Our locations:",
     "contacts": "Our contact information:",
-    "social_media": "Social media"
+    "social_media": "Social media:"
   },
   "gifts": {
     "title": "GIFTS & EXTRAS",

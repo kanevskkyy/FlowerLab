@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import "./AdminBouquetForm.css";
 import { useAdminBouquetForm } from "./hooks/useAdminBouquetForm";
@@ -354,6 +353,28 @@ export default function AdminBouquetForm() {
             {!isGiftMode && (
               <div className="abf-card">
                 <h3 className="abf-card-title">{t("admin.form.categories")}</h3>
+                {/* Flower Type */}
+                <div className="abf-cat-group">
+                  <h4>{t("filter.flower_type")}</h4>
+                  <div className="abf-tags">
+                    {flowers.map((item) => (
+                      <label
+                        key={item.id}
+                        className={`abf-tag ${
+                          formData.flowerTypes.includes(item.id) ? "active" : ""
+                        }`}>
+                        <input
+                          type="checkbox"
+                          checked={formData.flowerTypes.includes(item.id)}
+                          onChange={() =>
+                            handleCheckboxChange("flowerTypes", item.id)
+                          }
+                        />
+                        {renderLabel(item)}
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Events */}
                 <div className="abf-cat-group">
@@ -393,29 +414,6 @@ export default function AdminBouquetForm() {
                           checked={formData.forWho.includes(item.id)}
                           onChange={() =>
                             handleCheckboxChange("forWho", item.id)
-                          }
-                        />
-                        {renderLabel(item)}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Flower Type */}
-                <div className="abf-cat-group">
-                  <h4>{t("filter.flower_type")}</h4>
-                  <div className="abf-tags">
-                    {flowers.map((item) => (
-                      <label
-                        key={item.id}
-                        className={`abf-tag ${
-                          formData.flowerTypes.includes(item.id) ? "active" : ""
-                        }`}>
-                        <input
-                          type="checkbox"
-                          checked={formData.flowerTypes.includes(item.id)}
-                          onChange={() =>
-                            handleCheckboxChange("flowerTypes", item.id)
                           }
                         />
                         {renderLabel(item)}
