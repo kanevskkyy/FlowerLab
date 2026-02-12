@@ -145,6 +145,18 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
     }
   }, [isOpen]);
 
+  const [expanded, setExpanded] = useState({
+    price: true,
+    size: true,
+    event: false,
+    recipient: false,
+    flower: false,
+  });
+
+  const toggleSection = (key) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const toggleArrayValue = (value, setter, array) => {
     setter(
       array.includes(value)
@@ -197,141 +209,195 @@ const PopupFilterMenu = ({ isOpen, onClose, onApply, currentFilters }) => {
   return (
     <div className={`filter-overlay ${isOpen ? "open" : ""}`} onClick={onClose}>
       <div className="filter-menu" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>
+        <button className="filter-close-btn" onClick={onClose}>
           ✕
         </button>
 
         <h3 className="filter-title">{t("filter.title")}</h3>
 
-        {/* PRICE */}
-        <p className="filter-label">{t("filter.price")}</p>
-
-        <div className="price-inputs">
-          <input
-            type="number"
-            value={minPrice}
-            onChange={(e) => setMinPrice(Number(e.target.value))}
-            min={globalMin}
-            max={maxPrice}
-          />
-          <span>—</span>
-          <input
-            type="number"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(Number(e.target.value))}
-            min={minPrice}
-            max={globalMax}
-          />
-        </div>
-
-        <div className="range-wrapper">
-          <input
-            type="range"
-            min={globalMin}
-            max={globalMax}
-            step="100"
-            value={maxPrice}
-            onChange={(e) => {
-              const val = Number(e.target.value);
-              if (val >= minPrice) setMaxPrice(val);
-            }}
-          />
-        </div>
-
-        {/* SIZE + QUANTITY */}
-        <div className="two-columns">
-          <div>
-            <p className="filter-label">{t("filter.size")}</p>
-            {metadata.sizes.map((s) => (
-              <label key={s.id} className="radio-item">
-                <input
-                  type="radio"
-                  name="size"
-                  checked={selectedSizeId === s.id}
-                  onChange={() => setSelectedSizeId(s.id)}
-                />
-                {renderLabel(s)}
-              </label>
-            ))}
-          </div>
-
-          <div>
-            <p className="filter-label">{t("filter.quantity")}</p>
-            {["51", "101", "201", "501"].map((q) => (
-              <label key={q} className="radio-item">
-                <input
-                  type="radio"
-                  name="quantity"
-                  checked={quantity === q}
-                  onChange={() => setQuantity(q)}
-                />
-                {q}
-              </label>
-            ))}
-          </div>
-        </div>
-
         <div className="filter-scroll-area">
+          {/* PRICE */}
+          <div className={`filter-section ${expanded.price ? "expanded" : ""}`}>
+            <div
+              className="section-header"
+              onClick={() => toggleSection("price")}>
+              <p className="filter-label">{t("filter.price")}</p>
+              <span className="chevron">›</span>
+            </div>
+            <div className="section-content">
+              <div className="price-inputs">
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(Number(e.target.value))}
+                  min={globalMin}
+                  max={maxPrice}
+                />
+                <span>—</span>
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  min={minPrice}
+                  max={globalMax}
+                />
+              </div>
+              <div className="range-wrapper">
+                <input
+                  type="range"
+                  min={globalMin}
+                  max={globalMax}
+                  step="100"
+                  value={maxPrice}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val >= minPrice) setMaxPrice(val);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SIZE + QUANTITY */}
+          <div className={`filter-section ${expanded.size ? "expanded" : ""}`}>
+            <div
+              className="section-header"
+              onClick={() => toggleSection("size")}>
+              <p className="filter-label">
+                {t("filter.size")} & {t("filter.quantity")}
+              </p>
+              <span className="chevron">›</span>
+            </div>
+            <div className="section-content">
+              <div className="two-columns">
+                <div>
+                  <p className="sub-label">{t("filter.size")}</p>
+                  {metadata.sizes.map((s) => (
+                    <label key={s.id} className="radio-item">
+                      <input
+                        type="radio"
+                        name="size"
+                        checked={selectedSizeId === s.id}
+                        onChange={() => setSelectedSizeId(s.id)}
+                      />
+                      {renderLabel(s)}
+                    </label>
+                  ))}
+                </div>
+
+                <div>
+                  <p className="sub-label">{t("filter.quantity")}</p>
+                  {["51", "101", "201", "501"].map((q) => (
+                    <label key={q} className="radio-item">
+                      <input
+                        type="radio"
+                        name="quantity"
+                        checked={quantity === q}
+                        onChange={() => setQuantity(q)}
+                      />
+                      {q}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* EVENT */}
-          <p className="filter-label">{t("filter.event")}</p>
-          {metadata.events.map((e) => (
-            <label key={e.id} className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={selectedEventIds.includes(e.id)}
-                onChange={() =>
-                  toggleArrayValue(e.id, setSelectedEventIds, selectedEventIds)
-                }
-              />
-              {renderLabel(e)}
-            </label>
-          ))}
+          <div className={`filter-section ${expanded.event ? "expanded" : ""}`}>
+            <div
+              className="section-header"
+              onClick={() => toggleSection("event")}>
+              <p className="filter-label">{t("filter.event")}</p>
+              <span className="chevron">›</span>
+            </div>
+            <div className="section-content">
+              {metadata.events.map((e) => (
+                <label key={e.id} className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={selectedEventIds.includes(e.id)}
+                    onChange={() =>
+                      toggleArrayValue(
+                        e.id,
+                        setSelectedEventIds,
+                        selectedEventIds,
+                      )
+                    }
+                  />
+                  {renderLabel(e)}
+                </label>
+              ))}
+            </div>
+          </div>
 
           {/* FOR WHO */}
-          <p className="filter-label">{t("filter.recipient")}</p>
-          {metadata.recipients.map((r) => (
-            <label key={r.id} className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={selectedRecipientIds.includes(r.id)}
-                onChange={() =>
-                  toggleArrayValue(
-                    r.id,
-                    setSelectedRecipientIds,
-                    selectedRecipientIds,
-                  )
-                }
-              />
-              {renderLabel(r)}
-            </label>
-          ))}
+          <div
+            className={`filter-section ${expanded.recipient ? "expanded" : ""}`}>
+            <div
+              className="section-header"
+              onClick={() => toggleSection("recipient")}>
+              <p className="filter-label">{t("filter.recipient")}</p>
+              <span className="chevron">›</span>
+            </div>
+            <div className="section-content">
+              {metadata.recipients.map((r) => (
+                <label key={r.id} className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={selectedRecipientIds.includes(r.id)}
+                    onChange={() =>
+                      toggleArrayValue(
+                        r.id,
+                        setSelectedRecipientIds,
+                        selectedRecipientIds,
+                      )
+                    }
+                  />
+                  {renderLabel(r)}
+                </label>
+              ))}
+            </div>
+          </div>
 
           {/* FLOWER TYPE */}
-          <p className="filter-label">{t("filter.flower_type")}</p>
-          {metadata.flowers.map((f) => (
-            <label key={f.id} className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={selectedFlowerIds.includes(f.id)}
-                onChange={() =>
-                  toggleArrayValue(
-                    f.id,
-                    setSelectedFlowerIds,
-                    selectedFlowerIds,
-                  )
-                }
-              />
-              {renderLabel(f)}
-            </label>
-          ))}
+          <div
+            className={`filter-section ${expanded.flower ? "expanded" : ""}`}>
+            <div
+              className="section-header"
+              onClick={() => toggleSection("flower")}>
+              <p className="filter-label">{t("filter.flower_type")}</p>
+              <span className="chevron">›</span>
+            </div>
+            <div className="section-content">
+              {metadata.flowers.map((f) => (
+                <label key={f.id} className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={selectedFlowerIds.includes(f.id)}
+                    onChange={() =>
+                      toggleArrayValue(
+                        f.id,
+                        setSelectedFlowerIds,
+                        selectedFlowerIds,
+                      )
+                    }
+                  />
+                  {renderLabel(f)}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <button className="reset-btn" onClick={resetFilters}>
-          {t("filter.reset")}
-        </button>
-        <button className="apply-btn" onClick={applyFilters}>
-          {t("filter.apply")}
-        </button>
+        <div className="filter-actions">
+          <button className="reset-btn" onClick={resetFilters}>
+            {t("filter.reset")}
+          </button>
+          <button className="apply-btn" onClick={applyFilters}>
+            {t("filter.apply")}
+          </button>
+        </div>
       </div>
     </div>
   );

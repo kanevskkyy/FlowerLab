@@ -11,16 +11,17 @@ export default function ConfirmModal({
   cancelText = "Cancel",
   confirmType = "danger", // danger | nice
 }) {
-  if (!isOpen) return null;
-
-  // Close on Escape
+  // Close on Escape - FIX: Must be called before conditional return
   useEffect(() => {
+    if (!isOpen) return;
     const handleEsc = (e) => {
       if (e.key === "Escape") onCancel();
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [onCancel]);
+  }, [isOpen, onCancel]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="cm-overlay" onClick={onCancel}>

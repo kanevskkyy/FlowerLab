@@ -149,10 +149,14 @@ const OrderSummary = ({
       <button
         type="submit"
         className="confirm-btn"
-        disabled={total <= 0}
+        disabled={cartItems.length === 0 && selectedGifts.length === 0}
         style={{
-          opacity: total <= 0 ? 0.5 : 1,
-          cursor: total <= 0 ? "not-allowed" : "pointer",
+          opacity:
+            cartItems.length === 0 && selectedGifts.length === 0 ? 0.5 : 1,
+          cursor:
+            cartItems.length === 0 && selectedGifts.length === 0
+              ? "not-allowed"
+              : "pointer",
         }}>
         {t("checkout.confirm_btn")}
       </button>

@@ -389,6 +389,19 @@
   .cabinet-grid-single-left > * {
     grid-column: auto;
   }
+
+  .cabinet-avatar-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 24px 16px;
+  }
+
+  .cabinet-avatar-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 /* =========================
@@ -753,6 +766,7 @@
   justify-content: center;
   box-shadow: 0 4px 16px rgba(200, 106, 172, 0.25);
   border: 2px solid #fff;
+  flex-shrink: 0; /* Prevents squishing on mobile */
 }
 
 .cabinet-avatar-img {
@@ -781,6 +795,7 @@
   justify-content: center;
   opacity: 0;
   transition: opacity 0.2s;
+  border-radius: 50%; /* Ensures overlay is circular too */
 }
 
 .cabinet-avatar-wrapper:hover .cabinet-avatar-overlay {
