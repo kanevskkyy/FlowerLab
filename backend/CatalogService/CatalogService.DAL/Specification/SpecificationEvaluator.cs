@@ -18,10 +18,29 @@ namespace CatalogService.DAL.Specification
 
             query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
 
-            if (spec.OrderBy != null)
-                query = query.OrderBy(spec.OrderBy);
-            else if (spec.OrderByDescending != null)
-                query = query.OrderByDescending(spec.OrderByDescending);
+            if (spec.SortExpressions.Any())
+            {
+                IOrderedQueryable<T>? orderedQuery = null;
+
+                for (int i = 0; i < spec.SortExpressions.Count; i++)
+                {
+                    var sort = spec.SortExpressions[i];
+                    if (i == 0)
+                    {
+                        orderedQuery = sort.IsDescending 
+                            ? query.OrderByDescending(sort.Expression) 
+                            : query.OrderBy(sort.Expression);
+                    }
+                    else
+                    {
+                        orderedQuery = sort.IsDescending 
+                            ? orderedQuery!.ThenByDescending(sort.Expression) 
+                            : orderedQuery!.ThenBy(sort.Expression);
+                    }
+                }
+
+                query = orderedQuery!;
+            }
 
             return query;
         }

@@ -12,8 +12,7 @@ namespace CatalogService.DAL.Specification
         public Expression<Func<T, bool>> Criteria { get; }
         public List<Expression<Func<T, object>>> Includes { get; } = new();
 
-        public Expression<Func<T, object>>? OrderBy { get; private set; }
-        public Expression<Func<T, object>>? OrderByDescending { get; private set; }
+        public List<(Expression<Func<T, object>> Expression, bool IsDescending)> SortExpressions { get; } = new();
 
         protected BaseSpecification(Expression<Func<T, bool>> criteria)
         {
@@ -24,14 +23,15 @@ namespace CatalogService.DAL.Specification
         {
             Includes.Add(includeExpression);
         }
+        
         protected void AddOrderBy(Expression<Func<T, object>> orderByExpression)
         {
-            OrderBy = orderByExpression;
+            SortExpressions.Add((orderByExpression, false));
         }
 
         protected void AddOrderByDescending(Expression<Func<T, object>> orderByDescExpression)
         {
-            OrderByDescending = orderByDescExpression;
+            SortExpressions.Add((orderByDescExpression, true));
         }
     }
 }

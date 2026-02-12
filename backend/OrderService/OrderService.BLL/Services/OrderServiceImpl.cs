@@ -140,6 +140,11 @@ namespace OrderService.BLL.Services
                 throw new ValidationException($"Error checking bouquets: {errors}", "STOCK_INSUFFICIENT");
             }
 
+            if (!dto.Items.Any() && (dto.Gifts == null || !dto.Gifts.Any()))
+            {
+                throw new ValidationException("Order must contain at least one bouquet or gift.", "EMPTY_ORDER");
+            }
+
             var awaitingPaymentStatus = await unitOfWork.OrderStatuses.GetByNameAsync("AwaitingPayment");
             if (awaitingPaymentStatus == null)
             {

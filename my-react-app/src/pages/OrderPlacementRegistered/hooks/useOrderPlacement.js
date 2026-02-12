@@ -475,6 +475,11 @@ export const useOrderPlacement = () => {
 
     // Create Order immediately
     try {
+      if (cartItems.length === 0 && selectedGifts.length === 0) {
+        toast.error(t("cart.empty_msg"));
+        return;
+      }
+
       const response = await catalogService.createOrder(finalOrderData);
 
       // Save pending order ID to clear cart later on success
