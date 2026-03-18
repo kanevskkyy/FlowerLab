@@ -1,4 +1,4 @@
-﻿using EmailService.BLL.DTO;
+using EmailService.BLL.DTO;
 using EmailService.BLL.Service.Interfaces;
 using Microsoft.Extensions.Options;
 using SendGrid;
@@ -38,7 +38,13 @@ namespace EmailService.BLL.Service
             message.AddTo(emailMessageDTO.To);
             message.SetClickTracking(false, false);
 
-            await sendGridClient.SendEmailAsync(message, cancellationToken);
+            var response = await sendGridClient.SendEmailAsync(message, cancellationToken);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Body.ReadAsStringAsync();
+                throw new Exception($"Помилка відправки email через SendGrid. Status: {response.StatusCode}. Details: {responseBody}");
+            }
         }
     }
 }

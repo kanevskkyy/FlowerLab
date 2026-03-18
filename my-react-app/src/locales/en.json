@@ -55,7 +55,10 @@
   },
   "footer": {
     "address1": "Chernivtsi, Herzena str. 2a",
-    "address2": "Vasile Alecsandri str. 1"
+    "address2": "Vasile Alecsandri str. 1",
+    "delivery_payment": "Delivery and Payment",
+    "refund_policy": "Refund Policy",
+    "public_offer": "Public Offer"
   },
   "popular": {
     "title": "POPULAR BOUQUETS / SALES",
@@ -143,6 +146,8 @@
     "delivery": "Fast & Reliable Delivery",
     "personalized": "Personalized Designs",
     "locations": "Our locations:",
+    "address1": "Chernivtsi, Vasile Alecsandri str. 1",
+    "address2": "Chernivtsi, Herzena str. 2a",
     "contacts": "Our contact information:",
     "social_media": "Social media:"
   },
@@ -645,5 +650,76 @@
         "content": "You have full control over your data. You can change your information in your personal account or completely delete your account along with the entire history through the 'Settings' section. We do not transfer your data to third parties, except for cases necessary for order delivery (courier service)."
       }
     ]
+  },
+  "delivery_info": {
+    "title": "Delivery & Payment",
+    "seo_desc": "Delivery and payment conditions for flowers in the FlowerLab online store in Chernivtsi.",
+    "payment_title": "Payment",
+    "payment_p1": "Payment is made online via payment systems (Visa / MasterCard / Apple Pay / Google Pay / <1>LiqPay</1>).",
+    "payment_p2": "Refunds are only possible in case of order cancellation before the composition is assembled.",
+    "delivery_title": "Delivery & Pickup",
+    "delivery_p1": "Delivery is carried out within Chernivtsi and suburbs daily from 9:00 to 22:00.",
+    "delivery_p2": "Orders placed after 21:00 are fulfilled the next day.",
+    "delivery_p3": "The delivery cost is standard regardless of the neighborhood.",
+    "delivery_p4": "Pickup from the Flower Lab Vlada studio is also available by prior arrangement.",
+    "delivery_p5": "If the recipient is not at the address, the courier will contact them by phone. If there is no connection, the order may be left on-site or returned to the studio."
+  },
+  "refund_policy": {
+    "title": "Refunds and Exchanges (Refund Policy)",
+    "seo_desc": "Conditions for returning and exchanging flowers and products in the FlowerLab online store.",
+    "general_title": "General Conditions",
+    "general_p1": "Flowers are perishable goods, so their return is possible only in exceptional cases.",
+    "general_p2": "Returns are possible only in case of:",
+    "general_l1": "Non-compliance with the ordered product.",
+    "general_l2": "Damage to the product during delivery.",
+    "general_l3": "Inadequate quality at the time of receipt of the order by the client.",
+    "claims_title": "Deadlines for submitting claims",
+    "claims_l1": "The buyer is obliged to report a claim within <1>two hours</1> after receiving the order. The claim must be accompanied by mandatory photo fixation.",
+    "claims_l2": "Consideration of the claim is carried out by the administrator within <1>24 hours</1> from the moment of the buyer's appeal.",
+    "refund_title": "Refunds",
+    "refund_p1": "If the application for the return of the product is approved due to its inadequate quality or damage during delivery, we will issue a refund to the same user's bank card from which the payment was made.",
+    "refund_p2": "Also, a full refund is possible in case of order cancellation on the buyer's initiative, but strictly <1>before the florist starts assembling the composition</1>.",
+    "refund_p3": "The term for crediting funds depends on the card-issuing bank."
+  },
+  "public_offer_page": {
+    "title": "Business rules for the Flower Lab Vlada online store (Public offer)",
+    "seo_desc": "Business rules and public contract of the Flower Lab Vlada online store.",
+    "s1_title": "1. General provisions",
+    "s1_1": "1.1. The Flower Lab Vlada online store is an online platform for selling flowers, compositions, gift sets, and related products.",
+    "s1_2": "1.2. Users can browse the catalog, place orders, pay online, and order delivery or pickup.",
+    "s1_3": "1.3. Registration on the site is not mandatory, however, to make repeat purchases or participate in the loyalty program, creating a personal account is recommended.",
+    "s1_4": "1.4. Placing an order constitutes the buyer's consent to these rules and the privacy policy.",
+    "s2_title": "2. Users and age restrictions",
+    "s2_1": "2.1. The buyer can be any individual who has reached the age of 18.",
+    "s2_2": "2.2. Persons aged 14 to 18 can make online purchases only within the limits of small household orders that correspond to their income, or with the consent of parents / legal representatives.",
+    "s2_3": "2.3. The site administration is not responsible for the accuracy of the data entered by the user when placing an order.",
+    "s3_title": "3. Order placement and acceptance",
+    "s3_1": "3.1. An order can be placed through: the Flower Lab Vlada website, social networks (Instagram, Facebook), messengers (Viber, Telegram, Direct).",
+    "s3_2": "3.2. An order is considered accepted after confirmation by the administrator.",
+    "s3_3": "3.3. Mandatory data is required for registration: name, contact phone number, delivery address (if necessary).",
+    "s4_title": "4. Payment",
+    "s4_1": "4.1. Payment is made online via payment systems (Visa / MasterCard / LiqPay / Apple Pay / Google Pay).",
+    "s4_2": "4.2. Refunds are possible only in case of order cancellation before the composition is assembled.",
+    "s5_title": "5. Delivery and pickup",
+    "s5_1": "5.1. Delivery is carried out within Chernivtsi and the suburbs daily from 9:00 to 22:00.",
+    "s5_2": "5.2. Orders placed after 21:00 are completed the next day.",
+    "s5_3": "5.3. The delivery cost is standard regardless of the district.",
+    "s5_4": "5.4. Pickup from the Flower Lab Vlada studio is also available with prior time agreement.",
+    "s5_5": "5.5. If the recipient is absent at the address, the courier will contact by phone. If there is no connection, the order may be left on site or returned to the studio.",
+    "s6_title": "6. Assortment and individual orders",
+    "s6_1": "6.1. Photos of goods on the website are indicative. Slight differences are possible due to seasonality or flower shades.",
+    "s6_2": "6.2. If a certain type of flower is absent, the florist has the right to replace it with a similar one in color and cost, after agreeing it with the client.",
+    "s6_3": "6.3. Individual orders (designer bouquets, corporate orders, event decor) are accepted upon prior agreement of the conditions and terms of execution.",
+    "s7_title": "7. Returns and exchange",
+    "s7_1": "7.1. Flowers are perishable goods, so their return is possible only in case of: non-compliance with the order, damage during delivery, inadequate quality at the time of receipt.",
+    "s7_2": "7.2. The buyer must report a claim within two hours after receiving the order (with photo fixation).",
+    "s7_3": "7.3. Consideration of the claim is carried out within 24 hours from the moment of application.",
+    "s8_title": "8. Privacy and data protection",
+    "s8_1": "8.1. Users' personal data are used exclusively for processing and delivering orders.",
+    "s8_2": "8.2. A user can request the deletion of their data by sending a request to the official email address of Flower Lab Vlada.",
+    "s9_title": "9. Promotions, discounts, and loyalty programs",
+    "s9_1": "9.1. Upon registering on the site, the user receives a 10% discount on their first order.",
+    "s9_2": "9.2. Promotions and special offers are valid during the specified period mentioned on the site or in social networks.",
+    "s9_3": "9.3. Regular customers can receive personalized offers or bonuses."
   }
 }

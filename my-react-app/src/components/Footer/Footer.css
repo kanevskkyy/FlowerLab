@@ -24,8 +24,8 @@
 }
 /* Контейнери іконок у футері */
 .footer .footer-icon-wrapper {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -33,10 +33,10 @@
 }
 
 .footer .footer-icon {
-  width: auto;
-  height: auto;
-  max-width: 24px;
-  max-height: 24px;
+  width: 100%;
+  height: 100%;
+  max-width: 32px;
+  max-height: 32px;
   object-fit: contain;
   display: block;
   transition: transform 0.3s ease;
@@ -82,6 +82,35 @@
 .footer-socials .footer-link-single:hover .footer-icon,
 .footer-phone:has(.footer-link-single:hover) .phone-icon {
   transform: scale(1.15);
+}
+
+.footer-legal {
+  gap: 12px;
+}
+
+.footer-legal-link {
+  text-decoration: none;
+  font-size: 14px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.footer-legal-link:hover {
+  color: #c86aac;
+  text-decoration: underline;
+}
+
+.footer-payments {
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.payment-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* ================= RESPONSIVE ================= */

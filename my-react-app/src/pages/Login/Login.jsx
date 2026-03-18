@@ -65,20 +65,16 @@ export default function Login() {
         loginResponse.refreshToken || loginResponse.RefreshToken;
 
       if (accessToken) {
-        // Оновлюємо стан авторизації в контексті (токени вже в Cookie)
         setAuth(accessToken);
 
         toast.success(t("auth.welcome_back"));
         navigate("/cabinet", { replace: true });
       } else {
-        // Якщо токен не прийшов (наприклад, null)
         throw new Error("No access token received from server");
       }
     } catch (error) {
       console.error("Login failed:", error);
 
-      // Обробка помилок від бекенду
-      // ExceptionHandlingMiddleware повертає { error: "message", type: "..." }
       toast.error(t(extractErrorMessage(error, "auth.login_failed")));
     }
   };
