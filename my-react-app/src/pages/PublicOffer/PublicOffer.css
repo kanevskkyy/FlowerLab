@@ -1,0 +1,44 @@
+.info-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background-color: var(--white);
+  min-height: 60vh;
+}
+
+.info-page-container h1 {
+  font-size: 2.2rem;
+  color: var(--text-color);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.info-page-section {
+  margin-bottom: 30px;
+}
+
+.info-page-section h2 {
+  font-size: 1.5rem;
+  color: var(--primary-color, #d495b5);
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--border-color, #eee);
+  padding-bottom: 10px;
+}
+
+.info-page-section p,
+.info-page-section li {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--text-color);
+  margin-bottom: 10px;
+}
+
+.info-page-section ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-bottom: 15px;
+}
+
+.info-page-section ul li {
+  margin-bottom: 8px;
+}

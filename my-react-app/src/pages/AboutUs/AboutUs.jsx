@@ -128,7 +128,7 @@ const AboutUs = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-link-text">
-                <p>м. Чернівці, вул. Василя Александрі, 1</p>
+                <p>{t("about_page.address1")}</p>
               </a>
             </div>
 
@@ -145,7 +145,7 @@ const AboutUs = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-link-text">
-                <p>м. Чернівці, вул. Герцена 2а</p>
+                <p>{t("about_page.address2")}</p>
               </a>
             </div>
           </div>

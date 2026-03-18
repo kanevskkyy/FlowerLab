@@ -14,6 +14,9 @@ import HomePage from "./pages/HomePage/HomePage";
 import Catalog from "./pages/Catalog/Catalog";
 import ProductCard from "./pages/ProductCard/ProductCard";
 import AboutUs from "./pages/AboutUs/AboutUs";
+import DeliveryInfo from "./pages/DeliveryInfo/DeliveryInfo";
+import RefundPolicy from "./pages/RefundPolicy/RefundPolicy";
+import PublicOffer from "./pages/PublicOffer/PublicOffer";
 
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
@@ -104,6 +107,9 @@ function App() {
                 <Route path="/product/:id" element={<ProductCard />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/delivery" element={<DeliveryInfo />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/public-offer" element={<PublicOffer />} />
 
                 <Route path="/order" element={<OrderPlacementRegistered />} />
                 <Route

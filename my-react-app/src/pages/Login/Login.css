@@ -26,9 +26,11 @@ body,
 }
 
 .login-page .logo-img {
-  height: 32px;
-  object-fit: contain;
+  height: 40px;
+  width: auto;
   cursor: pointer;
+  object-fit: contain;
+  display: block;
 }
 
 /* CONTENT */

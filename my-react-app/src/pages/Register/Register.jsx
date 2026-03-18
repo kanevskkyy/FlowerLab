@@ -16,6 +16,7 @@ import hideIcon from "../../assets/icons/hide.svg";
 import showIcon from "../../assets/icons/show.svg";
 import messageIcon from "../../assets/icons/message.svg";
 import toast from "react-hot-toast";
+import { extractErrorMessage } from "../../utils/errorUtils";
 
 // Схема валідації
 export default function Register() {
