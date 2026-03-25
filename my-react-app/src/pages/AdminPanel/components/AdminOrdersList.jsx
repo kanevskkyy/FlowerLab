@@ -102,7 +102,13 @@ function AdminOrdersList({
                   value={statusId}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => onStatusChange(o.id, e.target.value)}>
-                  {(statuses || []).map((s) => (
+                  {[...(statuses || [])]
+                    .sort((a, b) => 
+                      getLocalizedStatus(a, i18n.language, t).localeCompare(
+                        getLocalizedStatus(b, i18n.language, t)
+                      )
+                    )
+                    .map((s) => (
                     <option key={s.id} value={s.id}>
                       {getLocalizedStatus(s, i18n.language, t)}
                     </option>

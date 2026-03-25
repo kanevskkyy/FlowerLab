@@ -122,7 +122,13 @@ export default function AdminOrderDetails() {
               className={`aod-status-select status-${getStatusKey(currentStatusName)}`}
               value={currentStatusId}
               onChange={(e) => handleStatusChange(e.target.value)}>
-              {statuses.map((s) => (
+              {[...(statuses || [])]
+                .sort((a, b) => 
+                  getLocalizedStatus(a, i18n.language, t).localeCompare(
+                    getLocalizedStatus(b, i18n.language, t)
+                  )
+                )
+                .map((s) => (
                 <option key={s.id} value={s.id}>
                   {getLocalizedStatus(s, i18n.language, t)}
                 </option>

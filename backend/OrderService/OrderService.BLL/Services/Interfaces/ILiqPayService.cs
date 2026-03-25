@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +12,6 @@ namespace OrderService.BLL.Services.Interfaces
         string GeneratePaymentUrl(Guid orderId, decimal amount, string description);
         bool ValidateCallback(string data, string signature);
         LiqPayResponse ParseCallback(string data);
+        Task<string> RefundPaymentAsync(string orderId, decimal amount);
     }
 }

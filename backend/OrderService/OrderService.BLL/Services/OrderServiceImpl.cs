@@ -361,6 +361,7 @@ namespace OrderService.BLL.Services
                         order.StatusId = paidStatus.Id;
                         order.Status = paidStatus;
                         order.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+                        order.LiqPayOrderId = response.OrderId;
 
                         await FinalizeOrderAsync(order, cancellationToken);
 
@@ -455,6 +456,67 @@ namespace OrderService.BLL.Services
             await cacheInvalidationService.InvalidateAllAsync();
         }
 
+        private async Task CancelOrderAsync(Order order, string oldStatusName, CancellationToken cancellationToken)
+        {
+            var paidStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered" };
+            bool wasPaid = paidStatuses.Contains(oldStatusName);
+
+            if (wasPaid)
+            {
+                // 1. Refund via LiqPay
+                try
+                {
+                    string liqPayId = !string.IsNullOrEmpty(order.LiqPayOrderId) ? order.LiqPayOrderId : order.Id.ToString();
+                    var refundStatus = await liqPayService.RefundPaymentAsync(liqPayId, order.TotalPrice);
+                    Console.WriteLine($"[LiqPay Refund] Order {order.Id} (LiqPay ID: {liqPayId}) refund executed. Status: {refundStatus}");
+                }
+                catch (Exception ex)
+                {
+                    // If refund fails, we might want to log it but still try to restock the flowers.
+                    Console.WriteLine($"[Refund Error] Could not refund order {order.Id}: {ex.Message}");
+                }
+
+                // 2. Restock Gifts in OrderService
+                foreach (var orderGift in order.OrderGifts)
+                {
+                    var gift = await unitOfWork.Gifts.GetByIdAsync(orderGift.GiftId);
+                    if (gift != null)
+                    {
+                        gift.AvailableCount += orderGift.Count;
+                        gift.UpdatedAt = DateTime.UtcNow.ToUniversalTime();
+                        unitOfWork.Gifts.Update(gift);
+                        await cacheInvalidationService.InvalidateByIdAsync(gift.Id);
+                    }
+                }
+
+                // 3. Publish OrderCancelledEvent to restock bouquets in CatalogService
+                var orderCancelledEvent = new OrderCancelledEvent
+                {
+                    OrderId = order.Id,
+                    Bouquets = order.Items.Select(i => new OrderBouquetItem
+                    {
+                        BouquetId = i.BouquetId,
+                        SizeId = i.SizeId,
+                        Count = i.Count
+                    }).ToList()
+                };
+                await publishEndpoint.Publish(orderCancelledEvent, cancellationToken);
+            }
+
+            // Deactivate reservations if they are still active
+            foreach (var reservation in order.Reservations.Where(r => r.IsActive))
+            {
+                reservation.IsActive = false;
+                unitOfWork.OrderReservations.Update(reservation);
+            }
+
+            foreach (var giftReservation in order.GiftReservations.Where(r => r.IsActive))
+            {
+                giftReservation.IsActive = false;
+                unitOfWork.GiftReservations.Update(giftReservation);
+            }
+        }
+
         public async Task<PagedList<OrderSummaryDto>> GetMyOrdersAsync(Guid? userId, Guid? guestToken, OrderSpecificationParameters parameters, CancellationToken cancellationToken = default)
         {
             parameters.UserId = userId;
@@ -489,6 +551,10 @@ namespace OrderService.BLL.Services
             if (oldStatusName != "Pending" && status.Name == "Pending")
             {
                 await FinalizeOrderAsync(order, cancellationToken);
+            }
+            else if (status.Name == "Cancelled" || status.Name == "Refunded")
+            {
+                await CancelOrderAsync(order, oldStatusName, cancellationToken);
             }
 
             unitOfWork.Orders.Update(order);

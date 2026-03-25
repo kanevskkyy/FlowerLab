@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +30,8 @@ namespace OrderService.Domain.Entities
         public Guid? DeliveryInformationId { get; set; }
 
         public Guid? GuestToken { get; set; }
+        
+        public string? LiqPayOrderId { get; set; }
 
         public DeliveryInformation? DeliveryInformation { get; set; }
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();

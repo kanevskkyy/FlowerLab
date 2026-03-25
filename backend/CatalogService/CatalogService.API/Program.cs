@@ -202,6 +202,7 @@ namespace CatalogService.API
             builder.Services.AddMassTransit(x =>
             {
                 x.AddConsumer<OrderCreatedConsumer>();
+                x.AddConsumer<OrderCancelledConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -223,6 +224,15 @@ namespace CatalogService.API
                     {
                         e.ConfigureConsumer<OrderCreatedConsumer>(context);
                         e.Bind("order-created-exchange", s =>
+                        {
+                            s.ExchangeType = "fanout";
+                        });
+                    });
+
+                    cfg.ReceiveEndpoint("catalog-order-cancelled-queue", e =>
+                    {
+                        e.ConfigureConsumer<OrderCancelledConsumer>(context);
+                        e.Bind("order-cancelled-exchange", s =>
                         {
                             s.ExchangeType = "fanout";
                         });
