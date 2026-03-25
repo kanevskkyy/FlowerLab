@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -78,6 +78,10 @@ namespace OrderService.BLL.Profiles
                 case "підтверджено":
                     canonicalKey = "confirmed";
                     break;
+                case "readyforpickup":
+                case "букетготовий":
+                    canonicalKey = "readyforpickup";
+                    break;
                 default:
                     canonicalKey = normalized;
                     break;
@@ -130,6 +134,10 @@ namespace OrderService.BLL.Profiles
                 case "confirmed":
                     dict["en"] = "Confirmed";
                     dict["ua"] = "Підтверджено";
+                    break;
+                case "readyforpickup":
+                    dict["en"] = "Ready For Pickup";
+                    dict["ua"] = "Букет готовий";
                     break;
             }
             return dict;

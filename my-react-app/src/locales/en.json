@@ -604,6 +604,7 @@
     "wait_accept": "Wait Accept",
     "waitaccept": "Wait Accept",
     "pending": "Pending",
+    "readyforpickup": "Ready For Pickup",
     "completed": "Completed",
     "indelivery": "In Delivery",
     "delivering": "Delivering",

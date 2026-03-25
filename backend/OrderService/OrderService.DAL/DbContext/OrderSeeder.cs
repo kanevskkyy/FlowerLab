@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using OrderService.Domain.Database;
 using OrderService.Domain.Entities;
 using System;
@@ -14,7 +14,7 @@ namespace OrderService.DAL.DbContext
         public static async Task SeedAsync(OrderDbContext context)
         {
             // ================= OrderStatuses =================
-            var requiredStatuses = new[] { "Pending", "AwaitingPayment", "Completed", "Delivering", "PaymentFailed", "Cancelled" };
+            var requiredStatuses = new[] { "Pending", "AwaitingPayment", "Completed", "Delivering", "PaymentFailed", "Cancelled", "ReadyForPickup" };
             foreach (var statusName in requiredStatuses)
             {
                 if (!await context.OrderStatuses.AnyAsync(s => s.Name == statusName))

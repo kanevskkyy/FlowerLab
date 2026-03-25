@@ -153,6 +153,15 @@ builder.Services.AddMassTransit(x =>
         {
             p.ExchangeType = "fanout"; 
         });
+
+        cfg.Message<OrderCancelledEvent>(m =>
+        {
+            m.SetEntityName("order-cancelled-exchange"); 
+        });
+        cfg.Publish<OrderCancelledEvent>(p =>
+        {
+            p.ExchangeType = "fanout"; 
+        });
     });
 });
 
