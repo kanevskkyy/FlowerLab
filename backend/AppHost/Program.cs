@@ -108,6 +108,7 @@ var userService = builder.AddProject<UsersService_API>("users")
 
 var emailService = builder.AddProject<EmailService_API>("email")
     .WithReference(rabbitmq)
+    .WithReference(userService)
     .WithEnvironment("SENDGRID__KEY", Environment.GetEnvironmentVariable("SENDGRID__KEY"))
     .WithEnvironment("SENDGRID__FROM_EMAIL", Environment.GetEnvironmentVariable("SENDGRID__FROM_EMAIL"))
     .WithEnvironment("SENDGRID__FROM_NAME", Environment.GetEnvironmentVariable("SENDGRID__FROM_NAME"))

@@ -14,16 +14,7 @@ import logoIcon from "../../assets/icons/logo.svg";
 import hideIcon from "../../assets/icons/hide.svg";
 import showIcon from "../../assets/icons/show.svg";
 
-// Validation schema
-const schema = z
-  .object({
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(1, "Confirm password is required"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+// Validation schema will be defined inside the component to use translations
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -31,6 +22,20 @@ export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const schema = React.useMemo(
+    () =>
+      z
+        .object({
+          password: z.string().min(8, t("validation.password_min")),
+          confirmPassword: z.string().min(1, t("validation.confirm_password_required")),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: t("validation.passwords_mismatch"),
+          path: ["confirmPassword"],
+        }),
+    [t]
+  );
 
   // Token check simulation
   useEffect(() => {

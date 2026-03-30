@@ -15,7 +15,7 @@ const ReceiverInfo = () => {
   return (
     <section className="form-section receiver-section-wrapper">
       <div className="receiver-section">
-        <label>{t("checkout.receiver_title")}</label>
+        <h2>{t("checkout.receiver_title")}</h2>
         <div className="radio-group">
           <label className="radio-label">
             <input type="radio" value="self" {...register("receiverType")} />

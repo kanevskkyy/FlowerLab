@@ -97,7 +97,7 @@ export default function AdminOrderDetails() {
         <header className="aod-header">
           <div className="aod-header-left">
             <button className="aod-back-btn" onClick={() => navigate("/admin")}>
-              ← {t("admin.orders.back_to_orders")}
+              ← <span className="aod-back-btn-text">{t("admin.orders.back_to_orders")}</span>
             </button>
             <h1 className="aod-title">
               {t("admin.orders.id")}

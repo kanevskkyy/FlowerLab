@@ -228,7 +228,11 @@
     "recovery_desc": "A password recovery email will be sent to you.",
     "new_password": "New Password",
     "updating": "Updating...",
-    "set_new_password": "Set New Password"
+    "set_new_password": "Set New Password",
+    "unconfirmed_email_msg": "Your email is not confirmed. Didn't receive the email?",
+    "resend_email_btn": "Resend Confirmation Email",
+    "resend_success": "New confirmation email sent! Please check your inbox.",
+    "sending": "Sending..."
   },
   "cabinet": {
     "title": "My Account",

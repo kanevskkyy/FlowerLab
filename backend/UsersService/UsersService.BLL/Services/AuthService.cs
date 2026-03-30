@@ -1,4 +1,4 @@
-﻿using MassTransit;
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -137,7 +137,7 @@ namespace UsersService.BLL.Services
             return await GenerateAndSaveTokens(user);
         }
 
-        public async Task ConfirmEmailAsync(string userId, string token)
+        public async Task<TokenResponseDto> ConfirmEmailAsync(string userId, string token)
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
@@ -151,6 +151,8 @@ namespace UsersService.BLL.Services
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new InvalidOperationException($"Failed to confirm email: {errors}");
             }
+
+            return await GenerateAndSaveTokens(user);
         }
 
 

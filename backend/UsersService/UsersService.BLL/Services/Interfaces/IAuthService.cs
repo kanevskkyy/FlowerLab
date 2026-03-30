@@ -1,4 +1,4 @@
-﻿using UsersService.BLL.Models.Auth;
+using UsersService.BLL.Models.Auth;
 using UsersService.BLL.Models.Users;
 
 namespace UsersService.BLL.Services.Interfaces
@@ -13,7 +13,7 @@ namespace UsersService.BLL.Services.Interfaces
         Task ResendConfirmationEmailAsync(string email);
         Task SendResetPasswordLinkAsync(string email);
         Task ResetPasswordAsync(ResetPasswordDto model);
-        Task ConfirmEmailAsync(string userId, string token);
+        Task<TokenResponseDto> ConfirmEmailAsync(string userId, string token);
         Task<TokenResponseDto> UpdateUserAsync(string userId, UpdateUserDto dto);
     }
 }

@@ -24,6 +24,8 @@ export default function Login() {
   const navigate = useNavigate();
   const { setAuth } = useAuth(); // Використовуємо метод для оновлення стану
   const [showPassword, setShowPassword] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState(null);
+  const [isResending, setIsResending] = useState(false);
 
   const schema = useMemo(
     () =>
@@ -68,14 +70,40 @@ export default function Login() {
         setAuth(accessToken);
 
         toast.success(t("auth.welcome_back"));
-        navigate("/cabinet", { replace: true });
+        navigate("/", { replace: true });
       } else {
         throw new Error("No access token received from server");
       }
     } catch (error) {
       console.error("Login failed:", error);
 
-      toast.error(t(extractErrorMessage(error, "auth.login_failed")));
+      const extractedError = extractErrorMessage(error, "auth.login_failed");
+      const rawLower = (typeof extractedError === "string" ? extractedError : "").toLowerCase();
+
+      if (
+        rawLower.includes("confirm your email") ||
+        rawLower.includes("email not confirmed")
+      ) {
+        setUnconfirmedEmail(data.email);
+        toast.error(t("auth.unconfirmed_email_msg"));
+      } else {
+        setUnconfirmedEmail(null);
+        toast.error(t(extractedError));
+      }
+    }
+  };
+
+  const handleResend = async () => {
+    if (!unconfirmedEmail) return;
+    setIsResending(true);
+    try {
+      await authService.resendConfirmationEmail(unconfirmedEmail);
+      toast.success(t("auth.resend_success"));
+      setUnconfirmedEmail(null);
+    } catch (err) {
+      toast.error(t(extractErrorMessage(err, "auth.registration_failed")));
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -151,6 +179,22 @@ export default function Login() {
                 <p className="error-text">{errors.password.message}</p>
               )}
             </div>
+
+            {unconfirmedEmail && (
+              <div className="resend-email-box">
+                <p className="resend-email-text">
+                  {t("auth.unconfirmed_email_msg")}
+                </p>
+                <button
+                  type="button"
+                  className="resend-email-btn"
+                  onClick={handleResend}
+                  disabled={isResending}>
+                  {isResending ? t("auth.sending") : t("auth.resend_email_btn")}
+                </button>
+              </div>
+            )}
+
             {/* Main Sign In Button */}
             <button
               type="submit"

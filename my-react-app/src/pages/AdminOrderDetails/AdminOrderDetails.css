@@ -315,4 +315,13 @@
   .aod-item-price {
     font-size: 13px;
   }
+
+  .aod-back-btn-text {
+    display: none;
+  }
+
+  .aod-back-btn {
+    font-size: 20px;
+    padding: 10px;
+  }
 }

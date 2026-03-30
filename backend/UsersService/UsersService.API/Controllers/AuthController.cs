@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using UsersService.BLL.Models.Auth;
 using UsersService.BLL.Models.Email;
 using UsersService.BLL.Services.Interfaces;
@@ -31,14 +31,17 @@ namespace UsersService.API.Controllers
         }
 
         [HttpGet("confirm-email")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenResponseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
         {
             try
             {
-                await authService.ConfirmEmailAsync(userId, token);
-                return Ok(new { Message = "Email підтверджено 🎉. Тепер можете увійти." });
+                var result = await authService.ConfirmEmailAsync(userId, token);
+                
+                SetTokensInCookies(result.AccessToken, result.RefreshToken);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

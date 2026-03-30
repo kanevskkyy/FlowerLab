@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
+import { useAuth } from "../../context/useAuth";
 import { extractErrorMessage } from "../../utils/errorUtils";
 import "./EmailConfirmation.css";
 
@@ -10,6 +11,7 @@ export default function EmailConfirmation() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
   const [status, setStatus] = useState("loading"); // loading, success, error
   const [message, setMessage] = useState("");
 
@@ -60,12 +62,20 @@ export default function EmailConfirmation() {
 
     const confirmEmail = async () => {
       try {
-        await axiosClient.get("/api/users/auth/confirm-email", {
+        const response = await axiosClient.get("/api/users/auth/confirm-email", {
           params: { userId, token },
         });
 
+        const accessToken = response.data.accessToken || response.data.AccessToken;
+        if (accessToken) {
+          setAuth(accessToken);
+        }
+
         setStatus("success");
         setMessage(t("auth.verification_success_msg"));
+        
+        // Auto redirect to home page after 2.5 seconds
+        setTimeout(() => navigate("/"), 2500);
       } catch (error) {
         console.error("Confirmation error:", error);
         setStatus("error");
@@ -91,11 +101,9 @@ export default function EmailConfirmation() {
               {t("auth.verification_success")}
             </h2>
             <p className="confirmation-text">{message}</p>
-            <button
-              className="confirmation-btn"
-              onClick={() => navigate("/login")}>
-              {t("auth.go_to_login")}
-            </button>
+            <p className="confirmation-text" style={{marginTop: "12px", fontSize: "14px", color: "#666"}}>
+              {t("auth.redirecting_to_home", "Перенаправлення на головну сторінку...")}
+            </p>
           </>
         )}
 
