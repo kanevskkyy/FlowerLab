@@ -181,7 +181,7 @@
 
 /* ================= RECEIVER SECTION ================= */
 .receiver-section {
-  margin-top: 25px;
+  margin-top: 0;
 }
 
 .receiver-section > label {
@@ -717,25 +717,56 @@
   border-radius: 50%;
   border: 2px solid #e0e0e0;
   background: #fff;
-  font-size: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
+  position: relative;
+}
+
+/* Horizontal line */
+.add-gift-btn::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background-color: #999;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+/* Vertical line */
+.add-gift-btn::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 14px;
+  background-color: #999;
+  border-radius: 2px;
+  transition: all 0.2s ease;
 }
 
 .add-gift-btn:hover {
-  border-color: #d46aac;
+  border-color: #f4bce5;
   background: #fceef9;
+}
+
+.add-gift-btn:hover::before,
+.add-gift-btn:hover::after {
+  background-color: #d46aac;
 }
 
 .add-gift-btn.active {
   background: #d46aac;
   border-color: #d46aac;
-  color: #fff;
   transform: rotate(45deg);
+}
+
+.add-gift-btn.active::before,
+.add-gift-btn.active::after {
+  background-color: #fff;
 }
 
 .add-gift-btn.disabled {

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +28,15 @@ namespace UsersService.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetCurrentUser() => Ok(await userService.GetCurrentAsync(UserId));
+
+        [AllowAnonymous]
+        [HttpGet("internal/{id}/email")]
+        public async Task<IActionResult> GetUserEmailInternal(string id)
+        {
+            var user = await userService.GetCurrentAsync(id);
+            if (user == null || string.IsNullOrEmpty(user.Email)) return NotFound();
+            return Ok(new { Email = user.Email });
+        }
 
         [HttpPut]
         public async Task<IActionResult> UpdateCurrentUser([FromForm] UpdateUserDto dto) => Ok(await userService.UpdateAsync(UserId, dto));

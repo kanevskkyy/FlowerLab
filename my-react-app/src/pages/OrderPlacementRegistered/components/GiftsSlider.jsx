@@ -71,8 +71,9 @@ const GiftsSlider = ({ gifts, giftsLoading, selectedGifts, toggleGift }) => {
                         className={`add-gift-btn ${
                           selectedGifts.includes(gift.id) ? "active" : ""
                         }`}
-                        onClick={() => toggleGift(gift.id)}>
-                        +
+                        onClick={() => toggleGift(gift.id)}
+                      >
+                        {/* No text here, lines will be drawn via CSS */}
                       </button>
                     </div>
                   </div>

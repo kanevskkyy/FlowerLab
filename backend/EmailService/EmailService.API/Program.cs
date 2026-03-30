@@ -15,10 +15,26 @@ builder.Services.Configure<EmailProviderOptions>(options =>
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
+// Get UsersService address from Aspire environment variables
+var usersServiceAddress = builder.Configuration["services:users:https:0"] 
+                         ?? builder.Configuration["services:users:http:0"];
+
+builder.Services.AddHttpClient("UsersServiceClient", client =>
+{
+    if (!string.IsNullOrEmpty(usersServiceAddress))
+    {
+        client.BaseAddress = new Uri(usersServiceAddress);
+    }
+});
+
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<SendVerifyEmailEventConsumer>();
     x.AddConsumer<SendResetPasswordEmailEventConsumer>();
+    x.AddConsumer<OrderReadyForPickupEventConsumer>();
+    x.AddConsumer<OrderDeliveringEventConsumer>();
+    x.AddConsumer<OrderPaidEventConsumer>();
+    x.AddConsumer<OrderCompletedEventConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -46,6 +62,26 @@ builder.Services.AddMassTransit(x =>
         {
             e.ConfigureConsumer<SendVerifyEmailEventConsumer>(context);
             e.Bind("send-user-confirm-email-exchange");
+        });
+
+        cfg.ReceiveEndpoint("order-ready-for-pickup-email-queue", e =>
+        {
+            e.ConfigureConsumer<OrderReadyForPickupEventConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("order-delivering-email-queue", e =>
+        {
+            e.ConfigureConsumer<OrderDeliveringEventConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("order-paid-email-queue", e =>
+        {
+            e.ConfigureConsumer<OrderPaidEventConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("order-completed-email-queue", e =>
+        {
+            e.ConfigureConsumer<OrderCompletedEventConsumer>(context);
         });
     });
 });

@@ -365,6 +365,54 @@ namespace OrderService.BLL.Services
 
                         await FinalizeOrderAsync(order, cancellationToken);
 
+                        // Publish OrderPaidEvent for detailed email notification
+                        if (order.UserId != null)
+                        {
+                            var address = order.IsDelivery 
+                                ? order.DeliveryInformation?.Address 
+                                : order.PickupStoreAddress switch
+                                {
+                                    PickupStore.Hertsena2A => "м. Чернівці, вул. Герцена 2а",
+                                    PickupStore.VasileAlexandri1 => "м. Чернівці, вул. Васіле Александрі, 1",
+                                    _ => "Магазин FlowerLab"
+                                };
+
+                            var baseUrl = "https://flowerlab-vlada.com.ua";
+
+                            var items = order.Items.Select(i => new OrderEmailItem
+                            {
+                                Name = i.BouquetName,
+                                Size = i.SizeName,
+                                Count = i.Count,
+                                Price = i.Price,
+                                ImageUrl = FormatImageUrl(i.BouquetImage, baseUrl)
+                            }).ToList();
+
+                            items.AddRange(order.OrderGifts.Select(g => new OrderEmailItem
+                            {
+                                Name = g.Gift?.Name?.TryGetValue("ua", out var name) == true ? name : "Подарунок",
+                                Count = g.Count,
+                                Price = g.Gift?.Price ?? 0,
+                                ImageUrl = FormatImageUrl(g.Gift?.ImageUrl, baseUrl)
+                            }));
+
+                            foreach(var item in items)
+                            {
+                                Console.WriteLine($"[Email Debug] Item {item.Name} ImageUrl: {item.ImageUrl}");
+                            }
+
+                            await publishEndpoint.Publish(new OrderPaidEvent
+                            {
+                                OrderId = order.Id,
+                                UserId = order.UserId,
+                                UserFirstName = order.UserFirstName ?? "Клієнт",
+                                TotalPrice = order.TotalPrice,
+                                ShippingAddress = address,
+                                IsDelivery = order.IsDelivery,
+                                Items = items
+                            }, cancellationToken);
+                        }
+
                         unitOfWork.Orders.Update(order);
                         await unitOfWork.SaveChangesAsync(cancellationToken);
                     }
@@ -458,7 +506,7 @@ namespace OrderService.BLL.Services
 
         private async Task CancelOrderAsync(Order order, string oldStatusName, CancellationToken cancellationToken)
         {
-            var paidStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered" };
+            var paidStatuses = new[] { "Pending", "ReadyForPickup", "Delivering", "Completed" };
             bool wasPaid = paidStatuses.Contains(oldStatusName);
 
             if (wasPaid)
@@ -548,13 +596,98 @@ namespace OrderService.BLL.Services
             order.StatusId = dto.StatusId;
             order.Status = status;
 
-            if (oldStatusName != "Pending" && status.Name == "Pending")
+            // We ONLY finalize (decrement stock) if transitioning from AwaitingPayment to Pending.
+            // This prevents double-deduction if admin toggles between Pending and other active statuses.
+            if (oldStatusName == "AwaitingPayment" && status.Name == "Pending")
             {
                 await FinalizeOrderAsync(order, cancellationToken);
+
+                // Also publish OrderPaidEvent for detailed email notification when manual transition happens
+                if (order.UserId != null)
+                {
+                    var baseUrl = "https://flowerlab-vlada.com.ua";
+
+                    var address = order.IsDelivery 
+                        ? order.DeliveryInformation?.Address 
+                        : order.PickupStoreAddress switch
+                        {
+                            PickupStore.Hertsena2A => "м. Чернівці, вул. Герцена 2а",
+                            PickupStore.VasileAlexandri1 => "м. Чернівці, вул. Васіле Александрі, 1",
+                            _ => "Магазин FlowerLab"
+                        };
+
+                    var itemsList = order.Items.Select(i => new OrderEmailItem
+                    {
+                        Name = i.BouquetName,
+                        Size = i.SizeName,
+                        Count = i.Count,
+                        Price = i.Price,
+                        ImageUrl = FormatImageUrl(i.BouquetImage, baseUrl)
+                    }).ToList();
+
+                    itemsList.AddRange(order.OrderGifts.Select(g => new OrderEmailItem
+                    {
+                        Name = g.Gift?.Name?.TryGetValue("ua", out var name) == true ? name : "Подарунок",
+                        Count = g.Count,
+                        Price = g.Gift?.Price ?? 0,
+                        ImageUrl = FormatImageUrl(g.Gift?.ImageUrl, baseUrl)
+                    }));
+
+                    await publishEndpoint.Publish(new OrderPaidEvent
+                    {
+                        OrderId = order.Id,
+                        UserId = order.UserId,
+                        UserFirstName = order.UserFirstName ?? "Клієнт",
+                        TotalPrice = order.TotalPrice,
+                        ShippingAddress = address,
+                        IsDelivery = order.IsDelivery,
+                        Items = itemsList
+                    }, cancellationToken);
+                }
             }
             else if (status.Name == "Cancelled" || status.Name == "Refunded")
             {
                 await CancelOrderAsync(order, oldStatusName, cancellationToken);
+            }
+
+            // Publish events for email notifications (ONLY if the user is registered)
+            if (order.UserId != null)
+            {
+                if (oldStatusName != "ReadyForPickup" && status.Name == "ReadyForPickup" && !order.IsDelivery)
+                {
+                    var pickupAddress = order.PickupStoreAddress switch
+                    {
+                        PickupStore.Hertsena2A => "м. Чернівці, вул. Герцена 2а",
+                        PickupStore.VasileAlexandri1 => "м. Чернівці, вул. Васіле Александрі, 1",
+                        _ => "Магазин FlowerLab"
+                    };
+
+                    await publishEndpoint.Publish(new OrderReadyForPickupEvent
+                    {
+                        UserId = order.UserId,
+                        UserFirstName = order.UserFirstName ?? "Клієнт",
+                        OrderId = order.Id,
+                        PickupAddress = pickupAddress
+                    }, cancellationToken);
+                }
+                else if (oldStatusName != "Delivering" && status.Name == "Delivering" && order.IsDelivery)
+                {
+                    await publishEndpoint.Publish(new OrderDeliveringEvent
+                    {
+                        UserId = order.UserId,
+                        UserFirstName = order.UserFirstName ?? "Клієнт",
+                        OrderId = order.Id
+                    }, cancellationToken);
+                }
+                else if (status.Name == "Completed")
+                {
+                    await publishEndpoint.Publish(new OrderCompletedEvent
+                    {
+                        UserId = order.UserId,
+                        UserFirstName = order.UserFirstName ?? "Клієнт",
+                        OrderId = order.Id
+                    }, cancellationToken);
+                }
             }
 
             unitOfWork.Orders.Update(order);
@@ -607,5 +740,20 @@ namespace OrderService.BLL.Services
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
+        private string? FormatImageUrl(string? imageUrl, string baseUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl)) return null;
+
+            // If it's already a full URL (Cloudinary or other), return as is
+            if (imageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                return imageUrl;
+
+            // If it's Cloudinary but missing protocol
+            if (imageUrl.Contains("cloudinary.com", StringComparison.OrdinalIgnoreCase))
+                return $"https://{imageUrl.TrimStart('/')}";
+
+            // Otherwise, it's a relative local path, prepend base URL
+            return $"{baseUrl.TrimEnd('/')}/{imageUrl.TrimStart('/')}";
+        }
     }
 }
