@@ -11,6 +11,9 @@ namespace shared.events.EmailEvents
         public string? UserFirstName { get; set; }
         public string? UserEmail { get; set; }
         public decimal TotalPrice { get; set; }
+        public decimal Subtotal { get; set; }
+        public decimal DeliveryPrice { get; set; }
+        public decimal DiscountAmount { get; set; }
         public string? ShippingAddress { get; set; }
         public bool IsDelivery { get; set; }
         public List<OrderEmailItem> Items { get; set; } = new();

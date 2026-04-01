@@ -378,8 +378,10 @@ namespace OrderService.BLL.Services
                                 };
 
                             var baseUrl = "https://flowerlab-vlada.com.ua";
+                            decimal subtotal = order.Items.Sum(i => i.Price * i.Count) + order.OrderGifts.Sum(g => g.Gift.Price * g.Count);
+                            if (!string.IsNullOrWhiteSpace(order.GiftMessage)) subtotal += 50m;
 
-                            var items = order.Items.Select(i => new OrderEmailItem
+                            var itemsList = order.Items.Select(i => new OrderEmailItem
                             {
                                 Name = i.BouquetName,
                                 Size = i.SizeName,
@@ -388,7 +390,7 @@ namespace OrderService.BLL.Services
                                 ImageUrl = FormatImageUrl(i.BouquetImage, baseUrl)
                             }).ToList();
 
-                            items.AddRange(order.OrderGifts.Select(g => new OrderEmailItem
+                            itemsList.AddRange(order.OrderGifts.Select(g => new OrderEmailItem
                             {
                                 Name = g.Gift?.Name?.TryGetValue("ua", out var name) == true ? name : "Подарунок",
                                 Count = g.Count,
@@ -396,10 +398,19 @@ namespace OrderService.BLL.Services
                                 ImageUrl = FormatImageUrl(g.Gift?.ImageUrl, baseUrl)
                             }));
 
-                            foreach(var item in items)
+                            if (!string.IsNullOrWhiteSpace(order.GiftMessage))
                             {
-                                Console.WriteLine($"[Email Debug] Item {item.Name} ImageUrl: {item.ImageUrl}");
+                                itemsList.Add(new OrderEmailItem
+                                {
+                                    Name = "Вітальна листівка",
+                                    Count = 1,
+                                    Price = 50m,
+                                    ImageUrl = "https://img.icons8.com/?size=100&id=12580&format=png&color=f4bce5"
+                                });
                             }
+
+                            decimal deliveryPrice = order.IsDelivery ? 300m : 0m;
+                            decimal discountAmount = subtotal - (order.TotalPrice - deliveryPrice);
 
                             await publishEndpoint.Publish(new OrderPaidEvent
                             {
@@ -407,9 +418,12 @@ namespace OrderService.BLL.Services
                                 UserId = order.UserId,
                                 UserFirstName = order.UserFirstName ?? "Клієнт",
                                 TotalPrice = order.TotalPrice,
+                                Subtotal = subtotal,
+                                DeliveryPrice = deliveryPrice,
+                                DiscountAmount = (discountAmount > 0) ? discountAmount : 0,
                                 ShippingAddress = address,
                                 IsDelivery = order.IsDelivery,
-                                Items = items
+                                Items = itemsList
                             }, cancellationToken);
                         }
 
@@ -536,6 +550,8 @@ namespace OrderService.BLL.Services
                         await cacheInvalidationService.InvalidateByIdAsync(gift.Id);
                     }
                 }
+                // Invalidate the entire gifts cache so list pages show updated quantities
+                await cacheInvalidationService.InvalidateAllAsync();
 
                 // 3. Publish OrderCancelledEvent to restock bouquets in CatalogService
                 var orderCancelledEvent = new OrderCancelledEvent
@@ -616,6 +632,9 @@ namespace OrderService.BLL.Services
                             _ => "Магазин FlowerLab"
                         };
 
+                    decimal subtotal = order.Items.Sum(i => i.Price * i.Count) + order.OrderGifts.Sum(g => g.Gift.Price * g.Count);
+                    if (!string.IsNullOrWhiteSpace(order.GiftMessage)) subtotal += 50m;
+
                     var itemsList = order.Items.Select(i => new OrderEmailItem
                     {
                         Name = i.BouquetName,
@@ -633,12 +652,29 @@ namespace OrderService.BLL.Services
                         ImageUrl = FormatImageUrl(g.Gift?.ImageUrl, baseUrl)
                     }));
 
+                    if (!string.IsNullOrWhiteSpace(order.GiftMessage))
+                    {
+                        itemsList.Add(new OrderEmailItem
+                        {
+                            Name = "Вітальна листівка",
+                            Count = 1,
+                            Price = 50m,
+                            ImageUrl = "https://img.icons8.com/?size=100&id=12580&format=png&color=f4bce5"
+                        });
+                    }
+
+                    decimal deliveryPrice = order.IsDelivery ? 300m : 0m;
+                    decimal discountAmount = subtotal - (order.TotalPrice - deliveryPrice);
+
                     await publishEndpoint.Publish(new OrderPaidEvent
                     {
                         OrderId = order.Id,
                         UserId = order.UserId,
                         UserFirstName = order.UserFirstName ?? "Клієнт",
                         TotalPrice = order.TotalPrice,
+                        Subtotal = subtotal,
+                        DeliveryPrice = deliveryPrice,
+                        DiscountAmount = (discountAmount > 0) ? discountAmount : 0,
                         ShippingAddress = address,
                         IsDelivery = order.IsDelivery,
                         Items = itemsList

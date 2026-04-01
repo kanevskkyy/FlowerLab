@@ -9,6 +9,7 @@ import {
   getLocalizedStatus,
   getStatusKey,
 } from "../../utils/localizationUtils";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import "./AdminOrderDetails.css";
 
 export default function AdminOrderDetails() {
@@ -18,6 +19,10 @@ export default function AdminOrderDetails() {
   const [order, setOrder] = useState(null);
   const [statuses, setStatuses] = useState([]); // List of available statuses
   const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [pendingStatusId, setPendingStatusId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,18 +44,27 @@ export default function AdminOrderDetails() {
     if (id) fetchData();
   }, [id, navigate]);
 
-  const handleStatusChange = async (newStatusId) => {
+  const handleStatusChange = (newStatusId) => {
+    const targetStatusObj = statuses.find((s) => s.id === newStatusId);
+    if (!targetStatusObj || (order.status && order.status.id === newStatusId))
+      return;
+
+    // IF CANCELLED -> OPEN MODAL
+    if (targetStatusObj.name === "Cancelled") {
+      setPendingStatusId(newStatusId);
+      setIsCancelModalOpen(true);
+      return;
+    }
+
+    // Otherwise, update immediately
+    proceedStatusUpdate(newStatusId);
+  };
+
+  const proceedStatusUpdate = async (newStatusId) => {
     const originalStatus = order.status;
     const targetStatusObj = statuses.find((s) => s.id === newStatusId);
 
-    // If not found or same, ignore
-    if (
-      !targetStatusObj ||
-      (originalStatus && originalStatus.id === newStatusId)
-    )
-      return;
-
-    // Optimistic
+    // Optimistic update
     setOrder((prev) => ({ ...prev, status: targetStatusObj }));
 
     try {
@@ -76,6 +90,9 @@ export default function AdminOrderDetails() {
         t(extractErrorMessage(error, "toasts.admin_status_update_failed")),
       );
       setOrder((prev) => ({ ...prev, status: originalStatus }));
+    } finally {
+      setIsCancelModalOpen(false);
+      setPendingStatusId(null);
     }
   };
 
@@ -330,6 +347,20 @@ export default function AdminOrderDetails() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isCancelModalOpen}
+        title={t("admin.orders.confirm_cancel_title")}
+        message={t("admin.orders.confirm_cancel_message")}
+        confirmText={t("admin.orders.confirm_cancel_btn")}
+        cancelText={t("common.cancel")}
+        onConfirm={() => proceedStatusUpdate(pendingStatusId)}
+        onCancel={() => {
+          setIsCancelModalOpen(false);
+          setPendingStatusId(null);
+        }}
+        confirmType="danger"
+      />
     </div>
   );
 }

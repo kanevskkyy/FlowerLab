@@ -69,6 +69,9 @@ namespace EmailService.BLL.Consumers
                     message.UserFirstName ?? "Клієнт",
                     message.OrderId,
                     message.TotalPrice,
+                    message.Subtotal,
+                    message.DeliveryPrice,
+                    message.DiscountAmount,
                     message.ShippingAddress ?? "Адреса магазину",
                     message.IsDelivery,
                     message.Items);
