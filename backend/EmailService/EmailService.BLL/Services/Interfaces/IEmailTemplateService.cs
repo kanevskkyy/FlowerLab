@@ -12,7 +12,7 @@ namespace EmailService.BLL.Service.Interfaces
         string GetPasswordResetTemplate(string firstName, string resetUrl);
         string GetOrderReadyForPickupTemplate(string firstName, Guid orderId, string pickupAddress);
         string GetOrderDeliveringTemplate(string firstName, Guid orderId);
-        string GetOrderPaidTemplate(string firstName, Guid orderId, decimal totalPrice, string address, bool isDelivery, List<shared.events.EmailEvents.OrderEmailItem> items);
+        string GetOrderPaidTemplate(string firstName, Guid orderId, decimal totalPrice, decimal subtotal, decimal deliveryPrice, decimal discountAmount, string address, bool isDelivery, List<shared.events.EmailEvents.OrderEmailItem> items);
         string GetOrderCompletedTemplate(string firstName, Guid orderId);
     }
 }

@@ -312,7 +312,8 @@
       "EMAIL_ALREADY_EXISTS": "An account with this email already exists.",
       "EMAIL_NOT_CONFIRMED": "Email not confirmed. Please check your inbox.",
       "ACCOUNT_LOCKED": "Account is temporarily locked due to too many failed login attempts.",
-      "USER_NOT_FOUND": "User with this email does not exist."
+      "USER_NOT_FOUND": "User with this email does not exist.",
+      "INCORRECT_OLD_PASSWORD": "Failed to change password: Incorrect password."
     },
     "error_default": "Something went wrong",
     "validation_error": "Validation error",
@@ -481,7 +482,10 @@
       "status_update_success": "Order status updated to {{status}}",
       "status_delivered_toast": "Order delivered! 🎉",
       "loading_details": "Loading order details...",
-      "not_found": "Order not found"
+      "not_found": "Order not found",
+      "confirm_cancel_title": "Cancel Order?",
+      "confirm_cancel_message": "Are you sure you want to change the status to 'Cancelled'? This may trigger a refund if the order was paid.",
+      "confirm_cancel_btn": "Yes, Cancel"
     },
     "reviews": {
       "pending_title": "Pending reviews",

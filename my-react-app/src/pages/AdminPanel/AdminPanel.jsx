@@ -12,6 +12,7 @@ import AdminOrdersList from "./components/AdminOrdersList";
 import AdminCatalogSettings from "./components/AdminCatalogSettings";
 import AdminReviewsList from "./components/AdminReviewsList";
 import AdminUsersList from "./components/AdminUsersList";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 
 // Services
 import authService from "../../services/authService";
@@ -49,6 +50,10 @@ export default function AdminPanel() {
   const handleLogout = () => {
     logout();
   };
+
+  // Modal State for Cancellation
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [pendingStatusData, setPendingStatusData] = useState(null); // { orderId, statusId }
 
   // --- HOOKS ---
   // Products
@@ -109,6 +114,24 @@ export default function AdminPanel() {
   // Catalog Settings
   const { settings, handleEdit } = useAdminCatalog();
 
+  const onStatusChangeIntercept = (orderId, statusId) => {
+    const targetStatus = statuses.find((s) => s.id === statusId);
+    if (targetStatus && targetStatus.name === "Cancelled") {
+      setPendingStatusData({ orderId, statusId });
+      setIsCancelModalOpen(true);
+    } else {
+      handleStatusChange(orderId, statusId);
+    }
+  };
+
+  const confirmCancel = () => {
+    if (pendingStatusData) {
+      handleStatusChange(pendingStatusData.orderId, pendingStatusData.statusId);
+    }
+    setIsCancelModalOpen(false);
+    setPendingStatusData(null);
+  };
+
   // Render logic
   const renderContent = () => {
     switch (activeTab) {
@@ -158,7 +181,7 @@ export default function AdminPanel() {
             setQ={setOrderQ}
             sort={sort}
             setSort={setSort}
-            onStatusChange={handleStatusChange}
+            onStatusChange={onStatusChangeIntercept}
             onOrderClick={(id) => navigate(`/admin/orders/${id}`)}
             loadMore={loadOrders}
             hasNextPage={hasNextOrders}
@@ -253,6 +276,20 @@ export default function AdminPanel() {
         {/* CONTENT */}
         <main className="admin-content">{renderContent()}</main>
       </div>
+
+      <ConfirmModal
+        isOpen={isCancelModalOpen}
+        title={t("admin.orders.confirm_cancel_title")}
+        message={t("admin.orders.confirm_cancel_message")}
+        confirmText={t("admin.orders.confirm_cancel_btn")}
+        cancelText={t("common.cancel")}
+        onConfirm={confirmCancel}
+        onCancel={() => {
+          setIsCancelModalOpen(false);
+          setPendingStatusData(null);
+        }}
+        confirmType="danger"
+      />
     </div>
   );
 }

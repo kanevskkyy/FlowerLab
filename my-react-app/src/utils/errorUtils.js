@@ -15,6 +15,7 @@ const FRIENDLY_ERROR_MESSAGES = {
   EMAIL_NOT_CONFIRMED: "toasts.backend_errors.EMAIL_NOT_CONFIRMED",
   ACCOUNT_LOCKED: "toasts.backend_errors.ACCOUNT_LOCKED",
   USER_NOT_FOUND: "toasts.backend_errors.USER_NOT_FOUND",
+  INCORRECT_OLD_PASSWORD: "toasts.backend_errors.INCORRECT_OLD_PASSWORD",
 };
 
 /**
@@ -32,6 +33,8 @@ const tryMapToKey = (input) => {
   const lower = input.toLowerCase();
   if (lower.includes("invalid password or email"))
     return FRIENDLY_ERROR_MESSAGES.INVALID_CREDENTIALS;
+  if (lower.includes("incorrect password") || lower.includes("failed to change password"))
+    return FRIENDLY_ERROR_MESSAGES.INCORRECT_OLD_PASSWORD;
   if (lower.includes("account is temporarily locked"))
     return FRIENDLY_ERROR_MESSAGES.ACCOUNT_LOCKED;
   if (lower.includes("does not exist"))

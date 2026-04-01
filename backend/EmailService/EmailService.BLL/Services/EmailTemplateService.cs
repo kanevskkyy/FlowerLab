@@ -216,7 +216,7 @@ namespace EmailService.BLL.Service
             """;
         }
 
-        public string GetOrderPaidTemplate(string firstName, Guid orderId, decimal totalPrice, string address, bool isDelivery, List<shared.events.EmailEvents.OrderEmailItem> items)
+        public string GetOrderPaidTemplate(string firstName, Guid orderId, decimal totalPrice, decimal subtotal, decimal deliveryPrice, decimal discountAmount, string address, bool isDelivery, List<shared.events.EmailEvents.OrderEmailItem> items)
         {
             var itemsHtml = string.Join("", items.Select(item => $"""
                 <tr>
@@ -281,8 +281,30 @@ namespace EmailService.BLL.Service
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td style="padding-top:20px; font-weight:600; font-size:16px; color:{TextMain};">Разом</td>
-                                    <td style="padding-top:20px; text-align:right; font-weight:700; font-size:20px; color:{PrimaryColor};">
+                                    <td style="padding-top:20px; font-size:14px; color:{TextMuted};">Сума</td>
+                                    <td style="padding-top:20px; text-align:right; font-size:14px; color:{TextMain};">
+                                        {subtotal:F2} ₴
+                                    </td>
+                                </tr>
+                                {(discountAmount > 0 ? $"""
+                                <tr>
+                                    <td style="padding-top:8px; font-size:14px; color:{TextMuted};">Знижка</td>
+                                    <td style="padding-top:8px; text-align:right; font-size:14px; color:#e57373;">
+                                        -{discountAmount:F2} ₴
+                                    </td>
+                                </tr>
+                                """ : "")}
+                                {(isDelivery ? $"""
+                                <tr>
+                                    <td style="padding-top:8px; font-size:14px; color:{TextMuted};">Доставка</td>
+                                    <td style="padding-top:8px; text-align:right; font-size:14px; color:{TextMain};">
+                                        {deliveryPrice:F2} ₴
+                                    </td>
+                                </tr>
+                                """ : "")}
+                                <tr>
+                                    <td style="padding-top:16px; font-weight:600; font-size:16px; color:{TextMain}; border-top:1px solid {BorderColor}; margin-top:8px;">Разом</td>
+                                    <td style="padding-top:16px; text-align:right; font-weight:700; font-size:20px; color:{PrimaryColor}; border-top:1px solid {BorderColor}; margin-top:8px;">
                                         {totalPrice:F2} ₴
                                     </td>
                                 </tr>
