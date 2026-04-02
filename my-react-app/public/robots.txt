@@ -11,4 +11,4 @@ Disallow: /email-confirmation-pending
 Disallow: /reset-password
 Disallow: /forgot-password
 
-Sitemap: https://flowerlab-vlada.com/sitemap.xml
+Sitemap: https://flowerlab-vlada.com.ua/sitemap.xml

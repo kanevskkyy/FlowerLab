@@ -1,0 +1,54 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: POSTGRES_PASSWORD,RABBITMQ_USER,RABBITMQ_PASSWORD,JWT_SECRET,JWT_ISSUER,JWT_AUDIENCE,JWT_ACCESS_TOKEN_EXPIRATION_MINUTES,JWT_REFRESH_TOKEN_EXPIRATION_DAYS,CLOUDINARY_CLOUDNAME,CLOUDINARY_API_KEY,CLOUDINARY_API_SECRET,BOT_ID,USER_ID,LIQPAY_PUBLIC_KEY,LIQPAY_PRIVATE_KEY,SENDGRID_KEY,SENDGRID_FROM_EMAIL,SENDGRID_FROM_NAME
+          script: |
+            cd /var/www/FlowerLab
+
+            echo "⬇️  Pulling latest code..."
+            git pull origin main
+
+            echo "📝  Writing .env file..."
+            cat > .env << EOF
+POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+RABBITMQ_USER=$RABBITMQ_USER
+RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+JWT_SECRET=$JWT_SECRET
+JWT_ISSUER=$JWT_ISSUER
+JWT_AUDIENCE=$JWT_AUDIENCE
+JWT_ACCESS_TOKEN_EXPIRATION_MINUTES=$JWT_ACCESS_TOKEN_EXPIRATION_MINUTES
+JWT_REFRESH_TOKEN_EXPIRATION_DAYS=$JWT_REFRESH_TOKEN_EXPIRATION_DAYS
+CLOUDINARY_CLOUDNAME=$CLOUDINARY_CLOUDNAME
+CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
+BOT__ID=$BOT_ID
+USER__ID=$USER_ID
+LIQPAY_PUBLIC_KEY=$LIQPAY_PUBLIC_KEY
+LIQPAY_PRIVATE_KEY=$LIQPAY_PRIVATE_KEY
+LIQPAY_SERVER_URL=https://api.flowerlab-vlada.com.ua/api/orders/liqpay-callback
+LIQPAY_SUCCESS_URL=https://flowerlab-vlada.com.ua/order-success
+LIQPAY_IS_SANDBOX=false
+SENDGRID__KEY=$SENDGRID_KEY
+SENDGRID__FROM_EMAIL=$SENDGRID_FROM_EMAIL
+SENDGRID__FROM_NAME=$SENDGRID_FROM_NAME
+EOF
+
+            echo "🐳  Restarting Docker services..."
+            docker compose up -d --build
+
+            echo "✅  Deploy complete!"

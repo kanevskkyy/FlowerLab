@@ -7,7 +7,7 @@ export default function SEO({
   url,
   type = "website",
 }) {
-  const siteUrl = "https://flowerlab-vlada.com"; // Replace with actual domain whenever available
+  const siteUrl = "https://flowerlab-vlada.com.ua"; // Replace with actual domain whenever available
   const currentUrl = url ? url : siteUrl;
 
   return (

@@ -1,0 +1,299 @@
+services:
+
+  # ─── Infrastructure ───────────────────────────────────────────
+
+  postgres:
+    image: postgres:16
+    container_name: flowerlab-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: md5
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - flowerlab-net
+
+  mongo:
+    image: mongo:7
+    container_name: flowerlab-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - flowerlab-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: flowerlab-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - flowerlab-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: flowerlab-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - flowerlab-net
+
+  # ─── Microservices ────────────────────────────────────────────
+
+  catalog-service:
+    build:
+      context: ./backend
+      dockerfile: CatalogService/CatalogService.API/Dockerfile
+    container_name: flowerlab-catalog
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5001;http://+:5011
+      Kestrel__Endpoints__Http__Url: http://+:5001
+      Kestrel__Endpoints__Http__Protocols: Http1
+      Kestrel__Endpoints__Grpc__Url: http://+:5011
+      Kestrel__Endpoints__Grpc__Protocols: Http2
+      # PostgreSQL
+      CONNECTIONSTRINGS__FLOWERLABCATALOG: "Host=postgres;Port=5432;Database=FlowerLabCatalog;Username=postgres;Password=${POSTGRES_PASSWORD}"
+      # Redis
+      CONNECTIONSTRINGS__FLOWERLAB-REDIS: "redis:6379"
+      # RabbitMQ
+      CONNECTIONSTRINGS__RABBITMQ: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      # JWT & Cloudinary
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_ACCESS_TOKEN_EXPIRATION_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES}
+      JWT_REFRESH_TOKEN_EXPIRATION_DAYS: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS}
+      CLOUDINARY_CLOUDNAME: ${CLOUDINARY_CLOUDNAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
+    networks:
+      - flowerlab-net
+
+  order-service:
+    build:
+      context: ./backend
+      dockerfile: OrderService/OrderService.API/Dockerfile
+    container_name: flowerlab-orders
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5002
+      Kestrel__EndpointDefaults__Protocols: Http1AndHttp2
+      # PostgreSQL
+      CONNECTIONSTRINGS__FLOWERLABORDER: "Host=postgres;Port=5432;Database=FlowerLabOrder;Username=postgres;Password=${POSTGRES_PASSWORD}"
+      # Redis
+      CONNECTIONSTRINGS__FLOWERLAB-REDIS: "redis:6379"
+      # RabbitMQ
+      CONNECTIONSTRINGS__RABBITMQ: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      # JWT & Cloudinary
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_ACCESS_TOKEN_EXPIRATION_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES}
+      JWT_REFRESH_TOKEN_EXPIRATION_DAYS: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS}
+      CLOUDINARY_CLOUDNAME: ${CLOUDINARY_CLOUDNAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      # LiqPay
+      LIQPAY_PUBLIC_KEY: ${LIQPAY_PUBLIC_KEY}
+      LIQPAY_PRIVATE_KEY: ${LIQPAY_PRIVATE_KEY}
+      LIQPAY_SERVER_URL: ${LIQPAY_SERVER_URL}
+      LIQPAY_SUCCESS_URL: ${LIQPAY_SUCCESS_URL}
+      LIQPAY_IS_SANDBOX: ${LIQPAY_IS_SANDBOX}
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+      # Service Discovery
+      SERVICES__CATALOG__HTTP__0: "http://catalog-service:5011"
+
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
+      - catalog-service
+    networks:
+      - flowerlab-net
+
+  users-service:
+    build:
+      context: ./backend
+      dockerfile: UsersService/UsersService.API/Dockerfile
+    container_name: flowerlab-users
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5004
+      # PostgreSQL
+      CONNECTIONSTRINGS__FLOWERLABUSERS: "Host=postgres;Port=5432;Database=FlowerLabUsers;Username=postgres;Password=${POSTGRES_PASSWORD}"
+      # RabbitMQ
+      CONNECTIONSTRINGS__RABBITMQ: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      # JWT & Cloudinary
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_ACCESS_TOKEN_EXPIRATION_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES}
+      JWT_REFRESH_TOKEN_EXPIRATION_DAYS: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS}
+      CLOUDINARY_CLOUDNAME: ${CLOUDINARY_CLOUDNAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      Frontend__ConfirmEmailUrl: "https://flowerlab-vlada.com.ua/confirm-email"
+      Frontend__ResetPasswordUrl: "https://flowerlab-vlada.com.ua/reset-password"
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - flowerlab-net
+
+  review-service:
+    build:
+      context: ./backend
+      dockerfile: ReviewService/ReviewService.API/Dockerfile
+    container_name: flowerlab-reviews
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5003
+      Kestrel__EndpointDefaults__Protocols: Http1AndHttp2
+      # MongoDB
+      CONNECTIONSTRINGS__FLOWERLABREVIEWS: "mongodb://mongo:27017"
+      # RabbitMQ
+      CONNECTIONSTRINGS__RABBITMQ: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      # service discovery
+      SERVICES__CATALOG__HTTP__0: "http://catalog-service:5011"
+      SERVICES__ORDERS__HTTP__0: "http://order-service:5002"
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+    depends_on:
+      - mongo
+      - rabbitmq
+      - catalog-service
+      - order-service
+    networks:
+      - flowerlab-net
+
+  email-service:
+    build:
+      context: ./backend
+      dockerfile: EmailService/EmailService.API/Dockerfile
+    container_name: flowerlab-email
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5006
+      # RabbitMQ
+      CONNECTIONSTRINGS__RABBITMQ: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      # Service Discovery for UsersService calls
+      SERVICES__USERS__HTTP__0: "http://users-service:5004"
+      # SendGrid
+      SENDGRID__KEY: ${SENDGRID__KEY}
+      SENDGRID__FROM_EMAIL: ${SENDGRID__FROM_EMAIL}
+      SENDGRID__FROM_NAME: ${SENDGRID__FROM_NAME}
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+    depends_on:
+      - rabbitmq
+      - users-service
+    networks:
+      - flowerlab-net
+
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: NotificationService/Dockerfile
+    container_name: flowerlab-notification
+    restart: unless-stopped
+    environment:
+      # RabbitMQ
+      CONNECTIONSTRINGS__RABBITMQ: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      # Telegram
+      BOT__ID: ${BOT__ID}
+      USER__ID: ${USER__ID}
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+    depends_on:
+      - rabbitmq
+    networks:
+      - flowerlab-net
+
+  aggregator-service:
+    build:
+      context: ./backend
+      dockerfile: AggregatorService/Dockerfile
+    container_name: flowerlab-aggregator
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5005
+      # Redis
+      CONNECTIONSTRINGS__FLOWERLAB-REDIS: "redis:6379"
+      # service discovery
+      SERVICES__CATALOG__HTTP__0: "http://catalog-service:5011"
+      SERVICES__REVIEWS__HTTP__0: "http://review-service:5003"
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+    depends_on:
+      - redis
+      - catalog-service
+      - review-service
+    networks:
+      - flowerlab-net
+
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: Gateway/Dockerfile
+    container_name: flowerlab-gateway
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5000
+      DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT: "true"
+    depends_on:
+      - catalog-service
+      - order-service
+      - users-service
+      - review-service
+      - aggregator-service
+    networks:
+      - flowerlab-net
+
+  # ─── Frontend ─────────────────────────────────────────────────
+
+  frontend:
+    build:
+      context: ./my-react-app
+      dockerfile: Dockerfile
+    container_name: flowerlab-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - flowerlab-net
+
+# ─── Volumes & Networks ─────────────────────────────────────────
+
+volumes:
+  postgres-data:
+  mongo-data:
+  redis-data:
+  rabbitmq-data:
+
+networks:
+  flowerlab-net:
+    driver: bridge

@@ -1,4 +1,3 @@
-using AggregatorService.Redis;
 using CatalogService.API.Middleware;
 using shared.localization;
 using CatalogService.BLL.Automapper;
@@ -78,7 +77,7 @@ namespace CatalogService.API
             builder.Services.AddScoped<ILanguageProvider, LanguageProvider>();
 
             builder.Services.AddScoped<IEntityCacheInvalidationService<Bouquet>, BouquetCacheInvalidationService>();
-            builder.Services.AddScoped<IEntityCacheInvalidationService<FilterResponse>, FilterCacheInvalidationService>();
+            builder.Services.AddScoped<IEntityCacheInvalidationService<global::FilterResponse>, FilterCacheInvalidationService>();
             //
 
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";

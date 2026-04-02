@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using OrderService.BLL.DTOs;
 using OrderService.BLL.FluentValidation;
 using OrderService.BLL.Grpc;
+
 using OrderService.BLL.Helpers;
 using OrderService.BLL.Profiles;
 using OrderService.BLL.RedisCache;
@@ -242,9 +243,14 @@ if (string.IsNullOrEmpty(catalogAddress))
 
 if (!string.IsNullOrEmpty(catalogAddress))
 {
+    // Enable unencrypted HTTP/2 for gRPC over plain HTTP (Docker internal network)
+    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
     builder.Services.AddGrpcClient<CheckOrder.CheckOrderClient>(options =>
     {
         options.Address = new Uri(catalogAddress);
+    }).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+    {
+        EnableMultipleHttp2Connections = true,
     }).ConfigureChannel(channelOptions =>
     {
         channelOptions.MaxReceiveMessageSize = 5 * 1024 * 1024;

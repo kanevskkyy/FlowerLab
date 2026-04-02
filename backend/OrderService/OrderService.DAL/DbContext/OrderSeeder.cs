@@ -76,8 +76,9 @@ namespace OrderService.DAL.DbContext
                 var pendingStatus = await context.OrderStatuses.FirstAsync(s => s.Name == "Pending");
                 var completedStatus = await context.OrderStatuses.FirstAsync(s => s.Name == "Completed");
 
-                var giftBag = await context.Gifts.FirstAsync(g => g.Name["ua"] == "Подарунковий пакет");
-                var balloons = await context.Gifts.FirstAsync(g => g.Name["ua"] == "Повітряні кульки");
+                var allGiftsForSeed = await context.Gifts.ToListAsync();
+                var giftBag = allGiftsForSeed.First(g => g.Name.GetValueOrDefault("ua") == "Подарунковий пакет");
+                var balloons = allGiftsForSeed.First(g => g.Name.GetValueOrDefault("ua") == "Повітряні кульки");
 
                 var orders = new List<Order>
                 {

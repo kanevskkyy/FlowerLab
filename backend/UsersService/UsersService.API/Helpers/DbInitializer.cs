@@ -25,12 +25,12 @@ namespace UsersService.API.Helpers
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             
-            if (await userManager.FindByEmailAsync("admin@flowerlab.com") == null)
+            if (await userManager.FindByEmailAsync("flowerlabvlada@gmail.com") == null)
             {
                 var adminUser = new ApplicationUser
                 {
-                    UserName = "admin@flowerlab.com",
-                    Email = "admin@flowerlab.com",
+                    UserName = "flowerlabvlada@gmail.com",
+                    Email = "flowerlabvlada@gmail.com",
                     FirstName = "Tanya",
                     PhoneNumber = "+380957778899",
                     LastName = "FlowerLAB",
