@@ -1,4 +1,4 @@
-﻿using CatalogService.Domain.Entities;
+using CatalogService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -94,25 +94,25 @@ namespace CatalogService.DAL.Context
 
             if (!await context.Bouquets.AnyAsync())
             {
-                var allSizes = await context.Sizes.ToListAsync();
-                var allRecipients = await context.Recipients.ToListAsync();
-                var allFlowers = await context.Flowers.ToListAsync();
-                var allEvents = await context.Events.ToListAsync();
+                var sizes = await context.Sizes.ToListAsync();
+                var sSize = sizes.First(s => s.Name.GetValueOrDefault("en") == "S");
+                var mSize = sizes.First(s => s.Name.GetValueOrDefault("en") == "M");
+                var lSize = sizes.First(s => s.Name.GetValueOrDefault("en") == "L");
 
-                var sSize = allSizes.First(s => s.Name["en"] == "S");
-                var mSize = allSizes.First(s => s.Name["en"] == "M");
-                var lSize = allSizes.First(s => s.Name["en"] == "L");
+                var recipients = await context.Recipients.ToListAsync();
+                var mother = recipients.First(r => r.Name.GetValueOrDefault("en") == "For mother");
+                var father = recipients.First(r => r.Name.GetValueOrDefault("en") == "For father");
+                var friend = recipients.First(r => r.Name.GetValueOrDefault("en") == "For friend");
 
-                var mother = allRecipients.First(r => r.Name["en"] == "For mother");
-                var father = allRecipients.First(r => r.Name["en"] == "For father");
-                var friend = allRecipients.First(r => r.Name["en"] == "For friend");
+                var flowers = await context.Flowers.ToListAsync();
+                var redRose = flowers.First(f => f.Name.GetValueOrDefault("en") == "Red Rose");
+                var whiteRose = flowers.First(f => f.Name.GetValueOrDefault("en") == "White Rose");
+                var pinkPeony = flowers.First(f => f.Name.GetValueOrDefault("en") == "Pink Peony");
 
-                var redRose = allFlowers.First(f => f.Name["en"] == "Red Rose");
-                var whiteRose = allFlowers.First(f => f.Name["en"] == "White Rose");
-                var pinkPeony = allFlowers.First(f => f.Name["en"] == "Pink Peony");
+                var events = await context.Events.ToListAsync();
+                var birthday = events.First(e => e.Name.GetValueOrDefault("en") == "Birthday");
+                var anniversary = events.First(e => e.Name.GetValueOrDefault("en") == "Anniversary");
 
-                var birthday = allEvents.First(e => e.Name["en"] == "Birthday");
-                var anniversary = allEvents.First(e => e.Name["en"] == "Anniversary");
 
                 var bouquets = new List<Bouquet>
                 {
@@ -202,31 +202,29 @@ namespace CatalogService.DAL.Context
 
             if (!await context.BouquetSizeFlowers.AnyAsync())
             {
-                // Завантажуємо всі букети з розмірами в пам'ять
                 var allBouquets = await context.Bouquets
                     .Include(b => b.BouquetSizes)
                         .ThenInclude(bs => bs.Size)
                     .ToListAsync();
 
+                var romanticBouquet = allBouquets.First(b => b.Name.GetValueOrDefault("en") == "Romantic Bouquet");
+                var springBouquet = allBouquets.First(b => b.Name.GetValueOrDefault("en") == "Spring Delight");
+                var elegantBouquet = allBouquets.First(b => b.Name.GetValueOrDefault("en") == "Elegant Mix");
+
                 var allFlowers = await context.Flowers.ToListAsync();
+                var redRose = allFlowers.First(f => f.Name.GetValueOrDefault("en") == "Red Rose");
+                var whiteRose = allFlowers.First(f => f.Name.GetValueOrDefault("en") == "White Rose");
+                var pinkPeony = allFlowers.First(f => f.Name.GetValueOrDefault("en") == "Pink Peony");
 
-                var romanticBouquet = allBouquets.First(b => b.Name["en"] == "Romantic Bouquet");
-                var springBouquet = allBouquets.First(b => b.Name["en"] == "Spring Delight");
-                var elegantBouquet = allBouquets.First(b => b.Name["en"] == "Elegant Mix");
+                var romanticS = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name.GetValueOrDefault("en") == "S");
+                var romanticM = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name.GetValueOrDefault("en") == "M");
+                var romanticL = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name.GetValueOrDefault("en") == "L");
 
-                var redRose = allFlowers.First(f => f.Name["en"] == "Red Rose");
-                var whiteRose = allFlowers.First(f => f.Name["en"] == "White Rose");
-                var pinkPeony = allFlowers.First(f => f.Name["en"] == "Pink Peony");
+                var springS = springBouquet.BouquetSizes.First(bs => bs.Size.Name.GetValueOrDefault("en") == "S");
+                var springM = springBouquet.BouquetSizes.First(bs => bs.Size.Name.GetValueOrDefault("en") == "M");
 
-                var romanticS = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "S");
-                var romanticM = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "M");
-                var romanticL = romanticBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "L");
-
-                var springS = springBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "S");
-                var springM = springBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "M");
-
-                var elegantM = elegantBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "M");
-                var elegantL = elegantBouquet.BouquetSizes.First(bs => bs.Size.Name["en"] == "L");
+                var elegantM = elegantBouquet.BouquetSizes.First(bs => bs.Size.Name.GetValueOrDefault("en") == "M");
+                var elegantL = elegantBouquet.BouquetSizes.First(bs => bs.Size.Name.GetValueOrDefault("en") == "L");
 
                 var bouquetSizeFlowers = new List<BouquetSizeFlower>
                 {

@@ -24,6 +24,7 @@ using ReviewService.Application.Validation.Reviews;
 using DotNetEnv;
 using ReviewService.Application.Consumers.EventLog;
 using shared.events.EventService;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,8 @@ builder.Services.AddMassTransit(x =>
 });
 
 builder.AddMongoDBClient("FlowerLabReviews");
+builder.Services.AddSingleton<IMongoDatabase>(sp => 
+    sp.GetRequiredService<IMongoClient>().GetDatabase("FlowerLabReviews"));
 builder.Services.AddMongoDb();
 
 builder.Services.AddHealthChecks()

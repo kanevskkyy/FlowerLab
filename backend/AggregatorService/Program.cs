@@ -4,9 +4,13 @@ using AggregatorService.Redis;
 using AggregatorService.DTOs;
 using shared.cache;
 using shared.localization;
+using Grpc.Net.Client.Configuration;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Enable unencrypted HTTP/2 for gRPC over plain HTTP (Docker internal network)
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
@@ -56,6 +60,9 @@ builder.Services.AddScoped<shared.cache.IEntityCacheInvalidationService<Aggregat
 builder.Services.AddGrpcClient<FilterService.FilterServiceClient>(options =>
 {
     options.Address = new Uri(catalogAddress);
+}).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    EnableMultipleHttp2Connections = true,
 }).ConfigureChannel(channelOptions =>
 {
     channelOptions.MaxReceiveMessageSize = 5 * 1024 * 1024;
@@ -64,6 +71,9 @@ builder.Services.AddGrpcClient<FilterService.FilterServiceClient>(options =>
 builder.Services.AddGrpcClient<BouquetGrpcService.BouquetGrpcServiceClient>(options =>
 {
     options.Address = new Uri(catalogAddress);
+}).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    EnableMultipleHttp2Connections = true,
 }).ConfigureChannel(channelOptions =>
 {
     channelOptions.MaxReceiveMessageSize = 5 * 1024 * 1024;
@@ -72,11 +82,15 @@ builder.Services.AddGrpcClient<BouquetGrpcService.BouquetGrpcServiceClient>(opti
 builder.Services.AddGrpcClient<ReviewsByBouquetId.ReviewsByBouquetIdClient>(options =>
 {
     options.Address = new Uri(reviewsAddress);
+}).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    EnableMultipleHttp2Connections = true,
 }).ConfigureChannel(channelOptions =>
 {
     channelOptions.MaxReceiveMessageSize = 5 * 1024 * 1024;
     channelOptions.MaxSendMessageSize = 5 * 1024 * 1024;
 });
+
 
 var app = builder.Build();
 app.UseCors(MyAllowSpecificOrigins);
