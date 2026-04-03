@@ -12,7 +12,7 @@ namespace OrderService.BLL.RedisCache
     {
         private readonly IEntityCacheService cacheService;
 
-        private const string ALL_KEY = "order-status:all";
+        private const string ALL_KEY = "order-status:all:v2";
 
         public OrderStatusCacheInvalidationService(IEntityCacheService cacheService)
         {

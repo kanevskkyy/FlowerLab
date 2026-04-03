@@ -2,6 +2,7 @@ using CatalogService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CatalogService.DAL.Context
@@ -227,27 +228,25 @@ namespace CatalogService.DAL.Context
 
                 var bouquetSizeFlowers = new List<BouquetSizeFlower>
                 {
-    
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticS.SizeId, FlowerId = redRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticS.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
-                    
 
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticM.SizeId, FlowerId = redRose.Id, Quantity = 5 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticM.SizeId, FlowerId = pinkPeony.Id, Quantity = 3 },
-                    
+
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticL.SizeId, FlowerId = redRose.Id, Quantity = 7 },
                     new BouquetSizeFlower { BouquetId = romanticBouquet.Id, SizeId = romanticL.SizeId, FlowerId = pinkPeony.Id, Quantity = 5 },
 
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springS.SizeId, FlowerId = whiteRose.Id, Quantity = 2 },
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springS.SizeId, FlowerId = pinkPeony.Id, Quantity = 1 },
-                    
+
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springM.SizeId, FlowerId = whiteRose.Id, Quantity = 4 },
                     new BouquetSizeFlower { BouquetId = springBouquet.Id, SizeId = springM.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
 
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = redRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = whiteRose.Id, Quantity = 3 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantM.SizeId, FlowerId = pinkPeony.Id, Quantity = 2 },
-                    
+
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = redRose.Id, Quantity = 4 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = whiteRose.Id, Quantity = 4 },
                     new BouquetSizeFlower { BouquetId = elegantBouquet.Id, SizeId = elegantL.SizeId, FlowerId = pinkPeony.Id, Quantity = 3 }
