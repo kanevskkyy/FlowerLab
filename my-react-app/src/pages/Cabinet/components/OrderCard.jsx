@@ -1,11 +1,30 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import "./OrderCard.css";
 import CardIcon from "../../../assets/icons/message.svg";
 import { getLocalizedValue } from "../../../utils/localizationUtils";
 
 const OrderCard = ({ order }) => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+
+  const handlePaymentRedirect = () => {
+    const statusName =
+      typeof order.status === "object" ? order.status.name : order.status;
+    if ((statusName || "").replace(/\s/g, "").toLowerCase() === "awaitingpayment") {
+      navigate("/checkout", {
+        state: {
+          orderData: {
+            id: order.rawId || order.id,
+            total: order.total,
+            createdAt: order.createdAt,
+            guestToken: order.guestToken,
+          },
+        },
+      });
+    }
+  };
 
   return (
     <div className="history-card">
@@ -70,7 +89,19 @@ const OrderCard = ({ order }) => {
               const name =
                 typeof statusObj === "object" ? statusObj.name : statusObj;
               return (name || "").replace(/\s/g, "").toLowerCase();
-            })()}`}>
+            })()}`}
+            onClick={handlePaymentRedirect}
+            style={{
+              cursor:
+                (typeof order.status === "object"
+                  ? order.status.name
+                  : order.status || ""
+                )
+                  .replace(/\s/g, "")
+                  .toLowerCase() === "awaitingpayment"
+                  ? "pointer"
+                  : "default",
+            }}>
             {(() => {
               const statusObj = order.status;
               const name =

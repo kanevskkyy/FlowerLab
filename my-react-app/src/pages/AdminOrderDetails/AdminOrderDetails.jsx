@@ -122,7 +122,7 @@ export default function AdminOrderDetails() {
             </h1>
             <span className="aod-date">
               {new Date(
-                order.status?.createdAt || order.createdAt || Date.now(),
+                order.createdAt || Date.now(),
               ).toLocaleString("uk-UA", {
                 year: "numeric",
                 month: "numeric",

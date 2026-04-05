@@ -118,7 +118,7 @@ export function useAdminOrders() {
               `${order.userFirstName || order.firstName || ""} ${order.userLastName || order.lastName || ""}`.trim() ||
               t("admin.orders.guest"),
             date: new Date(
-              order.status?.createdAt || order.createdAt || Date.now(),
+              order.createdAt || Date.now(),
             ).toLocaleString(dateLocale, {
               day: "numeric",
               month: "numeric",
@@ -132,7 +132,7 @@ export function useAdminOrders() {
               "https://res.cloudinary.com/dg9clyn4k/image/upload/v1763712578/order-service/gifts/mpfiss97mfebcqwm6elb.jpg",
             status: order.status, // KEEP OBJECT {id, name}
             rawDate: new Date(
-              order.status?.createdAt || order.createdAt || Date.now(),
+              order.createdAt || Date.now(),
             ),
           };
         });
