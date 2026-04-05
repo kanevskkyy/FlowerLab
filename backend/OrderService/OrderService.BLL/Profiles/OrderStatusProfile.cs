@@ -80,6 +80,7 @@ namespace OrderService.BLL.Profiles
                     break;
                 case "readyforpickup":
                 case "букетготовий":
+                case "зібрано":
                     canonicalKey = "readyforpickup";
                     break;
                 default:
@@ -137,7 +138,7 @@ namespace OrderService.BLL.Profiles
                     break;
                 case "readyforpickup":
                     dict["en"] = "Ready For Pickup";
-                    dict["ua"] = "Букет готовий";
+                    dict["ua"] = "Зібрано";
                     break;
             }
             return dict;

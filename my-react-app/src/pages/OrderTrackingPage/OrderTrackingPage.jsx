@@ -89,6 +89,23 @@ const OrderTrackingPage = () => {
     };
   };
 
+  const handlePaymentRedirect = (order) => {
+    const statusObj = order.status;
+    const name = typeof statusObj === "object" ? statusObj.name : statusObj;
+    if ((name || "").replace(/\s/g, "").toLowerCase() === "awaitingpayment") {
+      navigate("/checkout", {
+        state: {
+          orderData: {
+            id: order.id,
+            total: order.totalPrice,
+            createdAt: order.createdAt,
+            guestToken: order.guestToken,
+          },
+        },
+      });
+    }
+  };
+
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
@@ -297,7 +314,19 @@ const OrderTrackingPage = () => {
                           ? statusObj.name
                           : statusObj;
                       return (name || "").replace(/\s/g, "").toLowerCase();
-                    })()}`}>
+                    })()}`}
+                    onClick={() => handlePaymentRedirect(order)}
+                    style={{
+                      cursor:
+                        (typeof order.status === "object"
+                          ? order.status.name
+                          : order.status || ""
+                        )
+                          .replace(/\s/g, "")
+                          .toLowerCase() === "awaitingpayment"
+                          ? "pointer"
+                          : "default",
+                    }}>
                     {(() => {
                       const statusObj = order.status;
                       const name =

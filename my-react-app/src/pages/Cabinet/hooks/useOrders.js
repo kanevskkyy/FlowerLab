@@ -73,6 +73,8 @@ export function useOrders(activeTab, TABS) {
             currency: "₴",
             items: allItems,
             cardText: order.giftMessage,
+            createdAt: order.createdAt,
+            guestToken: order.guestToken,
           };
         });
 

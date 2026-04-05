@@ -76,9 +76,9 @@ const Footer = () => {
           </div>
           <div className="footer-text">
             <a
-              href={`mailto:flowerlab-vlada@gmail.com`}
+              href={`mailto:flowerlabvlada@gmail.com`}
               className="footer-link-text">
-              <p>flowerlab-vlada@gmail.com</p>
+              <p>flowerlabvlada@gmail.com</p>
             </a>
           </div>
         </div>
