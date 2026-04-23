@@ -7,12 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<EmailProviderOptions>(options =>
 {
-    options.ApiKey = Environment.GetEnvironmentVariable("SENDGRID__KEY");
-    options.FromEmail = Environment.GetEnvironmentVariable("SENDGRID__FROM_EMAIL");
-    options.FromName = Environment.GetEnvironmentVariable("SENDGRID__FROM_NAME");
+    options.FromEmail = Environment.GetEnvironmentVariable("GMAIL__FROM_EMAIL");
+    options.FromName = Environment.GetEnvironmentVariable("GMAIL__FROM_NAME");
+    options.SmtpHost = "smtp.gmail.com";
+    options.SmtpPort = 587;
+    options.SmtpPassword = Environment.GetEnvironmentVariable("GMAIL__APP_PASSWORD");
 });
 
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<IEmailService, GmailSmtpEmailService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 // Get UsersService address from Aspire environment variables
