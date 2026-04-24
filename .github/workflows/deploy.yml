@@ -56,16 +56,16 @@ jobs:
             CLOUDINARY_CLOUDNAME=$CLOUDINARY_CLOUDNAME
             CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
             CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
-            BOT__ID=$BOT_ID
-            USER__ID=$USER_ID
+            BOT__ID=$BOT__ID
+            USER__ID=$USER__ID
             LIQPAY_PUBLIC_KEY=$LIQPAY_PUBLIC_KEY
             LIQPAY_PRIVATE_KEY=$LIQPAY_PRIVATE_KEY
             LIQPAY_SERVER_URL=https://api.flowerlab-vlada.com.ua/api/orders/liqpay-callback
             LIQPAY_SUCCESS_URL=https://flowerlab-vlada.com.ua/order-success
             LIQPAY_IS_SANDBOX=false
-            GMAIL__FROM_EMAIL=$GMAIL_FROM_EMAIL
-            GMAIL__FROM_NAME=$GMAIL_FROM_NAME
-            GMAIL__APP_PASSWORD=$GMAIL_APP_PASSWORD
+            GMAIL__FROM_EMAIL=$GMAIL__FROM_EMAIL
+            GMAIL__FROM_NAME=$GMAIL__FROM_NAME
+            GMAIL__APP_PASSWORD=$GMAIL__APP_PASSWORD
             VITE_API_URL=$VITE_API_URL
             EOF
             
