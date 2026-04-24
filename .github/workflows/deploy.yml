@@ -12,6 +12,26 @@ jobs:
     steps:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          RABBITMQ_USER: ${{ secrets.RABBITMQ_USER }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+          JWT_AUDIENCE: ${{ secrets.JWT_AUDIENCE }}
+          JWT_ACCESS_TOKEN_EXPIRATION_MINUTES: ${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION_MINUTES }}
+          JWT_REFRESH_TOKEN_EXPIRATION_DAYS: ${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION_DAYS }}
+          CLOUDINARY_CLOUDNAME: ${{ secrets.CLOUDINARY_CLOUDNAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          BOT_ID: ${{ secrets.BOT_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+          LIQPAY_PUBLIC_KEY: ${{ secrets.LIQPAY_PUBLIC_KEY }}
+          LIQPAY_PRIVATE_KEY: ${{ secrets.LIQPAY_PRIVATE_KEY }}
+          GMAIL_FROM_EMAIL: ${{ secrets.GMAIL_FROM_EMAIL }}
+          GMAIL_FROM_NAME: ${{ secrets.GMAIL_FROM_NAME }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: root
