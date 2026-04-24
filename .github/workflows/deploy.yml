@@ -24,13 +24,13 @@ jobs:
           CLOUDINARY_CLOUDNAME: ${{ secrets.CLOUDINARY_CLOUDNAME }}
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-          BOT_ID: ${{ secrets.BOT_ID }}
-          USER_ID: ${{ secrets.USER_ID }}
+          BOT__ID: ${{ secrets.BOT__ID }}
+          USER__ID: ${{ secrets.USER__ID }}
           LIQPAY_PUBLIC_KEY: ${{ secrets.LIQPAY_PUBLIC_KEY }}
           LIQPAY_PRIVATE_KEY: ${{ secrets.LIQPAY_PRIVATE_KEY }}
-          GMAIL_FROM_EMAIL: ${{ secrets.GMAIL_FROM_EMAIL }}
-          GMAIL_FROM_NAME: ${{ secrets.GMAIL_FROM_NAME }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL__FROM_EMAIL: ${{ secrets.GMAIL__FROM_EMAIL }}
+          GMAIL__FROM_NAME: ${{ secrets.GMAIL__FROM_NAME }}
+          GMAIL__APP_PASSWORD: ${{ secrets.GMAIL__APP_PASSWORD }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
         with:
           host: ${{ secrets.VPS_HOST }}
