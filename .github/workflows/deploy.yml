@@ -74,6 +74,7 @@ jobs:
 
 
             echo "🐳  Restarting Docker services..."
+            docker-compose down
             docker-compose build
             docker-compose up -d
 
